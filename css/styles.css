@@ -1,0 +1,57 @@
+:root{
+  --bg:#0f172a; --panel:#1e293b; --panel2:#334155; --text:#e2e8f0; --muted:#94a3b8;
+  --accent:#38bdf8; --good:#22c55e; --warn:#f59e0b; --bad:#ef4444;
+  --base:#0ea5e9; --build:#8b5cf6; --peak:#f43f5e; --taper:#22c55e; --deload:#64748b;
+  --radius:10px; --pad:14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);min-height:100vh}
+.app-header{position:sticky;top:0;background:var(--panel);padding:10px var(--pad);border-bottom:1px solid #0008;z-index:5;display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;gap:6px;align-items:center}
+.app-header h1{margin:0;font-size:1.05rem}
+.tabs{grid-column:1/-1;display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:transparent;color:var(--muted);border:1px solid transparent;border-radius:999px;padding:6px 12px;font-size:.85rem;cursor:pointer;white-space:nowrap}
+.tab.active{background:var(--panel2);color:var(--text);border-color:var(--accent)}
+.sync-status{font-size:.75rem;color:var(--muted);text-align:right}
+.view{padding:var(--pad);max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid #ffffff10;border-radius:var(--radius);padding:var(--pad)}
+.card h2{margin:0 0 8px;font-size:1.05rem}
+.card h3{margin:10px 0 6px;font-size:.95rem;color:var(--muted)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.muted{color:var(--muted);font-size:.85rem}
+.badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.75rem;background:var(--panel2);color:var(--text)}
+.badge.base{background:var(--base);color:#001} .badge.build{background:var(--build);color:#fff}
+.badge.peak{background:var(--peak);color:#fff} .badge.taper{background:var(--taper);color:#001}
+.badge.deload{background:var(--deload);color:#fff}
+button{cursor:pointer;font:inherit}
+.primary{background:var(--accent);color:#001;border:0;padding:10px 14px;border-radius:8px;font-weight:600}
+.ghost{background:transparent;color:var(--text);border:1px solid #ffffff30;padding:8px 12px;border-radius:8px}
+.danger{background:var(--bad);color:#fff;border:0;padding:8px 12px;border-radius:8px}
+input[type=text],input[type=number],input[type=date],select,textarea{background:#0b1220;color:var(--text);border:1px solid #ffffff20;border-radius:6px;padding:8px;font-size:.95rem;width:100%}
+textarea{min-height:60px;resize:vertical}
+label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
+.field{margin-bottom:10px}
+.checklist{list-style:none;padding:0;margin:0}
+.checklist li{display:flex;gap:8px;align-items:flex-start;padding:4px 0}
+.checklist input[type=checkbox]{margin-top:3px}
+.exercise{border-top:1px solid #ffffff10;padding:10px 0}
+.exercise:first-child{border-top:0}
+.kbd{font:600 .85rem ui-monospace,monospace;background:#0b1220;padding:1px 6px;border-radius:4px;border:1px solid #ffffff20}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-cell{aspect-ratio:1/1;border-radius:6px;background:var(--panel2);display:flex;align-items:center;justify-content:center;font-size:.7rem;cursor:pointer;position:relative}
+.cal-cell.base{background:var(--base);color:#001} .cal-cell.build{background:var(--build);color:#fff}
+.cal-cell.peak{background:var(--peak);color:#fff} .cal-cell.taper{background:var(--taper);color:#001}
+.cal-cell.deload::after{content:"D";position:absolute;top:1px;right:3px;font-size:.65rem;font-weight:700;opacity:.85}
+.cal-cell.rest{opacity:.55}
+.cal-cell.completed{outline:2px solid var(--good)}
+.cal-cell.missed{outline:2px solid var(--bad)}
+.hidden{display:none !important}
+.auth-gate{position:fixed;inset:0;background:#000c;display:flex;align-items:center;justify-content:center;z-index:99}
+.auth-card{background:var(--panel);padding:24px;border-radius:12px;max-width:360px;width:90%;text-align:center;display:flex;flex-direction:column;gap:10px}
+.range-input{display:flex;gap:6px;align-items:center}
+.range-input input{width:80px}
+@media (max-width:480px){
+  .app-header h1{font-size:1rem}
+  .view{padding:10px}
+}

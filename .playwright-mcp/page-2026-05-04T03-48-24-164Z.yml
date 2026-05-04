@@ -1,0 +1,104 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - heading "Climbing Planner" [level=1] [ref=e3]
+    - navigation [ref=e4]:
+      - button "Today" [ref=e5] [cursor=pointer]
+      - button "Week" [ref=e6] [cursor=pointer]
+      - button "Cycle" [ref=e7] [cursor=pointer]
+      - button "Benchmarks" [ref=e8] [cursor=pointer]
+      - button "Log" [ref=e9] [cursor=pointer]
+      - button "Settings" [ref=e10] [cursor=pointer]
+    - generic [ref=e11]: offline
+  - main [ref=e12]:
+    - generic [ref=e48]:
+      - heading "2026-05-04 · Wk 1" [level=2] [ref=e49]
+      - generic [ref=e50]:
+        - generic [ref=e51]: base
+        - generic [ref=e52]: boulder-emphasis
+        - generic [ref=e53]: Hangboard (base) + S&C
+      - paragraph [ref=e54]: "Energy system: Strength / alactic"
+    - generic [ref=e55]:
+      - heading "Readiness" [level=2] [ref=e56]
+      - generic [ref=e57]:
+        - generic [ref=e58]:
+          - generic [ref=e59]: sleep (1–5)
+          - spinbutton [ref=e60]: "3"
+        - generic [ref=e61]:
+          - generic [ref=e62]: soreness (1–5)
+          - spinbutton [ref=e63]: "3"
+        - generic [ref=e64]:
+          - generic [ref=e65]: fatigue (1–5)
+          - spinbutton [ref=e66]: "3"
+      - paragraph [ref=e67]: Avg 3.0 → Lighter (×0.85)
+    - generic [ref=e68]:
+      - heading "Warm-up" [level=2] [ref=e69]
+      - list [ref=e70]:
+        - listitem [ref=e71]:
+          - checkbox [ref=e72]
+          - text: 5 min easy cardio (jog / bike / row)
+        - listitem [ref=e73]:
+          - checkbox [ref=e74]
+          - text: "Synovial: wrist / elbow / shoulder / hip joint circles 30s each"
+        - listitem [ref=e75]:
+          - checkbox [ref=e76]
+          - text: "Fascial: dynamic mobility — arm swings, leg swings, T-spine rotations"
+        - listitem [ref=e77]:
+          - checkbox [ref=e78]
+          - text: "Shoulder band routine: external rotations, Y-T-W (10–12 reps each)"
+        - listitem [ref=e79]:
+          - checkbox [ref=e80]
+          - text: 3 progressive hangs on jug @ 40% load · 5s
+        - listitem [ref=e81]:
+          - checkbox [ref=e82]
+          - text: 3 progressive hangs @ 60% load · 5s
+        - listitem [ref=e83]:
+          - checkbox [ref=e84]
+          - text: 2 hangs @ 80% load · 5s
+    - generic [ref=e85]:
+      - heading "Exercises" [level=2] [ref=e86]
+      - generic [ref=e87]:
+        - generic [ref=e88]: Min-Edge hangs
+        - generic [ref=e89]: 12s on smallest edge you can hold ~15s · 5 hangs × 2 sets (half-crimp + open-crimp) · RPE 9–10
+        - textbox "actual e.g. 5x2 @ 62kg RPE 9" [ref=e90]
+        - textbox "notes" [ref=e91]
+      - generic [ref=e92]:
+        - generic [ref=e93]: Weighted pull-ups
+        - generic [ref=e94]: 5 × 5 · 22–28 kg added
+        - generic [ref=e95]: "Suggested: 21.5 kg added (midpoint of range 22–28kg → readiness ×0.85)"
+        - textbox "actual e.g. 5x2 @ 62kg RPE 9" [ref=e96]
+        - textbox "notes" [ref=e97]
+      - generic [ref=e98]:
+        - text: S&C antagonist block
+        - list [ref=e99]:
+          - listitem [ref=e100]: "Push-ups: 3 × 15–25"
+          - listitem [ref=e101]: "Inverted rows / band cactus: 3 × 10–15"
+          - listitem [ref=e102]: "Wrist extensor curls: 3 × 20"
+          - listitem [ref=e103]: "Farmer's carry: 3 × 20–30 steps"
+          - listitem [ref=e104]: "Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit"
+        - textbox "Notes / actual" [ref=e105]
+    - generic [ref=e106]:
+      - heading "Session" [level=2] [ref=e107]
+      - generic [ref=e108]:
+        - generic [ref=e109]: Session feel (1–5)
+        - spinbutton [ref=e110]: "3"
+      - generic [ref=e111]:
+        - generic [ref=e112]: Notes
+        - textbox [ref=e113]
+      - generic [ref=e114]:
+        - button "Mark completed" [ref=e115] [cursor=pointer]
+        - button "Partial" [ref=e116] [cursor=pointer]
+    - generic [ref=e117]:
+      - heading "Cooldown" [level=2] [ref=e118]
+      - list [ref=e119]:
+        - listitem [ref=e120]:
+          - checkbox [ref=e121]
+          - text: Easy traverse 5–10 min OR walk 5 min
+        - listitem [ref=e122]:
+          - checkbox [ref=e123]
+          - text: Forearm flexor + extensor stretches (30s × 2 each)
+        - listitem [ref=e124]:
+          - checkbox [ref=e125]
+          - text: Shoulder & lat stretches (30s each)
+        - listitem [ref=e126]:
+          - checkbox [ref=e127]
+          - text: Hydrate, refuel within 30 min
