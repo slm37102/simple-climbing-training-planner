@@ -51,7 +51,66 @@ label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
 .auth-card{background:var(--panel);padding:24px;border-radius:12px;max-width:360px;width:90%;text-align:center;display:flex;flex-direction:column;gap:10px}
 .range-input{display:flex;gap:6px;align-items:center}
 .range-input input{width:80px}
+
+/* === pill selector (1..5 etc) === */
+.pill-group{display:flex;gap:6px;flex-wrap:wrap}
+.pill{background:#0b1220;color:var(--muted);border:1px solid #ffffff20;border-radius:999px;padding:8px 14px;font-size:.95rem;font-weight:600;min-width:42px;text-align:center;cursor:pointer;user-select:none;transition:all .12s ease}
+.pill:hover{border-color:var(--accent)}
+.pill.active{background:var(--accent);color:#001;border-color:var(--accent)}
+
+/* === stepper (kg / reps / RPE) === */
+.stepper-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+.stepper-row.two{grid-template-columns:repeat(2,1fr)}
+.stepper-row.one{grid-template-columns:1fr}
+.stepper{display:flex;align-items:stretch;background:#0b1220;border:1px solid #ffffff20;border-radius:8px;overflow:hidden}
+.stepper button{background:#172033;color:var(--text);border:0;width:34px;font-size:1.1rem;font-weight:700;line-height:1;cursor:pointer;flex-shrink:0}
+.stepper button:hover{background:#243049}
+.stepper button:active{background:var(--accent);color:#001}
+.stepper input{border:0;background:transparent;text-align:center;width:100%;font-weight:600;padding:8px 0;font-size:.95rem;-moz-appearance:textfield}
+.stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.stepper-label{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;text-align:center;margin-top:4px}
+
+/* === collapsibles === */
+.card details{margin:0}
+.card details > summary{cursor:pointer;list-style:none;padding:8px 0;font-weight:600;color:var(--text);user-select:none;display:flex;align-items:center;gap:8px}
+.card details > summary::-webkit-details-marker{display:none}
+.card details > summary::before{content:"▸";color:var(--muted);transition:transform .15s ease;display:inline-block;font-size:.8rem}
+.card details[open] > summary::before{transform:rotate(90deg)}
+.card details > summary .count{margin-left:auto;color:var(--muted);font-size:.75rem;font-weight:400}
+
+/* === today: compact session header === */
+.session-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.session-head h2{margin:0;font-size:1.05rem;flex:1;min-width:140px}
+.info-badge{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--panel2);color:var(--muted);font-size:.7rem;cursor:help;border:1px solid #ffffff20}
+.info-badge:hover{color:var(--text)}
+
+/* === exercise card revamp === */
+.exercise{border-top:1px solid #ffffff10;padding:12px 0}
+.exercise:first-child{border-top:0;padding-top:0}
+.exercise-title{font-weight:600;font-size:.95rem}
+.exercise-prescribe{color:var(--muted);font-size:.8rem;margin:2px 0 6px}
+.suggest-btn{background:#0b1220;border:1px dashed var(--accent);color:var(--accent);padding:6px 10px;border-radius:6px;font-size:.8rem;cursor:pointer;margin-bottom:6px}
+.suggest-btn:hover{background:var(--accent);color:#001}
+.notes-toggle{background:transparent;border:0;color:var(--muted);font-size:.8rem;cursor:pointer;padding:4px 0;margin-top:4px}
+.notes-toggle:hover{color:var(--text)}
+
+/* === comp-day calendar marker === */
+.cal-cell.comp::before{content:"🏆";position:absolute;top:1px;left:3px;font-size:.65rem;line-height:1}
+
+/* === selected-day panel (calendar drill-down) === */
+.day-panel{background:var(--panel2);border-radius:var(--radius);padding:12px;margin-top:10px;border:1px solid var(--accent)}
+.day-panel h3{margin:0 0 6px;font-size:.95rem}
+.day-panel ul{margin:6px 0 0;padding-left:18px}
+
+/* radio-group for anchor mode */
+.radio-group{display:flex;gap:8px;flex-wrap:wrap}
+.radio-group label{display:flex;align-items:center;gap:6px;padding:8px 12px;background:#0b1220;border:1px solid #ffffff20;border-radius:8px;cursor:pointer;flex:1;min-width:160px;color:var(--text);font-size:.9rem;margin:0}
+.radio-group label:has(input:checked){border-color:var(--accent);background:#0b1220cc}
+.radio-group input[type=radio]{accent-color:var(--accent);width:auto}
+
 @media (max-width:480px){
   .app-header h1{font-size:1rem}
   .view{padding:10px}
+  .pill{padding:8px 12px;min-width:38px}
+  .stepper button{width:30px}
 }

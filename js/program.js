@@ -292,6 +292,26 @@ export const Program = {
 
   weekFlavor,
 
+  // Given a comp/peak date (ISO YYYY-MM-DD), returns the cycle start date that
+  // would place the final cycle day (day 84) on the comp date.
+  computeStartFromComp(compDateIso) {
+    if (!compDateIso) return null;
+    const d = new Date(compDateIso + 'T00:00:00');
+    d.setDate(d.getDate() - 83);
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${d.getFullYear()}-${m}-${day}`;
+  },
+
+  // Resolve the effective cycle start date based on settings.anchorMode.
+  effectiveStart(settings) {
+    if (!settings) return null;
+    if (settings.anchorMode === 'compDate' && settings.compDate) {
+      return this.computeStartFromComp(settings.compDate);
+    }
+    return settings.startDate || null;
+  },
+
   // Returns {weekIdx 1..12, dayIdx 0..6, phase, deload, retest, flavor, slot} for a given date relative to startDate.
   resolveDate(dateStr, startDateStr) {
     if (!startDateStr) return null;

@@ -17,8 +17,8 @@ function todayIso() { return localIso(new Date()); }
 
 export function renderWeek(root) {
   const state = Storage.get();
-  const start = state.settings.startDate;
-  if (!start) { root.innerHTML = `<div class="card"><p>Set a cycle start date first.</p></div>`; return; }
+  const start = Program.effectiveStart(state.settings);
+  if (!start) { root.innerHTML = `<div class="card"><p>Set a cycle anchor in Benchmarks first.</p></div>`; return; }
 
   const today = todayIso();
   const ctx = Program.resolveDate(today, start);

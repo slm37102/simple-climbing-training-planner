@@ -1,12 +1,22 @@
 import { Storage } from '../storage.js';
+import { Program } from '../program.js';
 import { Sync } from '../sync.js';
 
 export function renderSettings(root) {
   const { settings } = Storage.get();
+  const effStart = Program.effectiveStart(settings);
+  const anchorLabel = settings.anchorMode === 'compDate'
+    ? `Peak on ${settings.compDate || '—'} (cycle starts ${effStart || '—'})`
+    : `Start on ${effStart || '—'}`;
 
-  let body = `<div class="card"><h2>Settings</h2>
-    <div class="field"><label>Cycle start date</label>
-      <input type="date" id="setStart" value="${settings.startDate || ''}"></div>
+  let body = `<div class="card"><h2>Cycle</h2>
+    <p class="muted">${anchorLabel}</p>
+    <div class="row">
+      <button class="ghost" onclick="location.hash='#benchmarks'">Edit cycle anchor</button>
+    </div>
+  </div>
+
+  <div class="card"><h2>Preferences</h2>
     <div class="field"><label>Units</label>
       <select id="setUnits">
         <option value="kg" ${settings.units==='kg'?'selected':''}>kg</option>
@@ -41,7 +51,6 @@ export function renderSettings(root) {
 
   document.getElementById('saveSettings').onclick = () => {
     Storage.setSettings({
-      startDate: document.getElementById('setStart').value || null,
       units: document.getElementById('setUnits').value
     });
     alert('Saved.');

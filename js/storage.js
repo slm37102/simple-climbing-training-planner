@@ -1,6 +1,6 @@
 // LocalStorage layer with schema versioning, change events, JSON import/export.
 const KEY = 'climb-planner:state';
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 const listeners = new Set();
 let suppressEmit = 0;
@@ -15,6 +15,8 @@ function defaultState() {
     version: SCHEMA_VERSION,
     settings: {
       startDate: null,
+      compDate: null,
+      anchorMode: 'startDate', // 'startDate' | 'compDate'
       units: 'kg',
       discipline: 'both',
       level: 'intermediate',
@@ -37,6 +39,38 @@ function defaultState() {
   };
 }
 
+// Parse legacy "5x2 @ 62kg RPE 9" → structured fields.
+function parseLegacyActual(str) {
+  if (!str || typeof str !== 'string') return { raw: '' };
+  const out = { raw: str };
+  let m = str.match(/(\d+)\s*[xX×]\s*(\d+)/);
+  if (m) { out.sets = parseInt(m[1], 10); out.reps = parseInt(m[2], 10); }
+  m = str.match(/@\s*(-?[\d.]+)\s*kg/i);
+  if (m) out.kg = parseFloat(m[1]);
+  m = str.match(/RPE\s*([\d.]+)/i);
+  if (m) out.rpe = parseFloat(m[1]);
+  return out;
+}
+
+function migrateExercises(exs) {
+  if (!Array.isArray(exs)) return exs;
+  return exs.map(ex => {
+    if (!ex) return ex;
+    const next = { ...ex };
+    // Migrate `actual` if it's a string (or undefined).
+    if (typeof next.actual === 'string') {
+      next.actual = parseLegacyActual(next.actual);
+    } else if (next.actual == null) {
+      next.actual = {};
+    } else if (typeof next.actual === 'object' && next.actual.raw == null && (next.actual.kg != null || next.actual.sets != null || next.actual.reps != null || next.actual.rpe != null)) {
+      // Already structured — leave alone.
+    } else if (typeof next.actual === 'object') {
+      // Object but no fields — keep as-is.
+    }
+    return next;
+  });
+}
+
 function migrate(s) {
   if (!s) return defaultState();
   if (!s.version || s.version < 2) {
@@ -45,6 +79,16 @@ function migrate(s) {
   s.benchmarks = s.benchmarks || defaultState().benchmarks;
   if (!Array.isArray(s.benchmarks.history)) s.benchmarks.history = [];
   s.days = s.days || {};
+  s.settings = { ...defaultState().settings, ...(s.settings || {}) };
+
+  // v2 → v3: structure exercise.actual
+  if (!s.version || s.version < 3) {
+    for (const date of Object.keys(s.days)) {
+      const day = s.days[date];
+      if (day?.exercises) day.exercises = migrateExercises(day.exercises);
+    }
+    s.version = 3;
+  }
   return s;
 }
 

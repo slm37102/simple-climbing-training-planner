@@ -15,7 +15,23 @@ export function renderLog(root) {
     document.getElementById('logList').innerHTML = list.map(([d, e]) => {
       const phase = e.phase || '';
       const status = e.status || '';
-      const ex = (e.exercises||[]).map(x => `<li>${x.name}: ${x.actual||'—'}${x.notes?` <span class="muted">(${x.notes})</span>`:''}</li>`).join('');
+      const ex = (e.exercises||[]).map(x => {
+        const a = x.actual;
+        let line = '';
+        if (a && typeof a === 'object') {
+          const parts = [];
+          if (a.sets != null && a.reps != null) parts.push(`${a.sets}×${a.reps}`);
+          else if (a.reps != null) parts.push(`${a.reps}`);
+          if (a.kg != null) parts.push(`@ ${a.kg}kg`);
+          if (a.rpe != null) parts.push(`RPE ${a.rpe}`);
+          line = parts.join(' ') || (a.raw || '—');
+        } else if (typeof a === 'string') {
+          line = a;
+        } else {
+          line = '—';
+        }
+        return `<li>${x.name}: ${line}${x.notes?` <span class="muted">(${x.notes})</span>`:''}</li>`;
+      }).join('');
       return `<div class="exercise">
         <div class="row"><b>${d}</b> <span class="badge ${phase}">${phase}</span>
           ${e.isDeload?'<span class="badge deload">D</span>':''}
