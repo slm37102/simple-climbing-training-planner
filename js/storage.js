@@ -1,6 +1,6 @@
 // LocalStorage layer with schema versioning, change events, JSON import/export.
 const KEY = 'climb-planner:state';
-const SCHEMA_VERSION = 4;
+const SCHEMA_VERSION = 5;
 
 const listeners = new Set();
 let suppressEmit = 0;
@@ -66,7 +66,16 @@ function defaultState() {
     version: SCHEMA_VERSION,
     activePlanId: id,
     plans: { [id]: defaultPlan(id) },
-    globalSettings: {}
+    globalSettings: {},
+    globalBenchmarks: {
+      bodyweight: null,
+      maxHang20mm: null,
+      pullup1RM: null,
+      sportGrade: '',
+      boulderGrade: '',
+      dominantStyle: 'crimp',
+      dominantAngle: 'slight-overhang',
+    },
   };
 }
 
@@ -151,8 +160,30 @@ function migrate(s) {
     s.version = 4;
   }
 
+  // v4 → v5: promote active plan's benchmarks to globalBenchmarks
+  if (s.version < 5) {
+    if (!s.globalBenchmarks) {
+      const activePlan = s.plans?.[s.activePlanId];
+      const src = activePlan?.benchmarks || {};
+      s.globalBenchmarks = {
+        bodyweight:    src.bodyweight    ?? null,
+        maxHang20mm:   src.maxHang20mm   ?? null,
+        pullup1RM:     src.pullup1RM     ?? null,
+        sportGrade:    src.sportGrade    ?? '',
+        boulderGrade:  src.boulderGrade  ?? '',
+        dominantStyle: src.dominantStyle ?? 'crimp',
+        dominantAngle: src.dominantAngle ?? 'slight-overhang',
+      };
+    }
+    s.version = 5;
+  }
+
   // Normalise all plans — fills in missing fields on freshly-loaded or newly-added plans
   s.globalSettings = s.globalSettings || {};
+  s.globalBenchmarks = s.globalBenchmarks || {
+    bodyweight: null, maxHang20mm: null, pullup1RM: null,
+    sportGrade: '', boulderGrade: '', dominantStyle: 'crimp', dominantAngle: 'slight-overhang',
+  };
   for (const plan of Object.values(s.plans || {})) {
     plan.settings   = { ...defaultSettings(),   ...(plan.settings   || {}) };
     plan.benchmarks = { ...defaultBenchmarks(), ...(plan.benchmarks || {}) };
@@ -186,7 +217,7 @@ export const Storage = {
     return {
       ...s,
       settings:   ap?.settings,
-      benchmarks: ap?.benchmarks,
+      benchmarks: state.globalBenchmarks,
       days:       ap?.days,
     };
   },
@@ -362,7 +393,14 @@ export const Storage = {
   },
 
   setBenchmarks(patch, opts) {
-    this.setPlanBenchmarks((state || this.init()).activePlanId, patch, opts);
+    this.setGlobalBenchmarks(patch);
+  },
+
+  setGlobalBenchmarks(patch) {
+    const s = state || this.init();
+    if (!s.globalBenchmarks) s.globalBenchmarks = {};
+    Object.assign(s.globalBenchmarks, patch, { updatedAt: new Date().toISOString() });
+    this._save(); emit();
   },
 
   onChange(fn) { listeners.add(fn); return () => listeners.delete(fn); },
@@ -418,6 +456,11 @@ export const Storage = {
         }
       }
       // Local plans not in remote are intentionally kept as-is.
+    }
+
+    // Merge globalBenchmarks LWW
+    if (newer(remote.globalBenchmarks?.updatedAt, state.globalBenchmarks?.updatedAt)) {
+      state.globalBenchmarks = remote.globalBenchmarks; changed = true;
     }
 
     if (changed) {
