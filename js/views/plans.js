@@ -86,11 +86,9 @@ export function renderPlans(root) {
     function formHtml(existingPlan) {
       const p = existingPlan || {};
       const settings = p.settings || {};
-      const bm = Storage.get().benchmarks;
       const focusVal = p.focus || 'hybrid';
       const colorVal = p.color || '#4f8cff';
       const anchorMode = settings.anchorMode || 'startDate';
-      const hasHangBm = bm.maxHang20mm != null || bm.pullup1RM != null;
 
       const swatches = COLORS.map(c =>
         `<button type="button" class="color-swatch${c === colorVal ? ' swatch-sel' : ''}" data-color="${c}"
@@ -153,54 +151,6 @@ export function renderPlans(root) {
             <div class="muted" style="font-size:.78rem;margin-top:2px" id="pf-comp-hint"></div>
           </div>
         </div>
-
-        <details>
-          <summary>Benchmarks <span class="count">(optional)</span></summary>
-          <div style="padding-top:8px">
-            <div class="field">
-              <label>Bodyweight (kg)</label>
-              <input type="number" id="pf-bodyweight" step="0.5" inputmode="decimal" value="${bm.bodyweight ?? ''}">
-            </div>
-            <div class="field">
-              <label>Max 10s hang on 20mm edge — added kg</label>
-              <input type="number" id="pf-maxHang20mm" step="0.5" inputmode="decimal" value="${bm.maxHang20mm ?? ''}">
-            </div>
-            <div class="field">
-              <label>1RM weighted pull-up — added kg</label>
-              <input type="number" id="pf-pullup1RM" step="0.5" inputmode="decimal" value="${bm.pullup1RM ?? ''}">
-            </div>
-            <div class="field">
-              <label>Sport redpoint grade</label>
-              <input type="text" id="pf-sportGrade" value="${escHtml(bm.sportGrade ?? '')}" placeholder="e.g. 5.12a or 7a+">
-            </div>
-            <div class="field">
-              <label>Max boulder grade</label>
-              <input type="text" id="pf-boulderGrade" value="${escHtml(bm.boulderGrade ?? '')}" placeholder="e.g. V6">
-            </div>
-            <div class="field">
-              <label>Dominant style</label>
-              <select id="pf-dominantStyle">
-                ${['crimp','pinch','sloper','pocket'].map(o =>
-                  `<option ${(bm.dominantStyle || 'crimp') === o ? 'selected' : ''}>${o}</option>`
-                ).join('')}
-              </select>
-            </div>
-            <div class="field">
-              <label>Dominant angle</label>
-              <select id="pf-dominantAngle">
-                ${['slab','vert','slight-overhang','steep','roof'].map(o =>
-                  `<option ${(bm.dominantAngle || 'slight-overhang') === o ? 'selected' : ''}>${o}</option>`
-                ).join('')}
-              </select>
-            </div>
-            ${hasHangBm ? `<div class="field">
-              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text)">
-                <input type="checkbox" id="pf-archive" style="width:auto;accent-color:var(--accent)">
-                Archive previous benchmarks and set new
-              </label>
-            </div>` : ''}
-          </div>
-        </details>
 
         <div class="row" style="margin-top:12px">
           <button class="primary" id="pf-save">${existingPlan ? 'Save changes' : 'Create plan'}</button>
@@ -317,32 +267,20 @@ export function renderPlans(root) {
                        ? (document.getElementById('pf-startDate')?.value || null) : null,
       compDate:      (document.querySelector('input[name="pf-anchor"]:checked')?.value === 'compDate')
                        ? (document.getElementById('pf-compDate')?.value || null) : null,
-      archiveChecked: document.getElementById('pf-archive')?.checked || false,
-      benchmarks: {
-        bodyweight:     numOrNull('pf-bodyweight'),
-        maxHang20mm:    numOrNull('pf-maxHang20mm'),
-        pullup1RM:      numOrNull('pf-pullup1RM'),
-        sportGrade:     strOrNull('pf-sportGrade'),
-        boulderGrade:   strOrNull('pf-boulderGrade'),
-        dominantStyle:  document.getElementById('pf-dominantStyle')?.value  || 'crimp',
-        dominantAngle:  document.getElementById('pf-dominantAngle')?.value  || 'slight-overhang',
-      },
     };
   }
 
   function saveForm() {
-    const { name, focus, color, anchorMode, startDate, compDate, archiveChecked, benchmarks } = readForm();
+    const { name, focus, color, anchorMode, startDate, compDate } = readForm();
     if (!name) { flash('Please enter a plan name.'); return; }
 
     if (formState.mode === 'add') {
       const newId = Storage.addPlan({ name, focus, color });
       Storage.setPlanSettings(newId, { anchorMode, startDate, compDate });
-      Storage.setGlobalBenchmarks(benchmarks);
       flash('Plan created.');
     } else if (formState.mode === 'edit' && formState.editId) {
       Storage.updatePlan(formState.editId, { name, focus, color });
       Storage.setPlanSettings(formState.editId, { anchorMode, startDate, compDate });
-      Storage.setGlobalBenchmarks(benchmarks);
       flash('Plan updated.');
     }
 
