@@ -43,8 +43,92 @@ function strOrNull(id) {
 }
 
 export function renderPlans(root) {
-  // formState persists across re-renders within this view mount
   let formState = { mode: null, editId: null };
+  let pickerState = { startDate: null, compDate: null, startMonth: null, compMonth: null };
+
+  function isoFirstOfMonth(isoOrNull) {
+    const base = isoOrNull || new Date().toISOString().slice(0, 10);
+    return base.slice(0, 7) + '-01';
+  }
+
+  function renderDatePicker(containerId, opts) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+
+    const monthKey    = opts.mode === 'startDate' ? 'startMonth' : 'compMonth';
+    const dateKey     = opts.mode === 'startDate' ? 'startDate'  : 'compDate';
+    const monthISO    = pickerState[monthKey] || isoFirstOfMonth(null);
+    const selectedISO = pickerState[dateKey];
+
+    const year      = parseInt(monthISO.slice(0, 4), 10);
+    const month     = parseInt(monthISO.slice(5, 7), 10); // 1-based
+    const monthName = new Date(year, month - 1, 1).toLocaleString('default', { month: 'long' });
+    const todayISO  = new Date().toISOString().slice(0, 10);
+
+    let bandStart = null, bandEnd = null;
+    if (selectedISO) {
+      if (opts.mode === 'startDate') {
+        bandStart = selectedISO;
+        bandEnd   = addDays(selectedISO, 83);
+      } else {
+        bandStart = Program.computeStartFromComp(selectedISO);
+        bandEnd   = selectedISO;
+      }
+    }
+
+    // Grid starts on Monday
+    const dow    = new Date(year, month - 1, 1).getDay(); // 0=Sun … 6=Sat
+    const offset = (dow === 0) ? 6 : dow - 1;
+    const cursor = new Date(year, month - 1, 1 - offset);
+
+    const headerHtml = ['Mo','Tu','We','Th','Fr','Sa','Su'].map(h => `<div>${h}</div>`).join('');
+    let cells = '';
+    for (let i = 0; i < 42; i++) {
+      const iso = cursor.toISOString().slice(0, 10);
+      const isCurrentMonth = cursor.getMonth() === month - 1;
+      const isSelected = iso === selectedISO;
+      const isToday    = iso === todayISO;
+      const inBand     = !isSelected && bandStart && bandEnd && iso >= bandStart && iso <= bandEnd;
+
+      let cls = 'dp-cell';
+      if (isSelected)      cls += ' dp-selected';
+      else if (inBand)     cls += ' dp-in-band';
+      if (isToday)         cls += ' dp-today';
+      if (!isCurrentMonth) cls += ' dp-other-month';
+
+      cells += `<div class="${cls}" data-date="${iso}">${cursor.getDate()}</div>`;
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    container.innerHTML = `
+      <div class="dp-nav">
+        <button data-dp-nav="-1">◀</button>
+        <span>${monthName} ${year}</span>
+        <button data-dp-nav="1">▶</button>
+      </div>
+      <div class="dp-header">${headerHtml}</div>
+      <div class="dp-grid">${cells}</div>`;
+
+    container.querySelectorAll('[data-dp-nav]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const delta = parseInt(btn.dataset.dpNav, 10);
+        const [y, m] = pickerState[monthKey].split('-').map(Number);
+        let nm = m + delta, ny = y;
+        if (nm > 12) { nm = 1; ny++; }
+        if (nm < 1)  { nm = 12; ny--; }
+        pickerState[monthKey] = `${ny}-${String(nm).padStart(2, '0')}-01`;
+        renderDatePicker(containerId, opts);
+      });
+    });
+
+    container.querySelectorAll('.dp-cell').forEach(cell => {
+      cell.addEventListener('click', () => {
+        pickerState[dateKey] = cell.dataset.date;
+        renderDatePicker(containerId, opts);
+        opts.onPick(cell.dataset.date);
+      });
+    });
+  }
 
   function render() {
     const plans = Storage.listPlans();
@@ -137,18 +221,14 @@ export function renderPlans(root) {
             </label>
           </div>
           <div data-anchor-pane="startDate" style="${anchorMode === 'startDate' ? '' : 'display:none'}">
-            <div class="field" style="margin-bottom:4px">
-              <label>Cycle start date <span class="muted">(Monday recommended)</span></label>
-              <input type="date" id="pf-startDate" value="${settings.startDate || ''}">
-            </div>
-            <div class="muted" style="font-size:.78rem;margin-top:2px" id="pf-start-hint"></div>
+            <label>Cycle start date <span class="muted">(Monday recommended)</span></label>
+            <div id="pf-startDate-picker" style="margin-top:8px"></div>
+            <div class="muted" id="pf-start-hint" style="font-size:.8rem;margin-top:4px"></div>
           </div>
           <div data-anchor-pane="compDate" style="${anchorMode === 'compDate' ? '' : 'display:none'}">
-            <div class="field" style="margin-bottom:4px">
-              <label>Competition / send date <span class="muted">(cycle ends here)</span></label>
-              <input type="date" id="pf-compDate" value="${settings.compDate || ''}">
-            </div>
-            <div class="muted" style="font-size:.78rem;margin-top:2px" id="pf-comp-hint"></div>
+            <label>Competition / send date <span class="muted">(cycle ends here)</span></label>
+            <div id="pf-compDate-picker" style="margin-top:8px"></div>
+            <div class="muted" id="pf-comp-hint" style="font-size:.8rem;margin-top:4px"></div>
           </div>
         </div>
 
@@ -179,6 +259,8 @@ export function renderPlans(root) {
   function wireListeners() {
     document.getElementById('new-plan-btn')?.addEventListener('click', () => {
       formState = { mode: 'add', editId: null };
+      pickerState = { startDate: null, compDate: null,
+        startMonth: isoFirstOfMonth(null), compMonth: isoFirstOfMonth(null) };
       render();
       document.getElementById('pf-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
@@ -222,8 +304,8 @@ export function renderPlans(root) {
       });
     });
 
-    document.getElementById('pf-startDate')?.addEventListener('change', refreshHints);
-    document.getElementById('pf-compDate')?.addEventListener('change', refreshHints);
+    renderDatePicker('pf-startDate-picker', { mode: 'startDate', onPick() { refreshHints(); } });
+    renderDatePicker('pf-compDate-picker',  { mode: 'compDate',  onPick() { refreshHints(); } });
     refreshHints();
 
     document.getElementById('pf-save')?.addEventListener('click', saveForm);
@@ -234,16 +316,15 @@ export function renderPlans(root) {
   }
 
   function refreshHints() {
-    const mode = document.querySelector('input[name="pf-anchor"]:checked')?.value || 'startDate';
     const startHint = document.getElementById('pf-start-hint');
     const compHint  = document.getElementById('pf-comp-hint');
 
     if (startHint) {
-      const v = document.getElementById('pf-startDate')?.value;
+      const v = pickerState.startDate;
       startHint.textContent = v ? `Cycle: ${v} → ${addDays(v, 83)}` : '';
     }
     if (compHint) {
-      const v = document.getElementById('pf-compDate')?.value;
+      const v = pickerState.compDate;
       if (v) {
         const start = Program.computeStartFromComp(v);
         const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -258,15 +339,14 @@ export function renderPlans(root) {
   }
 
   function readForm() {
+    const anchorMode = document.querySelector('input[name="pf-anchor"]:checked')?.value || 'startDate';
     return {
-      name:          document.getElementById('pf-name')?.value.trim() || '',
-      focus:         document.querySelector('input[name="pf-focus"]:checked')?.value || 'hybrid',
-      color:         document.querySelector('.color-swatch.swatch-sel')?.dataset.color || '#4f8cff',
-      anchorMode:    document.querySelector('input[name="pf-anchor"]:checked')?.value || 'startDate',
-      startDate:     (document.querySelector('input[name="pf-anchor"]:checked')?.value === 'startDate')
-                       ? (document.getElementById('pf-startDate')?.value || null) : null,
-      compDate:      (document.querySelector('input[name="pf-anchor"]:checked')?.value === 'compDate')
-                       ? (document.getElementById('pf-compDate')?.value || null) : null,
+      name:       document.getElementById('pf-name')?.value.trim() || '',
+      focus:      document.querySelector('input[name="pf-focus"]:checked')?.value || 'hybrid',
+      color:      document.querySelector('.color-swatch.swatch-sel')?.dataset.color || '#4f8cff',
+      anchorMode,
+      startDate:  (anchorMode === 'startDate') ? (pickerState.startDate || null) : null,
+      compDate:   (anchorMode === 'compDate')  ? (pickerState.compDate  || null) : null,
     };
   }
 
@@ -295,11 +375,21 @@ export function renderPlans(root) {
         flash('Active plan changed.');
         render();
         break;
-      case 'edit':
+      case 'edit': {
         formState = { mode: 'edit', editId: pid };
+        const ep = Storage.getPlan(pid);
+        const sDate = ep?.settings?.startDate || null;
+        const cDate = ep?.settings?.compDate  || null;
+        pickerState = {
+          startDate:  sDate,
+          compDate:   cDate,
+          startMonth: isoFirstOfMonth(sDate),
+          compMonth:  isoFirstOfMonth(cDate),
+        };
         render();
         document.getElementById('pf-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         break;
+      }
       case 'duplicate': {
         const src = Storage.getPlan(pid);
         Storage.duplicatePlan(pid, (src?.name || 'Plan') + ' (copy)');
