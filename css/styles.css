@@ -108,6 +108,11 @@ label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
 .radio-group label:has(input:checked){border-color:var(--accent);background:#0b1220cc}
 .radio-group input[type=radio]{accent-color:var(--accent);width:auto}
 
+/* === log tab buttons === */
+.log-tabs{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.log-tab{background:transparent;color:var(--muted);border:1px solid transparent;border-radius:999px;padding:6px 14px;font-size:.85rem;cursor:pointer;white-space:nowrap}
+.log-tab.active{background:var(--panel2);color:var(--text);border-color:var(--accent)}
+
 @media (max-width:480px){
   .app-header h1{font-size:1rem}
   .view{padding:10px}
