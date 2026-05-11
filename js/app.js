@@ -10,6 +10,7 @@ import { renderCalendar } from './views/calendar.js';
 import { renderBenchmarks } from './views/benchmarks.js';
 import { renderLog } from './views/log.js';
 import { renderSettings } from './views/settings.js';
+import { renderPlans } from './views/plans.js';
 
 const views = {
   today: renderToday,
@@ -18,6 +19,7 @@ const views = {
   benchmarks: renderBenchmarks,
   log: renderLog,
   settings: renderSettings,
+  plans: renderPlans,
 };
 
 const ctx = { Storage, Program, Loads, Warmup, Sync };

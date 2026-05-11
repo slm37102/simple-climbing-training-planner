@@ -17,6 +17,7 @@ const SHELL = [
   './js/views/benchmarks.js',
   './js/views/log.js',
   './js/views/settings.js',
+  './js/views/plans.js',
   './firebase-config.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
