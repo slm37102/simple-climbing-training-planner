@@ -86,12 +86,11 @@ export function renderPlans(root) {
     function formHtml(existingPlan) {
       const p = existingPlan || {};
       const settings = p.settings || {};
-      const bm = p.benchmarks || {};
+      const bm = Storage.get().benchmarks;
       const focusVal = p.focus || 'hybrid';
       const colorVal = p.color || '#4f8cff';
       const anchorMode = settings.anchorMode || 'startDate';
-      const hasHangBm = existingPlan &&
-        (existingPlan.benchmarks?.maxHang20mm != null || existingPlan.benchmarks?.pullup1RM != null);
+      const hasHangBm = bm.maxHang20mm != null || bm.pullup1RM != null;
 
       const swatches = COLORS.map(c =>
         `<button type="button" class="color-swatch${c === colorVal ? ' swatch-sel' : ''}" data-color="${c}"
@@ -338,12 +337,12 @@ export function renderPlans(root) {
     if (formState.mode === 'add') {
       const newId = Storage.addPlan({ name, focus, color });
       Storage.setPlanSettings(newId, { anchorMode, startDate, compDate });
-      Storage.setPlanBenchmarks(newId, benchmarks);
+      Storage.setGlobalBenchmarks(benchmarks);
       flash('Plan created.');
     } else if (formState.mode === 'edit' && formState.editId) {
       Storage.updatePlan(formState.editId, { name, focus, color });
       Storage.setPlanSettings(formState.editId, { anchorMode, startDate, compDate });
-      Storage.setPlanBenchmarks(formState.editId, benchmarks, { archive: archiveChecked });
+      Storage.setGlobalBenchmarks(benchmarks);
       flash('Plan updated.');
     }
 
