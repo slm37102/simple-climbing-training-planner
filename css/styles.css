@@ -233,6 +233,31 @@ label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
 .focus-option-label { font-weight: 600; font-size: .9rem; }
 .focus-option-desc { font-size: .75rem; color: var(--muted); margin-top: 2px; }
 
+/* ── Cycle month grid ──────────────────────────────── */
+.cycle-month-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-top: 6px; }
+.cycle-cell { position: relative; min-height: 56px; border-radius: 6px; padding: 4px 5px; font-size: .75rem; cursor: pointer; background: var(--surface, var(--panel2)); border: 1px solid #ffffff10; overflow: hidden; }
+.cycle-cell:hover { border-color: var(--accent); }
+.cycle-cell .day-num { font-weight: 600; font-size: .8rem; }
+.cycle-cell .cell-label { font-size: .6rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.cycle-cell .comp-icon { position: absolute; bottom: 2px; right: 3px; font-size: .7rem; }
+.cycle-cell.today { border: 2px solid var(--accent) !important; }
+.cycle-cell.base   { background: #1e3a2a; }
+.cycle-cell.build  { background: #1e2a3a; }
+.cycle-cell.peak   { background: #3a1e2a; }
+.cycle-cell.taper  { background: #3a3a1e; }
+.cycle-cell.deload { background-image: repeating-linear-gradient(45deg, transparent, transparent 4px, #ffffff08 4px, #ffffff08 8px); }
+.cycle-cell.out    { opacity: .35; }
+.cycle-day-header  { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font-size: .7rem; color: var(--muted); margin-top: 8px; }
+.month-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 8px 0 2px; }
+.month-nav button { background: none; border: 1px solid #ffffff20; border-radius: 6px; color: var(--text); padding: 4px 10px; cursor: pointer; font-size: .9rem; }
+.month-nav .month-label { font-weight: 600; flex: 1; text-align: center; }
+.phase-legend { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0; font-size: .75rem; align-items: center; }
+.phase-legend-item { display: flex; align-items: center; gap: 4px; }
+.phase-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.cycle-view-toggle { display: flex; gap: 0; border: 1px solid #ffffff20; border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
+.cycle-view-toggle button { flex: 1; background: none; border: none; color: var(--muted); padding: 6px; cursor: pointer; font-size: .85rem; }
+.cycle-view-toggle button.active { background: var(--accent); color: #001; font-weight: 600; }
+
 @media (max-width:480px){
   .app-header h1{font-size:1rem}
   .view{padding:10px}

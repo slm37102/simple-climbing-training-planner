@@ -16,6 +16,7 @@ const views = {
   today: renderToday,
   week: renderWeek,
   calendar: renderCalendar,
+  cycle: renderCalendar,
   benchmarks: renderBenchmarks,
   log: renderLog,
   settings: renderSettings,
