@@ -3,10 +3,14 @@ import { Program } from '../program.js';
 
 const COLORS = ['#4f8cff', '#f43f5e', '#22c55e', '#f59e0b', '#a78bfa', '#fb923c'];
 
+function toLocalISO(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function addDays(iso, n) {
   const d = new Date(iso + 'T00:00:00');
   d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0, 10);
+  return toLocalISO(d);
 }
 
 function planDateRange(plan) {
@@ -47,7 +51,7 @@ export function renderPlans(root) {
   let pickerState = { startDate: null, compDate: null, startMonth: null, compMonth: null };
 
   function isoFirstOfMonth(isoOrNull) {
-    const base = isoOrNull || new Date().toISOString().slice(0, 10);
+    const base = isoOrNull || toLocalISO(new Date());
     return base.slice(0, 7) + '-01';
   }
 
@@ -63,7 +67,7 @@ export function renderPlans(root) {
     const year      = parseInt(monthISO.slice(0, 4), 10);
     const month     = parseInt(monthISO.slice(5, 7), 10); // 1-based
     const monthName = new Date(year, month - 1, 1).toLocaleString('default', { month: 'long' });
-    const todayISO  = new Date().toISOString().slice(0, 10);
+    const todayISO  = toLocalISO(new Date());
 
     let bandStart = null, bandEnd = null;
     if (selectedISO) {
@@ -84,7 +88,7 @@ export function renderPlans(root) {
     const headerHtml = ['Mo','Tu','We','Th','Fr','Sa','Su'].map(h => `<div>${h}</div>`).join('');
     let cells = '';
     for (let i = 0; i < 42; i++) {
-      const iso = cursor.toISOString().slice(0, 10);
+      const iso = toLocalISO(cursor);
       const isCurrentMonth = cursor.getMonth() === month - 1;
       const isSelected = iso === selectedISO;
       const isToday    = iso === todayISO;
