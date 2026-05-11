@@ -1,19 +1,13 @@
 import { Storage } from '../storage.js';
-import { Program } from '../program.js';
 import { Sync } from '../sync.js';
 
 export function renderSettings(root) {
   const { settings } = Storage.get();
-  const effStart = Program.effectiveStart(settings);
-  const anchorLabel = settings.anchorMode === 'compDate'
-    ? `Peak on ${settings.compDate || '—'} (cycle starts ${effStart || '—'})`
-    : `Start on ${effStart || '—'}`;
 
-  let body = `<div class="card"><h2>Cycle</h2>
-    <p class="muted">${anchorLabel}</p>
-    <div class="row">
-      <button class="ghost" onclick="location.hash='#benchmarks'">Edit cycle anchor</button>
-    </div>
+  let body = `<div class="card">
+    <h2>Settings</h2>
+    <p class="muted">Training plans and benchmarks are managed in the Plans tab.</p>
+    <button class="ghost" onclick="location.hash='#plans'">Manage Plans →</button>
   </div>
 
   <div class="card"><h2>Preferences</h2>

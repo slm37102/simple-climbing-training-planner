@@ -314,8 +314,10 @@ export function renderPlans(root) {
       focus:         document.querySelector('input[name="pf-focus"]:checked')?.value || 'hybrid',
       color:         document.querySelector('.color-swatch.swatch-sel')?.dataset.color || '#4f8cff',
       anchorMode:    document.querySelector('input[name="pf-anchor"]:checked')?.value || 'startDate',
-      startDate:     document.getElementById('pf-startDate')?.value || null,
-      compDate:      document.getElementById('pf-compDate')?.value || null,
+      startDate:     (document.querySelector('input[name="pf-anchor"]:checked')?.value === 'startDate')
+                       ? (document.getElementById('pf-startDate')?.value || null) : null,
+      compDate:      (document.querySelector('input[name="pf-anchor"]:checked')?.value === 'compDate')
+                       ? (document.getElementById('pf-compDate')?.value || null) : null,
       archiveChecked: document.getElementById('pf-archive')?.checked || false,
       benchmarks: {
         bodyweight:     numOrNull('pf-bodyweight'),

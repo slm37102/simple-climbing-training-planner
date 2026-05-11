@@ -113,6 +113,126 @@ label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
 .log-tab{background:transparent;color:var(--muted);border:1px solid transparent;border-radius:999px;padding:6px 14px;font-size:.85rem;cursor:pointer;white-space:nowrap}
 .log-tab.active{background:var(--panel2);color:var(--text);border-color:var(--accent)}
 
+/* === plan color dot === */
+.plan-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* === plan tab buttons (Today view plan switcher) === */
+.plan-switcher { padding: 8px var(--pad); }
+.plan-tab {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid #ffffff20;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: .82rem;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .12s ease;
+}
+.plan-tab:hover { border-color: var(--accent); color: var(--text); }
+.plan-tab.active {
+  background: var(--panel2);
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+/* === discipline focus badges === */
+.badge.focus-boulder { background: #c2410c; color: #fff; }
+.badge.focus-sport   { background: #0369a1; color: #fff; }
+.badge.focus-hybrid  { background: #5b21b6; color: #fff; }
+
+/* === flash toast === */
+.flash-toast {
+  position: fixed;
+  bottom: 24px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent); color: #001;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: .9rem;
+  z-index: 100;
+  box-shadow: 0 4px 16px #0008;
+  pointer-events: none;
+  animation: fadeInUp .15s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* === plan card (Plans view) === */
+.plan-card {
+  border-left: 3px solid var(--accent);
+  position: relative;
+}
+.plan-card.active-plan { border-left-color: var(--good); }
+.plan-card.archived-plan { opacity: .65; }
+
+/* === color swatch picker === */
+.color-swatches { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.color-swatch {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: transform .1s ease;
+}
+.color-swatch:hover { transform: scale(1.15); }
+.color-swatch.selected { border-color: var(--text); transform: scale(1.1); }
+
+/* === plan legend (calendar) === */
+.plan-legend { display: flex; gap: 12px; flex-wrap: wrap; margin: 8px 0; }
+.plan-legend-item { display: flex; align-items: center; gap: 6px; font-size: .8rem; }
+
+/* === calendar plan dots === */
+.cal-dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px; margin-top: 2px; }
+.cal-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+}
+.cal-dot.hollow {
+  background: transparent;
+  border: 1px solid currentColor;
+}
+
+/* === phase progress bars (Log phases tab) === */
+.phase-progress-row { margin: 6px 0; }
+.phase-progress-label { display: flex; justify-content: space-between; font-size: .8rem; color: var(--muted); margin-bottom: 3px; }
+.phase-progress-track { background: var(--panel2); border-radius: 4px; height: 6px; overflow: hidden; }
+.phase-bar { height: 100%; border-radius: 4px; transition: width .3s ease; }
+.phase-bar.base  { background: var(--base); }
+.phase-bar.build { background: var(--build); }
+.phase-bar.peak  { background: var(--peak); }
+.phase-bar.taper { background: var(--taper); }
+
+/* === chart canvas wrapper === */
+.chart-wrap { margin: 12px 0; }
+.chart-wrap h3 { font-size: .85rem; color: var(--muted); margin: 0 0 4px; }
+.chart-canvas { display: block; width: 100%; max-width: 440px; height: 160px; border-radius: 6px; }
+
+/* === plan form (inline) === */
+.plan-form { border-top: 1px solid #ffffff15; margin-top: 10px; padding-top: 12px; }
+.focus-radio-group { display: flex; flex-direction: column; gap: 8px; margin: 8px 0; }
+.focus-option {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px;
+  background: #0b1220;
+  border: 1px solid #ffffff20;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.focus-option:has(input:checked) { border-color: var(--accent); background: #0b1220cc; }
+.focus-option input[type=radio] { margin-top: 2px; accent-color: var(--accent); flex-shrink: 0; }
+.focus-option-text { flex: 1; }
+.focus-option-label { font-weight: 600; font-size: .9rem; }
+.focus-option-desc { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+
 @media (max-width:480px){
   .app-header h1{font-size:1rem}
   .view{padding:10px}

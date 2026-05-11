@@ -66,13 +66,13 @@ function showAuthGate() {
     try {
       await Sync.signIn();
       gate.classList.add('hidden');
-      navigate('benchmarks');
+      navigate('today');
     } catch (e) { alert('Sign-in failed: ' + e.message); }
   };
   document.getElementById('localOnlyBtn').onclick = () => {
     Sync.setLocalOnly(true);
     gate.classList.add('hidden');
-    navigate('benchmarks');
+    navigate('today');
   };
 }
 

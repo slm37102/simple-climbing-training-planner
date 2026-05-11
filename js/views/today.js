@@ -32,45 +32,64 @@ function asActualObj(a) {
 function n(v) { return v == null || v === '' ? '' : v; }
 
 export function renderToday(root) {
-  const state = Storage.get();
+  const activePlan = Storage.getActivePlan();
   const date = todayIso();
-  const start = Program.effectiveStart(state.settings);
+  const start = Program.effectiveStart(activePlan.settings);
+
+  // Plan switcher — only shown when 2+ non-archived plans exist
+  const allPlans = Storage.listPlans().filter(p => !p.archived);
+  let planSwitcherHtml = '';
+  if (allPlans.length >= 2) {
+    const tabs = allPlans.map(p =>
+      `<button class="plan-tab ${p.id === activePlan.id ? 'active' : ''}" data-plan-id="${p.id}" style="--plan-color:${p.color}">
+        ${p.name}<span class="badge focus-${p.focus}">${p.focus[0].toUpperCase()}</span>
+      </button>`
+    ).join('');
+    planSwitcherHtml = `<div class="card plan-switcher" id="planSwitcher">
+      <div class="row" style="align-items:center;gap:8px">
+        <span class="muted" style="font-size:.8rem">Plan:</span>${tabs}
+      </div>
+    </div>`;
+  }
 
   if (!start) {
-    root.innerHTML = `<div class="card"><h2>Set up your cycle</h2>
-      <p class="muted">Add benchmarks and pick a cycle anchor (start date or competition date) to begin.</p>
-      <button class="primary" onclick="location.hash='#benchmarks'">Go to Benchmarks</button></div>`;
+    root.innerHTML = planSwitcherHtml + `<div class="card"><h2>Set up your cycle</h2>
+      <p class="muted">Configure your active plan with a start date or comp date.</p>
+      <button class="primary" onclick="location.hash='#plans'">Go to Plans</button></div>`;
+    wirePlanSwitcher(root, root);
     return;
   }
 
-  const ctx = Program.resolveDate(date, start);
+  const ctx = Program.resolveDate(date, Program.effectiveStart(activePlan.settings));
   if (ctx?.outOfCycle) {
-    const which = state.settings.anchorMode === 'compDate'
-      ? `Cycle window: ${start} → ${state.settings.compDate}`
+    const which = activePlan.settings.anchorMode === 'compDate'
+      ? `Cycle window: ${start} → ${activePlan.settings.compDate}`
       : `Cycle starts ${start}`;
-    root.innerHTML = `<div class="card"><h2>Outside cycle</h2>
+    root.innerHTML = planSwitcherHtml + `<div class="card"><h2>Outside cycle</h2>
       <p class="muted">Today (${date}) is outside the 12-week window. ${which}.</p>
-      <button class="ghost" onclick="location.hash='#benchmarks'">Adjust cycle</button></div>`;
+      <button class="ghost" onclick="location.hash='#plans'">Adjust in Plans</button></div>`;
+    wirePlanSwitcher(root, root);
     return;
   }
 
-  const session = Program.prescribeForContext(ctx);
+  const session = Program.build(activePlan, date);
   const dayLog = Storage.getDay(date) || {};
   const readiness = dayLog.readiness || { sleep:3, soreness:3, fatigue:3 };
   const { multiplier, label: rdLabel, avg: rdAvg } = Loads.computeReadinessMultiplier(readiness);
 
   const phaseBadge = `<span class="badge ${ctx.phase}">${ctx.phase}</span>`;
   const flavorBadge = `<span class="badge">${ctx.flavor}</span>`;
+  const focusBadge = `<span class="badge focus-${activePlan.focus}">${activePlan.focus}</span>`;
   const deloadBadge = ctx.deload ? `<span class="badge deload">DELOAD</span>` : '';
   const retestBadge = session.isRetest ? `<span class="badge">RETEST</span>` : '';
   const energyTip = session.energySystem ? `<span class="info-badge" title="Energy system: ${session.energySystem}">i</span>` : '';
 
   const { warmup, cooldown } = Warmup.forSession(session);
 
-  let body = `<div class="card">
+  let body = planSwitcherHtml + `<div class="card">
     <div class="session-head">
       <h2>${date} · Wk ${ctx.weekIdx}</h2>
-      ${phaseBadge}${flavorBadge}${deloadBadge}${retestBadge}${energyTip}
+      ${phaseBadge}${flavorBadge}${focusBadge}${deloadBadge}${retestBadge}${energyTip}
     </div>
     <div class="muted" style="margin-top:6px">${session.label}</div>
   </div>`;
@@ -88,6 +107,7 @@ export function renderToday(root) {
         Storage.setDay(date, { sessionId: 'rest', status: 'rest', recovery: cur });
       });
     });
+    wirePlanSwitcher(root, root);
     return;
   }
 
@@ -151,6 +171,16 @@ export function renderToday(root) {
 
   root.innerHTML = body;
   wire(root, date, session, ctx, multiplier);
+  wirePlanSwitcher(root, root);
+}
+
+function wirePlanSwitcher(root, container) {
+  container.querySelectorAll('button[data-plan-id]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      Storage.setActivePlan(btn.dataset.planId);
+      renderToday(root);
+    });
+  });
 }
 
 // Build the structured stepper inputs for an exercise.

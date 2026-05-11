@@ -94,7 +94,7 @@ function pullupPrescription(phase) {
   return { pctRange: [0.50, 0.60], reps: '3 × 5', rpe: [7, 8] }; // taper
 }
 
-function buildMonHangboard(phase, isDeload) {
+function buildMonHangboard(phase, isDeload, focus = 'hybrid') {
   const hb = HANGBOARD[phase];
   const exercises = [
     {
@@ -113,7 +113,16 @@ function buildMonHangboard(phase, isDeload) {
       ...pullupPrescription(phase)
     }
   ];
+  if (focus === 'boulder' && phase === 'build') {
+    exercises.push({ kind: 'campus', name: 'Campus warmup ladders', prescribed: '2–3 ladders × 5 min rest', rpeRange: [7, 8] });
+  }
+  if (focus === 'boulder' && phase === 'peak') {
+    exercises.push({ kind: 'campus', name: 'Campus board (1-5-9 / bumps)', prescribed: '3–5 reps × 5 min rest · 20 min cap', rpeRange: [9, 9.5] });
+  }
   if (!isDeload) {
+    if (focus === 'sport' && (phase === 'base' || phase === 'build')) {
+      exercises.push({ kind: 'hangboard', name: '7/3 Repeaters (endurance)', hang: '7s × 6 reps on 20mm', rest: '3s within / 3 min between sets', sets: '3–4 sets', rpeRange: [7.5, 8.5], edge: '20mm', loadPctRange: null });
+    }
     exercises.push({ kind: 'antagonist-block', name: 'S&C antagonist block', items: ANTAGONIST_BLOCK });
   }
   return {
@@ -212,6 +221,28 @@ function buildThuMain(phase, flavor, isDeload) {
 
 function buildSatMain(phase, flavor, isDeload) {
   if (flavor === 'boulder') {
+    if (phase === 'peak') {
+      return {
+        sessionId: 'sat-proj-boulder',
+        label: 'Project boulder session',
+        energySystem: 'Strength / Power',
+        exercises: [
+          { kind: 'limit-boulder', name: 'Project attempts', prescribed: '3–5 hard problems · max 5 attempts each · 5+ min rest', rpeRange: [9, 9.5] },
+          { kind: 'boulder', name: 'Flash/onsight attempts', prescribed: '3–5 problems at 1 grade below max', rpeRange: [8, 9] }
+        ]
+      };
+    }
+    if (phase === 'taper') {
+      return {
+        sessionId: 'sat-volume-down',
+        label: 'Low volume bouldering (Taper)',
+        energySystem: 'Maintenance',
+        exercises: [
+          { kind: 'boulder', name: 'Fun submaximal bouldering', prescribed: '45–60 min at 2–3 grades below max · no projecting', rpeRange: [6, 7.5] }
+        ]
+      };
+    }
+    // base / build
     return {
       sessionId: 'sat-boulder-triples',
       label: 'Boulder triples + open climb',
@@ -222,7 +253,7 @@ function buildSatMain(phase, flavor, isDeload) {
       ]
     };
   }
-  // sport: ARC / mileage
+  // sport
   if (phase === 'base') {
     return {
       sessionId: 'sat-arc',
@@ -233,6 +264,27 @@ function buildSatMain(phase, flavor, isDeload) {
       ]
     };
   }
+  if (phase === 'build') {
+    return {
+      sessionId: 'sat-4x4-build',
+      label: '4×4 power-endurance (Build)',
+      energySystem: 'Anaerobic capacity',
+      exercises: [
+        { kind: 'circuit', name: '4×4 circuits', prescribed: '4 routes/links back-to-back · 4 min rest · 3 sets · at 50–60% redpoint', rpeRange: [8.5, 9.5] }
+      ]
+    };
+  }
+  if (phase === 'peak') {
+    return {
+      sessionId: 'sat-redpoint-peak',
+      label: 'Redpoint session (Peak)',
+      energySystem: 'Sport-specific',
+      exercises: [
+        { kind: 'route', name: 'Redpoint attempts', prescribed: '2–4 quality redpoint attempts · 20+ min rest between goes', rpeRange: [9, 9.5] }
+      ]
+    };
+  }
+  // taper (and any other phase)
   return {
     sessionId: 'sat-route-mileage',
     label: 'Sport route mileage',
@@ -339,11 +391,12 @@ export const Program = {
   },
 
   // Builds the prescribed session for a given resolved date context (no load resolution yet).
-  prescribeForContext(ctx) {
+  prescribeForContext(ctx, focus = 'hybrid') {
     if (!ctx || ctx.outOfCycle) {
       return { sessionId: 'out-of-cycle', label: 'Outside 12-week cycle', exercises: [] };
     }
     const { phase, flavor, slot, deload, retest } = ctx;
+    const resolvedFlavor = focus === 'hybrid' ? flavor : focus;
 
     if (slot === 'rest') return REST_DAY;
     if (slot === 'tue-light') return LIGHT_DAY;
@@ -361,15 +414,22 @@ export const Program = {
     let session;
     if (slot === 'mon-main') {
       if (deload && retest) session = buildRetestSession();
-      else session = buildMonHangboard(phase, deload);
+      else session = buildMonHangboard(phase, deload, focus);
     } else if (slot === 'thu-main') {
-      session = buildThuMain(phase, flavor, deload);
+      session = buildThuMain(phase, resolvedFlavor, deload);
     } else if (slot === 'sat-main') {
-      session = buildSatMain(phase, flavor, deload);
+      session = buildSatMain(phase, resolvedFlavor, deload);
     } else {
       session = LIGHT_DAY;
     }
 
-    return { ...session, phase, flavor, deload, retest, weekIdx: ctx.weekIdx };
+    return { ...session, phase, flavor: resolvedFlavor, focus, deload, retest, weekIdx: ctx.weekIdx };
+  },
+
+  // Primary entry point: builds a session from a plan object and an ISO date string.
+  build(plan, dateISO) {
+    const start = this.effectiveStart(plan.settings);
+    const ctx = this.resolveDate(dateISO, start);
+    return this.prescribeForContext(ctx, plan.focus || 'hybrid');
   }
 };

@@ -32,8 +32,8 @@ export const Loads = {
   // ===== Compute kg range for an exercise =====
   // exercise has { kind, loadPctRange?, pctRange?, ...}
   // Uses benchmarks.maxHang20mm for hangboard, benchmarks.pullup1RM for pullup.
-  prescribeLoadKg(exercise) {
-    const { benchmarks } = Storage.get();
+  prescribeLoadKg(exercise, benchmarksOverride = null) {
+    const { benchmarks } = benchmarksOverride ? { benchmarks: benchmarksOverride } : Storage.get();
     const bw = benchmarks.bodyweight;
     let baseMax = null;
     let isAddedWeight = false;
@@ -64,8 +64,8 @@ export const Loads = {
   // Resolve effective kg for today's session, applying:
   //   (1) prev-actual seed, (2) auto-adjust, (3) readiness, (4) deload intensity.
   // Returns { suggestedKg, range, reason: [... steps ...] }
-  resolveEffective({ exercise, previousActualKg, previousAvgRpe, readinessMultiplier = 1.0, isDeload = false }) {
-    const base = this.prescribeLoadKg(exercise);
+  resolveEffective({ exercise, previousActualKg, previousAvgRpe, readinessMultiplier = 1.0, isDeload = false, benchmarks = null }) {
+    const base = this.prescribeLoadKg(exercise, benchmarks);
     if (!base) return null;
 
     const reason = [];
