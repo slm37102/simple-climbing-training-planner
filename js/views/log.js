@@ -259,7 +259,7 @@ export function renderLog(root) {
           ${phase  ? `<span class="badge ${phase}">${esc(phase)}</span>` : ''}
           ${e.isDeload ? `<span class="badge deload">Deload</span>` : ''}
           ${status ? `<span class="badge" style="${statusStyle}">${esc(status)}</span>` : ''}
-          <button style="margin-left:auto;background:none;border:1px solid #334155;border-radius:6px;color:var(--muted);cursor:pointer;font-size:.75rem;padding:3px 8px;flex-shrink:0" data-edit-log="${key}">✏️ Edit</button>
+          <button style="margin-left:auto;background:none;border:1px solid #334155;border-radius:6px;color:var(--muted);cursor:pointer;font-size:.75rem;padding:3px 8px;flex-shrink:0" data-edit-log="${key}">Edit</button>
         </div>
         <div class="muted" style="font-size:.85rem;margin-bottom:4px">${esc(e.sessionId || '')}${e.label ? ` — ${esc(e.label)}` : ''}</div>
         <div class="muted" style="font-size:.8rem;margin-bottom:6px">
