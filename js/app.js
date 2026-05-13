@@ -47,8 +47,9 @@ function init() {
       if (el) el.textContent = s;
     },
     onRemoteUpdate: () => {
-      // Re-render current view when remote data arrives
-      navigate((location.hash || '#today').slice(1));
+      const currentView = (location.hash || '#today').slice(1);
+      // Don't wipe the Plans form while user might be actively editing
+      if (currentView !== 'plans') navigate(currentView);
     }
   }).then(({ needsAuthGate }) => {
     if (needsAuthGate) showAuthGate();
@@ -68,7 +69,12 @@ function showAuthGate() {
       await Sync.signIn();
       gate.classList.add('hidden');
       navigate('today');
-    } catch (e) { alert('Sign-in failed: ' + e.message); }
+    } catch (e) {
+      // User closing the popup is not an error worth alerting
+      if (e.code !== 'auth/popup-closed-by-user' && e.code !== 'auth/cancelled-popup-request') {
+        alert('Sign-in failed: ' + e.message);
+      }
+    }
   };
   document.getElementById('localOnlyBtn').onclick = () => {
     Sync.setLocalOnly(true);

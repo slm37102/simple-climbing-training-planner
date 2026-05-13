@@ -6,6 +6,7 @@ export function renderLog(root) {
   let planFilter = 'all';
   let fromFilter = '';
   let toFilter = '';
+  let editingSet = new Set(); // tracks "planId:date" keys with edit form open
 
   // ── helpers ──────────────────────────────────────────────────────────────
 
@@ -68,6 +69,144 @@ export function renderLog(root) {
 <div id="logContent"></div>`;
   }
 
+  // ── Log entry edit form ───────────────────────────────────────────────
+
+  function editFormHtml(date, entry, plan) {
+    const key = plan.id + ':' + date;
+    const status = entry.status || '';
+    const feel   = entry.sessionFeel != null ? +entry.sessionFeel : null;
+    const notes  = entry.sessionNotes || '';
+
+    const statusBtn = (s, label, selBg, selColor) => {
+      const sel = s === status;
+      return `<button style="padding:4px 10px;border-radius:6px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;background:${sel ? selBg : '#334155'};color:${sel ? selColor : '#94a3b8'}" data-edit-status="${s}"${sel ? ' data-selected="1"' : ''}>${label}</button>`;
+    };
+
+    const stars = [1,2,3,4,5].map(n => {
+      const lit = feel != null && n <= feel;
+      return `<button style="background:none;border:none;font-size:1.4rem;cursor:pointer;padding:2px;line-height:1;color:${lit ? '#f59e0b' : '#ffffff30'}" data-edit-feel="${n}">${lit ? '★' : '☆'}</button>`;
+    }).join('');
+
+    const loadKinds = new Set(['hangboard', 'pullup']);
+    const exRows = (entry.exercises || []).map((x, i) => {
+      const a = (x.actual && typeof x.actual === 'object') ? x.actual : {};
+      const showLoad = loadKinds.has(x.kind);
+      return `<div style="padding:6px 0;border-bottom:1px solid #ffffff0f">
+        <div style="font-size:.8rem;color:var(--text);margin-bottom:4px;font-weight:600">${esc(x.name || 'Exercise ' + (i + 1))}</div>
+        <div class="row" style="gap:8px;flex-wrap:wrap">
+          ${showLoad ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">kg<input type="number" step="0.5" min="0" data-edit-ex="${i}" data-edit-ex-field="kg" value="${a.kg != null ? a.kg : ''}" style="width:60px"></label>` : ''}
+          <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">Sets<input type="number" step="1" min="0" data-edit-ex="${i}" data-edit-ex-field="sets" value="${a.sets != null ? a.sets : ''}" style="width:52px"></label>
+          <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">Reps<input type="number" step="1" min="0" data-edit-ex="${i}" data-edit-ex-field="reps" value="${a.reps != null ? a.reps : ''}" style="width:52px"></label>
+          <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">RPE<input type="number" step="0.5" min="1" max="10" data-edit-ex="${i}" data-edit-ex-field="rpe" value="${a.rpe != null ? a.rpe : ''}" style="width:52px"></label>
+          <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted);flex:1;min-width:80px">Notes<input type="text" data-edit-ex="${i}" data-edit-ex-field="notes" value="${esc(x.notes || '')}" style="width:100%"></label>
+        </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="log-edit-form" data-edit-form="${key}" data-edit-feel-value="${feel != null ? feel : ''}" style="margin-top:10px;border-top:1px solid #ffffff20;padding-top:10px">
+      <div class="row" style="gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:.8rem;color:var(--muted)">Status:</span>
+        ${statusBtn('completed', 'Completed', '#22c55e', '#001')}
+        ${statusBtn('missed',    'Missed',    '#ef4444', '#fff')}
+        ${statusBtn('partial',   'Partial',   '#f59e0b', '#001')}
+      </div>
+      <div class="row" style="gap:4px;margin-bottom:8px;align-items:center">
+        <span style="font-size:.8rem;color:var(--muted)">Feel:</span>${stars}
+      </div>
+      <textarea data-edit-field="notes" placeholder="Session notes…" style="width:100%;min-height:56px;resize:vertical;border-radius:6px;padding:8px;background:#1e293b;border:1px solid #334155;color:var(--text);font-family:inherit;font-size:.9rem;margin-bottom:8px;box-sizing:border-box">${esc(notes)}</textarea>
+      ${exRows ? `<details style="margin-bottom:8px"><summary style="cursor:pointer;font-size:.8rem;color:var(--muted)">Edit exercise logs (${(entry.exercises || []).length})</summary>${exRows}</details>` : ''}
+      <div class="row" style="gap:8px;justify-content:flex-end">
+        <button class="ghost" data-edit-cancel="${key}" style="font-size:.85rem">Cancel</button>
+        <button class="primary" data-edit-save="${key}" style="font-size:.85rem">Save</button>
+      </div>
+    </div>`;
+  }
+
+  function wireEditHandlers(el) {
+    el.querySelectorAll('[data-edit-log]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.editLog;
+        editingSet.has(key) ? editingSet.delete(key) : editingSet.add(key);
+        renderFeedList();
+      });
+    });
+
+    el.querySelectorAll('[data-edit-status]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const form = btn.closest('[data-edit-form]');
+        if (!form) return;
+        form.querySelectorAll('[data-edit-status]').forEach(b => {
+          const s = b.dataset.editStatus;
+          const isThis = b === btn;
+          b.style.background = isThis ? (s === 'completed' ? '#22c55e' : s === 'missed' ? '#ef4444' : '#f59e0b') : '#334155';
+          b.style.color      = isThis ? (s === 'missed' ? '#fff' : '#001') : '#94a3b8';
+          if (isThis) b.dataset.selected = '1'; else delete b.dataset.selected;
+        });
+      });
+    });
+
+    el.querySelectorAll('[data-edit-feel]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const form = btn.closest('[data-edit-form]');
+        if (!form) return;
+        const n = +btn.dataset.editFeel;
+        form.dataset.editFeelValue = n;
+        form.querySelectorAll('[data-edit-feel]').forEach(b => {
+          const i = +b.dataset.editFeel;
+          b.textContent = i <= n ? '★' : '☆';
+          b.style.color = i <= n ? '#f59e0b' : '#ffffff30';
+        });
+      });
+    });
+
+    el.querySelectorAll('[data-edit-save]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.editSave;
+        const colonIdx = key.indexOf(':');
+        const planId = key.slice(0, colonIdx);
+        const date   = key.slice(colonIdx + 1);
+        const form   = el.querySelector(`[data-edit-form="${key}"]`);
+        if (!form) return;
+
+        const statusBtn  = form.querySelector('[data-edit-status][data-selected]');
+        const status     = statusBtn?.dataset.editStatus || null;
+        const feelRaw    = form.dataset.editFeelValue;
+        const sessionFeel = feelRaw !== '' && feelRaw != null ? +feelRaw : null;
+        const sessionNotes = form.querySelector('[data-edit-field="notes"]')?.value ?? '';
+
+        const existing = Storage.getDay(planId, date);
+        const exercises = (existing?.exercises || []).map((x, i) => {
+          const kg    = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="kg"]`);
+          const sets  = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="sets"]`);
+          const reps  = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="reps"]`);
+          const rpe   = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="rpe"]`);
+          const nts   = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="notes"]`);
+          const prev  = (x.actual && typeof x.actual === 'object') ? x.actual : {};
+          const actual = { ...prev };
+          if (kg?.value   !== '') actual.kg   = parseFloat(kg.value);
+          if (sets?.value !== '') actual.sets = parseInt(sets.value, 10);
+          if (reps?.value !== '') actual.reps = parseInt(reps.value, 10);
+          if (rpe?.value  !== '') actual.rpe  = parseFloat(rpe.value);
+          return { ...x, actual, notes: nts?.value ?? x.notes ?? '' };
+        });
+
+        const patch = { exercises, sessionNotes };
+        if (status) patch.status = status;
+        if (sessionFeel != null) patch.sessionFeel = sessionFeel;
+        Storage.setDay(planId, date, patch);
+        editingSet.delete(key);
+        renderFeedList();
+      });
+    });
+
+    el.querySelectorAll('[data-edit-cancel]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        editingSet.delete(btn.dataset.editCancel);
+        renderFeedList();
+      });
+    });
+  }
+
   // ── Tab 1: Feed ───────────────────────────────────────────────────────
 
   function renderFeedList() {
@@ -94,6 +233,8 @@ export function renderLog(root) {
       const planColor = plan.color || '#4f8cff';
       const phase     = e.phase  || '';
       const status    = e.status || '';
+      const key       = plan.id + ':' + date;
+      const isEditing = editingSet.has(key);
 
       const exRows = (e.exercises || []).map(x => {
         const actual = fmtActual(x.actual);
@@ -111,13 +252,14 @@ export function renderLog(root) {
                         : '';
 
       return `<div class="card" style="padding:12px">
-        <div class="row" style="margin-bottom:4px;gap:6px;flex-wrap:wrap">
+        <div class="row" style="margin-bottom:4px;gap:6px;flex-wrap:wrap;align-items:center">
           <b>${esc(date)}</b>
           <span style="width:8px;height:8px;border-radius:50%;background:${planColor};display:inline-block;flex-shrink:0"></span>
           <span class="muted" style="font-size:.8rem">${esc(plan.name)}</span>
           ${phase  ? `<span class="badge ${phase}">${esc(phase)}</span>` : ''}
           ${e.isDeload ? `<span class="badge deload">Deload</span>` : ''}
           ${status ? `<span class="badge" style="${statusStyle}">${esc(status)}</span>` : ''}
+          <button style="margin-left:auto;background:none;border:1px solid #334155;border-radius:6px;color:var(--muted);cursor:pointer;font-size:.75rem;padding:3px 8px;flex-shrink:0" data-edit-log="${key}">✏️ Edit</button>
         </div>
         <div class="muted" style="font-size:.85rem;margin-bottom:4px">${esc(e.sessionId || '')}${e.label ? ` — ${esc(e.label)}` : ''}</div>
         <div class="muted" style="font-size:.8rem;margin-bottom:6px">
@@ -125,8 +267,11 @@ export function renderLog(root) {
         </div>
         ${exRows ? `<ul style="margin:4px 0;padding-left:16px">${exRows}</ul>` : ''}
         ${e.sessionNotes ? `<p class="muted" style="margin:6px 0 0;font-size:.85rem">${esc(e.sessionNotes)}</p>` : ''}
+        ${isEditing ? editFormHtml(date, e, plan) : ''}
       </div>`;
     }).join('');
+
+    wireEditHandlers(el);
   }
 
   function renderFeed() {
