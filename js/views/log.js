@@ -87,17 +87,21 @@ export function renderLog(root) {
       return `<button style="background:none;border:none;font-size:1.4rem;cursor:pointer;padding:2px;line-height:1;color:${lit ? '#f59e0b' : '#ffffff30'}" data-edit-feel="${n}">${lit ? '★' : '☆'}</button>`;
     }).join('');
 
-    const loadKinds = new Set(['hangboard', 'pullup']);
+    const noSetsKinds = new Set(['arc', 'open-climb', 'test', 'skill', 'mobility']);
+    const noRepsKinds = new Set(['antagonist-block', 'mobility', 'skill']);
     const exRows = (entry.exercises || []).map((x, i) => {
       const a = (x.actual && typeof x.actual === 'object') ? x.actual : {};
-      const showLoad = loadKinds.has(x.kind);
+      const showKg   = x.kind === 'hangboard' || x.kind === 'pullup' || x.kind === 'test';
+      const showReps = !noRepsKinds.has(x.kind);
+      const showSets = showReps && !noSetsKinds.has(x.kind);
+      const showRpe  = showReps;
       return `<div style="padding:6px 0;border-bottom:1px solid #ffffff0f">
         <div style="font-size:.8rem;color:var(--text);margin-bottom:4px;font-weight:600">${esc(x.name || 'Exercise ' + (i + 1))}</div>
         <div class="row" style="gap:8px;flex-wrap:wrap">
-          ${showLoad ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">kg<input type="number" step="0.5" min="0" data-edit-ex="${i}" data-edit-ex-field="kg" value="${a.kg != null ? a.kg : ''}" style="width:60px"></label>` : ''}
-          <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">Sets<input type="number" step="1" min="0" data-edit-ex="${i}" data-edit-ex-field="sets" value="${a.sets != null ? a.sets : ''}" style="width:52px"></label>
-          <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">Reps<input type="number" step="1" min="0" data-edit-ex="${i}" data-edit-ex-field="reps" value="${a.reps != null ? a.reps : ''}" style="width:52px"></label>
-          <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">RPE<input type="number" step="0.5" min="1" max="10" data-edit-ex="${i}" data-edit-ex-field="rpe" value="${a.rpe != null ? a.rpe : ''}" style="width:52px"></label>
+          ${showKg   ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">kg<input type="number" step="0.5" min="0" data-edit-ex="${i}" data-edit-ex-field="kg" value="${a.kg != null ? a.kg : ''}" style="width:60px"></label>` : ''}
+          ${showSets ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">Sets<input type="number" step="1" min="0" data-edit-ex="${i}" data-edit-ex-field="sets" value="${a.sets != null ? a.sets : ''}" style="width:52px"></label>` : ''}
+          ${showReps ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">Reps<input type="number" step="1" min="0" data-edit-ex="${i}" data-edit-ex-field="reps" value="${a.reps != null ? a.reps : ''}" style="width:52px"></label>` : ''}
+          ${showRpe  ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">RPE<input type="number" step="0.5" min="1" max="10" data-edit-ex="${i}" data-edit-ex-field="rpe" value="${a.rpe != null ? a.rpe : ''}" style="width:52px"></label>` : ''}
           <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted);flex:1;min-width:80px">Notes<input type="text" data-edit-ex="${i}" data-edit-ex-field="notes" value="${esc(x.notes || '')}" style="width:100%"></label>
         </div>
       </div>`;
