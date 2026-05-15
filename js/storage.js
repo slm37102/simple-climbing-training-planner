@@ -455,7 +455,33 @@ export const Storage = {
           localPlan.updatedAt = remotePlan.updatedAt; changed = true;
         }
       }
-      // Local plans not in remote are intentionally kept as-is.
+      // Local plans not in remote are intentionally kept as-is (offline-created).
+    }
+
+    // Prune local-only empty plans that were auto-created at startup.
+    // If remote has plans, any local plan with no days that isn't in remote
+    // is a phantom default — remove it so Plan 1 doesn't accumulate on every login.
+    if (Object.keys(remote.plans || {}).length > 0) {
+      for (const [planId, plan] of Object.entries(state.plans)) {
+        if (!remote.plans[planId] && Object.keys(plan.days || {}).length === 0) {
+          delete state.plans[planId];
+          changed = true;
+        }
+      }
+    }
+
+    // Sync activePlanId from remote (so active plan is correct after first login).
+    if (remote.activePlanId && state.plans[remote.activePlanId]) {
+      if (state.activePlanId !== remote.activePlanId) {
+        state.activePlanId = remote.activePlanId;
+        changed = true;
+      }
+    }
+
+    // Guard: ensure activePlanId still points to a valid plan after pruning.
+    if (!state.plans[state.activePlanId]) {
+      state.activePlanId = Object.keys(state.plans)[0] || null;
+      changed = true;
     }
 
     // Merge globalBenchmarks LWW
