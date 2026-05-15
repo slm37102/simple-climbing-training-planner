@@ -187,10 +187,10 @@ export function renderLog(root) {
           const nts   = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="notes"]`);
           const prev  = (x.actual && typeof x.actual === 'object') ? x.actual : {};
           const actual = { ...prev };
-          if (kg?.value   !== '') actual.kg   = parseFloat(kg.value);
-          if (sets?.value !== '') actual.sets = parseInt(sets.value, 10);
-          if (reps?.value !== '') actual.reps = parseInt(reps.value, 10);
-          if (rpe?.value  !== '') actual.rpe  = parseFloat(rpe.value);
+          if (kg   && kg.value   !== '') actual.kg   = parseFloat(kg.value);
+          if (sets && sets.value !== '') actual.sets = parseInt(sets.value, 10);
+          if (reps && reps.value !== '') actual.reps = parseInt(reps.value, 10);
+          if (rpe  && rpe.value  !== '') actual.rpe  = parseFloat(rpe.value);
           return { ...x, actual, notes: nts?.value ?? x.notes ?? '' };
         });
 
