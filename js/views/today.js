@@ -185,32 +185,23 @@ function wirePlanSwitcher(root, container) {
 
 // Build the structured stepper inputs for an exercise.
 function exerciseInputs(i, ex, actual, suggestion) {
-  const showKg = ex.kind === 'hangboard' || ex.kind === 'pullup' || ex.kind === 'test';
+  const showKg   = ex.kind === 'hangboard' || ex.kind === 'pullup' || ex.kind === 'test';
   const showReps = ex.kind !== 'antagonist-block' && ex.kind !== 'mobility' && ex.kind !== 'skill';
-  const showRpe = !!ex.rpeRange;
-
-  const cols = [showKg, showReps && showKg, showRpe].filter(Boolean).length;
-  const rowClass = showKg && showReps && showRpe ? '' : (cols === 2 ? 'two' : (cols === 1 ? 'one' : ''));
-
-  // For hangboard/pullup: kg + sets×reps + rpe
-  // For boulder/route/circuit/arc/test: reps + rpe (sets implicit)
-  // For antagonist: no inputs (notes only)
+  const showSets = showReps && !['arc', 'open-climb', 'test', 'skill', 'mobility'].includes(ex.kind);
+  const showRpe  = !!ex.rpeRange;
 
   if (ex.kind === 'antagonist-block') return '';
 
-  let row = '<div class="stepper-row';
-  if (rowClass) row += ' ' + rowClass;
-  row += '">';
+  let row = '<div class="stepper-row">';
 
+  if (showSets) {
+    row += stepper(`ex-${i}-sets`, n(actual.sets), 'sets', 1);
+  }
   if (showKg) {
     row += stepper(`ex-${i}-kg`, n(actual.kg), 'kg', 0.5);
   }
   if (showReps) {
-    if (showKg) row += stepper(`ex-${i}-reps`, n(actual.reps), 'reps', 1);
-    else {
-      // For non-kg exercises, show sets/reps as a single short field
-      row += stepper(`ex-${i}-reps`, n(actual.reps), ex.kind === 'arc' || ex.kind === 'open-climb' ? 'min' : 'reps', 1);
-    }
+    row += stepper(`ex-${i}-reps`, n(actual.reps), ex.kind === 'arc' || ex.kind === 'open-climb' ? 'min' : 'reps', 1);
   }
   if (showRpe) {
     row += stepper(`ex-${i}-rpe`, n(actual.rpe), 'RPE', 0.5);
@@ -385,13 +376,15 @@ function wire(root, date, session, ctx, readinessMult) {
 
   // ===== Exercise field updates =====
   function readExerciseInputs(i) {
-    const kgEl = root.querySelector(`#ex-${i}-kg`);
+    const setsEl = root.querySelector(`#ex-${i}-sets`);
+    const kgEl   = root.querySelector(`#ex-${i}-kg`);
     const repsEl = root.querySelector(`#ex-${i}-reps`);
-    const rpeEl = root.querySelector(`#ex-${i}-rpe`);
+    const rpeEl  = root.querySelector(`#ex-${i}-rpe`);
     const out = {};
-    if (kgEl && kgEl.value !== '') out.kg = parseFloat(kgEl.value);
-    if (repsEl && repsEl.value !== '') out.reps = parseFloat(repsEl.value);
-    if (rpeEl && rpeEl.value !== '') out.rpe = parseFloat(rpeEl.value);
+    if (setsEl && setsEl.value !== '') out.sets = parseInt(setsEl.value, 10);
+    if (kgEl   && kgEl.value   !== '') out.kg   = parseFloat(kgEl.value);
+    if (repsEl && repsEl.value !== '') out.reps  = parseFloat(repsEl.value);
+    if (rpeEl  && rpeEl.value  !== '') out.rpe   = parseFloat(rpeEl.value);
     return out;
   }
   function updateExerciseActual(i) {
@@ -403,7 +396,7 @@ function wire(root, date, session, ctx, readinessMult) {
   }
 
   for (let i = 0; i < session.exercises.length; i++) {
-    ['kg','reps','rpe'].forEach(k => {
+    ['sets','kg','reps','rpe'].forEach(k => {
       const inp = root.querySelector(`#ex-${i}-${k}`);
       if (inp) inp.addEventListener('change', () => updateExerciseActual(i));
     });
