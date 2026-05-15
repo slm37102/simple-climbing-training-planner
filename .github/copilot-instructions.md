@@ -69,3 +69,11 @@ Bumping the schema = bump `SCHEMA_VERSION` in `js/storage.js`, AND bump `CACHE` 
 ## Commit & deploy
 
 Use the conventional commit subject + Co-authored-by trailer (see existing log). Push goes to `origin/main` at <https://github.com/slm37102/simple-climbing-training-planner>. Deploy is "host the static folder anywhere"; no CI runs build/test on push.
+
+**Always deploy to Firebase hosting immediately after every push:**
+
+```powershell
+firebase deploy --only hosting
+```
+
+Hosting URL: <https://simple-climbing-planner.web.app>
