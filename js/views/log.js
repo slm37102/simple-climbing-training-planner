@@ -1,5 +1,6 @@
 import { Storage } from '../storage.js';
 import { Program, PHASE_PATTERN } from '../program.js';
+import { inputVisibility, repsLabel } from '../exercise-inputs.js';
 
 export function renderLog(root) {
   let activeTab = 'feed';
@@ -23,6 +24,7 @@ export function renderLog(root) {
     if (!a) return '';
     if (typeof a === 'string') return a;
     const parts = [];
+    if (a.done === true) parts.push('✓ done');
     if (a.sets != null && a.reps != null) parts.push(`${a.sets}×${a.reps}`);
     else if (a.reps != null) parts.push(`${a.reps}`);
     if (a.kg  != null) parts.push(`@ ${a.kg}kg`);
@@ -87,21 +89,31 @@ export function renderLog(root) {
       return `<button style="background:none;border:none;font-size:1.4rem;cursor:pointer;padding:2px;line-height:1;color:${lit ? '#f59e0b' : '#ffffff30'}" data-edit-feel="${n}">${lit ? '★' : '☆'}</button>`;
     }).join('');
 
-    const noSetsKinds = new Set(['arc', 'open-climb', 'test', 'skill', 'mobility']);
-    const noRepsKinds = new Set(['antagonist-block', 'mobility', 'skill']);
     const exRows = (entry.exercises || []).map((x, i) => {
       const a = (x.actual && typeof x.actual === 'object') ? x.actual : {};
-      const showKg   = x.kind === 'hangboard' || x.kind === 'pullup' || x.kind === 'test';
-      const showReps = !noRepsKinds.has(x.kind);
-      const showSets = showReps && !noSetsKinds.has(x.kind);
-      const showRpe  = showReps;
+      const vis = inputVisibility(x);
+      if (vis.none) {
+        return `<div style="padding:6px 0;border-bottom:1px solid #ffffff0f">
+          <div style="font-size:.8rem;color:var(--text);margin-bottom:4px;font-weight:600">${esc(x.name || 'Exercise ' + (i + 1))}</div>
+          <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">Notes<input type="text" data-edit-ex="${i}" data-edit-ex-field="notes" value="${esc(x.notes || '')}" style="width:100%"></label>
+        </div>`;
+      }
+      if (vis.optional) {
+        return `<div style="padding:6px 0;border-bottom:1px solid #ffffff0f">
+          <div style="font-size:.8rem;color:var(--text);margin-bottom:4px;font-weight:600">${esc(x.name || 'Exercise ' + (i + 1))}</div>
+          <div class="row" style="gap:8px;align-items:center;flex-wrap:wrap">
+            <label style="display:flex;gap:6px;align-items:center;font-size:.8rem"><input type="checkbox" data-edit-ex="${i}" data-edit-ex-field="done"${a.done ? ' checked' : ''}> Done</label>
+            <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted);flex:1;min-width:80px">Notes<input type="text" data-edit-ex="${i}" data-edit-ex-field="notes" value="${esc(x.notes || '')}" style="width:100%"></label>
+          </div>
+        </div>`;
+      }
       return `<div style="padding:6px 0;border-bottom:1px solid #ffffff0f">
         <div style="font-size:.8rem;color:var(--text);margin-bottom:4px;font-weight:600">${esc(x.name || 'Exercise ' + (i + 1))}</div>
         <div class="row" style="gap:8px;flex-wrap:wrap">
-          ${showKg   ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">kg<input type="number" step="0.5" min="0" data-edit-ex="${i}" data-edit-ex-field="kg" value="${a.kg != null ? a.kg : ''}" style="width:60px"></label>` : ''}
-          ${showSets ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">Sets<input type="number" step="1" min="0" data-edit-ex="${i}" data-edit-ex-field="sets" value="${a.sets != null ? a.sets : ''}" style="width:52px"></label>` : ''}
-          ${showReps ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">Reps<input type="number" step="1" min="0" data-edit-ex="${i}" data-edit-ex-field="reps" value="${a.reps != null ? a.reps : ''}" style="width:52px"></label>` : ''}
-          ${showRpe  ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">RPE<input type="number" step="0.5" min="1" max="10" data-edit-ex="${i}" data-edit-ex-field="rpe" value="${a.rpe != null ? a.rpe : ''}" style="width:52px"></label>` : ''}
+          ${vis.kg   ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">kg<input type="number" step="0.5" min="0" data-edit-ex="${i}" data-edit-ex-field="kg" value="${a.kg != null ? a.kg : ''}" style="width:60px"></label>` : ''}
+          ${vis.sets ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">Sets<input type="number" step="1" min="0" data-edit-ex="${i}" data-edit-ex-field="sets" value="${a.sets != null ? a.sets : ''}" style="width:52px"></label>` : ''}
+          ${vis.reps ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">${repsLabel(x)}<input type="number" step="1" min="0" data-edit-ex="${i}" data-edit-ex-field="reps" value="${a.reps != null ? a.reps : ''}" style="width:52px"></label>` : ''}
+          ${vis.rpe  ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">RPE<input type="number" step="0.5" min="1" max="10" data-edit-ex="${i}" data-edit-ex-field="rpe" value="${a.rpe != null ? a.rpe : ''}" style="width:52px"></label>` : ''}
           <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted);flex:1;min-width:80px">Notes<input type="text" data-edit-ex="${i}" data-edit-ex-field="notes" value="${esc(x.notes || '')}" style="width:100%"></label>
         </div>
       </div>`;
@@ -184,6 +196,7 @@ export function renderLog(root) {
           const sets  = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="sets"]`);
           const reps  = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="reps"]`);
           const rpe   = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="rpe"]`);
+          const done  = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="done"]`);
           const nts   = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="notes"]`);
           const prev  = (x.actual && typeof x.actual === 'object') ? x.actual : {};
           const actual = { ...prev };
@@ -191,6 +204,7 @@ export function renderLog(root) {
           if (sets && sets.value !== '') actual.sets = parseInt(sets.value, 10);
           if (reps && reps.value !== '') actual.reps = parseInt(reps.value, 10);
           if (rpe  && rpe.value  !== '') actual.rpe  = parseFloat(rpe.value);
+          if (done) actual.done = done.checked;
           return { ...x, actual, notes: nts?.value ?? x.notes ?? '' };
         });
 

@@ -306,7 +306,7 @@ function buildRetestSession() {
       { kind:'test', name: 'Max 10s hang on 20mm edge', prescribed: 'find heaviest 10s hold (RPE 9.5 cap)' },
       { kind:'test', name: '1RM weighted pull-up', prescribed: 'work up to 1 hard rep' },
       { kind:'test', name: 'Max boulder grade today', prescribed: 'flash/send the hardest you can in 60 min' },
-      { kind:'test', name: '(optional) Forearm repeater test', prescribed: '7/3 to failure on 20mm @ BW' }
+      { kind:'test', name: '(optional) Forearm repeater test', prescribed: '7/3 to failure on 20mm @ BW', optional: true }
     ]
   };
 }
@@ -318,7 +318,7 @@ const LIGHT_DAY = {
   energySystem: '—',
   exercises: [
     { kind:'mobility', name: '15–20 min mobility', prescribed: 'shoulders, hips, wrists' },
-    { kind:'skill', name: 'Optional skill drills (no fingers)', prescribed: 'footwork / silent feet / flagging' }
+    { kind:'skill', name: 'Optional skill drills (no fingers)', prescribed: 'footwork / silent feet / flagging', optional: true }
   ]
 };
 
@@ -406,7 +406,7 @@ export const Program = {
         label: 'Optional: easy open climb or rest',
         energySystem: 'Aerobic base / —',
         exercises: [
-          { kind:'open-climb', name: 'Easy open climbing (optional)', prescribed: '45–90 min mileage well below max', rpeRange: [4, 6] }
+          { kind:'open-climb', name: 'Easy open climbing (optional)', prescribed: '45–90 min mileage well below max', rpeRange: [4, 6], optional: true }
         ]
       };
     }

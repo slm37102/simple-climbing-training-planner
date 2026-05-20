@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Climbing Planner — Smoke Tests</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  body { font-family: -apple-system, system-ui, sans-serif; background: #0f172a; color: #e2e8f0; padding: 20px; max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 1.4rem; }
+  .summary { margin: 12px 0; padding: 10px; border-radius: 8px; background: #1e293b; font-weight: 600; }
+  .summary.allpass { background: #14532d; }
+  .summary.anyfail { background: #7f1d1d; }
+  .case { padding: 8px 12px; margin: 4px 0; border-radius: 6px; background: #1e293b; border-left: 4px solid #475569; }
+  .case.pass { border-left-color: #22c55e; }
+  .case.fail { border-left-color: #ef4444; }
+  .case .name { font-weight: 600; }
+  .case .err  { font-size: .8rem; color: #fca5a5; margin-top: 4px; white-space: pre-wrap; font-family: ui-monospace, monospace; }
+  button { background: #2563eb; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 1rem; margin-right: 8px; }
+  button.danger { background: #dc2626; }
+  a { color: #60a5fa; }
+</style>
+</head>
+<body>
+<h1>Smoke Tests</h1>
+<p><a href="../index.html">← Back to app</a> — these tests mutate localStorage. Click "Clear" before returning to the app to avoid surprises.</p>
+<p>
+  <button id="run">Run tests</button>
+  <button class="danger" id="clear">Clear storage &amp; reload</button>
+</p>
+<div id="summary" class="summary">Loading…</div>
+<div id="results"></div>
+
+<script type="module">
+import { Storage } from '../js/storage.js';
+import { Program } from '../js/program.js';
+import { inputVisibility, repsLabel } from '../js/exercise-inputs.js';
+import { renderToday } from '../js/views/today.js';
+import { renderLog }   from '../js/views/log.js';
+
+const results = document.getElementById('results');
+const summaryEl = document.getElementById('summary');
+
+const tests = [];
+function test(name, fn) { tests.push({ name, fn }); }
+function assert(cond, msg) { if (!cond) throw new Error(msg || 'Assertion failed'); }
+function assertEq(actual, expected, msg) {
+  const a = JSON.stringify(actual), b = JSON.stringify(expected);
+  if (a !== b) throw new Error(`${msg || 'assertEq failed'}: expected ${b}, got ${a}`);
+}
+
+function resetStorage() {
+  localStorage.clear();
+  sessionStorage.clear();
+  Storage.reset();
+}
+
+// ─── inputVisibility ──────────────────────────────────────────────────────
+
+test('inputVisibility hangboard → kg+sets+reps+rpe', () => {
+  const v = inputVisibility({ kind: 'hangboard' });
+  assertEq(v, { kg: true, sets: true, reps: true, rpe: true, optional: false, none: false });
+});
+
+test('inputVisibility boulder → sets+reps+rpe (no kg)', () => {
+  const v = inputVisibility({ kind: 'boulder' });
+  assertEq(v, { kg: false, sets: true, reps: true, rpe: true, optional: false, none: false });
+});
+
+test('inputVisibility test → kg+reps+rpe (no sets — single effort)', () => {
+  const v = inputVisibility({ kind: 'test' });
+  assertEq(v, { kg: true, sets: false, reps: true, rpe: true, optional: false, none: false });
+});
+
+test('inputVisibility arc → reps+rpe (min, no sets/kg)', () => {
+  const v = inputVisibility({ kind: 'arc' });
+  assertEq(v, { kg: false, sets: false, reps: true, rpe: true, optional: false, none: false });
+  assertEq(repsLabel({ kind: 'arc' }), 'min');
+  assertEq(repsLabel({ kind: 'boulder' }), 'reps');
+});
+
+test('inputVisibility mobility/skill/antagonist-block → no inputs', () => {
+  for (const k of ['mobility', 'skill', 'antagonist-block']) {
+    const v = inputVisibility({ kind: k });
+    assert(v.none === true, `kind ${k} should be none`);
+    assert(!v.kg && !v.sets && !v.reps && !v.rpe, `kind ${k} should have no numeric fields`);
+  }
+});
+
+test('inputVisibility optional flag overrides → checkbox only', () => {
+  const v = inputVisibility({ kind: 'test', optional: true });
+  assertEq(v, { kg: false, sets: false, reps: false, rpe: false, optional: true, none: false });
+});
+
+// ─── Storage ──────────────────────────────────────────────────────────────
+
+test('Storage.setDay → getDay round-trip preserves actual fields', () => {
+  resetStorage();
+  Storage.setDay('2026-05-20', {
+    sessionId: 'mon-hangboard-base',
+    status: 'completed',
+    exercises: [{ name: 'X', kind: 'hangboard', actual: { kg: 27.5, sets: 5, reps: 3, rpe: 8.5 } }]
+  });
+  const back = Storage.getDay('2026-05-20');
+  assert(back, 'getDay returned null');
+  assertEq(back.exercises[0].actual.kg,   27.5);
+  assertEq(back.exercises[0].actual.sets, 5);
+  assertEq(back.exercises[0].actual.reps, 3);
+  assertEq(back.exercises[0].actual.rpe,  8.5);
+});
+
+test('Storage.setDay 3-arg writes to specified plan only', () => {
+  resetStorage();
+  const id1 = Storage.getActivePlan().id;
+  const id2 = Storage.addPlan({ name: 'Plan 2' });
+  Storage.setDay(id2, '2026-05-20', { exercises: [{ actual: { kg: 99 } }] });
+  assert(!Storage.getDay(id1, '2026-05-20'), 'plan1 should not have day');
+  const d = Storage.getDay(id2, '2026-05-20');
+  assertEq(d.exercises[0].actual.kg, 99);
+});
+
+test('Storage: optional.done boolean persists', () => {
+  resetStorage();
+  Storage.setDay('2026-05-20', { exercises: [{ actual: { done: true } }] });
+  const back = Storage.getDay('2026-05-20');
+  assertEq(back.exercises[0].actual.done, true);
+});
+
+// ─── Today view ───────────────────────────────────────────────────────────
+
+test('Today: renders without throwing for a valid plan', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-18'); // Mon, wk 3
+  const root = document.createElement('div');
+  renderToday(root);
+  assert(root.innerHTML.length > 0, 'empty render');
+});
+
+test('Today: change events on stepper inputs persist actual', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-18');
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const setsEl = root.querySelector('#ex-0-sets');
+    const repsEl = root.querySelector('#ex-0-reps');
+    const rpeEl  = root.querySelector('#ex-0-rpe');
+    assert(setsEl, 'sets input missing');
+    assert(repsEl, 'reps input missing');
+    assert(rpeEl,  'rpe input missing');
+
+    setsEl.value = '5';  setsEl.dispatchEvent(new Event('change', { bubbles: true }));
+    repsEl.value = '2';  repsEl.dispatchEvent(new Event('change', { bubbles: true }));
+    rpeEl.value  = '8';  rpeEl.dispatchEvent(new Event('change', { bubbles: true }));
+
+    const back = Storage.getDay('2026-05-18');
+    assert(back, 'day not persisted');
+    assertEq(back.exercises[0].actual.sets, 5);
+    assertEq(back.exercises[0].actual.reps, 2);
+    assertEq(back.exercises[0].actual.rpe,  8);
+  } finally { root.remove(); }
+});
+
+// ─── Log view ─────────────────────────────────────────────────────────────
+
+test('Log: Edit + Save on hangboard entry persists changes', () => {
+  resetStorage();
+  Storage.setDay('2026-05-18', {
+    sessionId: 'mon-hangboard-base',
+    phase: 'base',
+    status: 'partial',
+    sessionFeel: 3,
+    exercises: [
+      { name: 'Hangboard', kind: 'hangboard', actual: { kg: 25, sets: 4, reps: 5, rpe: 7 } }
+    ]
+  });
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderLog(root);
+    const editBtn = root.querySelector('button[data-edit-log]');
+    assert(editBtn, 'Edit button missing');
+    editBtn.click();
+
+    const kgIn  = root.querySelector('[data-edit-ex="0"][data-edit-ex-field="kg"]');
+    const rpeIn = root.querySelector('[data-edit-ex="0"][data-edit-ex-field="rpe"]');
+    assert(kgIn,  'kg input missing');
+    assert(rpeIn, 'rpe input missing');
+    kgIn.value  = '40';
+    rpeIn.value = '9';
+
+    root.querySelector('button[data-edit-save]').click();
+
+    const back = Storage.getDay('2026-05-18');
+    assertEq(back.exercises[0].actual.kg,  40);
+    assertEq(back.exercises[0].actual.rpe, 9);
+  } finally { root.remove(); }
+});
+
+test('Log: editing boulder entry (no kg input) does not throw on Save', () => {
+  resetStorage();
+  Storage.setDay('2026-05-20', {
+    sessionId: 'thu-main',
+    phase: 'base',
+    status: 'completed',
+    exercises: [
+      { name: 'Boulder', kind: 'boulder', actual: { sets: 4, reps: 4, rpe: 8 } }
+    ]
+  });
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderLog(root);
+    root.querySelector('button[data-edit-log]').click();
+    const kgIn = root.querySelector('[data-edit-ex="0"][data-edit-ex-field="kg"]');
+    assert(!kgIn, 'kg input should not exist for boulder kind');
+    const repsIn = root.querySelector('[data-edit-ex="0"][data-edit-ex-field="reps"]');
+    assert(repsIn, 'reps input missing');
+    repsIn.value = '5';
+    root.querySelector('button[data-edit-save]').click();
+    const back = Storage.getDay('2026-05-20');
+    assertEq(back.exercises[0].actual.reps, 5);
+  } finally { root.remove(); }
+});
+
+test('Log: optional exercise edit form shows Done checkbox + persists', () => {
+  resetStorage();
+  Storage.setDay('2026-05-20', {
+    exercises: [
+      { name: 'Optional drills', kind: 'skill', optional: true, actual: {} }
+    ]
+  });
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderLog(root);
+    root.querySelector('button[data-edit-log]').click();
+    const doneCb = root.querySelector('[data-edit-ex="0"][data-edit-ex-field="done"]');
+    assert(doneCb, 'Done checkbox missing for optional');
+    // Should NOT have numeric inputs
+    assert(!root.querySelector('[data-edit-ex="0"][data-edit-ex-field="kg"]'),   'kg should be hidden');
+    assert(!root.querySelector('[data-edit-ex="0"][data-edit-ex-field="sets"]'), 'sets should be hidden');
+    doneCb.checked = true;
+    root.querySelector('button[data-edit-save]').click();
+    const back = Storage.getDay('2026-05-20');
+    assertEq(back.exercises[0].actual.done, true);
+  } finally { root.remove(); }
+});
+
+// ─── Program ──────────────────────────────────────────────────────────────
+
+test('Program.resolveDate inside cycle window', () => {
+  const ctx = Program.resolveDate('2026-05-18', '2026-05-04');
+  assert(ctx && !ctx.outOfCycle, 'should be in cycle');
+  assert(typeof ctx.weekIdx === 'number');
+  assert(typeof ctx.phase   === 'string');
+});
+
+test('Program.resolveDate before start → outOfCycle', () => {
+  const ctx = Program.resolveDate('2026-04-01', '2026-05-04');
+  assert(!ctx || ctx.outOfCycle, 'should be outOfCycle or null');
+});
+
+// ─── Runner ───────────────────────────────────────────────────────────────
+
+async function runAll() {
+  results.innerHTML = '';
+  summaryEl.className = 'summary';
+  summaryEl.textContent = `Running ${tests.length} tests…`;
+  let pass = 0, fail = 0;
+  for (const t of tests) {
+    const row = document.createElement('div');
+    row.className = 'case';
+    try {
+      await t.fn();
+      row.classList.add('pass');
+      row.innerHTML = `<div class="name">✓ ${t.name}</div>`;
+      pass++;
+    } catch (e) {
+      row.classList.add('fail');
+      const msg = (e && (e.stack || e.message)) || String(e);
+      row.innerHTML = `<div class="name">✗ ${t.name}</div><div class="err"></div>`;
+      row.querySelector('.err').textContent = msg;
+      fail++;
+    }
+    results.appendChild(row);
+  }
+  summaryEl.className = 'summary ' + (fail === 0 ? 'allpass' : 'anyfail');
+  summaryEl.textContent = `${pass} passed, ${fail} failed (${tests.length} total)`;
+}
+
+document.getElementById('run').addEventListener('click', runAll);
+document.getElementById('clear').addEventListener('click', () => {
+  localStorage.clear();
+  sessionStorage.clear();
+  location.reload();
+});
+
+runAll();
+</script>
+</body>
+</html>

@@ -3,11 +3,29 @@ import { Storage } from '../storage.js';
 import { Program } from '../program.js';
 import { Loads } from '../loads.js';
 import { Warmup } from '../warmup.js';
+import { inputVisibility, repsLabel } from '../exercise-inputs.js';
+
+const SELECTED_DATE_KEY = 'todaySelectedDate';
 
 function todayIso() {
   const d = new Date();
   const m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
   return `${d.getFullYear()}-${m}-${day}`;
+}
+
+function addDaysIso(iso, n) {
+  const d = new Date(iso + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  const mm = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0');
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+function getSelectedDate() {
+  return sessionStorage.getItem(SELECTED_DATE_KEY) || todayIso();
+}
+
+function setSelectedDate(iso) {
+  sessionStorage.setItem(SELECTED_DATE_KEY, iso);
 }
 
 function findPrevSameSession(date, sessionId) {
@@ -33,8 +51,20 @@ function n(v) { return v == null || v === '' ? '' : v; }
 
 export function renderToday(root) {
   const activePlan = Storage.getActivePlan();
-  const date = todayIso();
+  const date = getSelectedDate();
+  const realToday = todayIso();
   const start = Program.effectiveStart(activePlan.settings);
+
+  // Date navigation row — always visible at the top of the view
+  const isToday = date === realToday;
+  const dateNavHtml = `<div class="card date-nav-card">
+    <div class="row" style="align-items:center;justify-content:center;gap:8px;flex-wrap:wrap">
+      <button class="ghost" data-date-nav="-1" title="Previous day">◀</button>
+      <b style="min-width:120px;text-align:center">${date}${isToday ? ' (Today)' : ''}</b>
+      <button class="ghost" data-date-nav="1" title="Next day">▶</button>
+      ${isToday ? '' : '<button class="ghost" data-date-nav="today">Jump to today</button>'}
+    </div>
+  </div>`;
 
   // Plan switcher — only shown when 2+ non-archived plans exist
   const allPlans = Storage.listPlans().filter(p => !p.archived);
@@ -53,9 +83,10 @@ export function renderToday(root) {
   }
 
   if (!start) {
-    root.innerHTML = planSwitcherHtml + `<div class="card"><h2>Set up your cycle</h2>
+    root.innerHTML = dateNavHtml + planSwitcherHtml + `<div class="card"><h2>Set up your cycle</h2>
       <p class="muted">Configure your active plan with a start date or comp date.</p>
       <button class="primary" onclick="location.hash='#plans'">Go to Plans</button></div>`;
+    wireDateNav(root);
     wirePlanSwitcher(root, root);
     return;
   }
@@ -65,9 +96,10 @@ export function renderToday(root) {
     const which = activePlan.settings.anchorMode === 'compDate'
       ? `Cycle window: ${start} → ${activePlan.settings.compDate}`
       : `Cycle starts ${start}`;
-    root.innerHTML = planSwitcherHtml + `<div class="card"><h2>Outside cycle</h2>
-      <p class="muted">Today (${date}) is outside the 12-week window. ${which}.</p>
+    root.innerHTML = dateNavHtml + planSwitcherHtml + `<div class="card"><h2>Outside cycle</h2>
+      <p class="muted">${date} is outside the 12-week window. ${which}.</p>
       <button class="ghost" onclick="location.hash='#plans'">Adjust in Plans</button></div>`;
+    wireDateNav(root);
     wirePlanSwitcher(root, root);
     return;
   }
@@ -86,9 +118,9 @@ export function renderToday(root) {
 
   const { warmup, cooldown } = Warmup.forSession(session);
 
-  let body = planSwitcherHtml + `<div class="card">
+  let body = dateNavHtml + planSwitcherHtml + `<div class="card">
     <div class="session-head">
-      <h2>${date} · Wk ${ctx.weekIdx}</h2>
+      <h2>Wk ${ctx.weekIdx}</h2>
       ${phaseBadge}${flavorBadge}${focusBadge}${deloadBadge}${retestBadge}${energyTip}
     </div>
     <div class="muted" style="margin-top:6px">${session.label}</div>
@@ -107,6 +139,7 @@ export function renderToday(root) {
         Storage.setDay(date, { sessionId: 'rest', status: 'rest', recovery: cur });
       });
     });
+    wireDateNav(root);
     wirePlanSwitcher(root, root);
     return;
   }
@@ -170,8 +203,25 @@ export function renderToday(root) {
   }
 
   root.innerHTML = body;
+  wireDateNav(root);
   wire(root, date, session, ctx, multiplier);
   wirePlanSwitcher(root, root);
+}
+
+function wireDateNav(root) {
+  root.querySelectorAll('button[data-date-nav]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.dataset.dateNav;
+      const cur = getSelectedDate();
+      let next;
+      if (action === 'today')      next = todayIso();
+      else if (action === '-1')    next = addDaysIso(cur, -1);
+      else if (action === '1')     next = addDaysIso(cur, 1);
+      else return;
+      setSelectedDate(next);
+      renderToday(root);
+    });
+  });
 }
 
 function wirePlanSwitcher(root, container) {
@@ -185,34 +235,25 @@ function wirePlanSwitcher(root, container) {
 
 // Build the structured stepper inputs for an exercise.
 function exerciseInputs(i, ex, actual, suggestion) {
-  const showKg   = ex.kind === 'hangboard' || ex.kind === 'pullup' || ex.kind === 'test';
-  const showReps = ex.kind !== 'antagonist-block' && ex.kind !== 'mobility' && ex.kind !== 'skill';
-  const showSets = showReps && !['arc', 'open-climb', 'test', 'skill', 'mobility'].includes(ex.kind);
-  const showRpe  = !!ex.rpeRange;
+  const vis = inputVisibility(ex);
+  if (vis.none) return '';
 
-  if (ex.kind === 'antagonist-block') return '';
+  if (vis.optional) {
+    const done = !!actual.done;
+    return `<label class="optional-done"><input type="checkbox" data-optional-done="${i}" ${done ? 'checked' : ''}> <span>Done</span></label>`;
+  }
 
   let row = '<div class="stepper-row">';
-
-  if (showSets) {
-    row += stepper(`ex-${i}-sets`, n(actual.sets), 'sets', 1);
-  }
-  if (showKg) {
-    row += stepper(`ex-${i}-kg`, n(actual.kg), 'kg', 0.5);
-  }
-  if (showReps) {
-    row += stepper(`ex-${i}-reps`, n(actual.reps), ex.kind === 'arc' || ex.kind === 'open-climb' ? 'min' : 'reps', 1);
-  }
-  if (showRpe) {
-    row += stepper(`ex-${i}-rpe`, n(actual.rpe), 'RPE', 0.5);
-  }
+  if (vis.sets) row += stepper(`ex-${i}-sets`, n(actual.sets), 'sets', 1);
+  if (vis.kg)   row += stepper(`ex-${i}-kg`,   n(actual.kg),   'kg',   0.5);
+  if (vis.reps) row += stepper(`ex-${i}-reps`, n(actual.reps), repsLabel(ex), 1);
+  if (vis.rpe)  row += stepper(`ex-${i}-rpe`,  n(actual.rpe),  'RPE',  0.5);
   row += '</div>';
 
   let suggestionBtn = '';
   if (suggestion) {
     suggestionBtn = `<button class="suggest-btn" data-suggest-btn="${i}" data-suggest-kg="${suggestion.suggestedKg}">Suggested: ${suggestion.suggestedKg} kg → tap to use</button>`;
   }
-
   return suggestionBtn + row;
 }
 
@@ -401,6 +442,17 @@ function wire(root, date, session, ctx, readinessMult) {
       if (inp) inp.addEventListener('change', () => updateExerciseActual(i));
     });
   }
+
+  // Optional exercise "Done ✓" checkboxes
+  root.querySelectorAll('input[data-optional-done]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const i = +cb.dataset.optionalDone;
+      const d = getOrInitDay();
+      const cur = d.exercises[i] || { name: session.exercises[i].name };
+      d.exercises[i] = { ...cur, actual: { ...asActualObj(cur.actual), done: cb.checked } };
+      persist({ exercises: d.exercises });
+    });
+  });
 
   // ===== +note toggle =====
   root.querySelectorAll('button[data-notes-toggle]').forEach(btn => {
