@@ -16,7 +16,12 @@ A personal, single-user **PWA** that prescribes training every day for a 12-week
 2. Open the URL in a browser.
 3. On the auth gate, click **"Use locally only"**.
 4. Fill in **Benchmarks** (bodyweight, max 10s hang on 20mm, 1RM weighted pull-up, grades, dominant style/angle) and a **cycle start date** (a Monday is recommended).
-5. The **Today** tab is your default view. Each main day (Mon/Thu/Sat) gets a session with calculated load ranges and an explicit suggested kg.
+5. The **Today** tab is your default view. Each main day (Mon/Thu/Sat) gets a session with calculated load ranges and an explicit suggested kg. Use the ◀ / ▶ arrows above the session card to log a day you missed; tap **Jump to today** to return.
+6. The **Cycle** tab shows a month-view calendar with phase colors and a comp-day marker. Tap any day to jump back to it in Today.
+
+## Smoke tests
+
+Open `http://<your-host>/tests/` (e.g. `http://127.0.0.1:8765/tests/` locally, or `https://simple-climbing-planner.web.app/tests/` on the deployed site) to run the in-browser smoke suite. It exercises storage round-trips, Today input persistence, Log edit Save, optional-exercise Done checkbox, and `Program.resolveDate`. The page mutates `localStorage` — click **Clear** before returning to the live app to avoid surprises.
 
 ## Enable Firebase sync
 
@@ -55,6 +60,7 @@ The service worker requires the app to be served over **https** (or localhost) t
 - **Antagonist block** (push-ups / rows / wrist extensors / farmer's carry / core) on Mon main days; auto-dropped during deloads.
 - **Campus board** is gated to Peak boulder weeks only.
 - **ARC** sessions appear on sport-emphasis Saturdays during Base.
+- **Optional exercises** (e.g. optional skill drills, easy open climbing, optional forearm repeater test) render as a single "Done ✓" checkbox instead of numeric inputs — no need to log sets/reps/kg for things that aren't prescribed loads.
 
 ## Sync model
 
@@ -80,7 +86,9 @@ js/loads.js              Load ranges → kg, auto-adjust, readiness, deload
 js/storage.js            LocalStorage + JSON import/export + LWW remote merge
 js/sync.js               Firebase Google sign-in + Firestore mirror
 js/warmup.js             Warm-up & cooldown checklists
-js/views/                Today, Week, Calendar, Benchmarks, Log, Settings
+js/exercise-inputs.js    Shared per-kind input-visibility helper (Today + Log)
+js/views/                Today, Calendar, Benchmarks, Log, Settings, Plans
+tests/index.html         In-browser smoke-test runner
 ```
 
 ## Disclaimer

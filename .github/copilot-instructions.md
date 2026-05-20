@@ -14,7 +14,7 @@ python -m http.server 8765
 
 Then open `http://127.0.0.1:8765/` and click **"Use locally only"** on the auth gate (Firebase config is `REPLACE_ME` until the user wires it up — see README). The service worker only activates over `https://` or `localhost`.
 
-There are no tests, no linter, and no build script. Smoke-testing happens in the browser. The Playwright MCP browser is the standard way to drive end-to-end checks (load + click + `evaluate` to inspect state); init scripts for `Date` overrides do not always apply, so prefer fake-data + module imports via `evaluate('async () => { const {Storage} = await import("/js/storage.js"); ... }')` over time-travel.
+There is no linter and no build script. There **is** an in-browser smoke-test page at `tests/index.html` — open `http://127.0.0.1:8765/tests/` and tests auto-run. Add new cases there whenever you fix a bug or add input/storage logic (it covers `Storage` round-trips, `Today` input persistence, `Log` edit Save, `inputVisibility` per kind, optional Done, and `Program.resolveDate`). The Playwright MCP browser is also available for end-to-end checks (load + click + `evaluate` to inspect state); init scripts for `Date` overrides do not always apply, so prefer fake-data + module imports via `evaluate('async () => { const {Storage} = await import("/js/storage.js"); ... }')` over time-travel.
 
 ## Architecture (the parts you can't get from one file)
 
@@ -39,14 +39,19 @@ Key invariants worth preserving when editing:
 - **Phase pattern is a fixed 12-element array** (`PHASE_PATTERN` in `js/program.js`): Base 1–6 with deloads at 3 & 6 (3 & 6 also flagged `retest`), Build 7–9 with deload at 9, Peak 10–11, Taper 12. Don't re-derive — index into the array.
 - **Load math chain (in order):** `prescribeLoadKg` (% range from benchmarks) → seed by previous actual kg if present, else range midpoint → `autoAdjust` ±5% based on previous avg RPE vs target → readiness multiplier (×0.85 / ×1.0 / ×1.05 / 0=rest) → deload ×0.85. Each step appends to `reason` for UI traceability.
 - **`exercise.kind` drives rendering and load logic.** Loaded kinds are `hangboard` and `pullup` (use `loadPctRange` against `maxHang20mm` or `pullup1RM`). `antagonist-block` has nested `items[]`. `test`, `boulder`, `route`, `circuit`, `arc`, `open-climb`, `mobility`, `skill`, `limit-boulder`, `campus` exist for prescription text only — don't try to compute kg for them.
+- **`js/exercise-inputs.js` is the single source of truth for which inputs to show.** Both `today.js` (live session) and `log.js` (edit-past-day form) import `inputVisibility(ex)` → `{ kg, sets, reps, rpe, optional, none }` and `repsLabel(ex)` (returns `'min'` for `arc`/`open-climb`, else `'reps'`). Never hardcode per-kind UI rules in a view — extend the helper instead, so the two surfaces stay in sync.
+- **`exercise.optional: true`** on a program entry hides all numeric inputs and renders a single "Done" checkbox. Storage field is `actual.done: boolean`. Use this for prescribed-but-skippable items (e.g. optional skill drills, easy open climbing). Three exercises currently use it in `js/program.js`.
+- **Today tab supports prev/next/jump-to-today date navigation.** The selected ISO date is stored in `sessionStorage['todaySelectedDate']` (resets on browser close — intentional). Don't read `todayIso()` directly when prescribing the visible session; use `getSelectedDate()`.
 
 ## Schema & migrations
 
-`js/storage.js` versions the LocalStorage blob (`SCHEMA_VERSION`). Migrations run in `migrate(s)` on every load — they must be **idempotent and bump `s.version`** at the end of each step. v3's notable rule: every `days[date].exercises[].actual` is an object `{ kg, sets, reps, rpe, raw }`. Legacy strings (e.g. `"5x2 @ 62kg RPE 9"`) are auto-parsed by `parseLegacyActual`. New code must read structured fields, never regex-parse strings. The display string is **derived** in `js/views/log.js`, never persisted.
+`js/storage.js` versions the LocalStorage blob (`SCHEMA_VERSION`). Migrations run in `migrate(s)` on every load — they must be **idempotent and bump `s.version`** at the end of each step. v3's notable rule: every `days[date].exercises[].actual` is an object `{ kg, sets, reps, rpe, done, raw }` (the `done` boolean is for optional exercises). Legacy strings (e.g. `"5x2 @ 62kg RPE 9"`) are auto-parsed by `parseLegacyActual`. New code must read structured fields, never regex-parse strings. The display string is **derived** in `js/views/log.js`, never persisted.
+
+`Storage.mergeRemote()` (in `js/storage.js`) prunes local empty plans not present in remote and syncs `activePlanId` — preserve this when touching merge logic, otherwise login will silently re-add phantom "Plan 1" entries.
 
 When you add a settings field, add it to `defaultState().settings` AND let `migrate()` shallow-merge it onto loaded state (already done — just keep the pattern).
 
-Bumping the schema = bump `SCHEMA_VERSION` in `js/storage.js`, AND bump `CACHE` in `sw.js` (e.g. `climb-planner-v3` → `v4`) so PWA clients pick up the new JS.
+Bumping the schema = bump `SCHEMA_VERSION` in `js/storage.js`, AND bump `CACHE` in `sw.js` (e.g. `climb-planner-v7` → `v8`) so PWA clients pick up the new JS. Cache is currently at **v8** (last bumped when adding the optional-Done field + date nav).
 
 ## Key conventions
 
@@ -61,10 +66,13 @@ Bumping the schema = bump `SCHEMA_VERSION` in `js/storage.js`, AND bump `CACHE` 
 
 ## Useful entry points when making changes
 
-- New training session type → `js/program.js` (add to `buildMonHangboard` / `buildThuMain` / `buildSatMain`, plus a new `kind` if it has unique inputs).
+- New training session type → `js/program.js` (add to `buildMonHangboard` / `buildThuMain` / `buildSatMain`, plus a new `kind` if it has unique inputs). If the new kind has different input requirements, update `js/exercise-inputs.js` to register it.
+- Changing which inputs an exercise shows → `js/exercise-inputs.js` (`NO_INPUT_KINDS`, `KG_KINDS`, `NO_SETS_KINDS` sets). Both Today + Log edit pick this up automatically.
+- Making an exercise optional → set `optional: true` on its program entry. The Today tab and Log edit form will switch it to a Done checkbox.
 - Changing how loads are calculated → `js/loads.js`.
-- New input UI → add a renderer in `js/views/today.js` (inside `renderExercise`) and CSS in `css/styles.css`.
+- New input UI → add a renderer in `js/views/today.js` (inside `renderExercise`) and CSS in `css/styles.css`; mirror the change in `js/views/log.js`'s `editFormHtml` so editing a past day keeps parity.
 - New top-level tab → register in `views` map in `js/app.js`, add a `<button data-view="X">` in `index.html`, create `js/views/X.js`, add to `SHELL` in `sw.js`.
+- New behavioural fix → add a case to `tests/index.html` before/after the fix so it can't silently regress.
 
 ## Commit & deploy
 
