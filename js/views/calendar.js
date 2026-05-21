@@ -1,5 +1,5 @@
 import { Storage } from '../storage.js';
-import { Program } from '../program.js';
+import { PHASE_PATTERN, Program } from '../program.js';
 
 const DAY_HEADERS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -28,7 +28,8 @@ export function renderCalendar(root) {
     sessionStorage.setItem('cycleCurrentMonth',
       `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`);
 
-    root.innerHTML = `<div class="card"><h2>Cycle</h2>${buildMonthGrid()}</div>`;
+    const activePlan = Storage.getActivePlan();
+    root.innerHTML = `<div class="card"><h2>Cycle</h2>${summaryCardHtml(activePlan?.settings, activePlan?.days)}${buildMonthGrid()}</div>`;
 
     // Month navigation
     const prevM = root.querySelector('[data-month-nav="-1"]');
@@ -213,6 +214,101 @@ export function renderCalendar(root) {
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+function summaryCardHtml(settings, days = {}) {
+  const startIso = Program.effectiveStart(settings);
+  if (!startIso) {
+    return `<div class="card" data-cycle-summary style="margin-bottom:12px">
+      <div style="font-weight:600;margin-bottom:8px">Set up your cycle in Plans</div>
+      <div class="muted">Choose a cycle start or competition date to track 12-week progress here.</div>
+    </div>`;
+  }
+
+  const todayIso = isoDate(new Date());
+  const rawDayIndex = daysBetween(startIso, todayIso);
+  const clampedDayIndex = Math.max(0, Math.min(83, rawDayIndex));
+  const weekIdx = Math.floor(clampedDayIndex / 7);
+  const phaseInfo = PHASE_PATTERN[weekIdx] || PHASE_PATTERN[PHASE_PATTERN.length - 1] || {};
+  const weekStartIso = addDays(startIso, weekIdx * 7);
+  const cycleEndIso = addDays(startIso, 83);
+
+  let scheduledSessions = 0;
+  let loggedSessions = 0;
+  let bestHang = null;
+  let bestPull = null;
+
+  for (let i = 0; i < 7; i++) {
+    const iso = addDays(weekStartIso, i);
+    const ctx = Program.resolveDate(iso, startIso);
+    if (!ctx || ctx.outOfCycle || ctx.isRest) continue;
+    scheduledSessions++;
+    if (hasLoggedDay(days[iso])) loggedSessions++;
+  }
+
+  for (let i = 0; i < 84; i++) {
+    const iso = addDays(startIso, i);
+    const exercises = days[iso]?.exercises || [];
+    for (const ex of exercises) {
+      const kg = numericKg(ex?.actual?.kg);
+      if (kg == null) continue;
+      if (ex.kind === 'hangboard' || ex.kind === 'test') bestHang = bestHang == null ? kg : Math.max(bestHang, kg);
+      if (ex.kind === 'pullup') bestPull = bestPull == null ? kg : Math.max(bestPull, kg);
+    }
+  }
+
+  const phaseLabel = titleCase(phaseInfo.name || phaseInfo.phase || '');
+  const inCycle = rawDayIndex >= 0 && rawDayIndex < 84;
+  const title = inCycle
+    ? `Week ${weekIdx + 1} of 12 · ${phaseLabel}`
+    : rawDayIndex < 0 ? 'Cycle not started' : 'Cycle complete';
+  const statusLabel = inCycle ? 'This week' : rawDayIndex < 0 ? 'Starts' : 'Completed';
+  const statusValue = inCycle
+    ? `${loggedSessions} / ${scheduledSessions} sessions`
+    : rawDayIndex < 0 ? startIso : cycleEndIso;
+  const windowHtml = inCycle
+    ? ''
+    : `<div class="muted" style="margin-bottom:8px">${startIso} → ${cycleEndIso}</div>`;
+
+  return `<div class="card" data-cycle-summary style="margin-bottom:12px">
+    <div style="font-weight:600;margin-bottom:4px">${title}</div>
+    ${windowHtml}
+    <div class="row" style="gap:16px;flex-wrap:wrap">
+      <div><span class="muted">${statusLabel}</span><br><b>${statusValue}</b></div>
+      <div><span class="muted">Best hang</span><br><b>${formatKg(bestHang)}</b></div>
+      <div><span class="muted">Best pull</span><br><b>${formatKg(bestPull)}</b></div>
+    </div>
+  </div>`;
+}
+
+function hasLoggedDay(day) {
+  return !!day?.exercises?.some(ex => {
+    const actual = ex?.actual;
+    return actual && (
+      actual.kg != null ||
+      actual.sets != null ||
+      actual.reps != null ||
+      actual.rpe != null ||
+      actual.done === true ||
+      (typeof actual.raw === 'string' && actual.raw.trim())
+    );
+  });
+}
+
+function numericKg(value) {
+  if (value == null || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function formatKg(value) {
+  if (value == null) return '—';
+  const rounded = Math.round(value * 100) / 100;
+  return `${Number.isInteger(rounded) ? rounded.toFixed(0) : String(rounded)} kg`;
+}
+
+function titleCase(value) {
+  return value ? value.charAt(0).toUpperCase() + value.slice(1) : '—';
+}
 
 function isoDate(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;

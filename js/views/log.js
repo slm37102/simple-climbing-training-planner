@@ -333,6 +333,7 @@ export function renderLog(root) {
     }).join('');
 
     wireEditHandlers(el);
+  }
 
   function renderFeed() {
     document.getElementById('logContent').innerHTML = `

@@ -49,11 +49,144 @@ function asActualObj(a) {
 
 function n(v) { return v == null || v === '' ? '' : v; }
 
+function retestBenchmarkValues(session, date = getSelectedDate()) {
+  if (!session?.isRetest) return null;
+  const dayExercises = Storage.get().days?.[date]?.exercises || [];
+  let maxHang20mm = null;
+  let pullup1RM = null;
+
+  session.exercises.forEach((ex, i) => {
+    const actual = asActualObj(dayExercises[i]?.actual);
+    if (!Number.isFinite(actual.kg)) return;
+    if (/max 10s hang on 20mm edge/i.test(ex.name)) maxHang20mm = actual.kg;
+    if (/1rm weighted pull-up/i.test(ex.name)) pullup1RM = actual.kg;
+  });
+
+  if (!Number.isFinite(maxHang20mm) || !Number.isFinite(pullup1RM)) return null;
+  return { maxHang20mm, pullup1RM };
+}
+
+function retestBenchmarkBtn(session, date, saved = false) {
+  if (saved) {
+    return '<div class="muted" style="margin-top:6px;font-weight:600">✓ Benchmarks updated — future loads recalculated</div>';
+  }
+  if (!retestBenchmarkValues(session, date)) return '';
+  return '<button class="primary" type="button" data-retest-benchmark>📊 Save as Benchmark</button>';
+}
+
+function retestBenchmarkSection(session, date) {
+  if (!session?.isRetest) return '';
+  const content = retestBenchmarkBtn(session, date);
+  return `<div class="field" id="retestBenchmarkBox" style="${content ? '' : 'display:none'}">${content}</div>`;
+}
+
+function tomorrowIso() {
+  return addDaysIso(todayIso(), 1);
+}
+
+function cycleEndIso(settings) {
+  const start = Program.effectiveStart(settings);
+  if (!start) return null;
+  return addDaysIso(start, 83);
+}
+
+function isCycleComplete(settings, isoDate = todayIso()) {
+  const endIso = cycleEndIso(settings);
+  if (!endIso) return false;
+  const d = new Date(isoDate + 'T00:00:00');
+  const cycleEnd = new Date(endIso + 'T00:00:00');
+  return d >= cycleEnd;
+}
+
+function hasActualResult(actual) {
+  if (!actual || typeof actual !== 'object') return false;
+  return actual.kg != null || actual.sets != null || actual.reps != null || actual.rpe != null || actual.done === true || (typeof actual.raw === 'string' && actual.raw.trim());
+}
+
+function formatKgStat(v) {
+  if (v == null) return '—';
+  return `${parseFloat(Number(v).toFixed(1))} kg`;
+}
+
+function cycleStats(plan) {
+  const start = Program.effectiveStart(plan?.settings);
+  if (!start) return { bestHang: null, bestPull: null, totalSessions: 0, cycleEnd: null };
+
+  let bestHang = null;
+  let bestPull = null;
+  let totalSessions = 0;
+
+  for (const [iso, entry] of Object.entries(plan.days || {})) {
+    const d = new Date(iso + 'T00:00:00');
+    const dayIdx = Math.floor((d - new Date(start + 'T00:00:00')) / 86400000);
+    if (dayIdx < 0 || dayIdx > 83) continue;
+
+    const exList = entry?.exercises || [];
+    if (exList.some(ex => hasActualResult(asActualObj(ex?.actual)))) totalSessions++;
+
+    for (const ex of exList) {
+      const actual = asActualObj(ex?.actual);
+      const kg = Number(actual.kg);
+      if (!Number.isFinite(kg)) continue;
+
+      const name = String(ex?.name || '').toLowerCase();
+      const isHang = ex?.kind === 'hangboard' || (ex?.kind === 'test' && /\bhang\b/.test(name));
+      const isPull = ex?.kind === 'pullup' || (ex?.kind === 'test' && /pull[\s-]?up/.test(name));
+
+      if (isHang) bestHang = Math.max(bestHang ?? kg, kg);
+      if (isPull) bestPull = Math.max(bestPull ?? kg, kg);
+    }
+  }
+
+  return { bestHang, bestPull, totalSessions, cycleEnd: cycleEndIso(plan?.settings) };
+}
+
+function cycleCompleteHtml(plan) {
+  const { bestHang, bestPull, totalSessions, cycleEnd } = cycleStats(plan);
+  const defaultStart = tomorrowIso();
+  const defaultComp = addDaysIso(defaultStart, 83);
+
+  return `<div class="card" data-cycle-complete style="text-align:center;padding:24px 16px">
+    <div style="font-size:2rem;margin-bottom:8px">🎉</div>
+    <h2 style="margin:0 0 4px">🎉 Cycle Complete!</h2>
+    <p class="muted" style="margin:0 0 8px">12 weeks done. Here's how you got on:</p>
+    <p class="muted" style="margin:0 0 16px;font-size:.85rem">Cycle end: ${cycleEnd || '—'}</p>
+    <div class="row" style="justify-content:center;gap:24px;margin-bottom:20px;flex-wrap:wrap">
+      <div><div class="muted" style="font-size:.8rem">Sessions logged</div><b>${totalSessions} / 84 days</b></div>
+      <div><div class="muted" style="font-size:.8rem">Best hang</div><b>${formatKgStat(bestHang)}</b></div>
+      <div><div class="muted" style="font-size:.8rem">Best pull</div><b>${formatKgStat(bestPull)}</b></div>
+    </div>
+    <button class="primary" type="button" data-cycle-open>Start New Cycle</button>
+    <div data-cycle-form hidden style="margin-top:16px;text-align:left;max-width:420px;margin-left:auto;margin-right:auto">
+      <div class="field">
+        <label style="display:flex;gap:8px;align-items:center"><input type="radio" name="cycleAnchorMode" value="startDate" checked> Start from date</label>
+      </div>
+      <div class="field">
+        <label style="display:flex;gap:8px;align-items:center"><input type="radio" name="cycleAnchorMode" value="compDate"> Work back from comp</label>
+      </div>
+      <div class="field">
+        <label for="newCycleStartDate">Start date</label>
+        <input id="newCycleStartDate" type="date" value="${defaultStart}">
+      </div>
+      <div class="field">
+        <label for="newCycleCompDate">Competition date</label>
+        <input id="newCycleCompDate" type="date" value="${defaultComp}" disabled>
+      </div>
+      <div class="row" style="align-items:center;justify-content:center;gap:8px;flex-wrap:wrap">
+        <button class="primary" type="button" data-cycle-start>Start</button>
+        <span class="muted" data-cycle-error hidden style="color:#fca5a5"></span>
+      </div>
+    </div>
+  </div>`;
+}
+
 export function renderToday(root) {
   const activePlan = Storage.getActivePlan();
   const date = getSelectedDate();
   const realToday = todayIso();
   const start = Program.effectiveStart(activePlan.settings);
+  const showCycleComplete = isCycleComplete(activePlan.settings, date);
+  const completionHtml = showCycleComplete ? cycleCompleteHtml(activePlan) : '';
 
   // Date navigation row — always visible at the top of the view
   const isToday = date === realToday;
@@ -87,12 +220,20 @@ export function renderToday(root) {
       <p class="muted">Configure your active plan with a start date or comp date.</p>
       <button class="primary" onclick="location.hash='#plans'">Go to Plans</button></div>`;
     wireDateNav(root);
+    wireCycleComplete(root, activePlan);
     wirePlanSwitcher(root, root);
     return;
   }
 
   const ctx = Program.resolveDate(date, Program.effectiveStart(activePlan.settings));
   if (ctx?.outOfCycle) {
+    if (showCycleComplete) {
+      root.innerHTML = dateNavHtml + planSwitcherHtml + completionHtml;
+      wireDateNav(root);
+      wireCycleComplete(root, activePlan);
+      wirePlanSwitcher(root, root);
+      return;
+    }
     const which = activePlan.settings.anchorMode === 'compDate'
       ? `Cycle window: ${start} → ${activePlan.settings.compDate}`
       : `Cycle starts ${start}`;
@@ -100,6 +241,7 @@ export function renderToday(root) {
       <p class="muted">${date} is outside the 12-week window. ${which}.</p>
       <button class="ghost" onclick="location.hash='#plans'">Adjust in Plans</button></div>`;
     wireDateNav(root);
+    wireCycleComplete(root, activePlan);
     wirePlanSwitcher(root, root);
     return;
   }
@@ -118,7 +260,7 @@ export function renderToday(root) {
 
   const { warmup, cooldown } = Warmup.forSession(session);
 
-  let body = dateNavHtml + planSwitcherHtml + `<div class="card">
+  let body = dateNavHtml + planSwitcherHtml + completionHtml + `<div class="card">
     <div class="session-head">
       <h2>Wk ${ctx.weekIdx}</h2>
       ${phaseBadge}${flavorBadge}${focusBadge}${deloadBadge}${retestBadge}${energyTip}
@@ -140,6 +282,7 @@ export function renderToday(root) {
       });
     });
     wireDateNav(root);
+    wireCycleComplete(root, activePlan);
     wirePlanSwitcher(root, root);
     return;
   }
@@ -190,7 +333,8 @@ export function renderToday(root) {
     <div class="row">
       <button class="primary" id="markCompleted">${dayLog.status === 'completed' ? '✓ Completed' : 'Mark completed'}</button>
       <button class="ghost" id="markPartial">Partial</button>
-    </div></div>`;
+    </div>
+    ${retestBenchmarkSection(session, date)}</div>`;
 
   // Cooldown — collapsed
   if (cooldown.length) {
@@ -204,6 +348,7 @@ export function renderToday(root) {
 
   root.innerHTML = body;
   wireDateNav(root);
+  wireCycleComplete(root, activePlan);
   wire(root, date, session, ctx, multiplier);
   wirePlanSwitcher(root, root);
 }
@@ -233,6 +378,68 @@ function wirePlanSwitcher(root, container) {
   });
 }
 
+function wireCycleComplete(root, activePlan) {
+  const openBtn = root.querySelector('button[data-cycle-open]');
+  const form = root.querySelector('[data-cycle-form]');
+  if (!openBtn || !form) return;
+
+  const startInput = root.querySelector('#newCycleStartDate');
+  const compInput = root.querySelector('#newCycleCompDate');
+  const errorEl = root.querySelector('[data-cycle-error]');
+  const radios = [...root.querySelectorAll('input[name="cycleAnchorMode"]')];
+
+  function setError(msg = '') {
+    if (!errorEl) return;
+    errorEl.textContent = msg;
+    errorEl.hidden = !msg;
+  }
+
+  function selectedMode() {
+    return root.querySelector('input[name="cycleAnchorMode"]:checked')?.value || 'startDate';
+  }
+
+  function syncMode() {
+    const mode = selectedMode();
+    if (startInput) startInput.disabled = mode !== 'startDate';
+    if (compInput) compInput.disabled = mode !== 'compDate';
+    setError('');
+  }
+
+  openBtn.addEventListener('click', () => {
+    form.hidden = !form.hidden;
+    openBtn.textContent = form.hidden ? 'Start New Cycle' : 'Cancel';
+    syncMode();
+    if (!form.hidden) {
+      if (selectedMode() === 'compDate') compInput?.focus();
+      else startInput?.focus();
+    }
+  });
+
+  radios.forEach(radio => radio.addEventListener('change', syncMode));
+  syncMode();
+
+  root.querySelector('[data-cycle-start]')?.addEventListener('click', () => {
+    const anchorMode = selectedMode();
+    const startDate = anchorMode === 'startDate' ? (startInput?.value || null) : null;
+    const compDate = anchorMode === 'compDate' ? (compInput?.value || null) : null;
+
+    if (anchorMode === 'startDate' && !startDate) {
+      setError('Choose a start date.');
+      return;
+    }
+    if (anchorMode === 'compDate' && !compDate) {
+      setError('Choose a competition date.');
+      return;
+    }
+
+    const patch = { anchorMode, startDate, compDate };
+    Storage.setSettings(patch);
+    const nextStart = Program.effectiveStart({ ...activePlan.settings, ...patch });
+    if (nextStart) setSelectedDate(nextStart);
+    renderToday(root);
+  });
+}
+
 // Build the structured stepper inputs for an exercise.
 function exerciseInputs(i, ex, actual, suggestion) {
   const vis = inputVisibility(ex);
@@ -244,9 +451,9 @@ function exerciseInputs(i, ex, actual, suggestion) {
   }
 
   let row = '<div class="stepper-row">';
-  if (vis.sets) row += stepper(`ex-${i}-sets`, n(actual.sets), 'sets', 1);
+  if (vis.sets) row += stepper(`ex-${i}-sets`, n(actual.sets ?? ex.prescribedSets), 'sets', 1);
   if (vis.kg)   row += stepper(`ex-${i}-kg`,   n(actual.kg),   'kg',   0.5);
-  if (vis.reps) row += stepper(`ex-${i}-reps`, n(actual.reps), repsLabel(ex), 1);
+  if (vis.reps) row += stepper(`ex-${i}-reps`, n(actual.reps ?? ex.prescribedReps), repsLabel(ex), 1);
   if (vis.rpe)  row += stepper(`ex-${i}-rpe`,  n(actual.rpe),  'RPE',  0.5);
   row += '</div>';
 
@@ -428,12 +635,21 @@ function wire(root, date, session, ctx, readinessMult) {
     if (rpeEl  && rpeEl.value  !== '') out.rpe   = parseFloat(rpeEl.value);
     return out;
   }
+  function refreshRetestBenchmarkBox(saved = false) {
+    const box = root.querySelector('#retestBenchmarkBox');
+    if (!box) return;
+    const content = retestBenchmarkBtn(session, getSelectedDate(), saved);
+    box.style.display = content ? '' : 'none';
+    box.innerHTML = content;
+  }
+
   function updateExerciseActual(i) {
     const d = getOrInitDay();
     const cur = d.exercises[i] || { name: session.exercises[i].name };
     const merged = { ...asActualObj(cur.actual), ...readExerciseInputs(i) };
     d.exercises[i] = { ...cur, actual: merged };
     persist({ exercises: d.exercises });
+    refreshRetestBenchmarkBox();
   }
 
   for (let i = 0; i < session.exercises.length; i++) {
@@ -508,9 +724,21 @@ function wire(root, date, session, ctx, readinessMult) {
     persist({ status: 'completed' });
     const btn = root.querySelector('#markCompleted');
     if (btn) btn.textContent = '✓ Completed';
-    if (session.isRetest) alert('Retest done — update Benchmarks with new max-hang / 1RM. Old values are archived.');
   });
   root.querySelector('#markPartial')?.addEventListener('click', () => {
     persist({ status: 'partial' });
+  });
+  root.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-retest-benchmark]');
+    if (!btn) return;
+    const values = retestBenchmarkValues(session, getSelectedDate());
+    if (!values) return;
+    const { benchmarks } = Storage.get();
+    Storage.setGlobalBenchmarks({
+      bodyweight: benchmarks.bodyweight ?? null,
+      maxHang20mm: values.maxHang20mm,
+      pullup1RM: values.pullup1RM
+    });
+    refreshRetestBenchmarkBox(true);
   });
 }

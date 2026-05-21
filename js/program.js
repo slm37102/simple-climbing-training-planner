@@ -41,9 +41,9 @@ const HANGBOARD = {
     hang: '12s on smallest edge you can hold ~15s',
     rest: '3 min',
     sets: '5 hangs × 2 sets (half-crimp + open-crimp)',
+    prescribedSets: 2, prescribedReps: 5,
     rpeRange: [9, 10],
     edge: 'smallest holdable',
-    // Load: bodyweight only on small edge (no weight added in base)
     loadPctRange: null
   },
   build: {
@@ -51,9 +51,9 @@ const HANGBOARD = {
     hang: '10s weighted',
     rest: '3 min',
     sets: '5 hangs × 2–3 sets',
+    prescribedSets: 2, prescribedReps: 5,
     rpeRange: [9, 9.5],
     edge: '20mm',
-    // Add weight = 80–90% of max-hang added load
     loadPctRange: [0.80, 0.90]
   },
   peak: {
@@ -61,6 +61,7 @@ const HANGBOARD = {
     hang: '7s weighted',
     rest: '53s within set, 3 min between sets',
     sets: '3 hangs × 3–4 sets',
+    prescribedSets: 3, prescribedReps: 3,
     rpeRange: [9, 9.5],
     edge: '20mm',
     loadPctRange: [0.85, 0.95]
@@ -70,6 +71,7 @@ const HANGBOARD = {
     hang: '7s × 6 reps',
     rest: '3s within / 3 min between sets',
     sets: '1–2 sets per grip',
+    prescribedSets: 1, prescribedReps: 6,
     rpeRange: [7.5, 8.5],
     edge: '20mm',
     loadPctRange: [0.50, 0.60]
@@ -88,10 +90,10 @@ const ANTAGONIST_BLOCK = [
 // ============== Session generators (per slot per phase per flavor) ==============
 
 function pullupPrescription(phase) {
-  if (phase === 'base')  return { pctRange: [0.55, 0.70], reps: '5 × 5', rpe: [7, 8.5] };
-  if (phase === 'build') return { pctRange: [0.80, 0.90], reps: '5 × 3', rpe: [8.5, 9.5] };
-  if (phase === 'peak')  return { pctRange: [0.85, 0.95], reps: '5 × 2', rpe: [9, 9.5] };
-  return { pctRange: [0.50, 0.60], reps: '3 × 5', rpe: [7, 8] }; // taper
+  if (phase === 'base')  return { pctRange: [0.55, 0.70], reps: '5 × 5', prescribedSets: 5, prescribedReps: 5, rpe: [7, 8.5] };
+  if (phase === 'build') return { pctRange: [0.80, 0.90], reps: '5 × 3', prescribedSets: 5, prescribedReps: 3, rpe: [8.5, 9.5] };
+  if (phase === 'peak')  return { pctRange: [0.85, 0.95], reps: '5 × 2', prescribedSets: 5, prescribedReps: 2, rpe: [9, 9.5] };
+  return { pctRange: [0.50, 0.60], reps: '3 × 5', prescribedSets: 3, prescribedReps: 5, rpe: [7, 8] }; // taper
 }
 
 function buildMonHangboard(phase, isDeload, focus = 'hybrid') {
