@@ -1,0 +1,173 @@
+{
+  "version": 1,
+  "skills": {
+    "caveman": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/productivity/caveman/SKILL.md",
+      "computedHash": "536908fcfcb232600a5875aa85f1fd50fd13305e9d67379bcd95f07c8c916f3f"
+    },
+    "developing-genkit-dart": {
+      "source": "firebase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/developing-genkit-dart/SKILL.md",
+      "computedHash": "ba0025db33c95d8b66cd6de1f4c25b8b70456fb2789ec6c97cd88d432eed3fb3"
+    },
+    "developing-genkit-go": {
+      "source": "firebase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/developing-genkit-go/SKILL.md",
+      "computedHash": "5283fdc18ac5d4c4742cbf244fba1c887e04d4027e6313441ed8ff7424a88e9c"
+    },
+    "developing-genkit-js": {
+      "source": "firebase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/developing-genkit-js/SKILL.md",
+      "computedHash": "4d3de47b5be279ab3b0ee6055ae541f28d1cc45f8e8986c0b5df2f8d89f4ea30"
+    },
+    "developing-genkit-python": {
+      "source": "firebase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/developing-genkit-python/SKILL.md",
+      "computedHash": "6d80e42acbaec4f53f8f62da5d61e0ae540144552fc07fc06a3605efb5420fba"
+    },
+    "diagnose": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/diagnose/SKILL.md",
+      "computedHash": "1c3c85517ac42116fe5f2bfb5150f7b3e38ad23808e40b33fbb01f1afb611983"
+    },
+    "firebase-ai-logic-basics": {
+      "source": "firebase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/firebase-ai-logic-basics/SKILL.md",
+      "computedHash": "65aaefb79a4d018bb24b1904be4b9a460b189b78f26145741af83ad7c38f7669"
+    },
+    "firebase-app-hosting-basics": {
+      "source": "firebase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/firebase-app-hosting-basics/SKILL.md",
+      "computedHash": "a3ba088442abf5b97281bcf3e4dd11e1f7bdefdc5bd404b4fb30f344d19742d2"
+    },
+    "firebase-auth-basics": {
+      "source": "firebase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/firebase-auth-basics/SKILL.md",
+      "computedHash": "65e6f78dc3c9ea7896d65089899b0bd1060641b7756decd693e3179fe295456f"
+    },
+    "firebase-basics": {
+      "source": "firebase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/firebase-basics/SKILL.md",
+      "computedHash": "871b4fff9692faa25d6c9b96b8f7c2c5ea53be778bca2b702dd82ceeb8b1b272"
+    },
+    "firebase-crashlytics": {
+      "source": "firebase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/firebase-crashlytics/SKILL.md",
+      "computedHash": "e40f0b599853b0512d023306b23bfbcc39c911ff61d5f0f084cab2bce234480a"
+    },
+    "firebase-data-connect": {
+      "source": "firebase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/firebase-data-connect-basics/SKILL.md",
+      "computedHash": "506bd68146e316f296df2dd02d90aa90542584b6b131f4003447d7716155dcdd"
+    },
+    "firebase-firestore": {
+      "source": "firebase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/firebase-firestore/SKILL.md",
+      "computedHash": "b2257a15aabfe310176f4e94ffec377b32bdc2e8465d65d219542c4c4c896a39"
+    },
+    "firebase-hosting-basics": {
+      "source": "firebase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/firebase-hosting-basics/SKILL.md",
+      "computedHash": "0688a8ad6cb72149924352cc47e6cc8bf815e944b636a67b9da225cc9b025afc"
+    },
+    "firebase-security-rules-auditor": {
+      "source": "firebase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/firebase-security-rules-auditor/SKILL.md",
+      "computedHash": "42e793406ca8980c47fcdbd309f02838316849bcbf8475001b4ecaa6a67606b8"
+    },
+    "grill-me": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/productivity/grill-me/SKILL.md",
+      "computedHash": "daf64ca15f4fa081a6747766db538e2dbd1131725ed4fcdd3d538dc62c7035ba"
+    },
+    "grill-with-docs": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/grill-with-docs/SKILL.md",
+      "computedHash": "59849672f8fce76b73055f6c9270236212e444c9aa63d02481bdf3cf788edb9f"
+    },
+    "handoff": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/productivity/handoff/SKILL.md",
+      "computedHash": "3fdffd9dce6fc3e9f9f756ba79d694c5f162e11c7e7fbc72a0958f204312e0b1"
+    },
+    "improve-codebase-architecture": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/improve-codebase-architecture/SKILL.md",
+      "computedHash": "5d9444ffe5c240f2d20081c42c547112e1b8c372375a14e4c98df4d94bde11e1"
+    },
+    "prototype": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/prototype/SKILL.md",
+      "computedHash": "f52c019c3e0af2ad1807332d553b9ee7282a28c162d78cdeddd89dc8456b73ff"
+    },
+    "setup-matt-pocock-skills": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/setup-matt-pocock-skills/SKILL.md",
+      "computedHash": "f686b246e95afeaeeb3ff21b0f9f2c1ab29b02958468170cc9802fb477508488"
+    },
+    "tdd": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/tdd/SKILL.md",
+      "computedHash": "78b31b2120c5fe7aced1cebfd4c7c94acb0037fd4f89c83c67584414aa4173bd"
+    },
+    "to-issues": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/to-issues/SKILL.md",
+      "computedHash": "41915d1686991b0d3796eb0b52f3aa8e9021abc5f268d14e6dc62e95dbf8e044"
+    },
+    "to-prd": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/to-prd/SKILL.md",
+      "computedHash": "a80acb8760af6521a37ea4f079e617712fcaa800f8a766e247f815c5dabb20d2"
+    },
+    "triage": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/triage/SKILL.md",
+      "computedHash": "56ff15b41bbebfa4cb329d96150d9b297c1d919ce30784d883b8755b4bfd8e7e"
+    },
+    "write-a-skill": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/productivity/write-a-skill/SKILL.md",
+      "computedHash": "3b58a16bde08f84ed490cd449ecdc40289216d660e070c485f53bc2d1ed2b843"
+    },
+    "xcode-project-setup": {
+      "source": "firebase/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/xcode-project-setup/SKILL.md",
+      "computedHash": "c212c4e08f0d2bbd4a2a61278a9a030e3da1227c0fe57022ed54d1c3c1a0aaf8"
+    },
+    "zoom-out": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/engineering/zoom-out/SKILL.md",
+      "computedHash": "a8b8ed45609fdfa9f184d0c9f69326e43822a42eebea14db2792d777373de562"
+    }
+  }
+}
