@@ -47,13 +47,20 @@ export function renderLog(root) {
     return '★'.repeat(n) + '☆'.repeat(5 - n);
   }
 
-  // One-line summary of the most meaningful metric logged in a session
+  // One-line summary of all kg-bearing exercises in the session
   function keyMetric(entry) {
+    const parts = [];
     for (const ex of (entry.exercises || [])) {
       const a = ex.actual;
       if (!a || typeof a !== 'object') continue;
-      if (a.kg != null) return `${esc(ex.name || ex.kind)} · ${a.kg} kg${a.rpe != null ? ` @ RPE ${a.rpe}` : ''}`;
+      if (a.kg != null) {
+        const label = esc(ex.name || ex.kind);
+        const rpe = a.rpe != null ? ` @${a.rpe}` : '';
+        parts.push(`${label} ${a.kg}kg${rpe}`);
+      }
     }
+    if (parts.length) return parts.join(' · ');
+    // fallback: first RPE
     for (const ex of (entry.exercises || [])) {
       const a = ex.actual;
       if (a && a.rpe != null) return `RPE ${a.rpe}`;
