@@ -7,7 +7,8 @@ export function renderLog(root) {
   let planFilter = 'all';
   let fromFilter = '';
   let toFilter = '';
-  let editingSet = new Set(); // tracks "planId:date" keys with edit form open
+  let editingSet  = new Set(); // tracks "planId:date" keys with edit form open
+  let expandedSet = new Set(); // tracks collapsed/expanded rows
 
   // ── helpers ──────────────────────────────────────────────────────────────
 
@@ -44,6 +45,20 @@ export function renderLog(root) {
     if (feel == null) return '—';
     const n = Math.max(0, Math.min(5, parseInt(feel, 10)));
     return '★'.repeat(n) + '☆'.repeat(5 - n);
+  }
+
+  // One-line summary of the most meaningful metric logged in a session
+  function keyMetric(entry) {
+    for (const ex of (entry.exercises || [])) {
+      const a = ex.actual;
+      if (!a || typeof a !== 'object') continue;
+      if (a.kg != null) return `${esc(ex.name || ex.kind)} · ${a.kg} kg${a.rpe != null ? ` @ RPE ${a.rpe}` : ''}`;
+    }
+    for (const ex of (entry.exercises || [])) {
+      const a = ex.actual;
+      if (a && a.rpe != null) return `RPE ${a.rpe}`;
+    }
+    return '';
   }
 
   // ── header HTML (rendered once, kept alive) ───────────────────────────
@@ -139,10 +154,26 @@ export function renderLog(root) {
   }
 
   function wireEditHandlers(el) {
+    // Expand/collapse row on header tap
+    el.querySelectorAll('[data-log-toggle]').forEach(hdr => {
+      hdr.addEventListener('click', e => {
+        // Don't toggle if user clicked inside (e.g. a button inside the header)
+        if (e.target.closest('button')) return;
+        const key = hdr.dataset.logToggle;
+        expandedSet.has(key) ? expandedSet.delete(key) : expandedSet.add(key);
+        renderFeedList();
+      });
+    });
+
     el.querySelectorAll('[data-edit-log]').forEach(btn => {
       btn.addEventListener('click', () => {
         const key = btn.dataset.editLog;
-        editingSet.has(key) ? editingSet.delete(key) : editingSet.add(key);
+        if (editingSet.has(key)) {
+          editingSet.delete(key);
+        } else {
+          editingSet.add(key);
+          expandedSet.add(key); // ensure row stays open when edit opens
+        }
         renderFeedList();
       });
     });
@@ -248,12 +279,33 @@ export function renderLog(root) {
     }
 
     el.innerHTML = allDays.map(({ date, entry: e, plan }) => {
-      const planColor = plan.color || '#4f8cff';
-      const phase     = e.phase  || '';
-      const status    = e.status || '';
-      const key       = plan.id + ':' + date;
-      const isEditing = editingSet.has(key);
+      const phase      = e.phase  || '';
+      const status     = e.status || '';
+      const key        = plan.id + ':' + date;
+      const isEditing  = editingSet.has(key);
+      const isExpanded = isEditing || expandedSet.has(key);
+      const metric     = keyMetric(e);
 
+      const statusDot = status === 'completed' ? '🟢'
+                      : status === 'missed'    ? '🔴'
+                      : status === 'partial'   ? '🟡'
+                      : '';
+
+      // Collapsed one-liner header (always shown)
+      const header = `<div class="log-row-header" data-log-toggle="${key}" style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">
+        <b style="flex-shrink:0">${esc(date)}</b>
+        ${phase ? `<span class="badge ${phase}" style="flex-shrink:0">${esc(phase)}</span>` : ''}
+        ${e.isDeload ? `<span class="badge deload" style="flex-shrink:0">Deload</span>` : ''}
+        ${statusDot ? `<span style="flex-shrink:0">${statusDot}</span>` : ''}
+        <span class="muted" style="font-size:.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${metric || esc(e.label || e.sessionId || '')}</span>
+        <span style="flex-shrink:0;color:var(--muted);font-size:.8rem">${isExpanded ? '▾' : '▸'}</span>
+      </div>`;
+
+      if (!isExpanded) {
+        return `<div class="card" style="padding:10px 12px">${header}</div>`;
+      }
+
+      // Expanded detail
       const exRows = (e.exercises || []).map(x => {
         const actual = fmtActual(x.actual);
         if (!x.name && !actual) return '';
@@ -264,33 +316,23 @@ export function renderLog(root) {
           `</li>`;
       }).filter(Boolean).join('');
 
-      const statusStyle = status === 'completed' ? 'background:var(--good);color:#001'
-                        : status === 'missed'    ? 'background:var(--bad);color:#fff'
-                        : status === 'partial'   ? 'background:var(--warn);color:#001'
-                        : '';
-
-      return `<div class="card" style="padding:12px">
-        <div class="row" style="margin-bottom:4px;gap:6px;flex-wrap:wrap;align-items:center">
-          <b>${esc(date)}</b>
-          <span style="width:8px;height:8px;border-radius:50%;background:${planColor};display:inline-block;flex-shrink:0"></span>
-          <span class="muted" style="font-size:.8rem">${esc(plan.name)}</span>
-          ${phase  ? `<span class="badge ${phase}">${esc(phase)}</span>` : ''}
-          ${e.isDeload ? `<span class="badge deload">Deload</span>` : ''}
-          ${status ? `<span class="badge" style="${statusStyle}">${esc(status)}</span>` : ''}
-          <button style="margin-left:auto;background:none;border:1px solid #334155;border-radius:6px;color:var(--muted);cursor:pointer;font-size:.75rem;padding:3px 8px;flex-shrink:0" data-edit-log="${key}">Edit</button>
+      return `<div class="card" style="padding:10px 12px">
+        ${header}
+        <div style="margin-top:8px;padding-top:8px;border-top:1px solid #ffffff10">
+          <div class="muted" style="font-size:.8rem;margin-bottom:4px">
+            ${e.sessionFeel != null ? `Feel ${feelStars(e.sessionFeel)}` : ''}${fmtReadiness(e.readiness)}
+          </div>
+          ${exRows ? `<ul style="margin:4px 0 6px;padding-left:16px">${exRows}</ul>` : ''}
+          ${e.sessionNotes ? `<p class="muted" style="margin:4px 0;font-size:.85rem">${esc(e.sessionNotes)}</p>` : ''}
+          <div style="margin-top:8px">
+            <button style="background:none;border:1px solid #334155;border-radius:6px;color:var(--muted);cursor:pointer;font-size:.75rem;padding:4px 10px" data-edit-log="${key}">Edit</button>
+          </div>
+          ${isEditing ? editFormHtml(date, e, plan) : ''}
         </div>
-        <div class="muted" style="font-size:.85rem;margin-bottom:4px">${esc(e.sessionId || '')}${e.label ? ` — ${esc(e.label)}` : ''}</div>
-        <div class="muted" style="font-size:.8rem;margin-bottom:6px">
-          Feel: ${feelStars(e.sessionFeel)}${fmtReadiness(e.readiness)}
-        </div>
-        ${exRows ? `<ul style="margin:4px 0;padding-left:16px">${exRows}</ul>` : ''}
-        ${e.sessionNotes ? `<p class="muted" style="margin:6px 0 0;font-size:.85rem">${esc(e.sessionNotes)}</p>` : ''}
-        ${isEditing ? editFormHtml(date, e, plan) : ''}
       </div>`;
     }).join('');
 
     wireEditHandlers(el);
-  }
 
   function renderFeed() {
     document.getElementById('logContent').innerHTML = `

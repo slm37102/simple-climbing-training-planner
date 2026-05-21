@@ -241,11 +241,11 @@ label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
 .cycle-cell .cell-label { font-size: .6rem; color: #ffffffcc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
 .cycle-cell .comp-icon { position: absolute; bottom: 2px; right: 3px; font-size: .7rem; }
 .cycle-cell.today { border: 2px solid var(--accent) !important; box-shadow: 0 0 0 2px var(--accent) inset; }
-.cycle-cell.base   { background: #2d6a4f; }
-.cycle-cell.build  { background: #1d4ed8; }
-.cycle-cell.peak   { background: #b91c1c; }
-.cycle-cell.taper  { background: #ca8a04; color: #001; }
-.cycle-cell.taper .day-num, .cycle-cell.taper .cell-label { color: #001; }
+.cycle-cell.base   { background: #1e5c3e; }
+.cycle-cell.build  { background: #1e3fa0; }
+.cycle-cell.peak   { background: #991414; }
+.cycle-cell.taper  { background: #a16207; color: #fff; }
+.cycle-cell.taper .day-num, .cycle-cell.taper .cell-label { color: #fff; }
 .cycle-cell.deload { background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, #ffffff22 5px, #ffffff22 10px); }
 .cycle-cell.out    { opacity: .4; }
 .cycle-day-header  { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font-size: .7rem; color: var(--muted); margin-top: 8px; }
@@ -255,10 +255,10 @@ label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
 .phase-legend { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0; font-size: .75rem; align-items: center; }
 .phase-legend-item { display: flex; align-items: center; gap: 4px; }
 .phase-legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; border: 1px solid #ffffff20; }
-.phase-legend-dot.phase-base   { background: #2d6a4f; }
-.phase-legend-dot.phase-build  { background: #1d4ed8; }
-.phase-legend-dot.phase-peak   { background: #b91c1c; }
-.phase-legend-dot.phase-taper  { background: #ca8a04; }
+.phase-legend-dot.phase-base   { background: #1e5c3e; }
+.phase-legend-dot.phase-build  { background: #1e3fa0; }
+.phase-legend-dot.phase-peak   { background: #991414; }
+.phase-legend-dot.phase-taper  { background: #a16207; }
 .phase-legend-dot.phase-deload { background-image: repeating-linear-gradient(45deg, #333, #333 3px, #777 3px, #777 6px); }
 
 /* Date nav bar in Today tab */
