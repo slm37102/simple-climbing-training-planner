@@ -47,11 +47,13 @@ Key invariants worth preserving when editing:
 
 `js/storage.js` versions the LocalStorage blob (`SCHEMA_VERSION`). Migrations run in `migrate(s)` on every load — they must be **idempotent and bump `s.version`** at the end of each step. v3's notable rule: every `days[date].exercises[].actual` is an object `{ kg, sets, reps, rpe, done, raw }` (the `done` boolean is for optional exercises). Legacy strings (e.g. `"5x2 @ 62kg RPE 9"`) are auto-parsed by `parseLegacyActual`. New code must read structured fields, never regex-parse strings. The display string is **derived** in `js/views/log.js`, never persisted.
 
+**Log tab render pattern:** Cards are collapsed by default. `renderLog` keeps two `Set`s: `editingSet` (keys with edit form open) and `expandedSet` (keys with detail visible). Clicking a row header toggles `expandedSet`; clicking Edit adds the key to both sets. `keyMetric(entry)` finds the first exercise with `actual.kg` and formats `"Name · Nkg @ RPE M"` for the one-liner. Do not store expanded/editing state in LocalStorage — it is intentionally ephemeral (reset when the user navigates away).
+
 `Storage.mergeRemote()` (in `js/storage.js`) prunes local empty plans not present in remote and syncs `activePlanId` — preserve this when touching merge logic, otherwise login will silently re-add phantom "Plan 1" entries.
 
 When you add a settings field, add it to `defaultState().settings` AND let `migrate()` shallow-merge it onto loaded state (already done — just keep the pattern).
 
-Bumping the schema = bump `SCHEMA_VERSION` in `js/storage.js`, AND bump `CACHE` in `sw.js` (e.g. `climb-planner-v7` → `v8`) so PWA clients pick up the new JS. Cache is currently at **v8** (last bumped when adding the optional-Done field + date nav).
+Bumping the schema = bump `SCHEMA_VERSION` in `js/storage.js`, AND bump `CACHE` in `sw.js` (e.g. `climb-planner-v8` → `v9`) so PWA clients pick up the new JS. Cache is currently at **v9** (last bumped for compact log rows + settings cleanup).
 
 ## Key conventions
 
