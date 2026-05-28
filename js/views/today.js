@@ -190,13 +190,16 @@ export function renderToday(root) {
 
   // Date navigation row — always visible at the top of the view
   const isToday = date === realToday;
+  const dateLabel = isToday
+    ? `<b style="min-width:140px;text-align:center">${date} (Today)</b>`
+    : `<button class="ghost date-jump-today" data-date-nav="today" title="Jump to today" style="min-width:140px;font-weight:600">${date}</button>`;
   const dateNavHtml = `<div class="card date-nav-card">
-    <div class="row" style="align-items:center;justify-content:center;gap:8px;flex-wrap:wrap">
+    <div class="row" style="align-items:center;justify-content:center;gap:8px;flex-wrap:nowrap">
       <button class="ghost" data-date-nav="-1" title="Previous day">◀</button>
-      <b style="min-width:120px;text-align:center">${date}${isToday ? ' (Today)' : ''}</b>
+      ${dateLabel}
       <button class="ghost" data-date-nav="1" title="Next day">▶</button>
-      ${isToday ? '' : '<button class="ghost" data-date-nav="today">Jump to today</button>'}
     </div>
+    ${isToday ? '' : '<div class="muted" style="text-align:center;font-size:.75rem;margin-top:4px">Tap date to jump back to today</div>'}
   </div>`;
 
   // Plan switcher — only shown when 2+ non-archived plans exist

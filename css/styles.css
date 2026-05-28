@@ -264,6 +264,8 @@ label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
 /* Date nav bar in Today tab */
 .date-nav-card { padding: 8px 12px; }
 .date-nav-card button { padding: 6px 14px; font-size: .95rem; }
+.date-nav-card .date-jump-today { background: #ffffff10; border-color: #ffffff40; }
+.date-nav-card .date-jump-today:hover, .date-nav-card .date-jump-today:active { background: #ffffff20; }
 
 /* Optional exercise "Done" checkbox */
 .optional-done { display: inline-flex; align-items: center; gap: 8px; padding: 8px 0; font-size: .95rem; cursor: pointer; }
