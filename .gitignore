@@ -4,3 +4,8 @@ node_modules/
 .vscode/*
 !.vscode/mcp.json
 *.log
+
+# Firebase local artifacts
+.firebase/
+# Reference PDFs (not source)
+*.pdf

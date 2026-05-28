@@ -1,5 +1,5 @@
 import { Storage } from '../storage.js';
-import { PHASE_PATTERN, Program } from '../program.js';
+import { Program } from '../program.js';
 
 const DAY_HEADERS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -104,7 +104,7 @@ export function renderCalendar(root) {
       let isComp = false;
 
       for (const { plan, start } of activePlans) {
-        const ctx = Program.resolveDate(date, start);
+        const ctx = Program.resolveDate(date, start, Program.cycleWeeksOf(plan.settings));
         if (!ctx || ctx.outOfCycle) continue;
         if (!phase) phase = ctx.phase;
         if (ctx.deload) deload = true;
@@ -131,8 +131,8 @@ export function renderCalendar(root) {
       let dotsHtml = '';
       if (activePlans.length >= 2) {
         const dots = activePlans
-          .filter(({ start }) => {
-            const ctx = Program.resolveDate(date, start);
+          .filter(({ plan, start }) => {
+            const ctx = Program.resolveDate(date, start, Program.cycleWeeksOf(plan.settings));
             return ctx && !ctx.outOfCycle;
           })
           .map(({ plan }) =>
@@ -160,7 +160,7 @@ export function renderCalendar(root) {
 
     const entries = [];
     for (const { plan, start } of activePlans) {
-      const ctx = Program.resolveDate(date, start);
+      const ctx = Program.resolveDate(date, start, Program.cycleWeeksOf(plan.settings));
       if (!ctx || ctx.outOfCycle) continue;
       let session = null;
       try { session = Program.build(plan, date); } catch (_) { /* ignore */ }
@@ -222,17 +222,20 @@ function summaryCardHtml(settings, days = {}) {
   if (!startIso) {
     return `<div class="card" data-cycle-summary style="margin-bottom:12px">
       <div style="font-weight:600;margin-bottom:8px">Set up your cycle in Plans</div>
-      <div class="muted">Choose a cycle start or competition date to track 12-week progress here.</div>
+      <div class="muted">Choose a cycle start or competition date to track progress here.</div>
     </div>`;
   }
 
+  const cycleWeeks = Program.cycleWeeksOf(settings);
+  const totalDays  = Program.cycleDays(cycleWeeks);
+  const pattern    = Program.buildPhasePattern(cycleWeeks);
   const todayIso = isoDate(new Date());
   const rawDayIndex = daysBetween(startIso, todayIso);
-  const clampedDayIndex = Math.max(0, Math.min(83, rawDayIndex));
+  const clampedDayIndex = Math.max(0, Math.min(totalDays - 1, rawDayIndex));
   const weekIdx = Math.floor(clampedDayIndex / 7);
-  const phaseInfo = PHASE_PATTERN[weekIdx] || PHASE_PATTERN[PHASE_PATTERN.length - 1] || {};
+  const phaseInfo = pattern[weekIdx] || pattern[pattern.length - 1] || {};
   const weekStartIso = addDays(startIso, weekIdx * 7);
-  const cycleEndIso = addDays(startIso, 83);
+  const cycleEndIso = addDays(startIso, totalDays - 1);
 
   let scheduledSessions = 0;
   let loggedSessions = 0;
@@ -241,13 +244,13 @@ function summaryCardHtml(settings, days = {}) {
 
   for (let i = 0; i < 7; i++) {
     const iso = addDays(weekStartIso, i);
-    const ctx = Program.resolveDate(iso, startIso);
+    const ctx = Program.resolveDate(iso, startIso, cycleWeeks);
     if (!ctx || ctx.outOfCycle || ctx.isRest) continue;
     scheduledSessions++;
     if (hasLoggedDay(days[iso])) loggedSessions++;
   }
 
-  for (let i = 0; i < 84; i++) {
+  for (let i = 0; i < totalDays; i++) {
     const iso = addDays(startIso, i);
     const exercises = days[iso]?.exercises || [];
     for (const ex of exercises) {
@@ -259,9 +262,9 @@ function summaryCardHtml(settings, days = {}) {
   }
 
   const phaseLabel = titleCase(phaseInfo.name || phaseInfo.phase || '');
-  const inCycle = rawDayIndex >= 0 && rawDayIndex < 84;
+  const inCycle = rawDayIndex >= 0 && rawDayIndex < totalDays;
   const title = inCycle
-    ? `Week ${weekIdx + 1} of 12 · ${phaseLabel}`
+    ? `Week ${weekIdx + 1} of ${cycleWeeks} · ${phaseLabel}`
     : rawDayIndex < 0 ? 'Cycle not started' : 'Cycle complete';
   const statusLabel = inCycle ? 'This week' : rawDayIndex < 0 ? 'Starts' : 'Completed';
   const statusValue = inCycle

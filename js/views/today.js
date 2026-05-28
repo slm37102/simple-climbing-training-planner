@@ -87,7 +87,7 @@ function tomorrowIso() {
 function cycleEndIso(settings) {
   const start = Program.effectiveStart(settings);
   if (!start) return null;
-  return addDaysIso(start, 83);
+  return addDaysIso(start, Program.cycleDays(Program.cycleWeeksOf(settings)) - 1);
 }
 
 function isCycleComplete(settings, isoDate = todayIso()) {
@@ -110,8 +110,9 @@ function formatKgStat(v) {
 
 function cycleStats(plan) {
   const start = Program.effectiveStart(plan?.settings);
-  if (!start) return { bestHang: null, bestPull: null, totalSessions: 0, cycleEnd: null };
+  if (!start) return { bestHang: null, bestPull: null, totalSessions: 0, cycleEnd: null, totalDays: 0 };
 
+  const totalDays = Program.cycleDays(Program.cycleWeeksOf(plan?.settings));
   let bestHang = null;
   let bestPull = null;
   let totalSessions = 0;
@@ -119,7 +120,7 @@ function cycleStats(plan) {
   for (const [iso, entry] of Object.entries(plan.days || {})) {
     const d = new Date(iso + 'T00:00:00');
     const dayIdx = Math.floor((d - new Date(start + 'T00:00:00')) / 86400000);
-    if (dayIdx < 0 || dayIdx > 83) continue;
+    if (dayIdx < 0 || dayIdx >= totalDays) continue;
 
     const exList = entry?.exercises || [];
     if (exList.some(ex => hasActualResult(asActualObj(ex?.actual)))) totalSessions++;
@@ -138,21 +139,22 @@ function cycleStats(plan) {
     }
   }
 
-  return { bestHang, bestPull, totalSessions, cycleEnd: cycleEndIso(plan?.settings) };
+  return { bestHang, bestPull, totalSessions, cycleEnd: cycleEndIso(plan?.settings), totalDays };
 }
 
 function cycleCompleteHtml(plan) {
-  const { bestHang, bestPull, totalSessions, cycleEnd } = cycleStats(plan);
+  const { bestHang, bestPull, totalSessions, cycleEnd, totalDays } = cycleStats(plan);
+  const weeks = Program.cycleWeeksOf(plan?.settings);
   const defaultStart = tomorrowIso();
-  const defaultComp = addDaysIso(defaultStart, 83);
+  const defaultComp = addDaysIso(defaultStart, Program.cycleDays(weeks) - 1);
 
   return `<div class="card" data-cycle-complete style="text-align:center;padding:24px 16px">
     <div style="font-size:2rem;margin-bottom:8px">🎉</div>
     <h2 style="margin:0 0 4px">🎉 Cycle Complete!</h2>
-    <p class="muted" style="margin:0 0 8px">12 weeks done. Here's how you got on:</p>
+    <p class="muted" style="margin:0 0 8px">${weeks} weeks done. Here's how you got on:</p>
     <p class="muted" style="margin:0 0 16px;font-size:.85rem">Cycle end: ${cycleEnd || '—'}</p>
     <div class="row" style="justify-content:center;gap:24px;margin-bottom:20px;flex-wrap:wrap">
-      <div><div class="muted" style="font-size:.8rem">Sessions logged</div><b>${totalSessions} / 84 days</b></div>
+      <div><div class="muted" style="font-size:.8rem">Sessions logged</div><b>${totalSessions} / ${totalDays} days</b></div>
       <div><div class="muted" style="font-size:.8rem">Best hang</div><b>${formatKgStat(bestHang)}</b></div>
       <div><div class="muted" style="font-size:.8rem">Best pull</div><b>${formatKgStat(bestPull)}</b></div>
     </div>
@@ -228,7 +230,7 @@ export function renderToday(root) {
     return;
   }
 
-  const ctx = Program.resolveDate(date, Program.effectiveStart(activePlan.settings));
+  const ctx = Program.resolveDate(date, Program.effectiveStart(activePlan.settings), Program.cycleWeeksOf(activePlan.settings));
   if (ctx?.outOfCycle) {
     if (showCycleComplete) {
       root.innerHTML = dateNavHtml + planSwitcherHtml + completionHtml;
@@ -240,8 +242,9 @@ export function renderToday(root) {
     const which = activePlan.settings.anchorMode === 'compDate'
       ? `Cycle window: ${start} → ${activePlan.settings.compDate}`
       : `Cycle starts ${start}`;
+    const weeks = Program.cycleWeeksOf(activePlan.settings);
     root.innerHTML = dateNavHtml + planSwitcherHtml + `<div class="card"><h2>Outside cycle</h2>
-      <p class="muted">${date} is outside the 12-week window. ${which}.</p>
+      <p class="muted">${date} is outside the ${weeks}-week window. ${which}.</p>
       <button class="ghost" onclick="location.hash='#plans'">Adjust in Plans</button></div>`;
     wireDateNav(root);
     wireCycleComplete(root, activePlan);
@@ -269,6 +272,7 @@ export function renderToday(root) {
       ${phaseBadge}${flavorBadge}${focusBadge}${deloadBadge}${retestBadge}${energyTip}
     </div>
     <div class="muted" style="margin-top:6px">${session.label}</div>
+    ${session.deloadNote ? `<div class="muted" style="margin-top:6px;font-size:.85rem;padding:6px 8px;background:#ffffff10;border-radius:6px">⚙️ ${session.deloadNote}</div>` : ''}
   </div>`;
 
   if (session.isRest) {

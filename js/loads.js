@@ -1,13 +1,10 @@
-// Load calculator: turns prescribed % ranges + benchmarks → kg ranges; auto-adjust + readiness + deload.
+// Load calculator: turns prescribed % ranges + benchmarks → kg ranges; auto-adjust + readiness.
+// NOTE: Deload no longer scales intensity. Per Lattice (see docs/adr/0003-deload-as-volume-cut.md)
+// deload weeks cut volume (sets) and hold intensity. The volume cut is applied in program.js
+// when building the session; this module is purely about per-rep kg.
 import { Storage } from './storage.js';
 
-const DELOAD_INTENSITY = 0.85;
-const DELOAD_VOLUME = 0.5; // shown as informational text
-
 export const Loads = {
-  DELOAD_INTENSITY,
-  DELOAD_VOLUME,
-
   // ===== readiness =====
   // readiness = {sleep, soreness, fatigue} each 1..5
   computeReadinessMultiplier(readiness) {
@@ -62,8 +59,9 @@ export const Loads = {
   },
 
   // Resolve effective kg for today's session, applying:
-  //   (1) prev-actual seed, (2) auto-adjust, (3) readiness, (4) deload intensity.
-  // Returns { suggestedKg, range, reason: [... steps ...] }
+  //   (1) prev-actual seed, (2) auto-adjust, (3) readiness.
+  // Deload weeks cut volume (handled in program.js), not intensity — kg is held constant.
+  // The `isDeload` flag is accepted for back-compat but ignored.
   resolveEffective({ exercise, previousActualKg, previousAvgRpe, readinessMultiplier = 1.0, isDeload = false, benchmarks = null }) {
     const base = this.prescribeLoadKg(exercise, benchmarks);
     if (!base) return null;
@@ -87,8 +85,8 @@ export const Loads = {
       reason.push(`readiness ×${readinessMultiplier}`);
     }
     if (isDeload) {
-      kg *= DELOAD_INTENSITY;
-      reason.push(`deload ×${DELOAD_INTENSITY}`);
+      // Intensity held on deload — only volume is cut (see program.js applyDeloadVolume).
+      reason.push('deload: intensity held, volume cut');
     }
     return { suggestedKg: round(kg), range, reason };
   },

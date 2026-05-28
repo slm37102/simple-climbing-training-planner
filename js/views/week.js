@@ -21,8 +21,9 @@ export function renderWeek(root) {
   if (!start) { root.innerHTML = `<div class="card"><p>Set a cycle anchor in <a onclick="location.hash='#plans'" style="cursor:pointer;color:var(--accent)">Plans</a> first.</p></div>`; return; }
 
   const activePlan = Storage.getActivePlan();
+  const cycleWeeks = Program.cycleWeeksOf(state.settings);
   const today = todayIso();
-  const ctx = Program.resolveDate(today, start);
+  const ctx = Program.resolveDate(today, start, cycleWeeks);
   // Week starts Monday: find Monday of this week
   const d = new Date(today + 'T00:00:00');
   const dow = d.getDay(); // 0=Sun
@@ -32,7 +33,7 @@ export function renderWeek(root) {
   const cells = [];
   for (let i = 0; i < 7; i++) {
     const date = dateAdd(weekStart, i);
-    const c = Program.resolveDate(date, start);
+    const c = Program.resolveDate(date, start, cycleWeeks);
     const log = Storage.getDay(date);
     const session = c && !c.outOfCycle ? Program.build(activePlan, date) : null;
     cells.push({ date, ctx: c, session, log });

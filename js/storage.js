@@ -24,6 +24,7 @@ function defaultSettings() {
     startDate: null,
     compDate: null,
     anchorMode: 'startDate', // 'startDate' | 'compDate'
+    cycleWeeks: 12, // configurable macrocycle length (8–40, see js/program.js clampCycleWeeks)
     units: 'kg',
     syncEnabled: true,
     localOnly: false,

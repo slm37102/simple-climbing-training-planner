@@ -1,5 +1,5 @@
 import { Storage } from '../storage.js';
-import { Program, PHASE_PATTERN } from '../program.js';
+import { Program } from '../program.js';
 import { inputVisibility, repsLabel } from '../exercise-inputs.js';
 
 export function renderLog(root) {
@@ -389,13 +389,14 @@ export function renderLog(root) {
 
       for (const plan of plans) {
         const startISO = Program.effectiveStart(plan.settings);
+        const cycleWeeks = Program.cycleWeeksOf(plan.settings);
         const color    = plan.color || '#4f8cff';
         const hbPts = [], puPts = [];
         const rpeMap = {};
 
         for (const [date, entry] of Storage.listDays(plan.id)) {
           if (!startISO) continue;
-          const ctx = Program.resolveDate(date, startISO);
+          const ctx = Program.resolveDate(date, startISO, cycleWeeks);
           if (!ctx || ctx.outOfCycle) continue;
           const w = ctx.weekIdx;
 
@@ -434,17 +435,20 @@ export function renderLog(root) {
       const puC = initCanvas('chartPullup');
       const rC  = initCanvas('chartRpe');
 
+      // Use the largest cycle length across plans for the chart x-axis.
+      const xMax = Math.max(...plans.map(p => Program.cycleWeeksOf(p.settings)), Program.DEFAULT_CYCLE_WEEKS);
+
       if (hbC) {
         const r = autoRange(hbSeries, 0, 50);
-        drawLineChart(hbC, hbSeries, { title: 'Hangboard kg', ...r, xMax: 12 });
+        drawLineChart(hbC, hbSeries, { title: 'Hangboard kg', ...r, xMax });
       }
       if (puC) {
         const r = autoRange(puSeries, 0, 50);
-        drawLineChart(puC, puSeries, { title: 'Pull-up 1RM kg', ...r, xMax: 12 });
+        drawLineChart(puC, puSeries, { title: 'Pull-up 1RM kg', ...r, xMax });
       }
       if (rC) {
         const r = autoRange(rpeSeries, 5, 10);
-        drawLineChart(rC, rpeSeries, { title: 'Avg RPE', yMin: Math.max(0, r.yMin), yMax: Math.min(10, r.yMax), xMax: 12 });
+        drawLineChart(rC, rpeSeries, { title: 'Avg RPE', yMin: Math.max(0, r.yMin), yMax: Math.min(10, r.yMax), xMax });
       }
     });
   }
@@ -459,21 +463,42 @@ export function renderLog(root) {
       return;
     }
 
-    // Expected main sessions per phase (3 main days/week × weeks in phase)
-    const phaseWeekCount = { base: 0, build: 0, peak: 0, taper: 0 };
-    PHASE_PATTERN.forEach(p => { phaseWeekCount[p.phase]++; });
-    const expectedSessions = {
-      base:  phaseWeekCount.base  * 3,
-      build: phaseWeekCount.build * 3,
-      peak:  phaseWeekCount.peak  * 3,
-      taper: phaseWeekCount.taper * 3,
-    };
-    const phaseRanges  = { base: 'Wk 1–6', build: 'Wk 7–9', peak: 'Wk 10–11', taper: 'Wk 12' };
     const phaseColors  = { base: 'var(--base)', build: 'var(--build)', peak: 'var(--peak)', taper: 'var(--taper)' };
     const PHASES       = ['base', 'build', 'peak', 'taper'];
 
+    // Derive per-phase week ranges from a pattern array (handles double-block).
+    function rangesFromPattern(pattern) {
+      const ranges = { base: [], build: [], peak: [], taper: [] };
+      let i = 0;
+      while (i < pattern.length) {
+        const ph = pattern[i].phase;
+        let j = i;
+        while (j < pattern.length && pattern[j].phase === ph) j++;
+        ranges[ph].push([i + 1, j]); // 1-indexed week numbers
+        i = j;
+      }
+      const fmt = (arr) => arr.length
+        ? arr.map(([a, b]) => a === b ? `Wk ${a}` : `Wk ${a}–${b}`).join(' · ')
+        : '—';
+      return { base: fmt(ranges.base), build: fmt(ranges.build), peak: fmt(ranges.peak), taper: fmt(ranges.taper) };
+    }
+
     const html = plans.map(plan => {
       const startISO = Program.effectiveStart(plan.settings);
+      const cycleWeeks = Program.cycleWeeksOf(plan.settings);
+      const pattern = Program.buildPhasePattern(cycleWeeks);
+
+      // Expected main sessions per phase (3 main days/week × weeks in phase) — per-plan.
+      const phaseWeekCount = { base: 0, build: 0, peak: 0, taper: 0 };
+      pattern.forEach(p => { phaseWeekCount[p.phase]++; });
+      const expectedSessions = {
+        base:  phaseWeekCount.base  * 3,
+        build: phaseWeekCount.build * 3,
+        peak:  phaseWeekCount.peak  * 3,
+        taper: phaseWeekCount.taper * 3,
+      };
+      const phaseRanges = rangesFromPattern(pattern);
+
       const loggedByPhase = { base: 0, build: 0, peak: 0, taper: 0 };
       const rpeByPhase    = { base: [], build: [], peak: [], taper: [] };
       const setsByPhase   = { base: 0, build: 0, peak: 0, taper: 0 };
@@ -482,7 +507,7 @@ export function renderLog(root) {
         if (entry.status !== 'completed' && entry.status !== 'partial') continue;
         let ph = null;
         if (startISO) {
-          const ctx = Program.resolveDate(date, startISO);
+          const ctx = Program.resolveDate(date, startISO, cycleWeeks);
           if (ctx && !ctx.outOfCycle) ph = ctx.phase;
         } else if (entry.phase && Object.prototype.hasOwnProperty.call(loggedByPhase, entry.phase)) {
           ph = entry.phase;

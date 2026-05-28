@@ -12,7 +12,7 @@ export function renderBenchmarks(root) {
     </div>`;
 
   let body = `<div class="card"><h2>Cycle anchor</h2>
-    <p class="muted">Choose how the 12-week cycle is positioned in time.</p>
+    <p class="muted">Choose how the cycle is positioned in time.</p>
     <div class="radio-group" style="margin-bottom:10px">
       <label><input type="radio" name="anchorMode" value="startDate" ${anchorMode==='startDate'?'checked':''}> Start on a date</label>
       <label><input type="radio" name="anchorMode" value="compDate" ${anchorMode==='compDate'?'checked':''}> Peak on a comp / send date</label>
@@ -68,7 +68,7 @@ export function renderBenchmarks(root) {
     if (!compEl || !hint) return;
     const v = compEl.value;
     if (!v) { hint.textContent = ''; return; }
-    const start = Program.computeStartFromComp(v);
+    const start = Program.computeStartFromComp(v, Program.cycleWeeksOf(settings));
     const today = new Date(); today.setHours(0,0,0,0);
     const startDate = new Date(start + 'T00:00:00');
     const daysFromToday = Math.round((startDate - today) / 86400000);

@@ -32,7 +32,7 @@
 
 <script type="module">
 import { Storage } from '../js/storage.js';
-import { Program } from '../js/program.js';
+import { Program, buildPhasePattern, DEFAULT_CYCLE_WEEKS, MIN_CYCLE_WEEKS, MAX_CYCLE_WEEKS } from '../js/program.js';
 import { inputVisibility, repsLabel } from '../js/exercise-inputs.js';
 import { renderToday } from '../js/views/today.js';
 import { renderLog }   from '../js/views/log.js';
@@ -335,6 +335,101 @@ test('Program.resolveDate inside cycle window', () => {
 test('Program.resolveDate before start → outOfCycle', () => {
   const ctx = Program.resolveDate('2026-04-01', '2026-05-04');
   assert(!ctx || ctx.outOfCycle, 'should be outOfCycle or null');
+});
+
+// ─── Configurable cycle length ────────────────────────────────────────────
+
+test('buildPhasePattern(12) preserves single-block shape (6 base, 3 build, 2 peak, 1 taper)', () => {
+  const p = buildPhasePattern(12);
+  assertEq(p.length, 12);
+  const counts = { base: 0, build: 0, peak: 0, taper: 0 };
+  p.forEach(w => counts[w.phase]++);
+  assertEq(counts, { base: 6, build: 3, peak: 2, taper: 1 });
+  // retest = end of base (week 6)
+  assert(p[5].retest, 'wk6 should be retest');
+  assert(p[5].deload, 'wk6 should be deload (retest implies deload reset)');
+  // deload cadence — every 3rd week within base/build
+  assert(p[2].deload, 'wk3 should be deload');
+  assert(p[8].deload, 'wk9 should be deload (end of build)');
+});
+
+test('buildPhasePattern(8) shortest single-block', () => {
+  const p = buildPhasePattern(8);
+  assertEq(p.length, 8);
+  assertEq(p[p.length - 1].phase, 'taper');
+  assertEq(p[p.length - 2].phase, 'peak');
+  assertEq(p[p.length - 3].phase, 'peak');
+});
+
+test('buildPhasePattern(16) single-block scaled', () => {
+  const p = buildPhasePattern(16);
+  assertEq(p.length, 16);
+  const counts = { base: 0, build: 0, peak: 0, taper: 0 };
+  p.forEach(w => counts[w.phase]++);
+  assert(counts.peak === 2, 'peak fixed at 2');
+  assert(counts.taper === 2, 'taper grows to 2 when weeks ≥ 14');
+  assert(counts.base >= 2 * counts.build, 'base should dominate over build');
+});
+
+test('buildPhasePattern(24) switches to double-block', () => {
+  const p = buildPhasePattern(24);
+  assertEq(p.length, 24);
+  // double-block = two base→build cycles before peak
+  const sequence = p.map(w => w.phase).join(',');
+  // count base→build transitions
+  let transitions = 0;
+  for (let i = 1; i < p.length; i++) {
+    if (p[i - 1].phase === 'base' && p[i].phase === 'build') transitions++;
+  }
+  assertEq(transitions, 2, 'double-block has two base→build transitions');
+});
+
+test('buildPhasePattern clamps out-of-range weeks', () => {
+  assertEq(buildPhasePattern(4).length, MIN_CYCLE_WEEKS);
+  assertEq(buildPhasePattern(100).length, MAX_CYCLE_WEEKS);
+});
+
+test('Program.resolveDate with cycleWeeks=16 keeps day 100 inside cycle', () => {
+  const ctx = Program.resolveDate('2026-08-12', '2026-05-04', 16);
+  assert(ctx && !ctx.outOfCycle, 'should be inside 16-wk cycle');
+  assertEq(ctx.cycleWeeks, 16);
+  assertEq(ctx.totalDays, 112);
+});
+
+test('Program.resolveDate with default cycleWeeks=12 → same day is outOfCycle', () => {
+  const ctx = Program.resolveDate('2026-08-12', '2026-05-04');
+  assert(!ctx || ctx.outOfCycle, '12-wk cycle ends much earlier');
+});
+
+test('Program.cycleWeeksOf falls back to default when settings missing', () => {
+  assertEq(Program.cycleWeeksOf({}), DEFAULT_CYCLE_WEEKS);
+  assertEq(Program.cycleWeeksOf({ cycleWeeks: 20 }), 20);
+  assertEq(Program.cycleWeeksOf({ cycleWeeks: 5 }), MIN_CYCLE_WEEKS); // clamped
+});
+
+// ─── Deload semantics (volume cut, intensity held) ───────────────────────
+
+test('Deload week (non-retest) sets deloadNote and cuts prescribedSets ~40%', () => {
+  // wk3 of 12-wk cycle = deload but NOT retest (retest is wk6 in new pattern)
+  const ctx = Program.resolveDate('2026-05-18', '2026-05-04', 12); // start Mon 2026-05-04, wk3 Mon
+  assert(ctx.deload && !ctx.retest, 'wk3 should be deload-only');
+  assertEq(ctx.weekIdx, 3);
+  const sess = Program.prescribeForContext(ctx, 'hybrid');
+  assert(sess.deloadNote && /volume/i.test(sess.deloadNote), 'session should have deloadNote');
+  // find the weighted pullup (started at 5 sets)
+  const pull = sess.exercises.find(e => e.kind === 'pullup');
+  assert(pull, 'should have pullup');
+  assert(pull.prescribedSets < 5, `pullup sets should be cut, got ${pull.prescribedSets}`);
+  assert(pull.prescribedSets >= 1, 'should be ≥1');
+});
+
+test('Retest week skips volume cut (it has its own structure)', () => {
+  // wk6 of 12-wk cycle = retest
+  const ctx = Program.resolveDate('2026-06-08', '2026-05-04', 12);
+  assertEq(ctx.weekIdx, 6);
+  assert(ctx.retest, 'wk6 should be retest');
+  const sess = Program.prescribeForContext(ctx, 'hybrid');
+  assert(!sess.deloadNote, 'retest week should not emit volume-cut note');
 });
 
 // ─── Calendar view ────────────────────────────────────────────────────────

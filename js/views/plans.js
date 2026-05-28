@@ -16,8 +16,9 @@ function addDays(iso, n) {
 function planDateRange(plan) {
   const start = Program.effectiveStart(plan.settings);
   if (!start) return 'No dates set';
-  const end = plan.settings.compDate || addDays(start, 83);
-  return `${start} → ${end}`;
+  const weeks = Program.cycleWeeksOf(plan.settings);
+  const end = plan.settings.compDate || addDays(start, Program.cycleDays(weeks) - 1);
+  return `${start} → ${end} · ${weeks}wk`;
 }
 
 function flash(msg) {
@@ -69,13 +70,16 @@ export function renderPlans(root) {
     const monthName = new Date(year, month - 1, 1).toLocaleString('default', { month: 'long' });
     const todayISO  = toLocalISO(new Date());
 
+    const weeks = currentCycleWeeks();
+    const span  = Program.cycleDays(weeks) - 1;
+
     let bandStart = null, bandEnd = null;
     if (selectedISO) {
       if (opts.mode === 'startDate') {
         bandStart = selectedISO;
-        bandEnd   = addDays(selectedISO, 83);
+        bandEnd   = addDays(selectedISO, span);
       } else {
-        bandStart = Program.computeStartFromComp(selectedISO);
+        bandStart = Program.computeStartFromComp(selectedISO, weeks);
         bandEnd   = selectedISO;
       }
     }
@@ -177,6 +181,7 @@ export function renderPlans(root) {
       const focusVal = p.focus || 'hybrid';
       const colorVal = p.color || '#4f8cff';
       const anchorMode = settings.anchorMode || 'startDate';
+      const cycleWeeksVal = Program.cycleWeeksOf(settings);
 
       const swatches = COLORS.map(c =>
         `<button type="button" class="color-swatch${c === colorVal ? ' swatch-sel' : ''}" data-color="${c}"
@@ -212,6 +217,12 @@ export function renderPlans(root) {
         <div class="field">
           <label>Color</label>
           <div id="pf-colors" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">${swatches}</div>
+        </div>
+
+        <div class="field">
+          <label for="pf-cycleWeeks">Cycle length (weeks)</label>
+          <input type="number" id="pf-cycleWeeks" min="${Program.MIN_CYCLE_WEEKS}" max="${Program.MAX_CYCLE_WEEKS}" step="1" value="${cycleWeeksVal}">
+          <div class="muted" id="pf-cycle-hint" style="font-size:.8rem;margin-top:4px"></div>
         </div>
 
         <div class="field">
@@ -258,6 +269,12 @@ export function renderPlans(root) {
 
     root.innerHTML = html;
     wireListeners();
+  }
+
+  function currentCycleWeeks() {
+    const el = document.getElementById('pf-cycleWeeks');
+    if (el && el.value !== '') return Program.clampCycleWeeks(parseInt(el.value, 10));
+    return Program.DEFAULT_CYCLE_WEEKS;
   }
 
   function wireListeners() {
@@ -308,6 +325,16 @@ export function renderPlans(root) {
       });
     });
 
+    // Cycle length input → re-render pickers (band span changes) + refresh hints
+    const cwInput = document.getElementById('pf-cycleWeeks');
+    if (cwInput) {
+      cwInput.addEventListener('input', () => {
+        renderDatePicker('pf-startDate-picker', { mode: 'startDate', onPick() { refreshHints(); } });
+        renderDatePicker('pf-compDate-picker',  { mode: 'compDate',  onPick() { refreshHints(); } });
+        refreshHints();
+      });
+    }
+
     renderDatePicker('pf-startDate-picker', { mode: 'startDate', onPick() { refreshHints(); } });
     renderDatePicker('pf-compDate-picker',  { mode: 'compDate',  onPick() { refreshHints(); } });
     refreshHints();
@@ -322,20 +349,32 @@ export function renderPlans(root) {
   function refreshHints() {
     const startHint = document.getElementById('pf-start-hint');
     const compHint  = document.getElementById('pf-comp-hint');
+    const cycleHint = document.getElementById('pf-cycle-hint');
+    const weeks = currentCycleWeeks();
+    const span  = Program.cycleDays(weeks) - 1;
+    const pattern = Program.buildPhasePattern(weeks);
+    const phaseCounts = { base: 0, build: 0, peak: 0, taper: 0 };
+    pattern.forEach(p => { phaseCounts[p.phase]++; });
+    const isDouble = weeks > 20;
 
+    if (cycleHint) {
+      const parts = [`Base ${phaseCounts.base}wk · Build ${phaseCounts.build}wk · Peak ${phaseCounts.peak}wk · Taper ${phaseCounts.taper}wk`];
+      if (isDouble) parts.push('double-block (Base→Build × 2 → Peak → Taper)');
+      cycleHint.textContent = parts.join(' · ');
+    }
     if (startHint) {
       const v = pickerState.startDate;
-      startHint.textContent = v ? `Cycle: ${v} → ${addDays(v, 83)}` : '';
+      startHint.textContent = v ? `Cycle: ${v} → ${addDays(v, span)} (${weeks} wk)` : '';
     }
     if (compHint) {
       const v = pickerState.compDate;
       if (v) {
-        const start = Program.computeStartFromComp(v);
+        const start = Program.computeStartFromComp(v, weeks);
         const today = new Date(); today.setHours(0, 0, 0, 0);
         const diff  = Math.round((new Date(start + 'T00:00:00') - today) / 86400000);
         const warn  = diff < 0
           ? ` ⚠ cycle started ${-diff} day${diff === -1 ? '' : 's'} ago — early weeks already passed.` : '';
-        compHint.textContent = `Cycle: ${start} → ${v}.${warn}`;
+        compHint.textContent = `Cycle: ${start} → ${v} (${weeks} wk).${warn}`;
       } else {
         compHint.textContent = '';
       }
@@ -348,6 +387,7 @@ export function renderPlans(root) {
       name:       document.getElementById('pf-name')?.value.trim() || '',
       focus:      document.querySelector('input[name="pf-focus"]:checked')?.value || 'hybrid',
       color:      document.querySelector('.color-swatch.swatch-sel')?.dataset.color || '#4f8cff',
+      cycleWeeks: currentCycleWeeks(),
       anchorMode,
       startDate:  (anchorMode === 'startDate') ? (pickerState.startDate || null) : null,
       compDate:   (anchorMode === 'compDate')  ? (pickerState.compDate  || null) : null,
@@ -355,16 +395,16 @@ export function renderPlans(root) {
   }
 
   function saveForm() {
-    const { name, focus, color, anchorMode, startDate, compDate } = readForm();
+    const { name, focus, color, cycleWeeks, anchorMode, startDate, compDate } = readForm();
     if (!name) { flash('Please enter a plan name.'); return; }
 
     if (formState.mode === 'add') {
       const newId = Storage.addPlan({ name, focus, color });
-      Storage.setPlanSettings(newId, { anchorMode, startDate, compDate });
+      Storage.setPlanSettings(newId, { anchorMode, startDate, compDate, cycleWeeks });
       flash('Plan created.');
     } else if (formState.mode === 'edit' && formState.editId) {
       Storage.updatePlan(formState.editId, { name, focus, color });
-      Storage.setPlanSettings(formState.editId, { anchorMode, startDate, compDate });
+      Storage.setPlanSettings(formState.editId, { anchorMode, startDate, compDate, cycleWeeks });
       flash('Plan updated.');
     }
 
