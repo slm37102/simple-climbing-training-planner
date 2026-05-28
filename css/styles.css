@@ -252,6 +252,8 @@ label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
 .month-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 8px 0 2px; }
 .month-nav button { background: none; border: 1px solid #ffffff20; border-radius: 6px; color: var(--text); padding: 4px 10px; cursor: pointer; font-size: .9rem; }
 .month-nav .month-label { font-weight: 600; flex: 1; text-align: center; }
+.month-nav button.month-label { background: #ffffff10; border: 1px solid #ffffff40; border-radius: 6px; padding: 4px 10px; color: var(--text); cursor: pointer; font-size: 1rem; }
+.month-nav button.month-label:hover, .month-nav button.month-label:active { background: #ffffff20; }
 .phase-legend { display: flex; gap: 10px; flex-wrap: wrap; margin: 6px 0; font-size: .75rem; align-items: center; }
 .phase-legend-item { display: flex; align-items: center; gap: 4px; }
 .phase-legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; border: 1px solid #ffffff20; }

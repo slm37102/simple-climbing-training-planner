@@ -64,15 +64,17 @@ export function renderCalendar(root) {
 
     const monthLabel = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
     const onCurrent  = currentYear === todayYear && currentMonth === todayMonth;
-    const todayBtn   = onCurrent ? '' : '<button data-month-nav="today">Today</button>';
+    const labelHtml = onCurrent
+      ? `<span class="month-label">${monthLabel}</span>`
+      : `<button class="month-label month-jump-today" data-month-nav="today" title="Jump to current month">${monthLabel}</button>`;
 
     const navHtml = `
       <div class="month-nav">
         <button data-month-nav="-1">◀</button>
-        <span class="month-label">${monthLabel}</span>
+        ${labelHtml}
         <button data-month-nav="1">▶</button>
-        ${todayBtn}
-      </div>`;
+      </div>
+      ${onCurrent ? '' : '<div class="muted" style="text-align:center;font-size:.75rem;margin:0 0 4px">Tap month to jump back to today</div>'}`;
 
     const legendHtml = `
       <div class="phase-legend">
