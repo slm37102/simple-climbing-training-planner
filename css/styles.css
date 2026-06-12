@@ -313,6 +313,9 @@ label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
   .view {
     padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
   }
+  html {
+    scroll-padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  }
   /* Bottom-anchored toasts need room above the nav */
   .flash-toast {
     bottom: calc(80px + env(safe-area-inset-bottom, 0px));
@@ -321,7 +324,7 @@ label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
 
 @media (max-width:480px){
   .app-header h1{font-size:1rem}
-  .view{padding:10px}
+  .view{padding:10px; padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px))}
   .pill{padding:8px 12px;min-width:38px}
   .stepper button{width:30px}
 }
