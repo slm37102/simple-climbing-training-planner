@@ -612,7 +612,7 @@ function drawLineChart(canvas, seriesList, opts) {
 
   // X-axis week labels
   ctx.fillStyle = '#94a3b8'; ctx.font = '9px system-ui';
-  [1, 4, 8, 12].forEach(w => {
+  [0, 1, 2, 3].map(i => Math.round(1 + i * (opts.xMax - 1) / 3)).forEach(w => {
     const x = pad.left + ((w - 1) / (opts.xMax - 1)) * cw;
     ctx.fillText('W' + w, x - 6, H - 6);
   });

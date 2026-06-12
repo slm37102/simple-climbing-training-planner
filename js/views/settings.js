@@ -57,17 +57,17 @@ export function renderSettings(root) {
       maxHang20mm: parseFloat(document.getElementById('bm-maxHang20mm').value) || null,
       pullup1RM:   parseFloat(document.getElementById('bm-pullup1RM').value) || null,
     });
-    alert('Benchmarks saved.');
+    flash('Benchmarks saved.');
   };
   document.getElementById('saveSettings').onclick = () => {
     Storage.setSettings({
       units: document.getElementById('setUnits').value
     });
-    alert('Saved.');
+    flash('Saved.');
   };
   document.getElementById('signInBtn2').onclick = async () => {
     try { await Sync.signIn(); renderSettings(root); }
-    catch(e){ alert('Sign-in failed: ' + e.message); }
+    catch(e){ flash('Sign-in failed: ' + e.message); }
   };
   document.getElementById('signOutBtn').onclick = async () => { await Sync.signOut(); renderSettings(root); };
   document.getElementById('toggleLocal').onclick = () => {
@@ -78,10 +78,25 @@ export function renderSettings(root) {
     document.getElementById('ioArea').value = Storage.exportJson();
   };
   document.getElementById('importBtn').onclick = () => {
-    try { Storage.importJson(document.getElementById('ioArea').value); alert('Imported.'); }
-    catch(e){ alert('Invalid JSON'); }
+    const json = document.getElementById('ioArea').value.trim();
+    if (!json) { flash('Paste JSON into the text area first.'); return; }
+    let parsed;
+    try { parsed = JSON.parse(json); } catch(e) { flash('Cannot parse: not valid JSON.'); return; }
+    if (typeof parsed !== 'object' || Array.isArray(parsed) || !parsed.plans) {
+      flash('Not a valid backup — expected an object with a "plans" key.'); return;
+    }
+    try { Storage.importJson(json); flash('Imported.'); }
+    catch(e) { flash('Import failed: ' + e.message); }
   };
   document.getElementById('resetBtn').onclick = () => {
     if (confirm('Reset all local data? This cannot be undone.')) { Storage.reset(); renderSettings(root); }
   };
+}
+
+function flash(msg) {
+  const el = document.createElement('div');
+  el.textContent = msg;
+  el.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--accent);color:#001;padding:10px 18px;border-radius:8px;z-index:50;font-weight:600;box-shadow:0 4px 12px #0008';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1600);
 }
