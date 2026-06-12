@@ -47,6 +47,16 @@ export function renderLog(root) {
     return '★'.repeat(n) + '☆'.repeat(5 - n);
   }
 
+  // ISO → "Mon May 25" (or "Mon May 25, 2024" if not current year)
+  const DOW_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function fmtDateHuman(iso) {
+    const d = new Date(iso + 'T00:00:00');
+    if (isNaN(d)) return iso;
+    const base = `${DOW_NAMES[d.getDay()]} ${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`;
+    return d.getFullYear() === new Date().getFullYear() ? base : `${base}, ${d.getFullYear()}`;
+  }
+
   // One-line summary of all kg-bearing exercises in the session
   function keyMetric(entry) {
     const parts = [];
@@ -300,7 +310,7 @@ export function renderLog(root) {
 
       // Collapsed one-liner header (always shown)
       const header = `<div class="log-row-header" data-log-toggle="${key}" style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none">
-        <b style="flex-shrink:0">${esc(date)}</b>
+        <b style="flex-shrink:0">${esc(fmtDateHuman(date))}</b>
         ${phase ? `<span class="badge ${phase}" style="flex-shrink:0">${esc(phase)}</span>` : ''}
         ${e.isDeload ? `<span class="badge deload" style="flex-shrink:0">Deload</span>` : ''}
         ${statusDot ? `<span style="flex-shrink:0">${statusDot}</span>` : ''}

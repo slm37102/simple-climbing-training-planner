@@ -273,6 +273,52 @@ label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
 .optional-done { display: inline-flex; align-items: center; gap: 8px; padding: 8px 0; font-size: .95rem; cursor: pointer; }
 .optional-done input[type=checkbox] { width: 20px; height: 20px; cursor: pointer; }
 
+/* Stepper with a "default" / "not yet confirmed" pre-filled value.
+   Renders the number muted so the user knows it's a suggestion until they touch it. */
+.stepper.stepper-default input { color: var(--muted); font-style: italic; }
+.stepper.stepper-default { border-style: dashed; }
+
+/* ── Mobile bottom nav ───────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .app-header {
+    grid-template-rows: auto;
+  }
+  .tabs {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    background: var(--panel);
+    border-top: 1px solid #0008;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+    margin: 0;
+    z-index: 6;
+    gap: 4px;
+    overflow-x: visible;
+    justify-content: space-around;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    border-radius: 8px;
+    padding: 10px 4px;
+    font-size: .78rem;
+    border-color: transparent;
+  }
+  .tab.active {
+    background: var(--panel2);
+    border-color: var(--accent);
+  }
+  .view {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  }
+  /* Bottom-anchored toasts need room above the nav */
+  .flash-toast {
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 @media (max-width:480px){
   .app-header h1{font-size:1rem}
   .view{padding:10px}

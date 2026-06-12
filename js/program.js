@@ -174,6 +174,8 @@ function buildMonHangboard(phase, isDeload, focus = 'hybrid') {
       hang: hb.hang,
       rest: hb.rest,
       sets: hb.sets,
+      prescribedSets: hb.prescribedSets,
+      prescribedReps: hb.prescribedReps,
       rpeRange: hb.rpeRange,
       loadPctRange: hb.loadPctRange,
       grip: 'half-crimp + open-crimp'

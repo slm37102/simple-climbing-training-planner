@@ -5,7 +5,7 @@ export function renderSettings(root) {
   const { settings } = Storage.get();
 
   const bm = Storage.get().benchmarks;  let body = `<div class="card"><h2>Benchmarks</h2>
-    <p class="muted" style="font-size:.85rem">Used across all plans to prescribe loads.</p>
+    <p class="muted" style="font-size:.85rem">Used across all plans to prescribe loads. Changes save automatically.</p>
     <div class="field"><label>Bodyweight (kg)</label>
       <input type="number" id="bm-bodyweight" step="0.5" min="30" max="200" value="${bm.bodyweight ?? ''}">
     </div>
@@ -15,7 +15,6 @@ export function renderSettings(root) {
     <div class="field"><label>Pull-up 1RM (added kg)</label>
       <input type="number" id="bm-pullup1RM" step="1" min="-30" max="200" value="${bm.pullup1RM ?? ''}">
     </div>
-    <button class="primary" id="saveBenchmarks">Save benchmarks</button>
   </div>
 
   <div class="card"><h2>Preferences</h2>
@@ -24,9 +23,6 @@ export function renderSettings(root) {
         <option value="kg" ${settings.units==='kg'?'selected':''}>kg</option>
         <option value="lb" ${settings.units==='lb'?'selected':''}>lb</option>
       </select></div>
-    <div class="row">
-      <button class="primary" id="saveSettings">Save</button>
-    </div>
   </div>
 
   <div class="card"><h2>Sync</h2>
@@ -51,20 +47,21 @@ export function renderSettings(root) {
   root.innerHTML = body;
   document.getElementById('syncStat').textContent = document.getElementById('syncStatus').textContent;
 
-  document.getElementById('saveBenchmarks').onclick = () => {
+  function saveBenchmarks() {
     Storage.setGlobalBenchmarks({
       bodyweight:  parseFloat(document.getElementById('bm-bodyweight').value) || null,
       maxHang20mm: parseFloat(document.getElementById('bm-maxHang20mm').value) || null,
       pullup1RM:   parseFloat(document.getElementById('bm-pullup1RM').value) || null,
     });
-    flash('Benchmarks saved.');
-  };
-  document.getElementById('saveSettings').onclick = () => {
-    Storage.setSettings({
-      units: document.getElementById('setUnits').value
-    });
-    flash('Saved.');
-  };
+    flash('Saved');
+  }
+  ['bm-bodyweight', 'bm-maxHang20mm', 'bm-pullup1RM'].forEach(id => {
+    document.getElementById(id).addEventListener('change', saveBenchmarks);
+  });
+  document.getElementById('setUnits').addEventListener('change', e => {
+    Storage.setSettings({ units: e.target.value });
+    flash('Saved');
+  });
   document.getElementById('signInBtn2').onclick = async () => {
     try { await Sync.signIn(); renderSettings(root); }
     catch(e){ flash('Sign-in failed: ' + e.message); }

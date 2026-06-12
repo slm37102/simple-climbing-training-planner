@@ -258,20 +258,23 @@ export function renderToday(root) {
   const { multiplier, label: rdLabel, avg: rdAvg } = Loads.computeReadinessMultiplier(readiness);
 
   const phaseBadge = `<span class="badge ${ctx.phase}">${ctx.phase}</span>`;
-  const flavorBadge = `<span class="badge">${ctx.flavor}</span>`;
-  const focusBadge = `<span class="badge focus-${activePlan.focus}">${activePlan.focus}</span>`;
   const deloadBadge = ctx.deload ? `<span class="badge deload">DELOAD</span>` : '';
   const retestBadge = session.isRetest ? `<span class="badge">RETEST</span>` : '';
   const energyTip = session.energySystem ? `<span class="info-badge" title="Energy system: ${session.energySystem}">i</span>` : '';
 
   const { warmup, cooldown } = Warmup.forSession(session);
 
+  const subtitleParts = [];
+  if (ctx.flavor) subtitleParts.push(ctx.flavor.charAt(0).toUpperCase() + ctx.flavor.slice(1));
+  if (session.label) subtitleParts.push(session.label);
+  const subtitle = subtitleParts.join(' · ');
+
   let body = dateNavHtml + planSwitcherHtml + completionHtml + `<div class="card">
     <div class="session-head">
       <h2>Wk ${ctx.weekIdx}</h2>
-      ${phaseBadge}${flavorBadge}${focusBadge}${deloadBadge}${retestBadge}${energyTip}
+      ${phaseBadge}${deloadBadge}${retestBadge}${energyTip}
     </div>
-    <div class="muted" style="margin-top:6px">${session.label}</div>
+    ${subtitle ? `<div class="muted" style="margin-top:6px">${subtitle}</div>` : ''}
     ${session.deloadNote ? `<div class="muted" style="margin-top:6px;font-size:.85rem;padding:6px 8px;background:#ffffff10;border-radius:6px">⚙️ ${session.deloadNote}</div>` : ''}
   </div>`;
 
@@ -457,25 +460,46 @@ function exerciseInputs(i, ex, actual, suggestion) {
     return `<label class="optional-done"><input type="checkbox" data-optional-done="${i}" ${done ? 'checked' : ''}> <span>Done</span></label>`;
   }
 
+  // Defaults so the user is one tap away from logging, not many.
+  // sets/reps default to prescribed; kg to the suggestion; rpe to mid of target range.
+  // All four are marked as "default" until the user touches them — `readExerciseInputs`
+  // ignores default-flagged values so we don't persist values the user didn't confirm.
+  const setsDefault  = ex.prescribedSets ?? '';
+  const repsDefault  = ex.prescribedReps ?? '';
+  const kgDefault    = suggestion?.suggestedKg ?? '';
+  const rpeDefault   = ex.rpeRange ? Math.round(((ex.rpeRange[0] + ex.rpeRange[1]) / 2) * 2) / 2 : '';
+  const setsValue    = actual.sets ?? setsDefault;
+  const repsValue    = actual.reps ?? repsDefault;
+  const kgValue      = actual.kg   ?? kgDefault;
+  const rpeValue     = actual.rpe  ?? rpeDefault;
+  const setsIsDefault = actual.sets == null && setsDefault !== '';
+  const repsIsDefault = actual.reps == null && repsDefault !== '';
+  const kgIsDefault   = actual.kg   == null && kgDefault   !== '';
+  const rpeIsDefault  = actual.rpe  == null && rpeDefault  !== '';
+
   let row = '<div class="stepper-row">';
-  if (vis.sets) row += stepper(`ex-${i}-sets`, n(actual.sets ?? ex.prescribedSets), 'sets', 1);
-  if (vis.kg)   row += stepper(`ex-${i}-kg`,   n(actual.kg),   'kg',   0.5);
-  if (vis.reps) row += stepper(`ex-${i}-reps`, n(actual.reps ?? ex.prescribedReps), repsLabel(ex), 1);
-  if (vis.rpe)  row += stepper(`ex-${i}-rpe`,  n(actual.rpe),  'RPE',  0.5);
+  if (vis.sets) row += stepper(`ex-${i}-sets`, n(setsValue), 'sets', 1, setsIsDefault);
+  if (vis.kg)   row += stepper(`ex-${i}-kg`,   n(kgValue),  'kg',   0.5, kgIsDefault);
+  if (vis.reps) row += stepper(`ex-${i}-reps`, n(repsValue), repsLabel(ex), 1, repsIsDefault);
+  if (vis.rpe)  row += stepper(`ex-${i}-rpe`,  n(rpeValue), 'RPE',  0.5, rpeIsDefault);
   row += '</div>';
 
   let suggestionBtn = '';
-  if (suggestion) {
+  // Hide the "tap to use" button when kg is already pre-filled with the suggestion —
+  // it would be a no-op. Show it only when the user has a logged kg that differs.
+  if (suggestion && !kgIsDefault && actual.kg != null && actual.kg !== suggestion.suggestedKg) {
     suggestionBtn = `<button class="suggest-btn" data-suggest-btn="${i}" data-suggest-kg="${suggestion.suggestedKg}">Suggested: ${suggestion.suggestedKg} kg → tap to use</button>`;
   }
   return suggestionBtn + row;
 }
 
-function stepper(id, value, label, step) {
+function stepper(id, value, label, step, isDefault = false) {
+  const wrapCls = isDefault ? 'stepper stepper-default' : 'stepper';
+  const inputAttrs = isDefault ? ' data-default="1"' : '';
   return `<div>
-    <div class="stepper">
+    <div class="${wrapCls}">
       <button type="button" data-step="-" data-target="${id}" data-step-amount="${step}">−</button>
-      <input type="number" id="${id}" inputmode="decimal" step="${step}" value="${value}" placeholder="">
+      <input type="number" id="${id}" inputmode="decimal" step="${step}" value="${value}" placeholder=""${inputAttrs}>
       <button type="button" data-step="+" data-target="${id}" data-step-amount="${step}">+</button>
     </div>
     <div class="stepper-label">${label}</div>
@@ -602,6 +626,14 @@ function wire(root, date, session, ctx, readinessMult) {
   });
 
   // ===== Steppers =====
+  function clearDefaultFlag(inp) {
+    if (!inp) return;
+    if (inp.hasAttribute('data-default')) {
+      inp.removeAttribute('data-default');
+      inp.closest('.stepper')?.classList.remove('stepper-default');
+    }
+  }
+
   root.querySelectorAll('button[data-step]').forEach(btn => {
     btn.addEventListener('click', () => {
       const targetId = btn.dataset.target;
@@ -612,8 +644,14 @@ function wire(root, date, session, ctx, readinessMult) {
       const cur = parseFloat(inp.value);
       const next = (isNaN(cur) ? 0 : cur) + dir * amount;
       inp.value = next;
+      clearDefaultFlag(inp);
       inp.dispatchEvent(new Event('change', { bubbles: true }));
     });
+  });
+
+  // Typing in the input directly: drop the "default" flag so we persist it.
+  root.querySelectorAll('.stepper input[type=number]').forEach(inp => {
+    inp.addEventListener('input', () => clearDefaultFlag(inp));
   });
 
   // ===== Suggestion buttons (pre-fill kg) =====
@@ -624,6 +662,7 @@ function wire(root, date, session, ctx, readinessMult) {
       const inp = root.querySelector(`#ex-${i}-kg`);
       if (inp) {
         inp.value = kg;
+        clearDefaultFlag(inp);
         inp.dispatchEvent(new Event('change', { bubbles: true }));
       }
     });
@@ -636,10 +675,11 @@ function wire(root, date, session, ctx, readinessMult) {
     const repsEl = root.querySelector(`#ex-${i}-reps`);
     const rpeEl  = root.querySelector(`#ex-${i}-rpe`);
     const out = {};
-    if (setsEl && setsEl.value !== '') out.sets = parseInt(setsEl.value, 10);
-    if (kgEl   && kgEl.value   !== '') out.kg   = parseFloat(kgEl.value);
-    if (repsEl && repsEl.value !== '') out.reps  = parseFloat(repsEl.value);
-    if (rpeEl  && rpeEl.value  !== '') out.rpe   = parseFloat(rpeEl.value);
+    const live = el => el && el.value !== '' && !el.hasAttribute('data-default');
+    if (live(setsEl)) out.sets = parseInt(setsEl.value, 10);
+    if (live(kgEl))   out.kg   = parseFloat(kgEl.value);
+    if (live(repsEl)) out.reps  = parseFloat(repsEl.value);
+    if (live(rpeEl))  out.rpe   = parseFloat(rpeEl.value);
     return out;
   }
   function refreshRetestBenchmarkBox(saved = false) {
@@ -662,7 +702,10 @@ function wire(root, date, session, ctx, readinessMult) {
   for (let i = 0; i < session.exercises.length; i++) {
     ['sets','kg','reps','rpe'].forEach(k => {
       const inp = root.querySelector(`#ex-${i}-${k}`);
-      if (inp) inp.addEventListener('change', () => updateExerciseActual(i));
+      if (inp) inp.addEventListener('change', () => {
+        clearDefaultFlag(inp);
+        updateExerciseActual(i);
+      });
     });
   }
 

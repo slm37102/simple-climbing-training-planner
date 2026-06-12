@@ -178,6 +178,97 @@ test('Today: change events on stepper inputs persist actual', () => {
   } finally { root.remove(); }
 });
 
+test('Today: kg + rpe inputs pre-fill defaults with data-default flag', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
+  Storage.setGlobalBenchmarks({ bodyweight: 70, maxHang20mm: 25, pullup1RM: 40 });
+  // 2026-06-15 = Mon of Wk 7 = Build phase, ex[0] is "Max-Weight 10s" w/ loadPctRange → computes kg suggestion.
+  sessionStorage.setItem('todaySelectedDate', '2026-06-15');
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const kgEl  = root.querySelector('#ex-0-kg');
+    const rpeEl = root.querySelector('#ex-0-rpe');
+    assert(kgEl,  'kg input missing');
+    assert(rpeEl, 'rpe input missing');
+    assert(kgEl.value  !== '', 'kg should be pre-filled with suggestion');
+    assert(rpeEl.value !== '', 'rpe should be pre-filled with mid of range');
+    assert(kgEl.hasAttribute('data-default'),  'kg should be flagged as default');
+    assert(rpeEl.hasAttribute('data-default'), 'rpe should be flagged as default');
+  } finally { root.remove(); }
+});
+
+test('Today: default pre-fill is NOT persisted until user touches that field', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
+  Storage.setGlobalBenchmarks({ bodyweight: 70, maxHang20mm: 25, pullup1RM: 40 });
+  sessionStorage.setItem('todaySelectedDate', '2026-06-15');
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    // User only changes RPE — kg/sets/reps stay as their default values.
+    const rpeEl = root.querySelector('#ex-0-rpe');
+    rpeEl.value = '8.5';
+    rpeEl.removeAttribute('data-default');
+    rpeEl.dispatchEvent(new Event('change', { bubbles: true }));
+
+    const back = Storage.getDay('2026-06-15');
+    assert(back, 'day not persisted');
+    assertEq(back.exercises[0].actual.rpe, 8.5, 'rpe should be persisted (user touched it)');
+    assert(back.exercises[0].actual.kg   == null, 'kg must NOT be persisted (still pre-fill default)');
+    assert(back.exercises[0].actual.sets == null, 'sets must NOT be persisted (still pre-fill default)');
+    assert(back.exercises[0].actual.reps == null, 'reps must NOT be persisted (still pre-fill default)');
+  } finally { root.remove(); }
+});
+
+test('Today: stepper +/- click clears data-default and persists', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
+  Storage.setGlobalBenchmarks({ bodyweight: 70, maxHang20mm: 25, pullup1RM: 40 });
+  sessionStorage.setItem('todaySelectedDate', '2026-06-15');
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const kgEl = root.querySelector('#ex-0-kg');
+    const kgBefore = parseFloat(kgEl.value);
+    assert(!isNaN(kgBefore), 'kg should be pre-filled with a numeric suggestion');
+    const plusBtn = root.querySelector(`button[data-step="+"][data-target="ex-0-kg"]`);
+    assert(plusBtn, '+ button missing');
+    plusBtn.click();
+    assert(!kgEl.hasAttribute('data-default'), 'data-default should be cleared by stepper click');
+
+    const back = Storage.getDay('2026-06-15');
+    assert(back && back.exercises[0].actual.kg != null, 'kg should now be persisted');
+    assertEq(back.exercises[0].actual.kg, kgBefore + 0.5);
+  } finally { root.remove(); }
+});
+
+test('Log: feed header renders human-friendly date (e.g. "Mon May 25")', () => {
+  resetStorage();
+  Storage.setDay('2026-05-25', { // Monday
+    sessionId: 'mon-hangboard-base',
+    status: 'completed',
+    phase: 'base',
+    exercises: [{ name: 'Hangboard', kind: 'hangboard', actual: { kg: 15 } }]
+  });
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderLog(root);
+    const txt = root.textContent;
+    assert(txt.includes('Mon May 25'),
+      `Log header should show "Mon May 25" (got snippet: ${txt.slice(0, 300)})`);
+    assert(!txt.includes('2026-05-25'),
+      'Raw ISO date should not appear in the row header');
+  } finally { root.remove(); }
+});
+
 test('Today: retest benchmark button only shows when both test kg values are logged', () => {
   resetStorage();
   const plan = Storage.getActivePlan();
