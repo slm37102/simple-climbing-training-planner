@@ -1,4 +1,6 @@
 // LocalStorage layer with schema versioning, change events, JSON import/export.
+import { today } from './dates.js';
+
 const KEY = 'climb-planner:state';
 const SCHEMA_VERSION = 5;
 
@@ -13,10 +15,6 @@ function emit() {
 function makeUUID() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
   return 'plan-' + Date.now();
-}
-
-function today() {
-  return new Date().toISOString().slice(0, 10);
 }
 
 function defaultSettings() {
@@ -399,7 +397,7 @@ export const Storage = {
     this.setPlanSettings((state || this.init()).activePlanId, patch);
   },
 
-  setBenchmarks(patch, opts) {
+  setBenchmarks(patch) {
     this.setGlobalBenchmarks(patch);
   },
 
@@ -512,7 +510,9 @@ export const Storage = {
     emit();
   },
 
-  raw() { return state; }
+  raw() { return state; },
+
+  activeId() { return (state || this.init()).activePlanId; }
 };
 
 export function newer(a, b) {

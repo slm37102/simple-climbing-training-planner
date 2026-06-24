@@ -7,7 +7,6 @@ import { Sync } from './sync.js';
 import { renderToday } from './views/today.js';
 import { renderWeek } from './views/week.js';
 import { renderCalendar } from './views/calendar.js';
-import { renderBenchmarks } from './views/benchmarks.js';
 import { renderLog } from './views/log.js';
 import { renderSettings } from './views/settings.js';
 import { renderPlans } from './views/plans.js';
@@ -17,7 +16,6 @@ const views = {
   week: renderWeek,
   calendar: renderCalendar,
   cycle: renderCalendar,
-  benchmarks: renderBenchmarks,
   log: renderLog,
   settings: renderSettings,
   plans: renderPlans,
@@ -66,6 +64,7 @@ function init() {
 function showAuthGate() {
   const gate = document.getElementById('authGate');
   gate.classList.remove('hidden');
+  setTimeout(() => gate.querySelector('button')?.focus(), 50);
   document.getElementById('signInBtn').onclick = async () => {
     try {
       await Sync.signIn();

@@ -75,18 +75,29 @@ function _composeSingle({ base, build, peak, taper }) {
   for (let i = 0; i < build; i++) arr.push({ phase: 'build', deload: ((i + 1) % 3 === 0), retest: false });
   for (let i = 0; i < peak; i++)  arr.push({ phase: 'peak',  deload: false, retest: false });
   for (let i = 0; i < taper; i++) arr.push({ phase: 'taper', deload: false, retest: false });
-  if (base > 0) { arr[base - 1].deload = true; arr[base - 1].retest = true; }
+  if (base > 0) {
+    arr[base - 1].deload = true; arr[base - 1].retest = true;
+    // C2: the forced retest-deload must not land back-to-back with a natural deload.
+    // Clear the immediately preceding week's natural deload if it was set.
+    if (base > 1 && arr[base - 2].deload) arr[base - 2].deload = false;
+  }
   return arr;
 }
 
 function _composeDouble({ base1, build1, base2, build2, peak, taper }) {
   const arr = [];
   for (let i = 0; i < base1; i++)  arr.push({ phase: 'base',  deload: ((i + 1) % 3 === 0), retest: false });
-  if (base1 > 0) { arr[base1 - 1].deload = true; arr[base1 - 1].retest = true; }
+  if (base1 > 0) {
+    arr[base1 - 1].deload = true; arr[base1 - 1].retest = true;
+    if (base1 > 1 && arr[base1 - 2].deload) arr[base1 - 2].deload = false; // C2
+  }
   for (let i = 0; i < build1; i++) arr.push({ phase: 'build', deload: ((i + 1) % 3 === 0), retest: false });
   const base2Start = arr.length;
   for (let i = 0; i < base2; i++)  arr.push({ phase: 'base',  deload: ((i + 1) % 3 === 0), retest: false });
-  if (base2 > 0) { arr[base2Start + base2 - 1].deload = true; arr[base2Start + base2 - 1].retest = true; }
+  if (base2 > 0) {
+    arr[base2Start + base2 - 1].deload = true; arr[base2Start + base2 - 1].retest = true;
+    if (base2 > 1 && arr[base2Start + base2 - 2].deload) arr[base2Start + base2 - 2].deload = false; // C2
+  }
   for (let i = 0; i < build2; i++) arr.push({ phase: 'build', deload: ((i + 1) % 3 === 0), retest: false });
   for (let i = 0; i < peak; i++)   arr.push({ phase: 'peak',  deload: false, retest: false });
   for (let i = 0; i < taper; i++)  arr.push({ phase: 'taper', deload: false, retest: false });

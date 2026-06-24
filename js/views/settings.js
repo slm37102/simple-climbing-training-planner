@@ -1,5 +1,6 @@
 import { Storage } from '../storage.js';
 import { Sync } from '../sync.js';
+import { flash } from '../ui.js';
 
 export function renderSettings(root) {
   const { settings } = Storage.get();
@@ -90,10 +91,3 @@ export function renderSettings(root) {
   };
 }
 
-function flash(msg) {
-  const el = document.createElement('div');
-  el.textContent = msg;
-  el.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--accent);color:#001;padding:10px 18px;border-radius:8px;z-index:50;font-weight:600;box-shadow:0 4px 12px #0008';
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 1600);
-}

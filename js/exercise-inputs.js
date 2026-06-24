@@ -34,3 +34,12 @@ export function inputVisibility(ex) {
 export function repsLabel(ex) {
   return (ex.kind === 'arc' || ex.kind === 'open-climb') ? 'min' : 'reps';
 }
+
+// Returns true when an actual object has at least one logged value.
+// Used by Today (progress count) and Calendar (day-completed indicator).
+export function actualHasResult(actual) {
+  if (!actual || typeof actual !== 'object') return false;
+  return actual.kg != null || actual.sets != null || actual.reps != null ||
+    actual.rpe != null || actual.done === true ||
+    (typeof actual.raw === 'string' && actual.raw.trim());
+}

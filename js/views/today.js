@@ -3,7 +3,7 @@ import { Storage } from '../storage.js';
 import { Program } from '../program.js';
 import { Loads } from '../loads.js';
 import { Warmup } from '../warmup.js';
-import { inputVisibility, repsLabel } from '../exercise-inputs.js';
+import { inputVisibility, repsLabel, actualHasResult } from '../exercise-inputs.js';
 
 const SELECTED_DATE_KEY = 'todaySelectedDate';
 
@@ -96,11 +96,6 @@ function isCycleComplete(settings, isoDate = todayIso()) {
   const d = new Date(isoDate + 'T00:00:00');
   const cycleEnd = new Date(endIso + 'T00:00:00');
   return d >= cycleEnd;
-}
-
-function hasActualResult(actual) {
-  if (!actual || typeof actual !== 'object') return false;
-  return actual.kg != null || actual.sets != null || actual.reps != null || actual.rpe != null || actual.done === true || (typeof actual.raw === 'string' && actual.raw.trim());
 }
 
 function formatKgStat(v) {
@@ -300,10 +295,10 @@ export function renderToday(root) {
   // Readiness — pill selectors
   const readinessRow = (key) => `
     <div class="field">
-      <label>${key}</label>
-      <div class="pill-group" data-pill-group="${key}">
+      <label id="pill-lbl-${key}">${key.charAt(0).toUpperCase() + key.slice(1)}</label>
+      <div class="pill-group" role="radiogroup" aria-labelledby="pill-lbl-${key}" data-pill-group="${key}">
         ${[1,2,3,4,5].map(v =>
-          `<div class="pill ${readiness[key]===v?'active':''}" data-pill="${key}" data-val="${v}">${v}</div>`
+          `<button type="button" class="pill ${readiness[key]===v?'active':''}" data-pill="${key}" data-val="${v}" aria-pressed="${readiness[key]===v}">${v}</button>`
         ).join('')}
       </div>
     </div>`;
@@ -332,9 +327,9 @@ export function renderToday(root) {
   body += `<div class="card"><h2>Session</h2>
     <div class="field">
       <label>Session feel</label>
-      <div class="pill-group" data-pill-group="sessionFeel">
+      <div class="pill-group" role="radiogroup" aria-label="Session feel" data-pill-group="sessionFeel">
         ${[1,2,3,4,5].map(v =>
-          `<div class="pill ${(dayLog.sessionFeel ?? 3)===v?'active':''}" data-pill="sessionFeel" data-val="${v}">${v}</div>`
+          `<button type="button" class="pill ${(dayLog.sessionFeel ?? 3)===v?'active':''}" data-pill="sessionFeel" data-val="${v}" aria-pressed="${(dayLog.sessionFeel ?? 3)===v}">${v}</button>`
         ).join('')}
       </div>
     </div>
@@ -587,8 +582,8 @@ function wire(root, date, session, ctx, readinessMult) {
       const val = parseInt(p.dataset.val, 10);
       // Toggle active state for siblings
       const group = root.querySelector(`[data-pill-group="${key}"]`);
-      group.querySelectorAll('.pill').forEach(s => s.classList.remove('active'));
-      p.classList.add('active');
+      group.querySelectorAll('.pill').forEach(s => { s.classList.remove('active'); s.setAttribute('aria-pressed', 'false'); });
+      p.classList.add('active'); p.setAttribute('aria-pressed', 'true');
 
       if (key === 'sessionFeel') {
         persist({ sessionFeel: val });

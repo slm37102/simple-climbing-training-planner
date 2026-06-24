@@ -1,5 +1,6 @@
 import { Storage } from '../storage.js';
 import { Program } from '../program.js';
+import { flash, escHtml } from '../ui.js';
 
 const COLORS = ['#4f8cff', '#f43f5e', '#22c55e', '#f59e0b', '#a78bfa', '#fb923c'];
 
@@ -21,19 +22,6 @@ function planDateRange(plan) {
   return `${start} → ${end} · ${weeks}wk`;
 }
 
-function flash(msg) {
-  const el = document.createElement('div');
-  el.textContent = msg;
-  el.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--accent);color:#001;padding:10px 18px;border-radius:8px;z-index:50;font-weight:600;box-shadow:0 4px 12px #0008';
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 1800);
-}
-
-function escHtml(str) {
-  return String(str ?? '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
 
 function numOrNull(id) {
   const el = document.getElementById(id);

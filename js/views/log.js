@@ -1,6 +1,7 @@
 import { Storage } from '../storage.js';
 import { Program } from '../program.js';
 import { inputVisibility, repsLabel } from '../exercise-inputs.js';
+import { escHtml as esc } from '../ui.js';
 
 export function renderLog(root) {
   let activeTab = 'feed';
@@ -11,10 +12,6 @@ export function renderLog(root) {
   let expandedSet = new Set(); // tracks collapsed/expanded rows
 
   // ── helpers ──────────────────────────────────────────────────────────────
-
-  function esc(s) {
-    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
 
   function getFilteredPlans() {
     const all = Storage.listPlans();
