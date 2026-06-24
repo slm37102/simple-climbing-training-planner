@@ -515,7 +515,7 @@ export const Storage = {
   raw() { return state; }
 };
 
-function newer(a, b) {
+export function newer(a, b) {
   if (!a) return false;
   if (!b) return true;
   return new Date(a).getTime() > new Date(b).getTime();

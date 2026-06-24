@@ -31,7 +31,7 @@
 <div id="results"></div>
 
 <script type="module">
-import { Storage } from '../js/storage.js';
+import { Storage, newer } from '../js/storage.js';
 import { Program, buildPhasePattern, DEFAULT_CYCLE_WEEKS, MIN_CYCLE_WEEKS, MAX_CYCLE_WEEKS } from '../js/program.js';
 import { inputVisibility, repsLabel } from '../js/exercise-inputs.js';
 import { renderToday } from '../js/views/today.js';
@@ -660,6 +660,119 @@ test('[Phase1 S4] mergeRemote keeps a user-created offline plan, prunes only the
   Storage.mergeRemote(remote);
   assert(Storage.getPlan(offlineId), 'a configured offline plan with no logged days must NOT be pruned — see S4');
   assert(!Storage.getPlan(defaultId), 'the auto-created empty default SHOULD be pruned — see S4');
+});
+
+// ─── Phase 2: C2 no adjacent deloads ─────────────────────────────────────
+
+test('[Phase2 C2] no two adjacent weeks are both deload for all supported cycle lengths', () => {
+  for (let w = MIN_CYCLE_WEEKS; w <= MAX_CYCLE_WEEKS; w++) {
+    const p = buildPhasePattern(w);
+    for (let i = 1; i < p.length; i++) {
+      if (p[i - 1].deload && p[i].deload) {
+        throw new Error(`w=${w}: weeks ${i} and ${i+1} are both deload (adjacent) — see C2`);
+      }
+    }
+  }
+});
+
+// ─── Phase 2: S5 newer() + mergeRemote LWW ────────────────────────────────
+
+test('[Phase2 S5] newer: returns correct LWW ordering', () => {
+  assert( newer('2026-06-02T10:00:00.000Z', '2026-06-01T10:00:00.000Z'), 'newer A>B should be true');
+  assert(!newer('2026-06-01T10:00:00.000Z', '2026-06-02T10:00:00.000Z'), 'newer A<B should be false');
+  assert(!newer(null, '2026-06-01T10:00:00.000Z'), 'newer(null, b) should be false');
+  assert( newer('2026-06-01T10:00:00.000Z', null),  'newer(a, null) should be true');
+  assert( newer('2026-06-01T10:00:00.000Z', '2026-06-01T10:00:00.000Z') === false, 'equal timestamps: not newer');
+});
+
+test('[Phase2 S5] mergeRemote: remote plan added locally when not present', () => {
+  resetStorage();
+  const ts = new Date().toISOString();
+  const remote = {
+    version: 5,
+    activePlanId: 'r1',
+    plans: {
+      'r1': {
+        id: 'r1', name: 'Remote Plan', focus: 'sport', color: '#fff', archived: false,
+        createdAt: '2026-01-01', settings: { updatedAt: ts }, benchmarks: { history: [], updatedAt: ts },
+        days: {}, updatedAt: ts
+      }
+    },
+    globalSettings: {},
+    globalBenchmarks: { updatedAt: ts }
+  };
+  Storage.mergeRemote(remote);
+  assert(Storage.getPlan('r1'), 'remote-only plan should be added locally');
+});
+
+test('[Phase2 S5] mergeRemote: remote wins on newer updatedAt (LWW)', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  const olderTs = '2026-01-01T00:00:00.000Z';
+  const newerTs = '2026-12-31T00:00:00.000Z';
+  Storage.setPlanSettings(plan.id, { startDate: '2026-03-01', updatedAt: olderTs });
+  const remote = {
+    version: 5,
+    activePlanId: plan.id,
+    plans: {
+      [plan.id]: {
+        id: plan.id, name: 'Plan 1', focus: 'hybrid', color: '#4f8cff', archived: false,
+        createdAt: '2026-01-01',
+        settings: { startDate: '2026-06-01', updatedAt: newerTs },
+        benchmarks: { history: [], updatedAt: olderTs },
+        days: {}, updatedAt: newerTs
+      }
+    },
+    globalSettings: {},
+    globalBenchmarks: { updatedAt: olderTs }
+  };
+  Storage.mergeRemote(remote);
+  assertEq(Storage.getActivePlan().settings.startDate, '2026-06-01', 'remote startDate should win (newer)');
+});
+
+test('[Phase2 S5] mergeRemote: local wins when local is newer', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  const olderTs = '2026-01-01T00:00:00.000Z';
+  const newerTs = '2026-12-31T00:00:00.000Z';
+  Storage.setPlanSettings(plan.id, { startDate: '2026-09-01', updatedAt: newerTs });
+  const remote = {
+    version: 5,
+    activePlanId: plan.id,
+    plans: {
+      [plan.id]: {
+        id: plan.id, name: 'Plan 1', focus: 'hybrid', color: '#4f8cff', archived: false,
+        createdAt: '2026-01-01',
+        settings: { startDate: '2026-01-15', updatedAt: olderTs },
+        benchmarks: { history: [], updatedAt: olderTs },
+        days: {}, updatedAt: olderTs
+      }
+    },
+    globalSettings: {},
+    globalBenchmarks: { updatedAt: olderTs }
+  };
+  Storage.mergeRemote(remote);
+  assertEq(Storage.getActivePlan().settings.startDate, '2026-09-01', 'local startDate should win (newer)');
+});
+
+test('[Phase2 S5] mergeRemote: activePlanId syncs from remote', () => {
+  resetStorage();
+  const ts = new Date().toISOString();
+  const remote = {
+    version: 5,
+    activePlanId: 'r-active',
+    plans: {
+      'r-active': {
+        id: 'r-active', name: 'Remote Active', focus: 'hybrid', color: '#4f8cff', archived: false,
+        createdAt: '2026-01-01', settings: { updatedAt: ts }, benchmarks: { history: [], updatedAt: ts },
+        days: {}, updatedAt: ts
+      }
+    },
+    globalSettings: {},
+    globalBenchmarks: { updatedAt: ts }
+  };
+  Storage.mergeRemote(remote);
+  assertEq(Storage.get().activePlanId, 'r-active', 'activePlanId should sync from remote');
 });
 
 // ─── Runner ───────────────────────────────────────────────────────────────

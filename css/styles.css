@@ -61,6 +61,7 @@ label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
 /* === stepper (kg / reps / RPE) === */
 .stepper-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
 .stepper-row.two{grid-template-columns:repeat(2,1fr)}
+.stepper-row.four{grid-template-columns:repeat(2,1fr)}
 .stepper-row.one{grid-template-columns:1fr}
 .stepper{display:flex;align-items:stretch;background:#0b1220;border:1px solid #ffffff20;border-radius:8px;overflow:hidden}
 .stepper button{background:#172033;color:var(--text);border:0;width:34px;font-size:1.1rem;font-weight:700;line-height:1;cursor:pointer;flex-shrink:0}
@@ -275,7 +276,7 @@ label{display:block;font-size:.8rem;color:var(--muted);margin-bottom:4px}
 
 /* Stepper with a "default" / "not yet confirmed" pre-filled value.
    Renders the number muted so the user knows it's a suggestion until they touch it. */
-.stepper.stepper-default input { color: var(--muted); font-style: italic; }
+.stepper.stepper-default input { color: #cbd5e1; }
 .stepper.stepper-default { border-style: dashed; }
 
 /* ── Mobile bottom nav ───────────────────────────────────────────────── */

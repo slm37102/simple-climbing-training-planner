@@ -477,7 +477,9 @@ function exerciseInputs(i, ex, actual, suggestion) {
   const kgIsDefault   = actual.kg   == null && kgDefault   !== '';
   const rpeIsDefault  = actual.rpe  == null && rpeDefault  !== '';
 
-  let row = '<div class="stepper-row">';
+  const count = [vis.sets, vis.kg, vis.reps, vis.rpe].filter(Boolean).length;
+  const rowCls = count >= 4 ? 'stepper-row four' : count === 2 ? 'stepper-row two' : count === 1 ? 'stepper-row one' : 'stepper-row';
+  let row = `<div class="${rowCls}">`;
   if (vis.sets) row += stepper(`ex-${i}-sets`, n(setsValue), 'sets', 1, setsIsDefault);
   if (vis.kg)   row += stepper(`ex-${i}-kg`,   n(kgValue),  'kg',   0.5, kgIsDefault);
   if (vis.reps) row += stepper(`ex-${i}-reps`, n(repsValue), repsLabel(ex), 1, repsIsDefault);

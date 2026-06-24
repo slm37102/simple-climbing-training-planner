@@ -441,6 +441,15 @@ export function renderLog(root) {
         return c;
       }
 
+      const allEmpty = hbSeries.every(s => !s.points.length) &&
+                       puSeries.every(s => !s.points.length) &&
+                       rpeSeries.every(s => !s.points.length);
+      if (allEmpty) {
+        document.getElementById('logContent').innerHTML =
+          '<p class="muted" style="padding:10px 0">No data logged yet. Complete sessions to see charts.</p>';
+        return;
+      }
+
       const hbC = initCanvas('chartHangboard');
       const puC = initCanvas('chartPullup');
       const rC  = initCanvas('chartRpe');
