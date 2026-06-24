@@ -1,0 +1,106 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## What this is
+
+A single-user, offline-first **PWA** that prescribes a periodized climbing training macrocycle (Base → Build → Peak → Taper) for one intermediate climber (V5–V6 boulder / ~7a lead) doing both bouldering and sport. **Vanilla HTML / CSS / JS ES modules — no build step, no bundler, no npm runtime deps, no test framework.** Optional Firebase Auth (Google) + Firestore sync.
+
+## Commands
+
+There is **no build, no lint, no `package.json`**. Everything is served as static files.
+
+```powershell
+# Run locally — any static server pointed at repo root:
+npx http-server . -p 8765 -c-1
+# or
+python -m http.server 8765
+```
+
+Then open `http://127.0.0.1:8765/` and click **"Use locally only"** on the auth gate. The service worker only activates over `https://` or `localhost`.
+
+**Tests** are an in-browser smoke suite at `tests/index.html` (open `http://127.0.0.1:8765/tests/` — they auto-run on load). They cover `Storage` round-trips, `Today` input persistence + pre-fill defaults, `Log` edit/save, `inputVisibility` per kind, optional Done, `Program.resolveDate`, `buildPhasePattern` for various cycle lengths, deload semantics, and the Cycle summary card. To run a single test, comment out the others or temporarily filter `tests` in the runner — there is no CLI test runner. **The page mutates `localStorage`** — click **Clear** before returning to the live app. Add a case here before/after any bug fix or input/storage change so it can't silently regress.
+
+The Playwright MCP browser is available for end-to-end checks. Init scripts for `Date` overrides do not reliably apply — prefer seeding fake data via module imports (`evaluate('async () => { const {Storage} = await import("/js/storage.js"); ... }')`) over time-travel.
+
+## Deploy
+
+Static host anywhere. Canonical target is Firebase Hosting (`public: "."` — serves repo root, see `firebase.json`):
+
+```powershell
+firebase deploy --only hosting
+```
+
+Hosting URL: <https://simple-climbing-planner.web.app>. Repo: <https://github.com/slm37102/simple-climbing-training-planner> (pushes to `origin/main`). No CI runs build/test on push. Use conventional-commit subjects + the `Co-authored-by` trailer (see git log).
+
+## Architecture
+
+`js/app.js` is the entry point: registers the service worker, wires tab nav, gates on auth, and mounts views. Tabs map to renderers in `js/views/*.js`. **There is no framework** — each renderer takes `(root, ctx)`, replaces `#view`'s `innerHTML`, then wires its own listeners via `data-*` attributes. Re-rendering on state change = re-calling the view function. `ctx` bundles the domain singletons `{ Storage, Program, Loads, Warmup, Sync }`.
+
+Data flow is layered:
+
+```
+js/views/*   → read Storage.get(), Program.*, Loads.*   (pure read of plan + math)
+             → write via Storage.setDay / setPlanSettings / setGlobalBenchmarks
+js/storage.js→ LocalStorage is the source of truth; emits change events
+js/sync.js   → subscribes Storage.onChange, debounced 800ms upload to
+               Firestore users/{uid}/state/main; onSnapshot merges remote back
+               via Storage.mergeRemote (per-plan, per-day Last-Write-Wins on updatedAt)
+```
+
+### Domain model (the parts that need multiple files to understand)
+
+The training logic lives in two modules and is grounded in `docs/training-philosophy.md` + the ADRs in `docs/adr/`. **Read those before changing prescriptions** — the values are deliberate, evidence-based, and sometimes intentionally softened from the source frameworks (Lattice / Hörst / Anderson) for this athlete's injury risk.
+
+- **`js/program.js`** — the macrocycle. `Program.build(plan, dateISO)` is the primary entry point: it resolves the date to a `{weekIdx, phase, deload, retest, flavor, slot}` context, then builds the prescribed session (exercise list with prescriptions, but no kg yet).
+- **`js/loads.js`** — turns prescribed % ranges + benchmarks into kg, then applies the adjustment chain.
+
+### Key invariants (preserve these when editing)
+
+- **Cycle length is configurable, not fixed.** `settings.cycleWeeks` (default 12, clamped 8–40 via `clampCycleWeeks`). The phase split is **derived** from length by `buildPhasePattern(weeks)` — never hardcode a 12-element pattern. Single block ≤ 20 weeks; **double block** (two Base→Build cycles) above the `DOUBLE_BLOCK_THRESHOLD` of 20. Peak is fixed at 2 weeks; Taper is 1–2. Index into `Program.phasePattern(settings)`; don't re-derive phases. (See `docs/adr/0002`.) `PHASE_PATTERN` is still exported as `buildPhasePattern(12)` for back-compat callers.
+- **Deload = volume cut, intensity held.** This was inverted historically. Deload weeks cut `prescribedSets` ~40% (`applyDeloadVolume` in `program.js`) and append a note to prescription text; kg is **not** scaled. `Loads.resolveEffective` still accepts an `isDeload` arg but ignores it (kept for call-site compat). (See `docs/adr/0003`.) Retest weeks are exempt from the volume cut.
+- **The cycle is anchored two ways.** `settings.anchorMode: 'startDate' | 'compDate'`. Always resolve via `Program.effectiveStart(settings)` — never read `settings.startDate` directly in views. In `compDate` mode, start = `compDate − (cycleWeeks × 7 − 1)` days, so the final taper day lands on the comp date.
+- **Day-of-week determines the session slot, not cycle position.** `Program.resolveDate` uses `d.getDay()` to map Mon→`mon-main`, Thu/Sat→main, Wed/Fri→`rest`, Tue→`tue-light`, Sun→`sun-optional`. A non-Monday `startDate` therefore shifts which calendar day is "Wk 1 Mon-main".
+- **Load math chain (in `Loads.resolveEffective`, in order):** `prescribeLoadKg` (% range from benchmarks) → seed by previous-actual kg if present, else range midpoint → `autoAdjust` ±5% (previous avg RPE vs target `rpeRange`) → readiness multiplier (×0.85 / ×1.0 / ×1.05, or 0 = suggest rest). Each step appends to `reason[]` for the UI tooltip. **No deload multiplier here** (see above).
+- **`exercise.kind` drives both rendering and load logic.** Only `hangboard` and `pullup` compute kg (`loadPctRange` against `maxHang20mm` / `pullup1RM`). `antagonist-block` has nested `items[]`. `test`, `boulder`, `route`, `circuit`, `arc`, `open-climb`, `mobility`, `skill`, `limit-boulder`, `campus` are prescription-text-only — don't try to compute kg for them.
+- **`js/exercise-inputs.js` is the single source of truth for which inputs to show.** Both `today.js` (live session) and `log.js` (edit-past-day form) import `inputVisibility(ex)` → `{ kg, sets, reps, rpe, optional, none }` and `repsLabel(ex)` (`'min'` for `arc`/`open-climb`, else `'reps'`). Never hardcode per-kind UI rules in a view — extend the sets in this helper (`NO_INPUT_KINDS`, `KG_KINDS`, `NO_SETS_KINDS`) so the two surfaces stay in sync.
+- **`exercise.optional: true`** hides all numeric inputs and renders a single "Done ✓" checkbox; the stored field is `actual.done: boolean`.
+- **Today tab supports prev/next/jump-to-today navigation.** The selected ISO date lives in `sessionStorage['todaySelectedDate']` (resets on browser close — intentional). Use the view's `getSelectedDate()` when prescribing the visible session, not `today()`.
+
+## Storage, schema & migrations
+
+`js/storage.js` versions a single LocalStorage blob (`SCHEMA_VERSION`, currently **5**). `migrate(s)` runs on every load; each step must be **idempotent and bump `s.version`** at its end.
+
+- **Multi-plan shape (v4+):** state is `{ version, activePlanId, plans: {id: plan}, globalSettings, globalBenchmarks }`. Each plan has its own `settings`, `days`, and (legacy) `benchmarks`.
+- **Benchmarks are GLOBAL (v5+).** `Storage.get().benchmarks` returns `state.globalBenchmarks`, and `setBenchmarks` shims to `setGlobalBenchmarks`. The per-plan `setPlanBenchmarks` still exists (it maintains `benchmarks.history` and is used by retest archiving) but the prescriptive benchmarks the app reads are the global ones.
+- **Plan-scoped setters have legacy + new arities.** `getDay`/`setDay`/`deleteDay`/`listDays` accept both the old "active-plan" form (`setDay(date, patch)`) and the new explicit form (`setDay(planId, date, patch)`).
+- **`actual` is always a structured object** `{ kg, sets, reps, rpe, done, raw }`. Legacy strings like `"5x2 @ 62kg RPE 9"` are auto-parsed by `parseLegacyActual`. New code reads structured fields — never regex-parse strings. The human-readable display string is **derived** in `log.js`, never persisted.
+- **`Storage.mergeRemote` must NOT emit change events** — emitting would re-trigger upload and loop. It guards with an internal `suppressEmit` counter. It also **prunes local empty plans not present in remote** and syncs `activePlanId`; preserve this or login will silently re-add phantom "Plan 1" entries.
+- **Editing/expansion state is intentionally ephemeral.** `log.js` keeps `editingSet`/`expandedSet` in memory only — never persist them.
+
+### When you add a field or file
+
+- New `settings` field → add to `defaultSettings()` AND rely on `migrate()`'s shallow-merge to backfill loaded state (keep the existing pattern).
+- **Bumping the schema = bump `SCHEMA_VERSION` in `js/storage.js` AND bump `CACHE` in `sw.js`** (e.g. `climb-planner-v14` → `v15`) so PWA clients fetch the new JS. Cache is currently at **v14**.
+- **Any file added/renamed under `js/` must be added to the `SHELL` array in `sw.js`** or it won't be cached for offline use.
+
+## Conventions
+
+- **ES modules, relative paths, explicit `.js` extensions** — the browser resolves them directly; nothing rewrites imports.
+- **Dates are ISO `YYYY-MM-DD` strings everywhere.** Parse with `new Date(iso + 'T00:00:00')` to avoid UTC drift. The ISO/date helpers are deliberately duplicated across views — no shared util.
+- **View pattern:** replace `root.innerHTML`, then call a `wire(...)` function that attaches listeners by `data-*` attribute. No virtual DOM, no templating library.
+- **Tap-friendly inputs:** pill selectors and steppers (in `today.js`, styled in `css/styles.css`) are the standard idiom for numeric input — use them over bare `<input type="number">`. Suggested loads are tap-to-prefill buttons (`data-suggest-btn` / `data-suggest-kg`).
+- **`firebase-config.js` is intentionally public.** The `apiKey` is a project identifier, not a secret; security is enforced by `firestore.rules` (`request.auth.uid == uid`). Don't move it to env vars or try to hide it. Set `SYNC_ENABLED = false` there for a local-only build.
+- **`sw.js` bypasses Firestore / Auth / gstatic URLs explicitly** (see the regex) — the Firebase SDK handles its own offline persistence; don't cache those.
+
+## Common entry points for changes
+
+- New training session type → `js/program.js` (`buildMonHangboard` / `buildThuMain` / `buildSatMain`); add a new `kind` if it has unique inputs, then register that kind in `js/exercise-inputs.js`.
+- Change which inputs a kind shows → `js/exercise-inputs.js` only (both Today + Log pick it up).
+- Change load calculation → `js/loads.js`.
+- New input UI → renderer in `js/views/today.js` (`renderExercise`) + CSS; mirror it in `js/views/log.js`'s edit form for parity.
+- New top-level tab → register in the `views` map in `js/app.js`, add a `<button data-view="X">` in `index.html`, create `js/views/X.js`, add it to `SHELL` in `sw.js`.
+
+## Disclaimer
+
+The training content is not medical advice; that framing is intentional and surfaced in the app.
