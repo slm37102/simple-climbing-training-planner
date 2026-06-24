@@ -83,6 +83,10 @@ export function renderSettings(root) {
     if (typeof parsed !== 'object' || Array.isArray(parsed) || !parsed.plans) {
       flash('Not a valid backup — expected an object with a "plans" key.'); return;
     }
+    // S3: import REPLACES all local data wholesale; when signed in it also overwrites the
+    // synced copy on the next upload. Make that destructive intent explicit before proceeding.
+    if (!confirm('Import will REPLACE all current plans and data with this backup. '
+      + 'If you are signed in, it will also overwrite your synced copy. Continue?')) return;
     try { Storage.importJson(json); flash('Imported.'); }
     catch(e) { flash('Import failed: ' + e.message); }
   };

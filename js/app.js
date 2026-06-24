@@ -55,9 +55,18 @@ function init() {
   });
 
   if ('serviceWorker' in navigator) {
+    // On a first-ever visit there is no controller yet; the initial clients.claim() fires
+    // controllerchange once — that is NOT an update and must not trigger a reload.
+    const hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.register('./sw.js').catch(console.warn);
-    // P3: reload the page when a new SW takes control so users get the fresh shell immediately.
-    navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
+    // P3: reload the page when a NEW SW takes over an already-controlled page (a genuine update),
+    // so users get the fresh shell immediately. Guard against the first-visit claim and double-fire.
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController || refreshing) return;
+      refreshing = true;
+      location.reload();
+    });
   }
 }
 

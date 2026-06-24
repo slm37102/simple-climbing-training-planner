@@ -329,6 +329,26 @@ test('Today: retest Save as Benchmark updates global benchmarks + shows confirma
   } finally { root.remove(); }
 });
 
+test('Today: renders the cycle-complete screen without throwing (cycleStats actualHasResult)', () => {
+  // Regression: cycleStats() called actualHasResult under the wrong (deleted) name,
+  // throwing ReferenceError on the cycle-complete path once a day was logged.
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
+  // A logged day inside the cycle so cycleStats iterates real exercises (hits the call site).
+  Storage.setDay(plan.id, '2026-05-18', {
+    exercises: [{ name: 'Hangboard', kind: 'hangboard', actual: { kg: 30, sets: 4, reps: 5, rpe: 7 } }]
+  });
+  // Select a date well past the 12-week cycle end → cycle-complete view renders.
+  sessionStorage.setItem('todaySelectedDate', '2027-01-01');
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root); // must not throw
+    assert(root.textContent.trim().length > 0, 'cycle-complete view should render content');
+  } finally { root.remove(); }
+});
+
 // ─── Log view ─────────────────────────────────────────────────────────────
 
 test('Log: Edit + Save on hangboard entry persists changes', () => {
@@ -756,7 +776,10 @@ test('[Phase2 S5] mergeRemote: remote wins on newer updatedAt (LWW)', () => {
   const plan = Storage.getActivePlan();
   const olderTs = '2026-01-01T00:00:00.000Z';
   const newerTs = '2026-12-31T00:00:00.000Z';
-  Storage.setPlanSettings(plan.id, { startDate: '2026-03-01', updatedAt: olderTs });
+  Storage.setPlanSettings(plan.id, { startDate: '2026-03-01' });
+  // setPlanSettings stamps updatedAt=now; pin local to the intended OLDER timestamp so the
+  // LWW boundary is genuinely exercised (independent of the current date).
+  { const lp = Storage.raw().plans[plan.id]; lp.settings.updatedAt = olderTs; lp.updatedAt = olderTs; }
   const remote = {
     version: 5,
     activePlanId: plan.id,
@@ -781,7 +804,9 @@ test('[Phase2 S5] mergeRemote: local wins when local is newer', () => {
   const plan = Storage.getActivePlan();
   const olderTs = '2026-01-01T00:00:00.000Z';
   const newerTs = '2026-12-31T00:00:00.000Z';
-  Storage.setPlanSettings(plan.id, { startDate: '2026-09-01', updatedAt: newerTs });
+  Storage.setPlanSettings(plan.id, { startDate: '2026-09-01' });
+  // Pin local to the intended NEWER timestamp (setPlanSettings would otherwise stamp now).
+  { const lp = Storage.raw().plans[plan.id]; lp.settings.updatedAt = newerTs; lp.updatedAt = newerTs; }
   const remote = {
     version: 5,
     activePlanId: plan.id,

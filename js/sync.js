@@ -20,6 +20,9 @@ let lastKnownUid = null;
 // S1: gate that prevents uploading un-merged local state before the first snapshot arrives.
 // Reset on each _attachDoc; set true after the first merge (or when remote is empty).
 let hydrated = false;
+// S1: set when an upload is suppressed because the gate wasn't open yet, so we can flush
+// it once the first remote merge completes (otherwise the edit waits for the next change).
+let pendingUpload = false;
 const LAST_UID_KEY = 'climb-planner:lastUid';
 
 function setStatus(s) { onStatusCb(s); }
@@ -148,6 +151,8 @@ export const Sync = {
           hydrated = true; // S1: safe to upload now that remote is merged
           setStatus('synced ' + new Date().toLocaleTimeString());
           if (changed) onRemoteCb();
+          // S1: flush any edit that was made (and suppressed) during the hydration window.
+          if (pendingUpload) { pendingUpload = false; this._scheduleUpload(); }
         } else {
           // Remote is empty (new account) — safe to push local state up.
           hydrated = true; // S1: no remote to clobber
@@ -166,7 +171,9 @@ export const Sync = {
   },
 
   async _uploadNow() {
-    if (!user || !docRef || !hydrated) return; // S1: don't upload before first remote merge
+    if (!user || !docRef) return;
+    // S1: don't upload before first remote merge; remember to flush once hydrated.
+    if (!hydrated) { pendingUpload = true; return; }
     const { setDoc } = this._fs;
     try {
       await setDoc(docRef, Storage.raw(), { merge: false });

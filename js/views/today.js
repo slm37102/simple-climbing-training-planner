@@ -118,7 +118,7 @@ function cycleStats(plan) {
     if (dayIdx < 0 || dayIdx >= totalDays) continue;
 
     const exList = entry?.exercises || [];
-    if (exList.some(ex => hasActualResult(asActualObj(ex?.actual)))) totalSessions++;
+    if (exList.some(ex => actualHasResult(asActualObj(ex?.actual)))) totalSessions++;
 
     for (const ex of exList) {
       const actual = asActualObj(ex?.actual);
@@ -296,7 +296,7 @@ export function renderToday(root) {
   const readinessRow = (key) => `
     <div class="field">
       <label id="pill-lbl-${key}">${key.charAt(0).toUpperCase() + key.slice(1)}</label>
-      <div class="pill-group" role="radiogroup" aria-labelledby="pill-lbl-${key}" data-pill-group="${key}">
+      <div class="pill-group" role="group" aria-labelledby="pill-lbl-${key}" data-pill-group="${key}">
         ${[1,2,3,4,5].map(v =>
           `<button type="button" class="pill ${readiness[key]===v?'active':''}" data-pill="${key}" data-val="${v}" aria-pressed="${readiness[key]===v}">${v}</button>`
         ).join('')}
@@ -327,7 +327,7 @@ export function renderToday(root) {
   body += `<div class="card"><h2>Session</h2>
     <div class="field">
       <label>Session feel</label>
-      <div class="pill-group" role="radiogroup" aria-label="Session feel" data-pill-group="sessionFeel">
+      <div class="pill-group" role="group" aria-label="Session feel" data-pill-group="sessionFeel">
         ${[1,2,3,4,5].map(v =>
           `<button type="button" class="pill ${(dayLog.sessionFeel ?? 3)===v?'active':''}" data-pill="sessionFeel" data-val="${v}" aria-pressed="${(dayLog.sessionFeel ?? 3)===v}">${v}</button>`
         ).join('')}
@@ -615,6 +615,11 @@ function wire(root, date, session, ctx, readinessMult) {
         if (eff && eff.suggestedKg != null) {
           btn.textContent = `Suggested: ${eff.suggestedKg} kg → tap to use`;
           btn.dataset.suggestKg = eff.suggestedKg;
+          btn.style.display = '';
+        } else {
+          // Readiness dropped to a rest suggestion — hide the now-stale "Suggested" button
+          // so the old kg isn't presented as a live recommendation.
+          btn.style.display = 'none';
         }
       });
     });
