@@ -63,10 +63,12 @@ function defaultPlan(id, name = 'Plan 1') {
 
 function defaultState() {
   const id = makeUUID();
+  const plan = defaultPlan(id);
+  plan.auto = true; // startup placeholder — pruned by mergeRemote if remote has real plans (S4)
   return {
     version: SCHEMA_VERSION,
     activePlanId: id,
-    plans: { [id]: defaultPlan(id) },
+    plans: { [id]: plan },
     globalSettings: {},
     globalBenchmarks: {
       bodyweight: null,
@@ -252,6 +254,8 @@ export const Storage = {
     if (planData.anchorMode != null)  plan.settings.anchorMode  = planData.anchorMode;
     if (planData.startDate  != null)  plan.settings.startDate   = planData.startDate;
     if (planData.compDate   != null)  plan.settings.compDate    = planData.compDate;
+    // user-created plans are never auto-pruned on remote merge (S4)
+    plan.auto = false;
     s.plans[id] = plan;
     this._save(); emit();
     return id;
@@ -264,7 +268,7 @@ export const Storage = {
     const plan = s.plans[id];
     if (!plan) throw new Error(`Plan not found: ${id}`);
     const { settings, benchmarks, days, ...rest } = patch;
-    Object.assign(plan, rest, { updatedAt: new Date().toISOString() });
+    Object.assign(plan, rest, { updatedAt: new Date().toISOString(), auto: false });
     this._save(); emit();
   },
 
@@ -317,6 +321,7 @@ export const Storage = {
     if (!plan) throw new Error(`Plan not found: ${planId}`);
     plan.settings = { ...plan.settings, ...patch, updatedAt: new Date().toISOString() };
     plan.updatedAt = new Date().toISOString();
+    plan.auto = false; // first real edit clears the auto-default flag (S4)
     this._save(); emit();
   },
 
@@ -360,6 +365,7 @@ export const Storage = {
     const cur = plan.days[date] || {};
     plan.days[date] = { ...cur, ...patch, updatedAt: new Date().toISOString() };
     plan.updatedAt  = new Date().toISOString();
+    plan.auto = false; // first logged day clears the auto-default flag (S4)
     this._save(); emit();
   },
 
@@ -412,6 +418,9 @@ export const Storage = {
 
   importJson(json) {
     const incoming = JSON.parse(json);
+    if (!incoming.plans || Array.isArray(incoming.plans) || typeof incoming.plans !== 'object') {
+      throw new Error('Invalid import: plans must be a non-array object');
+    }
     state = migrate(incoming);
     this._save(); emit();
   },
@@ -459,12 +468,11 @@ export const Storage = {
       // Local plans not in remote are intentionally kept as-is (offline-created).
     }
 
-    // Prune local-only empty plans that were auto-created at startup.
-    // If remote has plans, any local plan with no days that isn't in remote
-    // is a phantom default — remove it so Plan 1 doesn't accumulate on every login.
+    // Prune ONLY the auto-created startup default plan when remote already has real plans.
+    // Plans created via addPlan() have auto:false and survive regardless of their day count (S4).
     if (Object.keys(remote.plans || {}).length > 0) {
       for (const [planId, plan] of Object.entries(state.plans)) {
-        if (!remote.plans[planId] && Object.keys(plan.days || {}).length === 0) {
+        if (!remote.plans[planId] && plan.auto === true) {
           delete state.plans[planId];
           changed = true;
         }

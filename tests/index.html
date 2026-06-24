@@ -567,13 +567,20 @@ test('Cycle: summary card shows future-cycle messaging', () => {
   const startIso = addIsoDays(todayIso, 7);
   Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: startIso });
 
+  // After C1, effectiveStart snaps any startDate to the Monday of its week.
+  // Compute the expected snapped Monday so the assertion stays accurate.
+  const snapD = new Date(startIso + 'T00:00:00');
+  const dow = snapD.getDay();
+  snapD.setDate(snapD.getDate() - (dow === 0 ? 6 : dow - 1));
+  const snappedStartIso = localIso(snapD);
+
   const root = document.createElement('div');
   renderCalendar(root);
   const card = root.querySelector('[data-cycle-summary]');
   assert(card, 'summary card missing');
   const text = card.textContent.replace(/\s+/g, ' ');
   assert(text.includes('Cycle not started'), text);
-  assert(text.includes(startIso), text);
+  assert(text.includes(snappedStartIso), text);
 });
 
 // ─── Phase 1 regression stubs (RED until implemented) ─────────────────────

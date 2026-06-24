@@ -17,6 +17,9 @@ let onRemoteCb = () => {};
 let initialized = false;
 let firebaseAvailable = false;
 let lastKnownUid = null;
+// S1: gate that prevents uploading un-merged local state before the first snapshot arrives.
+// Reset on each _attachDoc; set true after the first merge (or when remote is empty).
+let hydrated = false;
 const LAST_UID_KEY = 'climb-planner:lastUid';
 
 function setStatus(s) { onStatusCb(s); }
@@ -129,6 +132,9 @@ export const Sync = {
 
   async _attachDoc() {
     if (!user) return;
+    // S1: reset hydration gate; cancel any debounced upload from before attachment.
+    hydrated = false;
+    clearTimeout(saveTimer);
     const { doc, onSnapshot } = this._fs;
     docRef = doc(db, 'users', user.uid, 'state', 'main');
     if (unsubSnap) unsubSnap();
@@ -139,10 +145,12 @@ export const Sync = {
           // mergeRemote returns true only if local actually changed; emit is suppressed
           // internally so this does NOT re-trigger the upload pipeline.
           const changed = Storage.mergeRemote(remote);
+          hydrated = true; // S1: safe to upload now that remote is merged
           setStatus('synced ' + new Date().toLocaleTimeString());
           if (changed) onRemoteCb();
         } else {
-          // Push local up if remote empty
+          // Remote is empty (new account) — safe to push local state up.
+          hydrated = true; // S1: no remote to clobber
           this._uploadNow();
         }
       },
@@ -158,7 +166,7 @@ export const Sync = {
   },
 
   async _uploadNow() {
-    if (!user || !docRef) return;
+    if (!user || !docRef || !hydrated) return; // S1: don't upload before first remote merge
     const { setDoc } = this._fs;
     try {
       await setDoc(docRef, Storage.raw(), { merge: false });

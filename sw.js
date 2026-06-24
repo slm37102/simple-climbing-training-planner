@@ -1,5 +1,5 @@
 // Service worker: cache-first shell, network-first for index.html, bypass Firestore/Auth.
-const CACHE = 'climb-planner-v14';
+const CACHE = 'climb-planner-v15';
 const SHELL = [
   './',
   './index.html',
@@ -44,8 +44,14 @@ self.addEventListener('fetch', e => {
   }
   if (e.request.mode === 'navigate' || e.request.destination === 'document') {
     e.respondWith(
-      fetch(e.request).then(r => { caches.open(CACHE).then(c => c.put(e.request, r.clone())); return r; })
-        .catch(() => caches.match('./index.html'))
+      fetch(e.request).then(r => {
+        // P1: only cache a valid, same-origin, non-redirected response to avoid poisoning
+        // the offline shell with error pages, captive-portal redirects, or 5xx responses.
+        if (r.ok && r.type === 'basic' && !r.redirected) {
+          caches.open(CACHE).then(c => c.put(e.request, r.clone()));
+        }
+        return r;
+      }).catch(() => caches.match('./index.html'))
     );
     return;
   }
