@@ -576,6 +576,85 @@ test('Cycle: summary card shows future-cycle messaging', () => {
   assert(text.includes(startIso), text);
 });
 
+// ─── Phase 1 regression stubs (RED until implemented) ─────────────────────
+// These assertions are EXPECTED TO FAIL against the current code. They encode
+// the target behavior for Phase 1 of docs/improvement-audit.md. Make them green
+// by implementing the referenced fixes — do NOT relax the assertions.
+//
+// Not covered here (need a different harness — verify manually):
+//   S1/S2  sync `hydrated` gate           → js/sync.js   (requires Firebase mock)
+//   P1     SW navigation r.ok guard        → sw.js        (service-worker context)
+
+function makeWednesday() {
+  // A deterministic non-Monday anchor (walk forward to the first Wednesday).
+  const d = new Date('2026-06-01T00:00:00');
+  while (d.getDay() !== 3) d.setDate(d.getDate() + 1);
+  return localIso(d);
+}
+function nextCalendarMonday(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  do { d.setDate(d.getDate() + 1); } while (d.getDay() !== 1);
+  return localIso(d);
+}
+
+test('[Phase1 C1] effectiveStart snaps a non-Monday startDate to Monday', () => {
+  const wed = makeWednesday(); // 2026-06-03, a Wednesday
+  const start = Program.effectiveStart({ anchorMode: 'startDate', startDate: wed, cycleWeeks: 12 });
+  assert(start, 'effectiveStart returned null');
+  const dow = new Date(start + 'T00:00:00').getDay();
+  assertEq(dow, 1, `effectiveStart should snap to a Monday (got ${start}, dow ${dow}) — see C1`);
+});
+
+test('[Phase1 C1] Mon/Thu/Sat of one calendar week share weekIdx/phase/flavor (non-Monday anchor)', () => {
+  const wed = makeWednesday();
+  const cw = 12;
+  const start = Program.effectiveStart({ anchorMode: 'startDate', startDate: wed, cycleWeeks: cw });
+  const mon = nextCalendarMonday(wed);
+  const thu = addIsoDays(mon, 3);
+  const sat = addIsoDays(mon, 5);
+  const rMon = Program.resolveDate(mon, start, cw);
+  const rThu = Program.resolveDate(thu, start, cw);
+  const rSat = Program.resolveDate(sat, start, cw);
+  assert(rMon && !rMon.outOfCycle && rThu && !rThu.outOfCycle && rSat && !rSat.outOfCycle, 'all three days should resolve inside the cycle');
+  assertEq(rThu.weekIdx, rMon.weekIdx, `Thu must share Mon's weekIdx within one calendar week — see C1`);
+  assertEq(rSat.weekIdx, rMon.weekIdx, `Sat must share Mon's weekIdx within one calendar week — see C1`);
+  assertEq(rSat.phase, rMon.phase, 'phase must be constant across one calendar week');
+  assertEq(rSat.flavor, rMon.flavor, 'flavor must be constant across one calendar week');
+});
+
+test('[Phase1 S3] importJson rejects a payload whose plans is not a plain object', () => {
+  resetStorage();
+  let threw = false;
+  try {
+    Storage.importJson(JSON.stringify({ version: 5, activePlanId: 'x', plans: [], globalBenchmarks: {} }));
+  } catch (e) { threw = true; }
+  assert(threw, 'importJson should throw when `plans` is an array / not a plain object — see S3');
+  resetStorage();
+});
+
+test('[Phase1 S4] mergeRemote keeps a user-created offline plan, prunes only the auto default', () => {
+  resetStorage();
+  const defaultId = Storage.getActivePlan().id;                          // auto-created "Plan 1"
+  const offlineId = Storage.addPlan({ name: 'My Offline Plan', focus: 'sport' }); // real plan, no days yet
+  const ts = new Date().toISOString();
+  const remote = {
+    version: 5,
+    activePlanId: 'remote-1',
+    plans: {
+      'remote-1': {
+        id: 'remote-1', name: 'Remote', focus: 'hybrid', color: '#4f8cff', archived: false,
+        createdAt: '2026-01-01', settings: { updatedAt: ts }, benchmarks: { history: [], updatedAt: ts },
+        days: {}, updatedAt: ts
+      }
+    },
+    globalSettings: {},
+    globalBenchmarks: { updatedAt: ts }
+  };
+  Storage.mergeRemote(remote);
+  assert(Storage.getPlan(offlineId), 'a configured offline plan with no logged days must NOT be pruned — see S4');
+  assert(!Storage.getPlan(defaultId), 'the auto-created empty default SHOULD be pruned — see S4');
+});
+
 // ─── Runner ───────────────────────────────────────────────────────────────
 
 async function runAll() {
