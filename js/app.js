@@ -7,7 +7,6 @@ import { Sync } from './sync.js';
 import { renderToday } from './views/today.js';
 import { renderWeek } from './views/week.js';
 import { renderCalendar } from './views/calendar.js';
-import { renderBenchmarks } from './views/benchmarks.js';
 import { renderLog } from './views/log.js';
 import { renderSettings } from './views/settings.js';
 import { renderPlans } from './views/plans.js';
@@ -17,7 +16,6 @@ const views = {
   week: renderWeek,
   calendar: renderCalendar,
   cycle: renderCalendar,
-  benchmarks: renderBenchmarks,
   log: renderLog,
   settings: renderSettings,
   plans: renderPlans,
@@ -57,13 +55,25 @@ function init() {
   });
 
   if ('serviceWorker' in navigator) {
+    // On a first-ever visit there is no controller yet; the initial clients.claim() fires
+    // controllerchange once — that is NOT an update and must not trigger a reload.
+    const hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.register('./sw.js').catch(console.warn);
+    // P3: reload the page when a NEW SW takes over an already-controlled page (a genuine update),
+    // so users get the fresh shell immediately. Guard against the first-visit claim and double-fire.
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController || refreshing) return;
+      refreshing = true;
+      location.reload();
+    });
   }
 }
 
 function showAuthGate() {
   const gate = document.getElementById('authGate');
   gate.classList.remove('hidden');
+  setTimeout(() => gate.querySelector('button')?.focus(), 50);
   document.getElementById('signInBtn').onclick = async () => {
     try {
       await Sync.signIn();

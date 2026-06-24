@@ -31,9 +31,10 @@
 <div id="results"></div>
 
 <script type="module">
-import { Storage } from '../js/storage.js';
+import { Storage, newer } from '../js/storage.js';
 import { Program, buildPhasePattern, DEFAULT_CYCLE_WEEKS, MIN_CYCLE_WEEKS, MAX_CYCLE_WEEKS } from '../js/program.js';
-import { inputVisibility, repsLabel } from '../js/exercise-inputs.js';
+import { inputVisibility, repsLabel, actualHasResult } from '../js/exercise-inputs.js';
+import { today as datesToday, addDays as datesAddDays, daysBetween, snapToMonday as datesSnapToMonday } from '../js/dates.js';
 import { renderToday } from '../js/views/today.js';
 import { renderLog }   from '../js/views/log.js';
 import { renderCalendar } from '../js/views/calendar.js';
@@ -328,6 +329,26 @@ test('Today: retest Save as Benchmark updates global benchmarks + shows confirma
   } finally { root.remove(); }
 });
 
+test('Today: renders the cycle-complete screen without throwing (cycleStats actualHasResult)', () => {
+  // Regression: cycleStats() called actualHasResult under the wrong (deleted) name,
+  // throwing ReferenceError on the cycle-complete path once a day was logged.
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
+  // A logged day inside the cycle so cycleStats iterates real exercises (hits the call site).
+  Storage.setDay(plan.id, '2026-05-18', {
+    exercises: [{ name: 'Hangboard', kind: 'hangboard', actual: { kg: 30, sets: 4, reps: 5, rpe: 7 } }]
+  });
+  // Select a date well past the 12-week cycle end → cycle-complete view renders.
+  sessionStorage.setItem('todaySelectedDate', '2027-01-01');
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root); // must not throw
+    assert(root.textContent.trim().length > 0, 'cycle-complete view should render content');
+  } finally { root.remove(); }
+});
+
 // ─── Log view ─────────────────────────────────────────────────────────────
 
 test('Log: Edit + Save on hangboard entry persists changes', () => {
@@ -567,13 +588,20 @@ test('Cycle: summary card shows future-cycle messaging', () => {
   const startIso = addIsoDays(todayIso, 7);
   Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: startIso });
 
+  // After C1, effectiveStart snaps any startDate to the Monday of its week.
+  // Compute the expected snapped Monday so the assertion stays accurate.
+  const snapD = new Date(startIso + 'T00:00:00');
+  const dow = snapD.getDay();
+  snapD.setDate(snapD.getDate() - (dow === 0 ? 6 : dow - 1));
+  const snappedStartIso = localIso(snapD);
+
   const root = document.createElement('div');
   renderCalendar(root);
   const card = root.querySelector('[data-cycle-summary]');
   assert(card, 'summary card missing');
   const text = card.textContent.replace(/\s+/g, ' ');
   assert(text.includes('Cycle not started'), text);
-  assert(text.includes(startIso), text);
+  assert(text.includes(snappedStartIso), text);
 });
 
 // ─── Phase 1 regression stubs (RED until implemented) ─────────────────────
@@ -653,6 +681,169 @@ test('[Phase1 S4] mergeRemote keeps a user-created offline plan, prunes only the
   Storage.mergeRemote(remote);
   assert(Storage.getPlan(offlineId), 'a configured offline plan with no logged days must NOT be pruned — see S4');
   assert(!Storage.getPlan(defaultId), 'the auto-created empty default SHOULD be pruned — see S4');
+});
+
+// ─── Phase 4: dates.js + exercise-inputs.js + Storage.activeId ───────────
+
+test('[Phase4 Q1] dates.js today() returns a local YYYY-MM-DD string', () => {
+  const t = datesToday();
+  assert(/^\d{4}-\d{2}-\d{2}$/.test(t), `today() should be YYYY-MM-DD, got ${t}`);
+  // Local date should match JS Date local parts
+  const d = new Date();
+  const expected = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  assertEq(t, expected, 'today() must use local time, not UTC');
+});
+
+test('[Phase4 Q1] dates.js addDays and daysBetween round-trip', () => {
+  const base = '2026-06-01';
+  assertEq(datesAddDays(base, 7), '2026-06-08', 'addDays +7');
+  assertEq(datesAddDays(base, -1), '2026-05-31', 'addDays -1 across month');
+  assertEq(daysBetween(base, '2026-06-08'), 7, 'daysBetween');
+  assertEq(daysBetween('2026-06-08', base), -7, 'daysBetween negative');
+});
+
+test('[Phase4 Q1] dates.js snapToMonday snaps any weekday to Monday', () => {
+  assertEq(datesSnapToMonday('2026-06-01'), '2026-06-01', 'Monday stays');
+  assertEq(datesSnapToMonday('2026-06-03'), '2026-06-01', 'Wednesday → Monday');
+  assertEq(datesSnapToMonday('2026-06-07'), '2026-06-01', 'Sunday → previous Monday');
+});
+
+test('[Phase4 Q8] actualHasResult detects any logged field', () => {
+  assert(!actualHasResult(null), 'null → false');
+  assert(!actualHasResult({}), 'empty object → false');
+  assert( actualHasResult({ kg: 20 }), 'kg → true');
+  assert( actualHasResult({ sets: 3 }), 'sets → true');
+  assert( actualHasResult({ done: true }), 'done → true');
+  assert(!actualHasResult({ done: false }), 'done:false → false');
+  assert( actualHasResult({ raw: 'some text' }), 'raw string → true');
+  assert(!actualHasResult({ raw: '' }), 'empty raw → false');
+});
+
+test('[Phase4 Q5] Storage.activeId() returns activePlanId', () => {
+  resetStorage();
+  const id = Storage.getActivePlan().id;
+  assertEq(Storage.activeId(), id, 'activeId() should match active plan id');
+  const newId = Storage.addPlan({ name: 'New Plan' });
+  Storage.setActivePlan(newId);
+  assertEq(Storage.activeId(), newId, 'activeId() updates after setActivePlan');
+});
+
+// ─── Phase 2: C2 no adjacent deloads ─────────────────────────────────────
+
+test('[Phase2 C2] no two adjacent weeks are both deload for all supported cycle lengths', () => {
+  for (let w = MIN_CYCLE_WEEKS; w <= MAX_CYCLE_WEEKS; w++) {
+    const p = buildPhasePattern(w);
+    for (let i = 1; i < p.length; i++) {
+      if (p[i - 1].deload && p[i].deload) {
+        throw new Error(`w=${w}: weeks ${i} and ${i+1} are both deload (adjacent) — see C2`);
+      }
+    }
+  }
+});
+
+// ─── Phase 2: S5 newer() + mergeRemote LWW ────────────────────────────────
+
+test('[Phase2 S5] newer: returns correct LWW ordering', () => {
+  assert( newer('2026-06-02T10:00:00.000Z', '2026-06-01T10:00:00.000Z'), 'newer A>B should be true');
+  assert(!newer('2026-06-01T10:00:00.000Z', '2026-06-02T10:00:00.000Z'), 'newer A<B should be false');
+  assert(!newer(null, '2026-06-01T10:00:00.000Z'), 'newer(null, b) should be false');
+  assert( newer('2026-06-01T10:00:00.000Z', null),  'newer(a, null) should be true');
+  assert( newer('2026-06-01T10:00:00.000Z', '2026-06-01T10:00:00.000Z') === false, 'equal timestamps: not newer');
+});
+
+test('[Phase2 S5] mergeRemote: remote plan added locally when not present', () => {
+  resetStorage();
+  const ts = new Date().toISOString();
+  const remote = {
+    version: 5,
+    activePlanId: 'r1',
+    plans: {
+      'r1': {
+        id: 'r1', name: 'Remote Plan', focus: 'sport', color: '#fff', archived: false,
+        createdAt: '2026-01-01', settings: { updatedAt: ts }, benchmarks: { history: [], updatedAt: ts },
+        days: {}, updatedAt: ts
+      }
+    },
+    globalSettings: {},
+    globalBenchmarks: { updatedAt: ts }
+  };
+  Storage.mergeRemote(remote);
+  assert(Storage.getPlan('r1'), 'remote-only plan should be added locally');
+});
+
+test('[Phase2 S5] mergeRemote: remote wins on newer updatedAt (LWW)', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  const olderTs = '2026-01-01T00:00:00.000Z';
+  const newerTs = '2026-12-31T00:00:00.000Z';
+  Storage.setPlanSettings(plan.id, { startDate: '2026-03-01' });
+  // setPlanSettings stamps updatedAt=now; pin local to the intended OLDER timestamp so the
+  // LWW boundary is genuinely exercised (independent of the current date).
+  { const lp = Storage.raw().plans[plan.id]; lp.settings.updatedAt = olderTs; lp.updatedAt = olderTs; }
+  const remote = {
+    version: 5,
+    activePlanId: plan.id,
+    plans: {
+      [plan.id]: {
+        id: plan.id, name: 'Plan 1', focus: 'hybrid', color: '#4f8cff', archived: false,
+        createdAt: '2026-01-01',
+        settings: { startDate: '2026-06-01', updatedAt: newerTs },
+        benchmarks: { history: [], updatedAt: olderTs },
+        days: {}, updatedAt: newerTs
+      }
+    },
+    globalSettings: {},
+    globalBenchmarks: { updatedAt: olderTs }
+  };
+  Storage.mergeRemote(remote);
+  assertEq(Storage.getActivePlan().settings.startDate, '2026-06-01', 'remote startDate should win (newer)');
+});
+
+test('[Phase2 S5] mergeRemote: local wins when local is newer', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  const olderTs = '2026-01-01T00:00:00.000Z';
+  const newerTs = '2026-12-31T00:00:00.000Z';
+  Storage.setPlanSettings(plan.id, { startDate: '2026-09-01' });
+  // Pin local to the intended NEWER timestamp (setPlanSettings would otherwise stamp now).
+  { const lp = Storage.raw().plans[plan.id]; lp.settings.updatedAt = newerTs; lp.updatedAt = newerTs; }
+  const remote = {
+    version: 5,
+    activePlanId: plan.id,
+    plans: {
+      [plan.id]: {
+        id: plan.id, name: 'Plan 1', focus: 'hybrid', color: '#4f8cff', archived: false,
+        createdAt: '2026-01-01',
+        settings: { startDate: '2026-01-15', updatedAt: olderTs },
+        benchmarks: { history: [], updatedAt: olderTs },
+        days: {}, updatedAt: olderTs
+      }
+    },
+    globalSettings: {},
+    globalBenchmarks: { updatedAt: olderTs }
+  };
+  Storage.mergeRemote(remote);
+  assertEq(Storage.getActivePlan().settings.startDate, '2026-09-01', 'local startDate should win (newer)');
+});
+
+test('[Phase2 S5] mergeRemote: activePlanId syncs from remote', () => {
+  resetStorage();
+  const ts = new Date().toISOString();
+  const remote = {
+    version: 5,
+    activePlanId: 'r-active',
+    plans: {
+      'r-active': {
+        id: 'r-active', name: 'Remote Active', focus: 'hybrid', color: '#4f8cff', archived: false,
+        createdAt: '2026-01-01', settings: { updatedAt: ts }, benchmarks: { history: [], updatedAt: ts },
+        days: {}, updatedAt: ts
+      }
+    },
+    globalSettings: {},
+    globalBenchmarks: { updatedAt: ts }
+  };
+  Storage.mergeRemote(remote);
+  assertEq(Storage.get().activePlanId, 'r-active', 'activePlanId should sync from remote');
 });
 
 // ─── Runner ───────────────────────────────────────────────────────────────

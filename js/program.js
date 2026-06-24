@@ -22,6 +22,17 @@ export function cycleDays(weeks) {
   return clampCycleWeeks(weeks) * 7;
 }
 
+// Snap an ISO date to the Monday of its calendar week.
+// dow=0 (Sun) steps back 6 days; dow=1 (Mon) stays; others subtract (dow-1).
+function snapToMonday(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  const dow = d.getDay();
+  d.setDate(d.getDate() - (dow === 0 ? 6 : dow - 1));
+  const m   = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
 // Build the per-week phase pattern for any supported cycle length.
 // Single block ≤ DOUBLE_BLOCK_THRESHOLD weeks; double block above.
 // Deload every 3rd week within Base and Build; retest = last week of Base (each Base block).
@@ -64,18 +75,29 @@ function _composeSingle({ base, build, peak, taper }) {
   for (let i = 0; i < build; i++) arr.push({ phase: 'build', deload: ((i + 1) % 3 === 0), retest: false });
   for (let i = 0; i < peak; i++)  arr.push({ phase: 'peak',  deload: false, retest: false });
   for (let i = 0; i < taper; i++) arr.push({ phase: 'taper', deload: false, retest: false });
-  if (base > 0) { arr[base - 1].deload = true; arr[base - 1].retest = true; }
+  if (base > 0) {
+    arr[base - 1].deload = true; arr[base - 1].retest = true;
+    // C2: the forced retest-deload must not land back-to-back with a natural deload.
+    // Clear the immediately preceding week's natural deload if it was set.
+    if (base > 1 && arr[base - 2].deload) arr[base - 2].deload = false;
+  }
   return arr;
 }
 
 function _composeDouble({ base1, build1, base2, build2, peak, taper }) {
   const arr = [];
   for (let i = 0; i < base1; i++)  arr.push({ phase: 'base',  deload: ((i + 1) % 3 === 0), retest: false });
-  if (base1 > 0) { arr[base1 - 1].deload = true; arr[base1 - 1].retest = true; }
+  if (base1 > 0) {
+    arr[base1 - 1].deload = true; arr[base1 - 1].retest = true;
+    if (base1 > 1 && arr[base1 - 2].deload) arr[base1 - 2].deload = false; // C2
+  }
   for (let i = 0; i < build1; i++) arr.push({ phase: 'build', deload: ((i + 1) % 3 === 0), retest: false });
   const base2Start = arr.length;
   for (let i = 0; i < base2; i++)  arr.push({ phase: 'base',  deload: ((i + 1) % 3 === 0), retest: false });
-  if (base2 > 0) { arr[base2Start + base2 - 1].deload = true; arr[base2Start + base2 - 1].retest = true; }
+  if (base2 > 0) {
+    arr[base2Start + base2 - 1].deload = true; arr[base2Start + base2 - 1].retest = true;
+    if (base2 > 1 && arr[base2Start + base2 - 2].deload) arr[base2Start + base2 - 2].deload = false; // C2
+  }
   for (let i = 0; i < build2; i++) arr.push({ phase: 'build', deload: ((i + 1) % 3 === 0), retest: false });
   for (let i = 0; i < peak; i++)   arr.push({ phase: 'peak',  deload: false, retest: false });
   for (let i = 0; i < taper; i++)  arr.push({ phase: 'taper', deload: false, retest: false });
@@ -475,16 +497,18 @@ export const Program = {
     d.setDate(d.getDate() - (cycleDays(cycleWeeks) - 1));
     const m = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
-    return `${d.getFullYear()}-${m}-${day}`;
+    // Snap to Monday so weekIdx always aligns with calendar weeks (C1).
+    return snapToMonday(`${d.getFullYear()}-${m}-${day}`);
   },
 
   // Resolve the effective cycle start date based on settings.anchorMode + cycleWeeks.
+  // Always snapped to Monday so all days in a calendar week share the same weekIdx (C1).
   effectiveStart(settings) {
     if (!settings) return null;
     if (settings.anchorMode === 'compDate' && settings.compDate) {
       return this.computeStartFromComp(settings.compDate, this.cycleWeeksOf(settings));
     }
-    return settings.startDate || null;
+    return settings.startDate ? snapToMonday(settings.startDate) : null;
   },
 
   // Returns {weekIdx 1..N, dayIdx 0..6, phase, deload, retest, flavor, slot} for a given date relative to startDate.

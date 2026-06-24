@@ -1,21 +1,22 @@
 // Service worker: cache-first shell, network-first for index.html, bypass Firestore/Auth.
-const CACHE = 'climb-planner-v14';
+const CACHE = 'climb-planner-v19';
 const SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './css/styles.css',
   './js/app.js',
+  './js/dates.js',
   './js/storage.js',
   './js/program.js',
   './js/loads.js',
   './js/warmup.js',
   './js/sync.js',
   './js/exercise-inputs.js',
+  './js/ui.js',
   './js/views/today.js',
   './js/views/week.js',
   './js/views/calendar.js',
-  './js/views/benchmarks.js',
   './js/views/log.js',
   './js/views/settings.js',
   './js/views/plans.js',
@@ -44,10 +45,22 @@ self.addEventListener('fetch', e => {
   }
   if (e.request.mode === 'navigate' || e.request.destination === 'document') {
     e.respondWith(
-      fetch(e.request).then(r => { caches.open(CACHE).then(c => c.put(e.request, r.clone())); return r; })
-        .catch(() => caches.match('./index.html'))
+      fetch(e.request).then(r => {
+        // P1: only cache a valid, same-origin, non-redirected response to avoid poisoning
+        // the offline shell with error pages, captive-portal redirects, or 5xx responses.
+        if (r.ok && r.type === 'basic' && !r.redirected) {
+          caches.open(CACHE).then(c => c.put(e.request, r.clone()));
+        }
+        return r;
+      }).catch(() => caches.match('./index.html'))
     );
     return;
   }
-  e.respondWith(caches.match(e.request).then(c => c || fetch(e.request)));
+  e.respondWith(caches.match(e.request).then(c => {
+    if (c) return c;
+    return fetch(e.request).then(r => {
+      if (r.ok && r.type === 'basic') caches.open(CACHE).then(cache => cache.put(e.request, r.clone()));
+      return r;
+    });
+  }));
 });

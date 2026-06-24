@@ -1,5 +1,6 @@
 import { Storage } from '../storage.js';
 import { Program } from '../program.js';
+import { actualHasResult } from '../exercise-inputs.js';
 
 const DAY_HEADERS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -46,7 +47,7 @@ export function renderCalendar(root) {
     });
 
     // Cell clicks → detail panel
-    root.querySelectorAll('.cycle-cell[data-date]').forEach(cell => {
+    root.querySelectorAll('[data-date]').forEach(cell => {
       cell.addEventListener('click', () => showDayPanel(cell.dataset.date));
     });
   }
@@ -141,12 +142,13 @@ export function renderCalendar(root) {
         if (dots) dotsHtml = `<div style="position:absolute;bottom:${isComp ? '14px' : '2px'};left:3px;right:3px;display:flex;flex-wrap:wrap;gap:2px">${dots}</div>`;
       }
 
-      cellsHtml += `<div class="${classes.join(' ')}" data-date="${date}">
+      const ariaLabel = `${date}${phase ? ': ' + phase : ''}${sessionLabel ? ' — ' + sessionLabel : ''}`;
+      cellsHtml += `<button type="button" class="${classes.join(' ')}" data-date="${date}" aria-label="${ariaLabel}">
         <span class="day-num">${d.getDate()}</span>
         ${labelHtml}
         ${dotsHtml}
         ${compIcon}
-      </div>`;
+      </button>`;
     }
 
     return `${navHtml}${legendHtml}${headersHtml}
@@ -247,7 +249,7 @@ function summaryCardHtml(settings, days = {}) {
     const ctx = Program.resolveDate(iso, startIso, cycleWeeks);
     if (!ctx || ctx.outOfCycle || ctx.isRest) continue;
     scheduledSessions++;
-    if (hasLoggedDay(days[iso])) loggedSessions++;
+    if (days[iso]?.exercises?.some(ex => actualHasResult(ex?.actual))) loggedSessions++;
   }
 
   for (let i = 0; i < totalDays; i++) {
@@ -285,19 +287,6 @@ function summaryCardHtml(settings, days = {}) {
   </div>`;
 }
 
-function hasLoggedDay(day) {
-  return !!day?.exercises?.some(ex => {
-    const actual = ex?.actual;
-    return actual && (
-      actual.kg != null ||
-      actual.sets != null ||
-      actual.reps != null ||
-      actual.rpe != null ||
-      actual.done === true ||
-      (typeof actual.raw === 'string' && actual.raw.trim())
-    );
-  });
-}
 
 function numericKg(value) {
   if (value == null || value === '') return null;

@@ -3,7 +3,7 @@ import { Storage } from '../storage.js';
 import { Program } from '../program.js';
 import { Loads } from '../loads.js';
 import { Warmup } from '../warmup.js';
-import { inputVisibility, repsLabel } from '../exercise-inputs.js';
+import { inputVisibility, repsLabel, actualHasResult } from '../exercise-inputs.js';
 
 const SELECTED_DATE_KEY = 'todaySelectedDate';
 
@@ -98,11 +98,6 @@ function isCycleComplete(settings, isoDate = todayIso()) {
   return d >= cycleEnd;
 }
 
-function hasActualResult(actual) {
-  if (!actual || typeof actual !== 'object') return false;
-  return actual.kg != null || actual.sets != null || actual.reps != null || actual.rpe != null || actual.done === true || (typeof actual.raw === 'string' && actual.raw.trim());
-}
-
 function formatKgStat(v) {
   if (v == null) return '—';
   return `${parseFloat(Number(v).toFixed(1))} kg`;
@@ -123,7 +118,7 @@ function cycleStats(plan) {
     if (dayIdx < 0 || dayIdx >= totalDays) continue;
 
     const exList = entry?.exercises || [];
-    if (exList.some(ex => hasActualResult(asActualObj(ex?.actual)))) totalSessions++;
+    if (exList.some(ex => actualHasResult(asActualObj(ex?.actual)))) totalSessions++;
 
     for (const ex of exList) {
       const actual = asActualObj(ex?.actual);
@@ -300,10 +295,10 @@ export function renderToday(root) {
   // Readiness — pill selectors
   const readinessRow = (key) => `
     <div class="field">
-      <label>${key}</label>
-      <div class="pill-group" data-pill-group="${key}">
+      <label id="pill-lbl-${key}">${key.charAt(0).toUpperCase() + key.slice(1)}</label>
+      <div class="pill-group" role="group" aria-labelledby="pill-lbl-${key}" data-pill-group="${key}">
         ${[1,2,3,4,5].map(v =>
-          `<div class="pill ${readiness[key]===v?'active':''}" data-pill="${key}" data-val="${v}">${v}</div>`
+          `<button type="button" class="pill ${readiness[key]===v?'active':''}" data-pill="${key}" data-val="${v}" aria-pressed="${readiness[key]===v}">${v}</button>`
         ).join('')}
       </div>
     </div>`;
@@ -318,7 +313,7 @@ export function renderToday(root) {
   // Warm-up — collapsed
   if (warmup.length) {
     const checkedCount = Object.values(dayLog?.warmup || {}).filter(Boolean).length;
-    body += `<div class="card"><details ${checkedCount === 0 ? '' : ''}>
+    body += `<div class="card"><details>
       <summary>Warm-up <span class="count">${checkedCount}/${warmup.length}</span></summary>
       <ul class="checklist">${warmup.map((t,i) =>
         `<li><label style="display:flex;gap:8px;cursor:pointer"><input type="checkbox" data-warmup="${i}" ${dayLog?.warmup?.[i]?'checked':''}> ${t}</label></li>`).join('')}</ul>
@@ -332,9 +327,9 @@ export function renderToday(root) {
   body += `<div class="card"><h2>Session</h2>
     <div class="field">
       <label>Session feel</label>
-      <div class="pill-group" data-pill-group="sessionFeel">
+      <div class="pill-group" role="group" aria-label="Session feel" data-pill-group="sessionFeel">
         ${[1,2,3,4,5].map(v =>
-          `<div class="pill ${(dayLog.sessionFeel ?? 3)===v?'active':''}" data-pill="sessionFeel" data-val="${v}">${v}</div>`
+          `<button type="button" class="pill ${(dayLog.sessionFeel ?? 3)===v?'active':''}" data-pill="sessionFeel" data-val="${v}" aria-pressed="${(dayLog.sessionFeel ?? 3)===v}">${v}</button>`
         ).join('')}
       </div>
     </div>
@@ -477,7 +472,9 @@ function exerciseInputs(i, ex, actual, suggestion) {
   const kgIsDefault   = actual.kg   == null && kgDefault   !== '';
   const rpeIsDefault  = actual.rpe  == null && rpeDefault  !== '';
 
-  let row = '<div class="stepper-row">';
+  const count = [vis.sets, vis.kg, vis.reps, vis.rpe].filter(Boolean).length;
+  const rowCls = count >= 4 ? 'stepper-row four' : count === 2 ? 'stepper-row two' : count === 1 ? 'stepper-row one' : 'stepper-row';
+  let row = `<div class="${rowCls}">`;
   if (vis.sets) row += stepper(`ex-${i}-sets`, n(setsValue), 'sets', 1, setsIsDefault);
   if (vis.kg)   row += stepper(`ex-${i}-kg`,   n(kgValue),  'kg',   0.5, kgIsDefault);
   if (vis.reps) row += stepper(`ex-${i}-reps`, n(repsValue), repsLabel(ex), 1, repsIsDefault);
@@ -487,7 +484,7 @@ function exerciseInputs(i, ex, actual, suggestion) {
   let suggestionBtn = '';
   // Hide the "tap to use" button when kg is already pre-filled with the suggestion —
   // it would be a no-op. Show it only when the user has a logged kg that differs.
-  if (suggestion && !kgIsDefault && actual.kg != null && actual.kg !== suggestion.suggestedKg) {
+  if (suggestion && suggestion.suggestedKg != null && !kgIsDefault && actual.kg != null && actual.kg !== suggestion.suggestedKg) {
     suggestionBtn = `<button class="suggest-btn" data-suggest-btn="${i}" data-suggest-kg="${suggestion.suggestedKg}">Suggested: ${suggestion.suggestedKg} kg → tap to use</button>`;
   }
   return suggestionBtn + row;
@@ -531,7 +528,6 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
       previousActualKg: prevActual?.kg ?? null,
       previousAvgRpe: prevActual?.rpe ?? null,
       readinessMultiplier: readinessMult,
-      isDeload: ctx.deload
     });
     const rangeStr = suggestion?.range ? `${suggestion.range[0]}–${suggestion.range[1]} kg` : '';
     const sets = ex.sets || ex.reps || '';
@@ -586,8 +582,8 @@ function wire(root, date, session, ctx, readinessMult) {
       const val = parseInt(p.dataset.val, 10);
       // Toggle active state for siblings
       const group = root.querySelector(`[data-pill-group="${key}"]`);
-      group.querySelectorAll('.pill').forEach(s => s.classList.remove('active'));
-      p.classList.add('active');
+      group.querySelectorAll('.pill').forEach(s => { s.classList.remove('active'); s.setAttribute('aria-pressed', 'false'); });
+      p.classList.add('active'); p.setAttribute('aria-pressed', 'true');
 
       if (key === 'sessionFeel') {
         persist({ sessionFeel: val });
@@ -615,11 +611,15 @@ function wire(root, date, session, ctx, readinessMult) {
           previousActualKg: prevActual?.kg ?? null,
           previousAvgRpe: prevActual?.rpe ?? null,
           readinessMultiplier: multiplier,
-          isDeload: ctx.deload
         });
-        if (eff) {
+        if (eff && eff.suggestedKg != null) {
           btn.textContent = `Suggested: ${eff.suggestedKg} kg → tap to use`;
           btn.dataset.suggestKg = eff.suggestedKg;
+          btn.style.display = '';
+        } else {
+          // Readiness dropped to a rest suggestion — hide the now-stale "Suggested" button
+          // so the old kg isn't presented as a live recommendation.
+          btn.style.display = 'none';
         }
       });
     });

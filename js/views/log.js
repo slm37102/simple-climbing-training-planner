@@ -1,6 +1,7 @@
 import { Storage } from '../storage.js';
 import { Program } from '../program.js';
 import { inputVisibility, repsLabel } from '../exercise-inputs.js';
+import { escHtml as esc } from '../ui.js';
 
 export function renderLog(root) {
   let activeTab = 'feed';
@@ -11,10 +12,6 @@ export function renderLog(root) {
   let expandedSet = new Set(); // tracks collapsed/expanded rows
 
   // ── helpers ──────────────────────────────────────────────────────────────
-
-  function esc(s) {
-    return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
 
   function getFilteredPlans() {
     const all = Storage.listPlans();
@@ -439,6 +436,15 @@ export function renderLog(root) {
         c.width  = c.offsetWidth || 400;
         c.height = 160;
         return c;
+      }
+
+      const allEmpty = hbSeries.every(s => !s.points.length) &&
+                       puSeries.every(s => !s.points.length) &&
+                       rpeSeries.every(s => !s.points.length);
+      if (allEmpty) {
+        document.getElementById('logContent').innerHTML =
+          '<p class="muted" style="padding:10px 0">No data logged yet. Complete sessions to see charts.</p>';
+        return;
       }
 
       const hbC = initCanvas('chartHangboard');
