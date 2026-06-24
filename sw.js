@@ -1,5 +1,5 @@
 // Service worker: cache-first shell, network-first for index.html, bypass Firestore/Auth.
-const CACHE = 'climb-planner-v15';
+const CACHE = 'climb-planner-v17';
 const SHELL = [
   './',
   './index.html',
@@ -55,5 +55,11 @@ self.addEventListener('fetch', e => {
     );
     return;
   }
-  e.respondWith(caches.match(e.request).then(c => c || fetch(e.request)));
+  e.respondWith(caches.match(e.request).then(c => {
+    if (c) return c;
+    return fetch(e.request).then(r => {
+      if (r.ok && r.type === 'basic') caches.open(CACHE).then(cache => cache.put(e.request, r.clone()));
+      return r;
+    });
+  }));
 });

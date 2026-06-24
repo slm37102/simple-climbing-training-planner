@@ -52,7 +52,7 @@ export const Loads = {
     const hi = baseMax * pctRange[1];
     return {
       isAddedWeight,
-      addedKgRange: [round(lo), round(hi)],
+      addedKgRange: [round(Math.min(lo, hi)), round(Math.max(lo, hi))],
       // Total system weight (info only)
       totalKgRange: bw != null ? [round(bw + lo), round(bw + hi)] : null
     };
@@ -61,13 +61,16 @@ export const Loads = {
   // Resolve effective kg for today's session, applying:
   //   (1) prev-actual seed, (2) auto-adjust, (3) readiness.
   // Deload weeks cut volume (handled in program.js), not intensity — kg is held constant.
-  // The `isDeload` flag is accepted for back-compat but ignored.
-  resolveEffective({ exercise, previousActualKg, previousAvgRpe, readinessMultiplier = 1.0, isDeload = false, benchmarks = null }) {
+  resolveEffective({ exercise, previousActualKg, previousAvgRpe, readinessMultiplier = 1.0, benchmarks = null }) {
     const base = this.prescribeLoadKg(exercise, benchmarks);
     if (!base) return null;
 
     const reason = [];
     const range = base.addedKgRange;
+
+    // C3: when readiness score says "rest", signal that to the UI rather than suggesting 0 kg.
+    if (readinessMultiplier <= 0) return { suggestedKg: null, restSuggested: true, range, reason };
+
     let kg;
 
     if (previousActualKg != null) {
@@ -83,10 +86,6 @@ export const Loads = {
     if (readinessMultiplier !== 1.0) {
       kg *= readinessMultiplier;
       reason.push(`readiness ×${readinessMultiplier}`);
-    }
-    if (isDeload) {
-      // Intensity held on deload — only volume is cut (see program.js applyDeloadVolume).
-      reason.push('deload: intensity held, volume cut');
     }
     return { suggestedKg: round(kg), range, reason };
   },

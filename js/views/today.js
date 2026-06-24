@@ -318,7 +318,7 @@ export function renderToday(root) {
   // Warm-up — collapsed
   if (warmup.length) {
     const checkedCount = Object.values(dayLog?.warmup || {}).filter(Boolean).length;
-    body += `<div class="card"><details ${checkedCount === 0 ? '' : ''}>
+    body += `<div class="card"><details>
       <summary>Warm-up <span class="count">${checkedCount}/${warmup.length}</span></summary>
       <ul class="checklist">${warmup.map((t,i) =>
         `<li><label style="display:flex;gap:8px;cursor:pointer"><input type="checkbox" data-warmup="${i}" ${dayLog?.warmup?.[i]?'checked':''}> ${t}</label></li>`).join('')}</ul>
@@ -489,7 +489,7 @@ function exerciseInputs(i, ex, actual, suggestion) {
   let suggestionBtn = '';
   // Hide the "tap to use" button when kg is already pre-filled with the suggestion —
   // it would be a no-op. Show it only when the user has a logged kg that differs.
-  if (suggestion && !kgIsDefault && actual.kg != null && actual.kg !== suggestion.suggestedKg) {
+  if (suggestion && suggestion.suggestedKg != null && !kgIsDefault && actual.kg != null && actual.kg !== suggestion.suggestedKg) {
     suggestionBtn = `<button class="suggest-btn" data-suggest-btn="${i}" data-suggest-kg="${suggestion.suggestedKg}">Suggested: ${suggestion.suggestedKg} kg → tap to use</button>`;
   }
   return suggestionBtn + row;
@@ -533,7 +533,6 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
       previousActualKg: prevActual?.kg ?? null,
       previousAvgRpe: prevActual?.rpe ?? null,
       readinessMultiplier: readinessMult,
-      isDeload: ctx.deload
     });
     const rangeStr = suggestion?.range ? `${suggestion.range[0]}–${suggestion.range[1]} kg` : '';
     const sets = ex.sets || ex.reps || '';
@@ -617,9 +616,8 @@ function wire(root, date, session, ctx, readinessMult) {
           previousActualKg: prevActual?.kg ?? null,
           previousAvgRpe: prevActual?.rpe ?? null,
           readinessMultiplier: multiplier,
-          isDeload: ctx.deload
         });
-        if (eff) {
+        if (eff && eff.suggestedKg != null) {
           btn.textContent = `Suggested: ${eff.suggestedKg} kg → tap to use`;
           btn.dataset.suggestKg = eff.suggestedKg;
         }

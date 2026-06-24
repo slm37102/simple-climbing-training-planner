@@ -58,6 +58,8 @@ function init() {
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(console.warn);
+    // P3: reload the page when a new SW takes control so users get the fresh shell immediately.
+    navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
   }
 }
 
