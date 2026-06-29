@@ -1,0 +1,701 @@
+<title>Climbing Training & Planning — Intermediate Field Manual</title>
+<style>
+  :root{
+    --ground:#ECEFE9; --surface:#FBFCFA; --surface-2:#F4F6F1;
+    --ink:#19211C; --muted:#586259; --faint:#8A938B;
+    --line:#D5DAD0; --line-strong:#C2C9BD;
+    --accent:#1E5A4B; --accent-ink:#143f34; --accent-soft:#DDE9E2;
+    --low:#3E7D5A; --low-bg:#E2EFE5;
+    --mod:#A9791C; --mod-bg:#F2E9D2;
+    --max:#A2402A; --max-bg:#F1DDD4;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
+    --measure:70ch;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--ground);color:var(--ink);
+    font-family:var(--sans);font-size:17px;line-height:1.65;
+    -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  .wrap{max-width:980px;margin:0 auto;padding:0 22px}
+  a{color:var(--accent-ink);text-decoration-color:var(--line-strong);text-underline-offset:2px}
+  a:hover{text-decoration-color:var(--accent)}
+  :focus-visible{outline:2.5px solid var(--accent);outline-offset:2px;border-radius:2px}
+
+  /* ---- header ---- */
+  header.masthead{
+    background:
+      radial-gradient(120% 140% at 88% -20%, rgba(30,90,75,.12), transparent 60%),
+      linear-gradient(180deg,#F3F5F0,var(--ground));
+    border-bottom:1px solid var(--line);
+  }
+  .masthead .wrap{padding-top:56px;padding-bottom:40px}
+  .eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--accent);font-weight:600}
+  h1{font-family:var(--serif);font-weight:600;
+    font-size:clamp(2.1rem,5.2vw,3.3rem);line-height:1.08;letter-spacing:-.012em;
+    margin:.34em 0 .28em;text-wrap:balance;max-width:18ch}
+  .lede{font-size:1.16rem;color:var(--muted);max-width:60ch;margin:0 0 1.4em}
+  .scope-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+  .tag{font-family:var(--mono);font-size:.74rem;letter-spacing:.02em;
+    background:var(--surface);border:1px solid var(--line-strong);
+    border-radius:999px;padding:4px 11px;color:var(--ink)}
+  .tag.solid{background:var(--accent);border-color:var(--accent);color:#fff}
+
+  /* ---- method note ---- */
+  .method{background:var(--surface);border:1px solid var(--line);
+    border-radius:12px;padding:16px 18px;margin-top:26px;font-size:.92rem;color:var(--muted)}
+  .method b{color:var(--ink)}
+
+  /* ---- contents ---- */
+  nav.toc{margin:34px 0 8px}
+  nav.toc h2{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--faint);font-weight:600;margin:0 0 12px}
+  .toc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+    gap:2px;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--line)}
+  .toc-grid a{display:flex;gap:11px;align-items:baseline;background:var(--surface);
+    padding:13px 15px;text-decoration:none;color:var(--ink);font-size:.95rem}
+  .toc-grid a:hover{background:var(--surface-2)}
+  .toc-grid .n{font-family:var(--mono);font-size:.8rem;color:var(--accent);min-width:1.4em}
+
+  /* ---- sections ---- */
+  main .wrap{padding-top:8px;padding-bottom:10px}
+  section{padding:46px 0 8px;border-top:1px solid var(--line);margin-top:38px}
+  section:first-of-type{border-top:none;margin-top:18px}
+  .sec-eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.15em;
+    text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:6px}
+  h2.title{font-family:var(--serif);font-weight:600;font-size:clamp(1.6rem,3.4vw,2.2rem);
+    line-height:1.14;letter-spacing:-.01em;margin:0 0 .5em;text-wrap:balance}
+  h3{font-family:var(--serif);font-weight:600;font-size:1.3rem;line-height:1.2;
+    margin:1.9em 0 .5em;letter-spacing:-.005em}
+  h4{font-size:1rem;font-weight:700;margin:1.4em 0 .35em;letter-spacing:.005em}
+  p,li{max-width:var(--measure)}
+  p{margin:0 0 1em}
+  ul,ol{margin:0 0 1.1em;padding-left:1.25em}
+  li{margin:.3em 0}
+  strong{font-weight:650}
+  .key{font-weight:650;color:var(--accent-ink)}
+
+  /* ---- callouts ---- */
+  .note{border-left:3px solid var(--accent);background:var(--accent-soft);
+    border-radius:0 10px 10px 0;padding:14px 18px;margin:1.3em 0;max-width:var(--measure)}
+  .note.warn{border-left-color:var(--max);background:var(--max-bg)}
+  .note.warn .lbl{color:var(--max)}
+  .note .lbl{font-family:var(--mono);font-size:.7rem;letter-spacing:.12em;
+    text-transform:uppercase;font-weight:700;color:var(--accent-ink);display:block;margin-bottom:4px}
+  .note p:last-child{margin-bottom:0}
+
+  /* ---- chips: provenance + intensity ---- */
+  .chip{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);
+    font-size:.68rem;letter-spacing:.04em;text-transform:uppercase;font-weight:600;
+    border-radius:999px;padding:3px 9px;white-space:nowrap;vertical-align:middle}
+  .chip.pr{background:var(--accent);color:#fff}
+  .chip.vf{background:var(--accent-soft);color:var(--accent-ink)}
+  .chip.fw{background:var(--surface);color:var(--accent-ink);border:1px solid var(--line-strong)}
+  .chip.low{background:var(--low-bg);color:var(--low)}
+  .chip.mod{background:var(--mod-bg);color:var(--mod)}
+  .chip.max{background:var(--max-bg);color:var(--max)}
+  sup.cite{font-family:var(--mono);font-size:.66em;font-weight:600}
+  sup.cite a{text-decoration:none;color:var(--accent)}
+
+  /* ---- tables ---- */
+  .tbl-wrap{overflow-x:auto;margin:1.2em 0 1.4em;border:1px solid var(--line);
+    border-radius:12px;background:var(--surface)}
+  table{border-collapse:collapse;width:100%;font-size:.92rem}
+  caption{caption-side:top;text-align:left;font-size:.82rem;color:var(--muted);
+    padding:12px 15px 0;font-style:italic}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  thead th{background:var(--surface-2);font-size:.74rem;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--muted);font-weight:700;white-space:nowrap;
+    border-bottom:1.5px solid var(--line-strong)}
+  tbody tr:last-child td{border-bottom:none}
+  td.num,th.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+  td.phase{font-weight:650}
+  tbody tr:hover{background:var(--surface-2)}
+  .col-min{width:1%;white-space:nowrap}
+
+  /* ---- protocol cards ---- */
+  .proto{background:var(--surface);border:1px solid var(--line);border-radius:14px;
+    padding:0;margin:1.3em 0;overflow:hidden}
+  .proto>.head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;
+    padding:15px 18px;border-bottom:1px solid var(--line);background:var(--surface-2)}
+  .proto>.head .pname{font-family:var(--serif);font-size:1.18rem;font-weight:600;margin-right:auto}
+  .proto>.body{padding:6px 18px 16px}
+  .spec{display:grid;grid-template-columns:max-content 1fr;gap:2px 0;margin:12px 0 4px;
+    border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .spec dt{font-family:var(--mono);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--muted);background:var(--surface-2);padding:9px 13px;border-bottom:1px solid var(--line);font-weight:600}
+  .spec dd{margin:0;padding:9px 14px;border-bottom:1px solid var(--line);font-size:.93rem}
+  .spec dt:last-of-type,.spec dd:last-child{border-bottom:none}
+  .spec dd b{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+  /* ---- legend ---- */
+  .legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px;margin:1.2em 0}
+  .legend .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .legend .card p{font-size:.88rem;color:var(--muted);margin:.5em 0 0;max-width:none}
+
+  /* ---- sources ---- */
+  ol.src{counter-reset:s;list-style:none;padding:0;font-size:.9rem}
+  ol.src li{counter-increment:s;position:relative;padding:9px 0 9px 42px;
+    border-bottom:1px solid var(--line);max-width:none}
+  ol.src li::before{content:"["counter(s)"]";position:absolute;left:0;top:9px;
+    font-family:var(--mono);font-size:.78rem;color:var(--accent);font-weight:600}
+  ol.src .what{display:block;color:var(--muted);font-size:.86rem;margin-top:2px}
+  ol.src a{word-break:break-word}
+  .pr-dot{font-family:var(--mono);font-size:.62rem;background:var(--accent);color:#fff;
+    border-radius:4px;padding:1px 5px;letter-spacing:.05em;margin-left:6px;vertical-align:middle}
+
+  footer{border-top:1px solid var(--line);margin-top:48px;padding:28px 0 60px;color:var(--faint);font-size:.85rem}
+  .toplink{font-family:var(--mono);font-size:.78rem}
+  @media (max-width:560px){
+    body{font-size:16px}
+    .masthead .wrap{padding-top:40px}
+    th,td{padding:9px 11px}
+    .spec{grid-template-columns:1fr}
+    .spec dt{border-bottom:none;padding-bottom:2px}
+  }
+  @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+  html{scroll-behavior:smooth}
+</style>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Evidence-based field manual</div>
+    <h1>Training &amp; Planning for the Intermediate Climber</h1>
+    <p class="lede">How to structure a season and exactly what to do in each session — built for a climber pushing both short power and long routes, where finger strength has started to matter and "just climb more" has stopped working.</p>
+    <div class="scope-row">
+      <span class="tag solid">Intermediate</span>
+      <span class="tag">Boulder V4–V6</span>
+      <span class="tag">Sport 6c–7a</span>
+      <span class="tag">Both disciplines</span>
+      <span class="tag">Periodization + protocols</span>
+    </div>
+    <div class="method">
+      <b>How this was built.</b> Several research passes fanned out parallel web searches — a broad pass over five angles plus a deep gather over ten sub-topics (~300 detailed claims extracted with quotes) — then ran key claims through a 3-vote adversarial fact-check (three skeptical reviewers; ≥2 must fail to refute). <b>31 claims passed:</b> 15 from the broad passes (periodization structure, finger-test reliability) plus all 16 curated deep-detail claims (ARC dosing, Hörst's 5×5 and 60/60, limit-boulder specifics, training-frequency data) — 14 unanimous, 2 split. Tags: <span class="chip pr">Peer-reviewed</span> = published research; <span class="chip vf">✓ Verified</span> = survived the adversarial check; <span class="chip fw">Expert framework</span> = authoritative coach/practitioner sources (Hörst, Lattice, Anderson/RCTM, Dr. Vagy) not individually re-checked. Numbers are starting points to <em>adjust</em>, not laws. <b>This is training information, not medical advice.</b>
+    </div>
+
+    <nav class="toc" aria-label="Contents">
+      <h2>Contents</h2>
+      <div class="toc-grid">
+        <a href="#read"><span class="n">00</span><span>How to read this</span></a>
+        <a href="#principles"><span class="n">01</span><span>Principles for the dual climber</span></a>
+        <a href="#periodization"><span class="n">02</span><span>Periodization &amp; planning</span></a>
+        <a href="#phases"><span class="n">03</span><span>The macrocycle, phase by phase</span></a>
+        <a href="#week"><span class="n">04</span><span>Weekly templates</span></a>
+        <a href="#fingers"><span class="n">05</span><span>Fingerboard protocols</span></a>
+        <a href="#strength"><span class="n">06</span><span>Max &amp; contact strength</span></a>
+        <a href="#power"><span class="n">07</span><span>Power &amp; limit work</span></a>
+        <a href="#pe"><span class="n">08</span><span>Power-endurance &amp; aerobic</span></a>
+        <a href="#prehab"><span class="n">09</span><span>Injury prevention &amp; antagonists</span></a>
+        <a href="#assess"><span class="n">10</span><span>Assessment &amp; benchmarks</span></a>
+        <a href="#plan"><span class="n">11</span><span>A worked 12-week plan</span></a>
+        <a href="#caveats"><span class="n">12</span><span>Caveats &amp; open questions</span></a>
+        <a href="#sources"><span class="n">13</span><span>Sources</span></a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+<!-- 00 -->
+<section id="read">
+  <div class="sec-eyebrow">Orientation</div>
+  <h2 class="title">How to read this</h2>
+  <p>Two systems run through the whole document so you can scan it like a coach would.</p>
+  <div class="legend">
+    <div class="card">
+      <span class="chip pr">Peer-reviewed</span> <span class="chip vf">✓ Verified</span> <span class="chip fw">Expert framework</span>
+      <p><strong>Provenance.</strong> <em>Peer-reviewed</em> = published research. <em>Verified</em> = passed an automated 3-vote adversarial fact-check (three skeptical AI reviewers; at least two had to fail to refute it). <em>Expert framework</em> = respected practitioner sources — strong consensus, but coaching judgement rather than controlled trials. Read "Verified" as <em>cross-checked</em>, not <em>proven</em>.</p>
+    </div>
+    <div class="card">
+      <span class="chip low">Low</span> <span class="chip mod">Moderate</span> <span class="chip max">High / max</span>
+      <p><strong>Intensity.</strong> Every protocol is tagged by how hard and how taxing it is on fingers and CNS, so you can see at a glance how much recovery it needs and where it belongs in the week.</p>
+    </div>
+  </div>
+  <p>The single most useful idea in here: <span class="key">the plan is a cycle, not a list.</span> You rotate emphasis through phases, you cut volume before you break, and you test so the numbers — not your mood — drive the next block.</p>
+</section>
+
+<!-- 01 -->
+<section id="principles">
+  <div class="sec-eyebrow">Foundations</div>
+  <h2 class="title">Principles for the climber who does both</h2>
+  <p>Training boulder and sport at once is the defining constraint at this level. The two ends pull in different directions — short maximal force versus sustained output — and you can't peak both at the exact same time. The plan below resolves that by <strong>sequencing</strong> them rather than blending them every week.</p>
+
+  <h4>1. Climbing is the main event; training is the supplement</h4>
+  <p>For a V4–V6 / 6c–7a climber, the largest gains still come from climbing volume and movement skill, not from the gym. Finger strength is <em>necessary but not sufficient</em> at this band — Lattice's ability-level analysis shows its predictive weight relative to technique and other factors shifts as you progress, and it is not the sole lever for an intermediate.<sup class="cite"><a href="#s27">[27]</a></sup> Structured strength work is the seasoning, not the meal.</p>
+
+  <h4>2. Finger strength is the trainable trait that matters most physiologically</h4>
+  <p>Among measurable physical traits, climbing-specific finger strength is the one most strongly tied to performance. In a peer-reviewed study of male climbers, maximal isometric finger strength (a max hang on a ~22 mm edge) correlated <strong>r = 0.89 with bouldering</strong> and <strong>r = 0.67 with redpoint sport grade</strong> (both p &lt; 0.01).<sup class="cite"><a href="#s25">[25]</a></sup> <span class="chip pr">Peer-reviewed</span> That is why a 20 mm max hang anchors the assessment in §10 — but see the caveats: correlation isn't a recipe, and ~50% of grade variance is unexplained.<sup class="cite"><a href="#s28">[28]</a></sup></p>
+
+  <h4>3. One priority per block</h4>
+  <p>You make a quality the focus of a phase and let the other discipline tick over in <em>maintenance</em> (one short session a week is usually enough to hold an adaptation while you build something else).<sup class="cite"><a href="#s2">[2]</a></sup> Chasing max power and max endurance in the same week is how intermediates plateau.</p>
+
+  <h4>4. Progressive overload, then recover before you have to</h4>
+  <p>Adaptations come from loading a little harder over weeks, then deliberately backing off. The deload is not a reward for being tired — it is scheduled <em>before</em> you break, typically every fourth week (see §2).<sup class="cite"><a href="#s6">[6]</a></sup></p>
+
+  <h4>5. Manage fingers like a long-term asset</h4>
+  <p>The most common injury at this level is a finger pulley strain.<sup class="cite"><a href="#s22">[22]</a></sup> Fingers adapt far slower than muscle, so the protocols here cap intensity jumps and rotate grips on purpose. Patience on the fingerboard is a performance strategy, not just caution.</p>
+</section>
+
+<!-- 02 -->
+<section id="periodization">
+  <div class="sec-eyebrow">Planning</div>
+  <h2 class="title">Periodization &amp; planning</h2>
+  <p>Periodization just means organising training into time blocks so that fitness peaks when you want it to. It nests at three scales:</p>
+  <div class="tbl-wrap">
+  <table>
+    <caption>The three planning scales — pick a goal date first, then work backwards.</caption>
+    <thead><tr><th>Scale</th><th>Length</th><th>What it is</th><th>Your version</th></tr></thead>
+    <tbody>
+      <tr><td class="phase">Macrocycle</td><td class="num">3–12 months</td><td>The whole season, ending on a goal (a trip, a project, a comp).</td><td>One full Base → Build → Peak → Taper run, ~12–24 weeks.</td></tr>
+      <tr><td class="phase">Mesocycle</td><td class="num">3–6 weeks</td><td>A block with one training emphasis.</td><td>e.g. a 4-week max-strength block (3 build + 1 deload).</td></tr>
+      <tr><td class="phase">Microcycle</td><td class="num">~1 week</td><td>The repeating session pattern.</td><td>Your weekly schedule (§4).</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>The three models — and which to use</h3>
+  <p>Climbing borrows three periodization models from strength sport. They are not equally suited to an intermediate.<sup class="cite"><a href="#s2">[2]</a></sup></p>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>Model</th><th>How emphasis changes</th><th>Best for</th><th>Trade-off</th></tr></thead>
+    <tbody>
+      <tr><td class="phase">Linear (classic)</td><td>One quality at a time, in sequence: endurance → strength → power → power-endurance → peak.</td><td><strong>Most intermediates</strong>, and first structured seasons. This is the RCTM model.<sup class="cite"><a href="#s1">[1]</a></sup></td><td>Qualities trained early can fade by peak if not maintained.</td></tr>
+      <tr><td class="phase">Undulating (non-linear)</td><td>Different qualities hit within the same week, varying day to day.</td><td>Time-crunched climbers; keeping multiple traits alive at once.<sup class="cite"><a href="#s2">[2]</a></sup></td><td>Harder to drive a true peak; needs good auto-regulation.</td></tr>
+      <tr><td class="phase">Block / conjugate</td><td>Concentrated blocks overload one system hard, maintain the rest.</td><td>Advanced climbers with a clear weakness to target.<sup class="cite"><a href="#s2">[2]</a></sup></td><td>Easy to over-stress one system; less margin for error.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note">
+    <span class="lbl">Verified · the coaching taxonomy</span>
+    <p>One widely-used framing (TrainingBeta) splits periodization into three families — <strong>sequential</strong> (which contains the classic linear method), <strong>concurrent</strong>, and <strong>conjugate</strong> — and notes that in sequential/linear work each cycle develops <em>one</em> quality and runs ~3–4 weeks (2–6 week range), moving from high-volume/low-intensity to low-volume/high-intensity.<sup class="cite"><a href="#s2">[2]</a></sup> <span class="chip vf">✓ Verified</span></p>
+  </div>
+  <div class="note">
+    <span class="lbl">Recommendation</span>
+    <p>For a V4–V6 / 6c–7a climber doing both disciplines: <strong>follow the linear phase arc, but maintain the off-emphasis qualities instead of dropping them</strong> — emphasize one quality per block (strength → power → power-endurance) while keeping the others alive with a weekly maintenance touch. In TrainingBeta's taxonomy that's a <em>conjugate</em> approach, which they explicitly recommend for intermediates; the fully <em>concurrent</em> "train everything hard at once" model is reserved for advanced climbers who know their recovery.<sup class="cite"><a href="#s2">[2]</a></sup> <span class="chip vf">✓ Verified</span> You keep the clean peak of a sequence without letting your second discipline rot — and practitioners widely warn that rigid one-quality-at-a-time plans over-structure real climbers.<sup class="cite"><a href="#s5">[5]</a></sup></p>
+  </div>
+
+  <h3>Deloads — the non-negotiable</h3>
+  <p>A deload is a planned easy week that lets accumulated fatigue clear so adaptation can surface. The standard cadence is <span class="key">3 loading weeks + 1 reduced week</span>.<sup class="cite"><a href="#s6">[6]</a></sup> The climbing-specific detail that trips people up:</p>
+  <div class="note">
+    <span class="lbl">Deload = cut volume, hold intensity</span>
+    <p>Reduce the <em>amount</em> of work (roughly 40–50% fewer hard sets / climbs), but keep the quality high — a few crisp, heavy efforts. Don't turn the hard edges soft; just do fewer of them. This preserves the strength stimulus while dropping the fatigue.</p>
+  </div>
+
+  <h3>Peaking &amp; tapering</h3>
+  <p>To send hard on a known date, schedule backwards from it. The last phase is a <strong>taper</strong>: 1–2 weeks of much-reduced volume but maintained intensity, so you arrive fresh and strong rather than fried.<sup class="cite"><a href="#s3">[3]</a></sup> Peak power-endurance and limit power are perishable — they fade in ~2–3 weeks — so they're trained last and deliberately, then held with minimal touches through the taper. The aerobic base built in Phase 1 is far more durable and needs almost no maintenance to persist.<sup class="cite"><a href="#s4">[4]</a></sup></p>
+</section>
+
+<!-- 03 -->
+<section id="phases">
+  <div class="sec-eyebrow">The arc</div>
+  <h2 class="title">The macrocycle, phase by phase</h2>
+  <p>This is the canonical climbing sequence — the Anderson brothers' RCTM, a sequential/linear periodization with four named phases in fixed order, <strong>Base Fitness → Strength → Power → Power Endurance</strong>, followed by a Performance/Peak window and then Rest.<sup class="cite"><a href="#s1">[1]</a></sup> <span class="chip vf">✓ Verified</span> Virtually every other framework uses the same phases, just renamed.<sup class="cite"><a href="#s3">[3]</a></sup> Read it top to bottom: each phase builds the substrate the next one exploits.</p>
+  <div class="tbl-wrap">
+  <table>
+    <caption>A linear macrocycle for the dual climber. Weeks are a ~16-week template; compress or stretch to fit your calendar (8–24 weeks).</caption>
+    <thead><tr><th class="col-min">#</th><th>Phase</th><th class="num">Weeks</th><th>Primary goal</th><th>Energy system</th><th>Signature sessions</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1</td><td class="phase">Base / Aerobic</td><td class="num">4–6</td><td>Volume, technique, work capacity, tendon prep</td><td>Aerobic capacity</td><td>High-volume easy climbing, ARC, light hangboard intro, antagonists</td></tr>
+      <tr><td class="num">2</td><td class="phase">Strength</td><td class="num">3–4</td><td>Max finger &amp; pulling strength</td><td>Alactic (strength)</td><td>Max hangs, weighted pull-ups, limit bouldering (low volume)</td></tr>
+      <tr><td class="num">3</td><td class="phase">Power</td><td class="num">2–3</td><td>Rate of force — explosive, dynamic moves</td><td>Alactic (power)</td><td>Limit bouldering, campus (with care), power boulders</td></tr>
+      <tr><td class="num">4</td><td class="phase">Power-endurance</td><td class="num">3–4</td><td>Sustain hard moves; resist the pump</td><td>Anaerobic capacity</td><td>4×4s, on-the-minute intervals, route intervals, repeaters</td></tr>
+      <tr><td class="num">5</td><td class="phase">Peak / Perform</td><td class="num">1–2</td><td>Realise fitness on real climbs</td><td>All (sharpened)</td><td>Redpoint / project attempts, limit boulders, full rest</td></tr>
+      <tr><td class="num">6</td><td class="phase">Taper &amp; Rest</td><td class="num">1–2</td><td>Shed fatigue, then recover</td><td>Maintenance</td><td>Low volume / high quality, then a true rest week</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note">
+    <span class="lbl">Reading the arc</span>
+    <p>Notice the shift in <em>both</em> intensity and energy system: long-and-easy at the start (build the engine and the tendons), short-and-heavy in the middle (build force), then medium-hard-and-repeated near the end (learn to apply force when pumped), then sharp-and-fresh to perform. Strength is trained <strong>before</strong> power for a reason — you can't express power you don't have, and power work on under-prepared fingers is where injuries cluster.</p>
+  </div>
+  <p><strong>Balancing boulder &amp; sport across the arc.</strong> The discipline emphasis tracks the phase. The Strength and Power phases lean bouldering (short, maximal). The Power-endurance phase leans sport (sustained). Throughout, the non-emphasised discipline gets one maintenance session a week. If your goal event is a boulder trip, shorten Phase 4; if it's a sport redpoint, extend it.</p>
+</section>
+
+<!-- 04 -->
+<section id="week">
+  <div class="sec-eyebrow">The microcycle</div>
+  <h2 class="title">Weekly templates</h2>
+  <p>Three to four climbing/training days a week is the sweet spot at this level — enough stimulus, enough recovery. Hard finger days need ~48 h between them.<sup class="cite"><a href="#s7">[7]</a></sup> The hard rule for sequencing a session: <span class="key">skill → power → strength → endurance → conditioning</span>. Do the most neurally demanding, least fatigued work first.</p>
+  <div class="note">
+    <span class="lbl">Verified · how much do strong climbers actually train?</span>
+    <p>Lattice's member data is reassuring: a <strong>V4 climber averages ~3 training days/week, a V12+ only ~4</strong> — about one extra day at the elite end. And total weekly exercise volume is <strong>nearly flat (~22 items/week) across every grade band</strong>. The lever at the top isn't more volume — it's quality, consistency and intensity.<sup class="cite"><a href="#s35">[35]</a></sup> <span class="chip vf">✓ Verified</span></p>
+  </div>
+
+  <h4>Strength-phase week (boulder-leaning)</h4>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>Day</th><th>Focus</th><th>Session</th></tr></thead>
+    <tbody>
+      <tr><td class="phase">Mon</td><td>Strength</td><td>Warm-up → max hangs → limit bouldering (low volume) → weighted pull-ups → antagonists</td></tr>
+      <tr><td class="phase">Tue</td><td>Rest / mobility</td><td>Off, or easy mobility + rotator-cuff routine</td></tr>
+      <tr><td class="phase">Wed</td><td>Skill / volume</td><td>Technique-focused climbing on moderate boulders; flow, footwork, body position</td></tr>
+      <tr><td class="phase">Thu</td><td>Rest</td><td>Full rest</td></tr>
+      <tr><td class="phase">Fri</td><td>Strength + maintenance</td><td>Max hangs → power boulders → <em>one</em> short PE/route set (sport maintenance) → core</td></tr>
+      <tr><td class="phase">Sat</td><td>Outdoor / project</td><td>Climbing outdoors or hard projecting — the fun application day</td></tr>
+      <tr><td class="phase">Sun</td><td>Rest</td><td>Full rest or easy ARC if fresh</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h4>Power-endurance-phase week (sport-leaning)</h4>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>Day</th><th>Focus</th><th>Session</th></tr></thead>
+    <tbody>
+      <tr><td class="phase">Mon</td><td>Power-endurance</td><td>Warm-up → 4×4s <em>or</em> on-the-minute intervals → core</td></tr>
+      <tr><td class="phase">Tue</td><td>Rest</td><td>Full rest</td></tr>
+      <tr><td class="phase">Wed</td><td>Strength maintenance</td><td>Max hangs (reduced volume) → a few limit boulders (boulder maintenance)</td></tr>
+      <tr><td class="phase">Thu</td><td>Rest / ARC</td><td>Easy aerobic climbing, 20–30 min, no pump</td></tr>
+      <tr><td class="phase">Fri</td><td>Route intervals</td><td>Linked routes / laps at redpoint-minus intensity → antagonists</td></tr>
+      <tr><td class="phase">Sat</td><td>Outdoor / redpoint</td><td>Project attempts on routes</td></tr>
+      <tr><td class="phase">Sun</td><td>Rest</td><td>Full rest</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>In <strong>Base phase</strong>, swap the hard days for high-volume easy-to-moderate climbing and ARC, with the hangboard introduced gently (light loads, technique of hanging) to prime tendons. In <strong>Peak/Taper</strong>, strip volume to two short, high-quality days plus your real attempts.</p>
+</section>
+
+<!-- 05 -->
+<section id="fingers">
+  <div class="sec-eyebrow">Protocol · the engine room</div>
+  <h2 class="title">Fingerboard protocols</h2>
+  <p>The fingerboard is the most efficient and most dangerous tool you have. The standard benchmark edge is <span class="key">20 mm</span> (about one finger-pad deep), and the two grips to live on are <strong>half-crimp</strong> and <strong>open-hand / open-crimp</strong>.<sup class="cite"><a href="#s10">[10]</a></sup> <span class="chip pr">Peer-reviewed</span> Beginners-to-intermediates should use two-arm hangs — load spreads across the shoulder girdle and setup is simpler.<sup class="cite"><a href="#s9">[9]</a></sup></p>
+
+  <div class="proto">
+    <div class="head"><span class="pname">Max Hangs</span><span class="chip max">High / max</span><span class="chip pr">Peer-reviewed</span></div>
+    <div class="body">
+      <p>Pure finger <em>strength</em> — heavy, short, fully recovered. The "deadlift for fingers."<sup class="cite"><a href="#s8">[8]</a></sup> Trained in the Strength phase.</p>
+      <dl class="spec">
+        <dt>Edge</dt><dd>20 mm (half-crimp &amp; open-crimp)</dd>
+        <dt>Load</dt><dd>Maximal: an edge/added weight you can <b>barely hold ~15 s</b>, hung for ~<b>10 s</b><sup class="cite"><a href="#s10">[10]</a></sup></dd>
+        <dt>Work : rest</dt><dd>~<b>10 s</b> hang : <b>3 min</b> rest<sup class="cite"><a href="#s10">[10]</a></sup> (Hörst variant: 7–13 s, 3–5 min<sup class="cite"><a href="#s7">[7]</a></sup>)</dd>
+        <dt>Volume</dt><dd><b>3–5</b> hangs per grip; <b>2–4</b> grips. (PhysiVantage: 5 hangs/set, ≥5 min between two sets<sup class="cite"><a href="#s10">[10]</a></sup>)</dd>
+        <dt>Frequency</dt><dd><b>2–3×/week</b>, ≥48 h apart<sup class="cite"><a href="#s7">[7]</a></sup></dd>
+        <dt>Progress by</dt><dd>Adding weight, then a smaller edge or fewer fingers<sup class="cite"><a href="#s10">[10]</a></sup></dd>
+      </dl>
+      <p><em>Research note:</em> Eva López's studies underpin the heavy-short-full-recovery method, including using the <strong>minimum edge</strong> you can hold (instead of added weight) as the progression variable.<sup class="cite"><a href="#s11">[11]</a></sup></p>
+    </div>
+  </div>
+
+  <div class="proto">
+    <div class="head"><span class="pname">Repeaters</span><span class="chip mod">Moderate</span><span class="chip pr">Peer-reviewed</span></div>
+    <div class="body">
+      <p>Finger <em>strength-endurance</em> — moderate load, brief rests, repeated to fatigue. Best for long boulders and route cruxes; trained in the Power-endurance phase.<sup class="cite"><a href="#s8">[8]</a></sup></p>
+      <dl class="spec">
+        <dt>Interval</dt><dd><b>7 s</b> hang / <b>3 s</b> rest × 6 = one set (~1 min)<sup class="cite"><a href="#s12">[12]</a></sup>. Variant: <b>10 s / 5 s × 4</b><sup class="cite"><a href="#s10">[10]</a></sup></dd>
+        <dt>Load</dt><dd>~<b>50–60%</b> of your max-hang load<sup class="cite"><a href="#s7">[7]</a></sup></dd>
+        <dt>Sets</dt><dd><b>1–3</b> per grip (Hörst)<sup class="cite"><a href="#s7">[7]</a></sup>; up to <b>10–20</b> total across grips, 1 min between<sup class="cite"><a href="#s10">[10]</a></sup></dd>
+        <dt>Frequency</dt><dd><b>2×/week</b>, ≥48 h apart</dd>
+        <dt>Progress by</dt><dd>More sets, then more load</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="note">
+    <span class="lbl">Verified dose-response</span>
+    <p><strong>Three brief hangboard sessions a week, for four weeks, produces a noticeable finger-strength increase</strong> — especially for those newer to hangboarding — and for intermediates, a few multi-week cycles bring clear gains.<sup class="cite"><a href="#s10">[10]</a></sup> <span class="chip pr">Peer-reviewed</span> You do not need marathon sessions; you need consistent, progressive, well-recovered ones.</p>
+  </div>
+
+  <div class="note warn">
+    <span class="lbl">Finger safety</span>
+    <p>Never hangboard cold — climb or do light hangs first. Stop a hang the instant form fails or you feel a sharp finger sensation. Limit <strong>full crimp</strong> on the board; bias half-crimp and open-hand, which load the pulleys less aggressively.<sup class="cite"><a href="#s23">[23]</a></sup> Add load in small increments — fingers adapt slower than the muscles that want to pull harder.</p>
+  </div>
+</section>
+
+<!-- 06 -->
+<section id="strength">
+  <div class="sec-eyebrow">Protocol · pulling</div>
+  <h2 class="title">Max &amp; contact strength</h2>
+  <p>Upper-body pulling strength supports steep climbing and lock-offs. It's trained alongside max hangs in the Strength phase.</p>
+
+  <div class="proto">
+    <div class="head"><span class="pname">Weighted Pull-ups</span><span class="chip max">High / max</span><span class="chip fw">Expert framework</span><span class="chip vf">✓ Verified</span></div>
+    <div class="body">
+      <p>Add load (hypergravity) once bodyweight pulling is solid.<sup class="cite"><a href="#s19">[19]</a></sup></p>
+      <dl class="spec">
+        <dt>Prerequisite</dt><dd>~<b>15</b> clean bodyweight pull-ups, no shoulder/elbow injury history, before adding weight<sup class="cite"><a href="#s19">[19]</a></sup></dd>
+        <dt>Scheme</dt><dd>Strength: <b>3–6 reps</b> × <b>3–5 sets</b>, <b>2–3 min</b> rest, heavy but clean<sup class="cite"><a href="#s24">[24]</a></sup></dd>
+        <dt>Hörst "5×5"</dt><dd><b>5 sets × 5</b> weighted pull-ups, <b>3 min</b> rest, ~<b>3×/week for 10 weeks</b>, done at the END of a session (fully warm)<sup class="cite"><a href="#s32">[32]</a></sup></dd>
+        <dt>Frequency</dt><dd><b>1–2×/week</b> in Strength phase</dd>
+        <dt>Progress by</dt><dd>Adding weight while keeping reps in range</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="proto">
+    <div class="head"><span class="pname">Lock-offs &amp; uneven pulls</span><span class="chip mod">Moderate</span><span class="chip fw">Expert framework</span></div>
+    <div class="body">
+      <p>Position-specific strength for holding a hand still while the other reaches. Hold lock-offs at 90° and 120° elbow angles; progress to uneven-grip pull-ups (one hand high, one low) as a step toward one-arm strength.<sup class="cite"><a href="#s19">[19]</a></sup></p>
+    </div>
+  </div>
+
+  <h4>Contact strength &amp; core</h4>
+  <p><strong>Contact strength</strong> — the ability to generate grip force instantly on a hold — is trained on the wall through limit bouldering and (carefully) campus work rather than on the board.<sup class="cite"><a href="#s24">[24]</a></sup> <strong>Core</strong> is trained as tension, not crunches: front levers/progressions, hanging leg raises, planks, and the body-tension you build by climbing steep terrain with precise feet. 2–3 short core sets after climbing, most training days.</p>
+</section>
+
+<!-- 07 -->
+<section id="power">
+  <div class="sec-eyebrow">Protocol · force, fast</div>
+  <h2 class="title">Power &amp; limit work</h2>
+  <p>Power is force applied quickly — the explosive, dynamic end of climbing. It sits on top of the strength you built in the previous phase.</p>
+
+  <div class="proto">
+    <div class="head"><span class="pname">Limit Bouldering</span><span class="chip max">High / max</span><span class="chip fw">Expert framework</span><span class="chip vf">✓ Verified</span></div>
+    <div class="body">
+      <p>The cornerstone power session: very hard, very short problems climbed fresh.</p>
+      <dl class="spec">
+        <dt>Problem</dt><dd><b>3–5 moves</b> (≤6 hand moves) at your absolute limit — more than that shifts the stimulus into power-endurance<sup class="cite"><a href="#s33">[33]</a></sup></dd>
+        <dt>Effort : rest</dt><dd>Max-effort attempt : <b>3–5 min</b> full rest — quality over quantity</dd>
+        <dt>Session</dt><dd><b>60–75 min</b> of limit/near-limit bouldering and/or system board<sup class="cite"><a href="#s33">[33]</a></sup></dd>
+        <dt>Volume</dt><dd>Low. Stop when power drops; never grind it out tired</dd>
+        <dt>When</dt><dd>First, while fresh; Strength &amp; Power phases</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="proto">
+    <div class="head"><span class="pname">Campus Board</span><span class="chip max">High / max</span><span class="chip fw">Expert framework</span></div>
+    <div class="body">
+      <div class="note warn" style="margin-top:4px">
+        <span class="lbl">Intermediate caution</span>
+        <p>Campusing is high-risk for fingers and elbows and is easy to start too early. Build a finger-strength base first. A safer substitute that hits the same anaerobic-power quality is <strong>"boulder campusing"</strong> — repeating a hard boulder problem powerfully — which Hörst recommends as a gentler on-ramp.<sup class="cite"><a href="#s16">[16]</a></sup></p>
+      </div>
+      <p>If you do campus: basic ladders (matched, then 1-3-5) on large rungs, fully warmed up, low volume, long rests, and only in the Power phase. Skip it entirely if you have any elbow or finger niggles.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 08 -->
+<section id="pe">
+  <div class="sec-eyebrow">Protocol · staying power</div>
+  <h2 class="title">Power-endurance &amp; aerobic capacity</h2>
+  <p>Three energy systems matter, and each gets a different tool.<sup class="cite"><a href="#s14">[14]</a></sup> Limit power lives in the first ~10 seconds (trained above). Below are the two that carry you up a route.</p>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>System</th><th>Duration</th><th>Feels like</th><th>Trained with</th></tr></thead>
+    <tbody>
+      <tr><td class="phase">Aerobic capacity</td><td class="num">minutes+</td><td>Easy, sustainable, pump clears</td><td>ARC / easy continuous climbing</td></tr>
+      <tr><td class="phase">Anaerobic capacity (PE)</td><td class="num">~20 s–2 min</td><td>Hard, building pump, fight</td><td>4×4s, intervals, route laps</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="proto">
+    <div class="head"><span class="pname">4×4s</span><span class="chip mod">Moderate</span><span class="chip pr">Peer-reviewed</span></div>
+    <div class="body">
+      <p>The classic power-endurance session — workhorse of the PE phase.<sup class="cite"><a href="#s15">[15]</a></sup></p>
+      <dl class="spec">
+        <dt>Problems</dt><dd><b>4</b> boulders, each ~<b>2–3 grades below</b> your limit<sup class="cite"><a href="#s17">[17]</a></sup></dd>
+        <dt>Structure</dt><dd>Climb each problem <b>4×</b> back-to-back = one set; <b>2 min</b> rest between problems<sup class="cite"><a href="#s15">[15]</a></sup></dd>
+        <dt>Sets</dt><dd><b>3</b> sets, <b>5 min</b> rest between sets<sup class="cite"><a href="#s15">[15]</a></sup></dd>
+        <dt>Recovery</dt><dd><b>48–72 h</b> between PE sessions; build <b>2 → 3×/week</b><sup class="cite"><a href="#s17">[17]</a></sup></dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="proto">
+    <div class="head"><span class="pname">On-the-minute intervals</span><span class="chip mod">Moderate</span><span class="chip fw">Expert framework</span><span class="chip vf">✓ Verified</span></div>
+    <div class="body">
+      <p>A modern alternative to 4×4s with tighter density control: climb a short boulder at the top of each minute; whatever's left of the minute is your rest. The work-to-rest ratio is what tunes the stimulus toward anaerobic-capacity vs. power-endurance.<sup class="cite"><a href="#s13">[13]</a></sup> Choose intervals over 4×4s when you want precise, repeatable dosing; choose 4×4s for a simpler, harder bout.<sup class="cite"><a href="#s18">[18]</a></sup></p>
+      <dl class="spec">
+        <dt>Hörst "60/60"</dt><dd><b>60 s</b> moderately hard climbing : <b>60 s</b> rest (1:1 ratio), total <b>10–30 min</b><sup class="cite"><a href="#s13">[13]</a></sup></dd>
+        <dt>Intensity</dt><dd><b>RPE 7–8.5/10</b>, at the anaerobic threshold — end before the 8.5+ pump zone to stay aerobic-power, not lactic<sup class="cite"><a href="#s13">[13]</a></sup></dd>
+      </dl>
+
+  <div class="proto">
+    <div class="head"><span class="pname">Route intervals / linked circuits</span><span class="chip mod">Moderate</span><span class="chip fw">Expert framework</span></div>
+    <div class="body">
+      <p>The sport-specific PE tool: climb a route (or linked laps) at redpoint-minus intensity, rest roughly equal to climbing time, repeat. Builds the exact ability to keep pulling hard while pumped that a redpoint demands.<sup class="cite"><a href="#s13">[13]</a></sup></p>
+    </div>
+  </div>
+
+  <div class="proto">
+    <div class="head"><span class="pname">ARC / Aerobic capacity</span><span class="chip low">Low</span><span class="chip fw">Expert framework</span><span class="chip vf">✓ Verified</span></div>
+    <div class="body">
+      <p>Aerobic Restoration &amp; Capillarity — continuous easy climbing that builds the engine and aids recovery; a Base-phase staple, useful year-round.<sup class="cite"><a href="#s14">[14]</a></sup></p>
+      <dl class="spec">
+        <dt>Intensity</dt><dd>Very low — roughly <b>10–40% of max effort</b>; a light pump at most, managed by alternating sequences so it never exceeds what clears<sup class="cite"><a href="#s34">[34]</a></sup></dd>
+        <dt>Duration</dt><dd><b>2–3 sets of 20–45 min</b> continuous (commonly 2–3 × 30 min, ~10 min rest) at/just below your max steady state<sup class="cite"><a href="#s34">[34]</a></sup></dd>
+        <dt>When</dt><dd>Base phase; recovery/rest days when fresh</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- 09 -->
+<section id="prehab">
+  <div class="sec-eyebrow">Staying in the game</div>
+  <h2 class="title">Injury prevention &amp; antagonists</h2>
+  <p>Climbing is overwhelmingly a pulling, finger-flexing sport. Left unchecked, that imbalance is what eventually hurts you. Three habits cover most of the risk.</p>
+
+  <h4>Warm up in a ramp, never cold</h4>
+  <p>Pulse-raise → mobility → easy climbing → progressively harder, finishing with a brief dynamic rotator-cuff activation before anything maximal.<sup class="cite"><a href="#s21">[21]</a></sup> Warm-up is most critical before hard projecting and any fingerboarding.<sup class="cite"><a href="#s23">[23]</a></sup></p>
+
+  <h4>Train the antagonists</h4>
+  <p>Balance the pulling with pushing and extension so forces across the joints stay even.<sup class="cite"><a href="#s20">[20]</a></sup></p>
+  <div class="tbl-wrap">
+  <table>
+    <thead><tr><th>Area</th><th>Why</th><th>Do</th></tr></thead>
+    <tbody>
+      <tr><td class="phase">Pushing muscles</td><td>Balance pull-dominance (triceps, chest, mid-delt)</td><td>Push-ups / dips, shoulder press, band pushes — 2×/week</td></tr>
+      <tr><td class="phase">Finger &amp; wrist extensors</td><td>Counter the flexor load on the pulleys</td><td>Reverse wrist curls, rubber-band finger extensions</td></tr>
+      <tr><td class="phase">Rotator cuff</td><td>Shoulder stability climbers rarely train</td><td>Short cuff routine (internal/external rotation) — ~10 min, 2–3×/week<sup class="cite"><a href="#s21">[21]</a></sup></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h4>Protect the pulleys</h4>
+  <p>Finger pulley sprains are the signature intermediate injury.<sup class="cite"><a href="#s22">[22]</a></sup> The prevention checklist, straight from the Rock Rehab approach:</p>
+  <ul>
+    <li><strong>Avoid sudden dynamic loading</strong> on small crimps when cold or tired.</li>
+    <li><strong>Don't over-rely on full crimp</strong> — rotate to half-crimp and 3-finger drag to spread load across grips.<sup class="cite"><a href="#s22">[22]</a></sup></li>
+    <li><strong>Watch the load <em>spike</em></strong> — keep total weekly stress from outrunning recovery; this is exactly what deloads protect against.<sup class="cite"><a href="#s23">[23]</a></sup></li>
+    <li><strong>Respect tweaks.</strong> A graded return after a sprain (gradual reloading, grip variation) beats pushing through.<sup class="cite"><a href="#s22">[22]</a></sup></li>
+  </ul>
+</section>
+
+<!-- 10 -->
+<section id="assess">
+  <div class="sec-eyebrow">Evidence &amp; metrics</div>
+  <h2 class="title">Assessment &amp; benchmarks</h2>
+  <p>Testing turns training from guesswork into a feedback loop. The headline metric for climbers is the <span class="key">max hang on a 20 mm edge</span>, expressed as added load relative to bodyweight.<sup class="cite"><a href="#s30">[30]</a></sup></p>
+
+  <h4>The core test</h4>
+  <dl class="spec" style="max-width:var(--measure)">
+    <dt>Test</dt><dd>Maximum added weight for a ~<b>7–10 s</b> hang on a <b>20 mm</b> edge, half-crimp, two arms<sup class="cite"><a href="#s29">[29]</a></sup></dd>
+    <dt>Express as</dt><dd>(bodyweight + added) ÷ bodyweight, or simply track added kg over time</dd>
+    <dt>Cadence</dt><dd>Retest at phase boundaries / every 4–6 weeks, fresh and warmed up</dd>
+  </dl>
+
+  <h4>What the evidence actually supports</h4>
+  <ul>
+    <li><strong>It predicts performance.</strong> Finger strength is the physical trait most strongly tied to grade — <strong>r = 0.89</strong> for bouldering, <strong>r = 0.67</strong> for redpoint in male climbers.<sup class="cite"><a href="#s25">[25]</a></sup> <span class="chip pr">Peer-reviewed</span></li>
+    <li><strong>The test is reliable.</strong> A 2025 systematic review (15 studies, 747 participants) found max isometric finger-strength tests reliable — <strong>14 of 15 studies</strong> showed high reliability (ICC &gt; 0.75) and 12 showed very high reliability (ICC 0.85–0.99), median ICC 0.86.<sup class="cite"><a href="#s26">[26]</a></sup><sup class="cite"><a href="#s31">[31]</a></sup> <span class="chip pr">Peer-reviewed</span></li>
+    <li><strong>Use a ~20 mm fixed edge.</strong> That review found assessments on fixed-depth edges of <strong>~20–23 mm consistently show high reliability and should be prioritized</strong> for standardized monitoring — directly validating a 20 mm max-hang as the number to track.<sup class="cite"><a href="#s31">[31]</a></sup> <span class="chip pr">Peer-reviewed</span></li>
+    <li><strong>But it isn't standardized.</strong> Studies used edges from <strong>6–60 mm</strong> and different grips, so reliability ranged widely (ICC 0.294–1) and a meta-analysis wasn't even possible.<sup class="cite"><a href="#s26">[26]</a></sup> <span class="chip pr">Peer-reviewed</span> The review calls for load cells and harmonized protocols.<sup class="cite"><a href="#s26">[26]</a></sup></li>
+  </ul>
+
+  <div class="note warn">
+    <span class="lbl">✗ Refuted by the fact-check</span>
+    <p>A tempting claim — that bodyweight <em>bent-arm hang</em> tests are simply unreliable for intermediates and should be abandoned for a load cell — was <strong>refuted 0–3</strong> by the adversarial reviewers. The evidence supports fixed-edge isometric tests as the <em>most</em> reliable, but does not condemn a consistently-performed self-test. Pick one protocol and standardize it.<sup class="cite"><a href="#s31">[31]</a></sup></p>
+  </div>
+
+  <div class="note warn">
+    <span class="lbl">Read this before chasing a number</span>
+    <p><strong>Cross-person %-bodyweight charts are shakier than they look.</strong> Because edge size, hang time and grip aren't standardized, a "%BW by grade" table from one source isn't comparable to another.<sup class="cite"><a href="#s26">[26]</a></sup> A community model of Lattice's 20 mm dataset explains only ~50% of grade variance (r ≈ 0.70, n ≈ 900) — finger strength is a strong signal, not a verdict.<sup class="cite"><a href="#s28">[28]</a></sup> <strong>The reliable use is intra-individual:</strong> track <em>your own</em> 20 mm max hang over time and train to move it. That's where the evidence is solid.</p>
+  </div>
+
+  <h4>Rough orientation (use cautiously)</h4>
+  <p>If you want a ballpark for a 7–10 s two-arm half-crimp hang on 20 mm — treat these as fuzzy, protocol-dependent bands, not targets:</p>
+  <div class="tbl-wrap">
+  <table>
+    <caption>Approximate orientation only — highly source- and protocol-dependent.<sup class="cite"><a href="#s28">[28]</a></sup> Your trend matters far more than hitting a row.</caption>
+    <thead><tr><th>Band</th><th class="num">Boulder ≈</th><th>Added load (½-crimp, 20 mm)</th></tr></thead>
+    <tbody>
+      <tr><td class="phase">Early intermediate</td><td class="num">V4–V5</td><td class="num">~+10–25% BW</td></tr>
+      <tr><td class="phase">Solid intermediate</td><td class="num">V6</td><td class="num">~+25–40% BW</td></tr>
+      <tr><td class="phase">Advanced-leaning</td><td class="num">V7+</td><td class="num">~+40–60% BW → one-arm 20 mm</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Finger strength rises roughly linearly with grade across a wide ability span,<sup class="cite"><a href="#s28">[28]</a></sup> but Lattice's own analysis stresses its <em>relative</em> importance shifts with level — at the intermediate band, technique and other benchmarks still carry real weight, so don't let one number crowd out movement practice.<sup class="cite"><a href="#s27">[27]</a></sup></p>
+</section>
+
+<!-- 11 -->
+<section id="plan">
+  <div class="sec-eyebrow">Putting it together</div>
+  <h2 class="title">A worked 12-week plan</h2>
+  <p>A compact, concrete macrocycle for a climber whose goal is a sport redpoint in ~12 weeks (shift the emphasis earlier for a boulder goal). Each block is 3 loading weeks + 1 deload.</p>
+  <div class="tbl-wrap">
+  <table>
+    <caption>12-week linear macrocycle with weekly maintenance of the off-discipline. Adjust loads off your last retest.</caption>
+    <thead><tr><th class="num">Wk</th><th>Phase</th><th>Finger work</th><th>Strength / power</th><th>Endurance</th><th>Test / deload</th></tr></thead>
+    <tbody>
+      <tr><td class="num">1–3</td><td class="phase">Base</td><td>Light hangs, intro</td><td>Bodyweight pulls, core</td><td>ARC + volume climbing</td><td>Baseline 20 mm test (wk 1)</td></tr>
+      <tr><td class="num">4</td><td class="phase">Deload</td><td>½ volume</td><td>½ volume</td><td>Easy</td><td>Deload</td></tr>
+      <tr><td class="num">5–7</td><td class="phase">Strength</td><td>Max hangs 2–3×/wk</td><td>Weighted pull-ups, limit boulder</td><td>1× ARC (maintain)</td><td>—</td></tr>
+      <tr><td class="num">8</td><td class="phase">Deload + test</td><td>½ volume, then retest</td><td>½ volume</td><td>Easy</td><td>Retest 20 mm hang</td></tr>
+      <tr><td class="num">9–10</td><td class="phase">Power → PE</td><td>Repeaters begin</td><td>Limit/power boulders</td><td>4×4s / intervals 2×/wk</td><td>—</td></tr>
+      <tr><td class="num">11</td><td class="phase">Peak</td><td>1 short max touch</td><td>Few limit boulders</td><td>Route intervals → attempts</td><td>—</td></tr>
+      <tr><td class="num">12</td><td class="phase">Taper</td><td>Minimal</td><td>Minimal, sharp</td><td>Redpoint attempts</td><td>Send window → rest week</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="note">
+    <span class="lbl">How to adapt it</span>
+    <p>Goal is bouldering? Extend Strength/Power (wk 5–10) and shrink the PE block. Only 3 days/week? Drop the maintenance touches first, never the phase's main session. Feeling beaten up before a scheduled deload? Take it early — the calendar serves the body, not the reverse.</p>
+  </div>
+</section>
+
+<!-- 12 -->
+<section id="caveats">
+  <div class="sec-eyebrow">Honesty</div>
+  <h2 class="title">Caveats &amp; open questions</h2>
+  <ul>
+    <li><strong>Coaching consensus ≠ controlled trials.</strong> The phase structure, session designs and most numbers here are strong <em>practitioner</em> consensus (Hörst, Lattice, RCTM, Vagy), not all confirmed by RCTs. They're reliable starting points, not proven optima.</li>
+    <li><strong>Finger-strength testing isn't standardized.</strong> Edge size, hang duration and grip vary across sources, so absolute %BW benchmarks aren't comparable between protocols.<sup class="cite"><a href="#s26">[26]</a></sup> Pick one protocol and stick to it.</li>
+    <li><strong>Most performance variance is unexplained.</strong> Finger strength predicts grade strongly but leaves ~50% unexplained;<sup class="cite"><a href="#s28">[28]</a></sup> technique, tactics, head-game and mobility fill the gap — especially at the intermediate band.<sup class="cite"><a href="#s27">[27]</a></sup></li>
+    <li><strong>The research skews to men and to bouldering.</strong> The strongest correlation figures here come from a male-only study;<sup class="cite"><a href="#s25">[25]</a></sup> sport/redpoint and female-specific data are thinner.</li>
+    <li><strong>Linear vs. undulating is genuinely debated.</strong> Practitioners disagree on how rigidly intermediates should periodize; the hybrid recommended here is a pragmatic middle, not a settled answer.<sup class="cite"><a href="#s5">[5]</a></sup></li>
+    <li><strong>Open question — optimal hangboard dose for intermediates.</strong> "Noticeable gains in a few cycles" is verified,<sup class="cite"><a href="#s10">[10]</a></sup> but the best long-run frequency, load and edge progression for this specific band isn't pinned down by the literature.</li>
+    <li><strong>Not everything was verified.</strong> 31 claims passed the adversarial fact-check, but the deep gather surfaced ~300 claims total — the remaining ~270 (held in the project's claim store) are well-sourced but not individually re-checked, and appear here only where they match expert-framework consensus. The fact-check itself is three skeptical AI reviewers, not ground truth.</li>
+  </ul>
+</section>
+
+<!-- 13 -->
+<section id="sources">
+  <div class="sec-eyebrow">References</div>
+  <h2 class="title">Sources</h2>
+  <p style="color:var(--muted);font-size:.92rem"><span class="pr-dot">PR</span> marks peer-reviewed research. Others are authoritative practitioner/coaching frameworks. Annotations note what each source supports.</p>
+  <ol class="src">
+    <li id="s1"><a href="https://rockclimberstrainingmanual.com/training-for-rock-climbing/rock-climbing-training-plan/">Building a Training Plan — The Rock Climber's Training Manual (Anderson brothers)</a><span class="what">The canonical linear/seasonal macrocycle (Base → Strength → Power → PE → Peak → Rest).</span></li>
+    <li id="s2"><a href="https://www.trainingbeta.com/periodized-training-for-climbing/">Periodized Training for Climbing — TrainingBeta</a><span class="what">Linear vs. undulating vs. block models, pros/cons, and maintenance logic.</span></li>
+    <li id="s3"><a href="https://rockclimbingrealms.com/build-your-climbing-plan-a-periodization-framework/">Build Your Climbing Plan: A Periodization Framework — Rock Climbing Realms</a><span class="what">Back-from-goal-date scheduling, peaking and taper structure.</span></li>
+    <li id="s4"><a href="https://www.climbing.com/skills/comprehensive-rock-climbing-training-guide-weeky-year-long/">A Full Year of Training, Step-by-Step — Climbing.com</a><span class="what">Concrete week-by-week macrocycle and deload cadence.</span></li>
+    <li id="s5"><a href="https://www.ukclimbing.com/forums/walls+training/periodisation-755068">Periodisation — UKClimbing forums</a><span class="what">Practitioner critique of rigid linear models; arguments for undulating/hybrid.</span></li>
+    <li id="s6"><a href="https://www.modusathletica.com/blog/the-climber-s-guide-to-periodization-a-focus-for-every-season">The Climber's Guide to Periodization — Modus Athletica</a><span class="what">Macro/meso/micro definitions; 3-on-1-off deload cadence.</span></li>
+    <li id="s7"><a href="https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/">4 Fingerboard Strength Protocols That Work — Eric Hörst</a><span class="what">Max-hang (7–13 s, 3–5 min, 3–5 sets) and repeater (7/3×6, ~50–60%) numbers.</span></li>
+    <li id="s8"><a href="https://thehangboard.com/blogs/news/max-hangs-vs-repeaters">Max Hangs vs Repeaters — thehangboard.com</a><span class="what">Strength vs. strength-endurance distinction and when to use each.</span></li>
+    <li id="s9"><a href="https://www.climbing.com/skills/tom-randalls-guide-to-better-hangboarding-part-1/">Lattice's Guide to Better Hangboarding (Tom Randall) — Climbing.com</a><span class="what">20 mm edge, two-arm hangs for intermediates, grip selection, safe ramping.</span></li>
+    <li id="s10"><a href="https://www.physivantage.com/pages/the-ultimate-guide-to-hangboard-training-for-climbers">The Ultimate Guide to Hangboard Training — PhysiVantage (Hörst)</a><span class="what">Verified: 12 s max hang at max load / 3 min rest; 10/5×4 repeaters, 10–20 sets; 3×/wk × 4 wk → gains; 20 mm benchmark; progression rules.</span></li>
+    <li id="s11"><a href="http://en-eva-lopez.blogspot.com/2018/07/fingerboard-training-guide-iii-periodization-samples-of-maxhangs-training-programs-.html">Fingerboard Training Guide III — Eva López, PhD</a><span class="what">Research-grounded MaxHangs/IntHangs/SubHangs method and minimum-edge progression.</span></li>
+    <li id="s12"><a href="https://strengthclimbing.com/hangboard-repeaters/">Hangboard Repeaters — StrengthClimbing</a><span class="what">7 s/3 s ×6 repeater structure and load scaling by level.</span></li>
+    <li id="s13"><a href="https://trainingforclimbing.com/power-endurance-training-protocols-for-climbers/">Power-Endurance Training Protocols — Eric Hörst</a><span class="what">4×4s, route intervals, work-to-rest ratios for anaerobic capacity vs. PE.</span></li>
+    <li id="s14"><a href="https://latticetraining.com/blog/training-energy-systems-the-climbers-guide/">Training Energy Systems: The Climber's Guide — Lattice Training</a><span class="what">Alactic / anaerobic / aerobic systems and how to target each.</span></li>
+    <li id="s15"><a href="https://www.climbing.com/skills/learn-to-train-increase-your-power-endurance/">Increase Your Power-Endurance — Climbing.com</a><span class="what">Concrete 4×4 numbers: 4 problems −3 grades, 2 min between, 5 min between sets, 3 sets.</span></li>
+    <li id="s16"><a href="https://trainingforclimbing.com/boulder-campusing-for-power-endurance/">"Boulder Campusing" for Power-Endurance — Eric Hörst</a><span class="what">Safer alternative to campus board for the anaerobic-power quality.</span></li>
+    <li id="s17"><a href="https://uphillathlete.com/rock-climbing/bouldering-4-x-4-drills/">Bouldering 4×4 Drills — Uphill Athlete</a><span class="what">Problem selection (−2/3 grades), 1:1 ratios, 48–72 h recovery, 2→3×/wk progression.</span></li>
+    <li id="s18"><a href="https://www.substr8climbing.com/blog/2023/4/28/the-great-debate-4x4s-vs-intervals">4×4s vs Intervals — SUBSTR8</a><span class="what">When to choose classic 4×4s vs. on-the-minute intervals.</span></li>
+    <li id="s19"><a href="https://trainingforclimbing.com/4-pull-up-variations-to-amp-up-your-workouts/">4 Pull-up Variations — Eric Hörst</a><span class="what">Weighted/uneven pulls and lock-offs; ~15-rep prerequisite before adding load.</span></li>
+    <li id="s20"><a href="https://theclimbingdoctor.com/how-to-train-antagonist-muscle-strength-for-climbing/">Train Antagonist Strength for Climbing — The Climbing Doctor (Dr. Jared Vagy)</a><span class="what">Pushing-muscle and finger/wrist-extensor balancing.</span></li>
+    <li id="s21"><a href="https://trainingforclimbing.com/rotator-cuff-training-for-climbers/">Must-Do Rotator Cuff Training — Eric Hörst</a><span class="what">Short cuff routine + 2-min dynamic warm-up.</span></li>
+    <li id="s22"><a href="https://www.trainingbeta.com/pulley/">Pulley Sprain Injury Protocol (Rock Rehab Pyramid) — Dr. Jared Vagy / TrainingBeta</a><span class="what">Load management, grip variation, graded return for the top intermediate injury.</span></li>
+    <li id="s23"><a href="https://www.climbing.com/skills/injury-prevention-quick-tip-preventing-and-strengthening-against-pulley-sprains/">Prevent Finger Pulley Strains — Climbing.com</a><span class="what">Warm-up before projecting; avoiding load spikes; grip variation.</span></li>
+    <li id="s24"><a href="https://latticetraining.com/blog/pull-up-workout-session-upper-body-strength-for-climbing/">Pull-Up Workout Session — Lattice Training</a><span class="what">Upper-body max-strength session template; contact/core strength.</span></li>
+    <li id="s25"><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12479556/">Climbing performance in males: the importance of climbing-specific finger strength</a><span class="pr-dot">PR</span><span class="what">Max hang (~22 mm) correlates r = 0.89 (boulder) / r = 0.67 (redpoint), p &lt; 0.01.</span></li>
+    <li id="s26"><a href="https://www.frontiersin.org/journals/sports-and-active-living/articles/10.3389/fspor.2025.1650198/full">Reliability of finger strength assessment methods in climbing — Frontiers in Sports and Active Living (2025)</a><span class="pr-dot">PR</span><span class="what">Systematic review (15 studies, 747 participants): high reliability (median ICC 0.86) but no standardization (edges 6–60 mm); recommends load cells + harmonized protocols.</span></li>
+    <li id="s27"><a href="https://latticetraining.com/blog/predictors-for-performance/">How predictors for bouldering performance differ between ability levels — Lattice Training</a><span class="what">Finger strength's predictive weight shifts with level; necessary but not sole lever for intermediates.</span></li>
+    <li id="s28"><a href="https://wmgclimbing.wordpress.com/2024/03/10/approximating-lattices-finger-strength-data-set/">Approximating Lattice's Finger Strength Dataset — CLIMB</a><span class="what">20 mm 7 s max-hang model: r ≈ 0.70 (~50% variance, n ≈ 900); roughly linear strength-by-grade with explicit unexplained-variance caveat.</span></li>
+    <li id="s29"><a href="https://trainingforclimbing.com/3-hangboard-tests-to-gauge-your-climbing-ability/">3 Hangboard Tests to Gauge Your Ability — Eric Hörst</a><span class="what">Practical self-administered max-hang benchmark test and interpretation.</span></li>
+    <li id="s30"><a href="https://latticetraining.com/blog/what-is-the-number-1-measure-of-performance-for-sport-climbers/">The #1 Measure of Performance for Sport Climbers — Lattice Training</a><span class="what">Argues 20 mm max hang (%BW) is the single strongest measurable predictor.</span></li>
+    <li id="s31"><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12521219/">Reliability of finger-strength assessment methods in climbing (systematic review, 2025) — PubMed Central</a><span class="pr-dot">PR</span><span class="what">Verified: 14/15 studies ICC &gt; 0.75; fixed-depth ~20–23 mm edges most reliable and to be prioritized for monitoring. Peer-reviewed; corroborates [26].</span></li>
+    <li id="s32"><a href="https://trainingforclimbing.com/hypergravity-pull-up-training-for-increased-strength-power-and-endurance/">Hypergravity (Weighted) Pull-Up Training — Eric Hörst</a><span class="what">Hörst's "5×5" protocol: 5 sets of 5 weighted pull-ups, 3 min rest, 3×/week for 10 weeks, performed at end of session.</span></li>
+    <li id="s33"><a href="https://trainingforclimbing.com/limit-bouldering-for-building-max-climbing-strength-and-power/">Limit Bouldering for Max Strength &amp; Power — Eric Hörst</a><span class="what">Limit boulders = 3–5 moves (≤6 hand moves); 60–75 min sessions of limit/near-limit bouldering + system board.</span></li>
+    <li id="s34"><a href="https://rockclimberstrainingmanual.com/training-for-rock-climbing/base-fitness/">Base Fitness — The Rock Climber's Training Manual</a><span class="what">ARC dosing: 2–3 × 20–45 min continuous (≈2–3 × 30 min, 10 min rest) at/below max steady state, ~10–40% of max effort.</span></li>
+    <li id="s35"><a href="https://latticetraining.com/blog/data-dive-training-days-weekly-exercise-v4-v12/">Data Dive: Training Days &amp; Weekly Exercise, V4–V12+ — Lattice Training</a><span class="what">V4 ≈ 3 training days/week, V12+ ≈ 4; total weekly exercise volume ~flat (~22/week) across grade bands.</span></li>
+  </ol>
+  <p style="margin-top:18px"><a class="toplink" href="#read">↑ Back to top</a></p>
+</section>
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    Compiled from parallel multi-source research with adversarial fact-checking. Provenance tags distinguish peer-reviewed evidence from expert coaching frameworks. Training information only — not medical advice; consult a professional for pain or injury.
+  </div>
+</footer>
