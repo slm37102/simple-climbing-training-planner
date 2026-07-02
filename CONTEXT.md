@@ -21,7 +21,7 @@ The macrocycle is anchored either by a chosen **start date** or by a **competiti
 
 ## Deload week
 
-A scheduled recovery week interleaved on a 3:1 cadence inside Base and Build. A deload **drops prescribed volume ~40% while holding intensity** (load kg unchanged) — this preserves the neuromuscular stimulus while letting connective tissue recover. See `docs/adr/0003-deload-as-volume-cut.md`. The last Base deload is also a **retest** week.
+A scheduled recovery week interleaved every third week (2 hard : 1 deload) inside Base and Build. A deload **drops prescribed volume ~40% while holding intensity** (load kg unchanged) — this preserves the neuromuscular stimulus while letting connective tissue recover. See `docs/adr/0003-deload-as-volume-cut.md`. The last Base deload is also a **retest** week.
 
 ## Retest
 
@@ -46,7 +46,3 @@ Each week is biased toward either **boulder** or **sport** climbing. The plan's 
 - `focus: 'hybrid'` → odd weeks boulder, even weeks sport (alternating)
 
 This affects Thu/Sat sessions only — Monday's hangboard protocol is determined by phase, not flavor.
-
-## Retest
-
-A **deload Monday session** at weeks 3 and 6 that replaces the normal hangboard session with re-measuring benchmarks (max 10s hang on 20mm, 1RM weighted pull-up, max boulder grade). Saving the results updates the benchmarks used to prescribe future loads.

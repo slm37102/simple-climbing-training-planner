@@ -19,6 +19,7 @@ disciplines. Deepest coverage on (1) **periodization & planning** and (2)
 | `verified-findings.md` | Every individual claim that passed the adversarial fact-check, grouped by topic, with vote tallies, sources, and supporting quotes. |
 | `data/gathered-claims.json` | All ~300 falsifiable claims extracted from sources — the raw research corpus. |
 | `data/verification-results.json` | Verdicts from the bulk reasoning-verification pass. |
+| `deep-research-report.md` | **Predecessor artifact** — an earlier single-pass web-research survey (from the repo's initial commit, before this verified corpus existed). Kept for reference; its claims did **not** go through the adversarial fact-check — prefer `verified-findings.md` when the two disagree. |
 
 ## How it was produced
 

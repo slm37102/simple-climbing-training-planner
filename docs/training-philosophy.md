@@ -2,6 +2,8 @@
 
 This document grounds the planner's prescriptions in the published coaching literature it draws from. It is descriptive (what the plan does and why), not normative — the plan is built for one athlete (V5–V6 boulder / ~7a lead, ~3 years experience) and the choices are biased toward that profile.
 
+> Known unknowns and doc/code divergences are tracked in [`knowledge-gaps.md`](knowledge-gaps.md) with stable KG-* IDs. Sections below carry a ⚠ marker where a divergence is known — check the referenced gap entry before treating either the doc or the code as authoritative.
+
 ## Three influences
 
 The macrocycle is a synthesis of three widely-cited frameworks:
@@ -21,7 +23,9 @@ The three converge more than they diverge. Where they differ — e.g. Anderson f
 | Peak | Peak performance | Power phase tail | Performance | 7-53 (Lattice) — heaviest, lowest volume |
 | Taper | Taper | Performance week | Performance | Minimal — keep hands fresh |
 
-The Peak protocol was softened from the published Lattice/Anderson defaults for this athlete — see ADR 0001.
+⚠ The Base and Build rows above do not match the current code (`js/program.js` prescribes min-edge bodyweight hangs in Base and max-weight 10s hangs in Build) — which side is right is an open adjudication, see [KG-B2](knowledge-gaps.md#kg-b2--hangboard-protocol-identitysequencing-three-way-disagreement-p2-g1g3).
+
+The Peak protocol was softened from the published Lattice/Anderson defaults for this athlete — see ADR 0001. ⚠ That softening is currently documented but **not implemented** in `js/program.js` — see [KG-B1](knowledge-gaps.md#kg-b1--peak-prescription-conflict-adr-0001-was-accepted-but-never-implemented-p1--critical-g3).
 
 ## Year-level shape (80/20)
 
@@ -29,9 +33,9 @@ Even within a single macrocycle the planner reflects the **Lattice 80/20 rule**:
 
 For longer cycles the planner switches to a **double-block** structure above 20 weeks (ADR 0002). This mirrors Lattice's stated preference for repeating base→build mesocycles in annual plans over a single long base period.
 
-## Deload cadence (3:1)
+## Deload cadence (every 3rd week)
 
-Two weeks hard, one week deload, then one more hard before the next deload — across Base and Build. The last Base deload is also a **retest** (re-measure max hang, weighted pull-up 1RM, current best boulder/route). Updated benchmarks reset load prescriptions for the Build phase. This 3:1 cadence is Lattice's published default and matches the connective-tissue recovery timeline Hörst describes in *Training for Climbing*.
+Two weeks hard, one week deload, then one more hard before the next deload — across Base and Build. The last Base deload is also a **retest** (re-measure max hang, weighted pull-up 1RM, current best boulder grade). Updated benchmarks reset load prescriptions for the Build phase. ⚠ Labeling note: what the code implements is **2 hard : 1 deload** (deload every 3rd week); Lattice's published "3:1" convention means 3 hard weeks then a deload (every 4th week). Whether this athlete should run 2:1 or 3:1 is an open adjudication — see [KG-B3](knowledge-gaps.md#kg-b3--deload-cadence-code-is-21-doc-says-31-lattices-31-is-every-4th-week-p2-g1g3).
 
 ## Half-crimp dominance in Base
 
