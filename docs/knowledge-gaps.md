@@ -113,7 +113,7 @@ The app was built before the research; these are the places where its decisions 
 
 | ID | Gap | Priority | Goals | Status |
 |----|-----|----------|-------|--------|
-| KG-B1 | Peak prescription conflict (ADR-0001 unimplemented) | **P1 — critical** | G3 | Open |
+| KG-B1 | Peak prescription conflict (ADR-0001 unimplemented) | **P1 — critical** | G3 | Closed (2026-07-02) |
 | KG-B2 | Hangboard protocol identity/sequencing | P2 | G1 G3 | Open |
 | KG-B3 | Deload cadence 2:1 vs 3:1 | P2 | G1 G3 | Open |
 | KG-B4 | ARC under-dosed in hybrid mode | P2 | G1 | Open |
@@ -131,6 +131,7 @@ The app was built before the research; these are the places where its decisions 
 This is the single worst G3 item in the repo — Sjöman 2023 (the ADR's basis) found a significant injury association for exactly this athlete profile doing high-intensity fingerboard work — and it silently invalidates training-philosophy.md's claim that "the Peak protocol was softened".
 
 - *Resolution path (per the owner):* **resolve with climbing-plan knowledge, not a blind hotfix** — re-adjudicate the correct Peak prescription for this athlete from the research corpus (the ADR's softening may itself need updating), record the decision (updated ADR-0001 or a new ADR), then implement it in `js/program.js`. Add the campus readiness gate (1-2-3-4-5 ladder without matching / 15–20 pull-ups — verified-findings § Power) as part of that decision. Feeds KG-D1.
+- **CLOSED 2026-07-02.** Re-adjudication against the verified corpus confirmed all four softening decisions and added the campus readiness gate — see the [ADR-0001 addendum](adr/0001-soften-peak-phase-for-intermediate-athlete.md#addendum-2026-07-02--implementation-status--re-adjudication). Implemented in `js/program.js` with `[ADR-0001]` regression tests in `tests/index.html`; KG-D1 closed with it.
 
 ### KG-B2 — Hangboard protocol identity/sequencing: three-way disagreement (P2, G1+G3)
 
@@ -221,7 +222,7 @@ App capabilities blocked on the knowledge above. Each names its prerequisite; no
 
 | ID | Feature | Priority | Prereq |
 |----|---------|----------|--------|
-| KG-D1 | Implement the adjudicated Peak in `js/program.js` (+ campus readiness gate) | P1 | KG-B1 decision |
+| KG-D1 | ~~Implement the adjudicated Peak in `js/program.js` (+ campus readiness gate)~~ **Closed 2026-07-02** with KG-B1 | P1 | KG-B1 decision |
 | KG-D2 | Limiter readout (read the 4 dead benchmark fields + norms table → "likely limiter" on Settings/Log) | P1 | KG-A1, KG-C6 |
 | KG-D3 | Missed-session detection + replan (shift/extend/compress; decay stale prev-actual seeds) | P1 | KG-A3 rules |
 | KG-D4 | Peak-date-aware taper generator (progressive cut, strength touch every 5–10 days, event type) | P2 | KG-A5 |
@@ -238,8 +239,8 @@ Engineering-quality items (sync, a11y, PWA, refactors) are owned by [`improvemen
 
 If only five things get done, in this order:
 
-1. **KG-B1 → KG-D1** — adjudicate and implement the Peak prescription (G3; the decision inputs are already in the repo).
-2. **KG-B6** — doc drift — *done in this commit*.
+1. **KG-B1 → KG-D1** — adjudicate and implement the Peak prescription (G3) — *done 2026-07-02*.
+2. **KG-B6** — doc drift — *done 2026-07-02*.
 3. **KG-A1 + KG-C6** — limiter-diagnosis norms (biggest G1 lever).
 4. **KG-A3 → KG-D3** — missed-session rules (protects all three goals).
 5. **KG-A5 + KG-C5** — taper + PE adjudication, before the next real peak date (G2).
@@ -251,3 +252,4 @@ Multi-user / product features · AI-coach chat · wearables/HRV integration · n
 ## Maintenance log
 
 - **2026-07-02** — Document created from a goal interview + a 5-agent verification of every code/doc claim against the current source. KG-B6 closed in the same commit (stale-doc corrections + folder restructure).
+- **2026-07-02** — **KG-B1 + KG-D1 closed.** Peak prescription re-adjudicated against the verified corpus (all four ADR-0001 decisions confirmed; campus readiness gate added) and implemented in `js/program.js` with `[ADR-0001]` regression tests. See the ADR-0001 addendum.

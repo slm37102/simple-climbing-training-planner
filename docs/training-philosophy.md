@@ -25,7 +25,7 @@ The three converge more than they diverge. Where they differ — e.g. Anderson f
 
 ⚠ The Base and Build rows above do not match the current code (`js/program.js` prescribes min-edge bodyweight hangs in Base and max-weight 10s hangs in Build) — which side is right is an open adjudication, see [KG-B2](knowledge-gaps.md#kg-b2--hangboard-protocol-identitysequencing-three-way-disagreement-p2-g1g3).
 
-The Peak protocol was softened from the published Lattice/Anderson defaults for this athlete — see ADR 0001. ⚠ That softening is currently documented but **not implemented** in `js/program.js` — see [KG-B1](knowledge-gaps.md#kg-b1--peak-prescription-conflict-adr-0001-was-accepted-but-never-implemented-p1--critical-g3).
+The Peak protocol was softened from the published Lattice/Anderson defaults for this athlete — see ADR 0001 (re-adjudicated against the verified research and implemented 2026-07-02; see the ADR's addendum).
 
 ## Year-level shape (80/20)
 
