@@ -17,7 +17,7 @@ A personal, single-user **PWA** that prescribes training every day for a periodi
 3. On the auth gate, click **"Use locally only"**.
 4. Fill in **Benchmarks** (bodyweight, max 10s hang on 20mm, 1RM weighted pull-up, grades, dominant style/angle) and a **cycle start date** (a Monday is recommended).
 5. The **Today** tab is your default view. Each main day (Mon/Thu/Sat) gets a session with calculated load ranges and an explicit suggested kg. Use the ◀ / ▶ arrows above the session card to log a day you missed; tap **Jump to today** to return.
-6. The **Cycle** tab shows a month-view calendar with phase colors and a comp-day marker. Tap any day to jump back to it in Today.
+6. The **Cycle** tab shows the whole macrocycle as a month-grouped week grid with phase colors, deload hatching, and a comp-day marker. Tap any day for its session detail, then open it in Today. Benchmarks, plans, and app settings live in the **Profile** tab; new plans start with a guided 5-step wizard.
 
 ## Smoke tests
 
@@ -89,7 +89,7 @@ js/warmup.js             Warm-up & cooldown checklists
 js/exercise-inputs.js    Shared per-kind input-visibility helper (Today + Log)
 js/dates.js              Shared local-time date helpers
 js/ui.js                 Shared UI helpers (toast, HTML escape)
-js/views/                Today, Week, Calendar, Log, Settings, Plans
+js/views/                Today, Calendar (Cycle), Log, Profile, Onboarding wizard
 tests/index.html         In-browser smoke-test runner
 ```
 

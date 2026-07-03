@@ -157,15 +157,18 @@ const HANGBOARD = {
     edge: '20mm',
     loadPctRange: [0.85, 0.95]
   },
+  // Taper holds intensity and cuts volume (ADR-0007): a short near-max touch keeps
+  // the nervous system sharp; the old 50–60% "light repeaters" shed fitness
+  // (cutting intensity 30–60% costs 20–30% performance — verified taper research).
   taper: {
-    name: '7/3 Repeaters (light)',
-    hang: '7s × 6 reps',
-    rest: '3s within / 3 min between sets',
-    sets: '1–2 sets per grip',
-    prescribedSets: 1, prescribedReps: 6,
-    rpeRange: [7.5, 8.5],
+    name: 'Near-max hangs (taper touch)',
+    hang: '10s weighted',
+    rest: '3 min',
+    sets: '2–3 hangs × 1 set — short & crisp, stop fresh',
+    prescribedSets: 1, prescribedReps: 3,
+    rpeRange: [8.5, 9],
     edge: '20mm',
-    loadPctRange: [0.50, 0.60]
+    loadPctRange: [0.80, 0.85]
   }
 };
 
@@ -185,7 +188,8 @@ function pullupPrescription(phase) {
   if (phase === 'build') return { pctRange: [0.80, 0.90], reps: '5 × 3', prescribedSets: 5, prescribedReps: 3, rpe: [8.5, 9.5] };
   // Peak capped at 90% 1RM (not 95) for this athlete's shoulder/tendon recovery — ADR-0001.
   if (phase === 'peak')  return { pctRange: [0.85, 0.90], reps: '5 × 2', prescribedSets: 5, prescribedReps: 2, rpe: [9, 9.5] };
-  return { pctRange: [0.50, 0.60], reps: '3 × 5', prescribedSets: 3, prescribedReps: 5, rpe: [7, 8] }; // taper
+  // Taper: intensity held near peak, volume cut to a single low-set touch (ADR-0007).
+  return { pctRange: [0.80, 0.90], reps: '2 × 2', prescribedSets: 2, prescribedReps: 2, rpe: [9, 9.5] }; // taper
 }
 
 function buildMonHangboard(phase, isDeload, focus = 'hybrid') {

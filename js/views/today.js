@@ -1,4 +1,5 @@
 // Today view: prescribed session for today, readiness, warm-up, exercises with loads, log form, cooldown.
+// ASCENT design: eyebrow + display title, accordion exercise cards, stepper inputs.
 import { Storage } from '../storage.js';
 import { Program } from '../program.js';
 import { Loads } from '../loads.js';
@@ -18,6 +19,13 @@ function addDaysIso(iso, n) {
   d.setDate(d.getDate() + n);
   const mm = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0');
   return `${d.getFullYear()}-${mm}-${dd}`;
+}
+
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function prettyDate(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return `${DOW[d.getDay()]} · ${d.getDate()} ${MON[d.getMonth()]}`;
 }
 
 function getSelectedDate() {
@@ -145,7 +153,7 @@ function cycleCompleteHtml(plan) {
 
   return `<div class="card" data-cycle-complete style="text-align:center;padding:24px 16px">
     <div style="font-size:2rem;margin-bottom:8px">🎉</div>
-    <h2 style="margin:0 0 4px">🎉 Cycle Complete!</h2>
+    <h2 style="margin:0 0 4px">Cycle Complete!</h2>
     <p class="muted" style="margin:0 0 8px">${weeks} weeks done. Here's how you got on:</p>
     <p class="muted" style="margin:0 0 16px;font-size:.85rem">Cycle end: ${cycleEnd || '—'}</p>
     <div class="row" style="justify-content:center;gap:24px;margin-bottom:20px;flex-wrap:wrap">
@@ -156,10 +164,10 @@ function cycleCompleteHtml(plan) {
     <button class="primary" type="button" data-cycle-open>Start New Cycle</button>
     <div data-cycle-form hidden style="margin-top:16px;text-align:left;max-width:420px;margin-left:auto;margin-right:auto">
       <div class="field">
-        <label style="display:flex;gap:8px;align-items:center"><input type="radio" name="cycleAnchorMode" value="startDate" checked> Start from date</label>
+        <label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font:500 13px 'Archivo';color:var(--text)"><input type="radio" name="cycleAnchorMode" value="startDate" checked> Start from date</label>
       </div>
       <div class="field">
-        <label style="display:flex;gap:8px;align-items:center"><input type="radio" name="cycleAnchorMode" value="compDate"> Work back from comp</label>
+        <label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0;font:500 13px 'Archivo';color:var(--text)"><input type="radio" name="cycleAnchorMode" value="compDate"> Work back from comp</label>
       </div>
       <div class="field">
         <label for="newCycleStartDate">Start date</label>
@@ -171,9 +179,33 @@ function cycleCompleteHtml(plan) {
       </div>
       <div class="row" style="align-items:center;justify-content:center;gap:8px;flex-wrap:wrap">
         <button class="primary" type="button" data-cycle-start>Start</button>
-        <span class="muted" data-cycle-error hidden style="color:#fca5a5"></span>
+        <span class="muted" data-cycle-error hidden style="color:#F0607A"></span>
       </div>
     </div>
+  </div>`;
+}
+
+// Big display title: session label with the "(phase)" parenthetical stripped —
+// the phase already lives in the eyebrow line.
+function displayTitle(session) {
+  return (session.label || '').replace(/\s*\([^)]*\)\s*/g, ' ').trim().replace(/\s+·\s+/g, ' · ');
+}
+
+function headerHtml(date, ctx, session) {
+  const phaseName = ctx.phase.charAt(0).toUpperCase() + ctx.phase.slice(1);
+  const deloadBadge = ctx.deload ? `<span class="badge deload">Deload</span>` : '';
+  const retestBadge = session?.isRetest ? `<span class="badge taper">Retest</span>` : '';
+  const energyTip = session?.energySystem ? `<span class="info-badge" title="Energy system: ${session.energySystem}">i</span>` : '';
+  const flavor = ctx.flavor ? `<span class="badge focus-${ctx.flavor === 'boulder' ? 'boulder' : ctx.flavor === 'sport' ? 'sport' : 'hybrid'}">${ctx.flavor}</span>` : '';
+  return `<div>
+    <div class="eyebrow">
+      <span>${prettyDate(date)}</span>
+      <span class="dot"></span>
+      <span class="phase-txt">Week ${ctx.weekIdx} · ${phaseName}</span>
+    </div>
+    <div class="display-title">${displayTitle(session)}</div>
+    <div class="row" style="margin-top:9px">${flavor}${deloadBadge}${retestBadge}${energyTip}</div>
+    ${session?.deloadNote ? `<div class="deload-note" style="margin-top:10px">⚙ ${session.deloadNote}</div>` : ''}
   </div>`;
 }
 
@@ -188,15 +220,12 @@ export function renderToday(root) {
   // Date navigation row — always visible at the top of the view
   const isToday = date === realToday;
   const dateLabel = isToday
-    ? `<b style="min-width:140px;text-align:center">${date} (Today)</b>`
-    : `<button class="ghost date-jump-today" data-date-nav="today" title="Jump to today" style="min-width:140px;font-weight:600">${date}</button>`;
-  const dateNavHtml = `<div class="card date-nav-card">
-    <div class="row" style="align-items:center;justify-content:center;gap:8px;flex-wrap:nowrap">
-      <button class="ghost" data-date-nav="-1" title="Previous day">◀</button>
-      ${dateLabel}
-      <button class="ghost" data-date-nav="1" title="Next day">▶</button>
-    </div>
-    ${isToday ? '' : '<div class="muted" style="text-align:center;font-size:.75rem;margin-top:4px">Tap date to jump back to today</div>'}
+    ? `<div style="flex:1;text-align:center;font:700 13px 'Archivo';color:var(--text2)">${prettyDate(date)} <span class="muted">(Today)</span></div>`
+    : `<button class="ghost date-jump-today" data-date-nav="today" title="Jump back to today">${prettyDate(date)} · tap for today</button>`;
+  const dateNavHtml = `<div class="date-nav-card">
+    <button class="ghost" data-date-nav="-1" title="Previous day" aria-label="Previous day">‹</button>
+    ${dateLabel}
+    <button class="ghost" data-date-nav="1" title="Next day" aria-label="Next day">›</button>
   </div>`;
 
   // Plan switcher — only shown when 2+ non-archived plans exist
@@ -205,20 +234,16 @@ export function renderToday(root) {
   if (allPlans.length >= 2) {
     const tabs = allPlans.map(p =>
       `<button class="plan-tab ${p.id === activePlan.id ? 'active' : ''}" data-plan-id="${p.id}" style="--plan-color:${p.color}">
-        ${p.name}<span class="badge focus-${p.focus}">${p.focus[0].toUpperCase()}</span>
+        ${p.name}
       </button>`
     ).join('');
-    planSwitcherHtml = `<div class="card plan-switcher" id="planSwitcher">
-      <div class="row" style="align-items:center;gap:8px">
-        <span class="muted" style="font-size:.8rem">Plan:</span>${tabs}
-      </div>
-    </div>`;
+    planSwitcherHtml = `<div class="row" id="planSwitcher" style="gap:6px">${tabs}</div>`;
   }
 
   if (!start) {
     root.innerHTML = dateNavHtml + planSwitcherHtml + `<div class="card"><h2>Set up your cycle</h2>
       <p class="muted">Configure your active plan with a start date or comp date.</p>
-      <button class="primary" onclick="location.hash='#plans'">Go to Plans</button></div>`;
+      <button class="primary" onclick="location.hash='#profile'">Go to Profile</button></div>`;
     wireDateNav(root);
     wireCycleComplete(root, activePlan);
     wirePlanSwitcher(root, root);
@@ -240,7 +265,7 @@ export function renderToday(root) {
     const weeks = Program.cycleWeeksOf(activePlan.settings);
     root.innerHTML = dateNavHtml + planSwitcherHtml + `<div class="card"><h2>Outside cycle</h2>
       <p class="muted">${date} is outside the ${weeks}-week window. ${which}.</p>
-      <button class="ghost" onclick="location.hash='#plans'">Adjust in Plans</button></div>`;
+      <button class="ghost" onclick="location.hash='#profile'">Adjust in Profile</button></div>`;
     wireDateNav(root);
     wireCycleComplete(root, activePlan);
     wirePlanSwitcher(root, root);
@@ -252,31 +277,14 @@ export function renderToday(root) {
   const readiness = dayLog.readiness || { sleep:3, soreness:3, fatigue:3 };
   const { multiplier, label: rdLabel, avg: rdAvg } = Loads.computeReadinessMultiplier(readiness);
 
-  const phaseBadge = `<span class="badge ${ctx.phase}">${ctx.phase}</span>`;
-  const deloadBadge = ctx.deload ? `<span class="badge deload">DELOAD</span>` : '';
-  const retestBadge = session.isRetest ? `<span class="badge">RETEST</span>` : '';
-  const energyTip = session.energySystem ? `<span class="info-badge" title="Energy system: ${session.energySystem}">i</span>` : '';
-
   const { warmup, cooldown } = Warmup.forSession(session);
 
-  const subtitleParts = [];
-  if (ctx.flavor) subtitleParts.push(ctx.flavor.charAt(0).toUpperCase() + ctx.flavor.slice(1));
-  if (session.label) subtitleParts.push(session.label);
-  const subtitle = subtitleParts.join(' · ');
-
-  let body = dateNavHtml + planSwitcherHtml + completionHtml + `<div class="card">
-    <div class="session-head">
-      <h2>Wk ${ctx.weekIdx}</h2>
-      ${phaseBadge}${deloadBadge}${retestBadge}${energyTip}
-    </div>
-    ${subtitle ? `<div class="muted" style="margin-top:6px">${subtitle}</div>` : ''}
-    ${session.deloadNote ? `<div class="muted" style="margin-top:6px;font-size:.85rem;padding:6px 8px;background:#ffffff10;border-radius:6px">⚙️ ${session.deloadNote}</div>` : ''}
-  </div>`;
+  let body = dateNavHtml + planSwitcherHtml + completionHtml + headerHtml(date, ctx, session);
 
   if (session.isRest) {
     body += `<div class="card"><h2>Recovery checklist</h2>
       <ul class="checklist">${Warmup.restRecoveryChecklist().map((t,i) =>
-        `<li><label style="display:flex;gap:8px;cursor:pointer"><input type="checkbox" data-rest-check="${i}" ${dayLog?.recovery?.[i]?'checked':''}> ${t}</label></li>`).join('')}</ul>
+        `<li><label style="display:flex;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0;font:400 13px 'Archivo';color:var(--text2)"><input type="checkbox" data-rest-check="${i}" ${dayLog?.recovery?.[i]?'checked':''}> ${t}</label></li>`).join('')}</ul>
       <p class="muted">Recovered well? It will improve tomorrow's readiness.</p></div>`;
     root.innerHTML = body;
     root.querySelectorAll('input[data-rest-check]').forEach(cb => {
@@ -292,7 +300,7 @@ export function renderToday(root) {
     return;
   }
 
-  // Readiness — pill selectors
+  // Readiness — pill selectors (sleep / soreness / fatigue, 1–5)
   const readinessRow = (key) => `
     <div class="field">
       <label id="pill-lbl-${key}">${key.charAt(0).toUpperCase() + key.slice(1)}</label>
@@ -303,25 +311,31 @@ export function renderToday(root) {
       </div>
     </div>`;
 
-  body += `<div class="card"><h2>Readiness</h2>
-    ${readinessRow('sleep')}
-    ${readinessRow('soreness')}
-    ${readinessRow('fatigue')}
-    <p class="muted" data-readiness-summary>Avg ${rdAvg ? rdAvg.toFixed(1) : '—'} → <b>${rdLabel}</b> ${multiplier ? `(×${multiplier})` : ''}</p>
+  body += `<div>
+    <div class="section-label" style="margin-bottom:9px">Readiness</div>
+    <div class="card">
+      ${readinessRow('sleep')}
+      ${readinessRow('soreness')}
+      ${readinessRow('fatigue')}
+      <p class="muted" data-readiness-summary style="margin:4px 0 0">Avg ${rdAvg ? rdAvg.toFixed(1) : '—'} → <b>${rdLabel}</b> ${multiplier ? `(×${multiplier})` : ''}</p>
+    </div>
   </div>`;
 
   // Warm-up — collapsed
   if (warmup.length) {
     const checkedCount = Object.values(dayLog?.warmup || {}).filter(Boolean).length;
-    body += `<div class="card"><details>
+    body += `<div class="card" style="padding-top:6px;padding-bottom:6px"><details>
       <summary>Warm-up <span class="count">${checkedCount}/${warmup.length}</span></summary>
       <ul class="checklist">${warmup.map((t,i) =>
         `<li><label style="display:flex;gap:8px;cursor:pointer"><input type="checkbox" data-warmup="${i}" ${dayLog?.warmup?.[i]?'checked':''}> ${t}</label></li>`).join('')}</ul>
     </details></div>`;
   }
 
-  // Exercises — main focus, always visible
-  body += `<div class="card"><h2>Exercises</h2>${session.exercises.map((ex, i) => renderExercise(ex, i, dayLog, ctx, multiplier, date, session.sessionId)).join('')}</div>`;
+  // Exercises — accordion cards, first open
+  body += `<div style="display:flex;flex-direction:column;gap:10px">
+    <div class="section-label">Session · tap to open &amp; log</div>
+    ${session.exercises.map((ex, i) => renderExercise(ex, i, dayLog, ctx, multiplier, date, session.sessionId)).join('')}
+  </div>`;
 
   // Session feel + notes + status
   body += `<div class="card"><h2>Session</h2>
@@ -336,7 +350,7 @@ export function renderToday(root) {
     <div class="field"><label>Notes</label>
       <textarea id="sessionNotes" placeholder="anything to remember">${dayLog.sessionNotes || ''}</textarea></div>
     <div class="row">
-      <button class="primary" id="markCompleted">${dayLog.status === 'completed' ? '✓ Completed' : 'Mark completed'}</button>
+      <button class="primary" id="markCompleted" style="flex:1">${dayLog.status === 'completed' ? '✓ Completed' : 'Mark completed'}</button>
       <button class="ghost" id="markPartial">Partial</button>
     </div>
     ${retestBenchmarkSection(session, date)}</div>`;
@@ -344,7 +358,7 @@ export function renderToday(root) {
   // Cooldown — collapsed
   if (cooldown.length) {
     const checkedCount = Object.values(dayLog?.cooldown || {}).filter(Boolean).length;
-    body += `<div class="card"><details>
+    body += `<div class="card" style="padding-top:6px;padding-bottom:6px"><details>
       <summary>Cooldown <span class="count">${checkedCount}/${cooldown.length}</span></summary>
       <ul class="checklist">${cooldown.map((t,i) =>
         `<li><label style="display:flex;gap:8px;cursor:pointer"><input type="checkbox" data-cooldown="${i}" ${dayLog?.cooldown?.[i]?'checked':''}> ${t}</label></li>`).join('')}</ul>
@@ -475,10 +489,10 @@ function exerciseInputs(i, ex, actual, suggestion) {
   const count = [vis.sets, vis.kg, vis.reps, vis.rpe].filter(Boolean).length;
   const rowCls = count >= 4 ? 'stepper-row four' : count === 2 ? 'stepper-row two' : count === 1 ? 'stepper-row one' : 'stepper-row';
   let row = `<div class="${rowCls}">`;
-  if (vis.sets) row += stepper(`ex-${i}-sets`, n(setsValue), 'sets', 1, setsIsDefault);
-  if (vis.kg)   row += stepper(`ex-${i}-kg`,   n(kgValue),  'kg',   0.5, kgIsDefault);
-  if (vis.reps) row += stepper(`ex-${i}-reps`, n(repsValue), repsLabel(ex), 1, repsIsDefault);
-  if (vis.rpe)  row += stepper(`ex-${i}-rpe`,  n(rpeValue), 'RPE',  0.5, rpeIsDefault);
+  if (vis.kg)   row += stepper(`ex-${i}-kg`,   n(kgValue),  'Added load · kg', 0.5, kgIsDefault);
+  if (vis.rpe)  row += stepper(`ex-${i}-rpe`,  n(rpeValue), ex.rpeRange ? `RPE · target ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : 'RPE', 0.5, rpeIsDefault);
+  if (vis.sets) row += stepper(`ex-${i}-sets`, n(setsValue), 'Sets', 1, setsIsDefault);
+  if (vis.reps) row += stepper(`ex-${i}-reps`, n(repsValue), repsLabel(ex) === 'min' ? 'Minutes' : 'Reps', 1, repsIsDefault);
   row += '</div>';
 
   let suggestionBtn = '';
@@ -494,13 +508,33 @@ function stepper(id, value, label, step, isDefault = false) {
   const wrapCls = isDefault ? 'stepper stepper-default' : 'stepper';
   const inputAttrs = isDefault ? ' data-default="1"' : '';
   return `<div>
+    <div class="stepper-label">${label}</div>
     <div class="${wrapCls}">
       <button type="button" data-step="-" data-target="${id}" data-step-amount="${step}">−</button>
       <input type="number" id="${id}" inputmode="decimal" step="${step}" value="${value}" placeholder=""${inputAttrs}>
       <button type="button" data-step="+" data-target="${id}" data-step-amount="${step}">+</button>
     </div>
-    <div class="stepper-label">${label}</div>
   </div>`;
+}
+
+// One-line summary under the accordion title: "2×5 · 62 kg suggested · RPE 8–9"
+function accSub(ex, actual, suggestion) {
+  const parts = [];
+  const sets = actual.sets ?? ex.prescribedSets;
+  const reps = actual.reps ?? ex.prescribedReps;
+  if (sets && reps) parts.push(`${sets}×${reps}`);
+  else if (ex.sets) parts.push(ex.sets);
+  if (suggestion?.suggestedKg != null) {
+    parts.push(suggestion.restSuggested ? 'rest suggested' : `${suggestion.suggestedKg} kg suggested`);
+  } else if (suggestion?.restSuggested) {
+    parts.push('rest suggested');
+  } else if (ex.hang) {
+    parts.push(ex.hang);
+  } else if (ex.prescribed) {
+    parts.push(ex.prescribed.length > 46 ? ex.prescribed.slice(0, 44) + '…' : ex.prescribed);
+  }
+  if (ex.rpeRange) parts.push(`RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}`);
+  return parts.join(' · ');
 }
 
 function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
@@ -511,12 +545,20 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
   let suggestion = null;
 
   if (ex.kind === 'antagonist-block') {
-    const items = ex.items.map(it => `<li>${it.name}: <b>${it.prescribed}</b></li>`).join('');
-    return `<div class="exercise">
-      <div class="exercise-title">${ex.name}</div>
-      <ul class="muted" style="margin:4px 0 6px;font-size:.8rem">${items}</ul>
-      ${notesField(i, notes, !!notes)}
-    </div>`;
+    const items = ex.items.map(it => `<div class="item-row" style="padding:5.5px 0"><span class="item-name">${it.name}</span><span class="muted" style="text-align:right">${it.prescribed}</span></div>`).join('');
+    return `<details class="acc" data-ex="${i}">
+      <summary>
+        <div>
+          <div class="acc-title">${ex.name}</div>
+          <div class="acc-sub">${ex.items.length} exercises</div>
+        </div>
+        <span class="acc-cv">＋</span>
+      </summary>
+      <div class="acc-body">
+        ${items}
+        ${notesField(i, notes, !!notes)}
+      </div>
+    </details>`;
   }
 
   if (ex.kind === 'hangboard' || ex.kind === 'pullup') {
@@ -538,20 +580,29 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
     prescribedStr = (ex.prescribed || '') + rpe;
   }
 
-  return `<div class="exercise" data-ex="${i}">
-    <div class="exercise-title">${ex.name}</div>
-    <div class="exercise-prescribe">${prescribedStr}</div>
-    ${exerciseInputs(i, ex, actual, suggestion)}
-    ${notesField(i, notes, !!notes)}
-  </div>`;
+  const openAttr = i === 0 ? ' open' : '';
+  return `<details class="acc" data-ex="${i}"${openAttr}>
+    <summary>
+      <div>
+        <div class="acc-title">${ex.name}</div>
+        <div class="acc-sub">${accSub(ex, actual, suggestion)}</div>
+      </div>
+      <span class="acc-cv">＋</span>
+    </summary>
+    <div class="acc-body">
+      <div class="exercise-prescribe" style="margin-top:0">${prescribedStr}</div>
+      ${exerciseInputs(i, ex, actual, suggestion)}
+      ${notesField(i, notes, !!notes)}
+    </div>
+  </details>`;
 }
 
 function notesField(i, value, openByDefault) {
   if (openByDefault) {
-    return `<textarea data-ex-notes="${i}" placeholder="notes" style="margin-top:6px">${value}</textarea>`;
+    return `<textarea data-ex-notes="${i}" placeholder="notes" style="margin-top:8px">${value}</textarea>`;
   }
   return `<button type="button" class="notes-toggle" data-notes-toggle="${i}">+ note</button>
-    <textarea data-ex-notes="${i}" placeholder="notes" style="margin-top:6px;display:none"></textarea>`;
+    <textarea data-ex-notes="${i}" placeholder="notes" style="margin-top:8px;display:none"></textarea>`;
 }
 
 function wire(root, date, session, ctx, readinessMult) {

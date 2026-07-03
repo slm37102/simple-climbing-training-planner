@@ -1,11 +1,11 @@
 {
-  "name": "Climbing Training Planner",
-  "short_name": "Climb Plan",
+  "name": "Ascent — Climbing Training Planner",
+  "short_name": "Ascent",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#1e293b",
+  "background_color": "#0C0E12",
+  "theme_color": "#0C0E12",
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },

@@ -34,7 +34,7 @@ What making a good climbing plan requires that neither the docs nor the code cur
 
 **The app cannot tell whether fingers, pulling, endurance, or technique is holding the athlete back.** With only 3 sessions/week, training a non-limiter is the most expensive possible mistake for G1: a V6 climber failing pumpy 7a needs a different plan than one with weak fingers on V6 crimps. This requires benchmark-vs-grade norm tables (e.g. "expected max hang %BW at 7a") that exist nowhere in the repo.
 
-- *Pointers:* `js/storage.js:38-41` — `sportGrade`, `boulderGrade`, `dominantStyle`, `dominantAngle` are stored but read by **nothing** (and since `js/views/benchmarks.js` was deleted they have no UI at all); `js/loads.js:38-46` — only `maxHang20mm`/`pullup1RM` are ever consumed; [`research/verified-findings.md`](research/verified-findings.md) § General — the 20 mm *measurement* is validated, its *interpretation* is missing.
+- *Pointers:* `js/storage.js:38-41` — `sportGrade`, `boulderGrade`, `dominantStyle`, `dominantAngle` are stored but read by **no prescription path** (the 2026-07 onboarding wizard now *writes* a target grade into `boulderGrade`/`sportGrade`, but nothing consumes them); `js/loads.js:38-46` — only `maxHang20mm`/`pullup1RM` are ever consumed; [`research/verified-findings.md`](research/verified-findings.md) § General — the 20 mm *measurement* is validated, its *interpretation* is missing.
 - *Verdict:* close — highest-leverage missing coach knowledge. Research task first (KG-C6), then KG-D2.
 
 ### KG-A2 — No intra-phase progressive overload (P1, G1)
@@ -257,7 +257,7 @@ These four are locked as ADRs but **not yet in code** — the deliberate ADR-000
 - [ ] **ADR-0004** — deload cadence `%3`→`%4` (6 loop sites in `buildPhasePattern`) + tests + doc label.
 - [ ] **ADR-0005** — Base repeaters+intro-maxhang, Build corrected max-hang dose, delete min-edge (`HANGBOARD`/`buildMonHangboard`) + tests + philosophy table.
 - [ ] **ADR-0006** — PE two-band model, compDate-anchored lactic block (`buildThuMain`/`buildSatMain`/`buildPhasePattern`) — land Option A guardrails first.
-- [ ] **ADR-0007** — taper hold-intensity + step-cut + rest-before-goal + `settings.peakType` (schema bump) (`HANGBOARD.taper`/`pullupPrescription`/`prescribeForContext`).
+- [x] **ADR-0007 (intensity fix only, shipped 2026-07-03)** — taper now holds near-peak load% (`HANGBOARD.taper` [0.80,0.85], pull-ups [0.80,0.90]) with low volume; flagged safe-immediately by the ADR. Still pending: taper volume step-cut via `applyDeloadVolume`, rest-day-before-goal, and the `settings.peakType` length lever (schema bump).
 
 ## Deliberately out of scope
 

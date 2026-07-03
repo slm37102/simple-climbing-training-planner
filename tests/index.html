@@ -587,6 +587,23 @@ test('[ADR-0001] Thu Peak campus is gated basic ladders at sub-max RPE', () => {
   assert(campus.rpeRange[1] <= 9, `campus RPE ceiling should be ≤9, got ${campus.rpeRange[1]}`);
 });
 
+// ─── ADR-0007: taper holds intensity, cuts volume ─────────────────────────
+// start Mon 2026-05-04, 12-wk cycle → taper = wk 12; Mon wk12 = 2026-07-20
+
+test('[ADR-0007] Taper holds near-peak intensity and cuts volume', () => {
+  const ctx = Program.resolveDate('2026-07-20', '2026-05-04', 12);
+  assertEq(ctx.phase, 'taper');
+  const sess = Program.prescribeForContext(ctx, 'boulder');
+  const hang = sess.exercises.find(e => e.kind === 'hangboard');
+  const pull = sess.exercises.find(e => e.kind === 'pullup');
+  assert(hang && hang.loadPctRange[0] >= 0.75,
+    `taper hangboard must hold near-peak load%, got ${hang && hang.loadPctRange}`);
+  assert(pull && pull.pctRange[0] >= 0.75,
+    `taper pull-up must hold near-peak load%, got ${pull && pull.pctRange}`);
+  assert(hang.prescribedSets <= 2 && pull.prescribedSets <= 3,
+    'taper volume must stay low (the cut is volume, not intensity)');
+});
+
 test('[ADR-0001] Peak limit-boulder volume reduced (quality over fatigue)', () => {
   const thu = Program.prescribeForContext(Program.resolveDate('2026-07-09', '2026-05-04', 12), 'boulder');
   const limit = thu.exercises.find(e => e.kind === 'limit-boulder');
