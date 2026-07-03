@@ -9,9 +9,9 @@
 
 ## Summary
 
-- **150 distinct claims verified** (31 search-verified, 119 reasoning-verified)
-- **3 claims refuted** (listed at the end for transparency)
-- Verification was paused partway: ~152 gathered claims remain un-adjudicated (held in `data/gathered-claims.json`; resumable).
+- **175 distinct claims verified** (150 in the original pass + 25 in the 2026-07-02 decision-round batch)
+- **7 claims refuted** (3 original + 4 in the 2026-07-02 batch; all listed at the end for transparency)
+- ~123 gathered claims remain un-adjudicated (held in `data/gathered-claims.json`; resumable). Verification is intentionally scoped to what pending decisions need — see `../knowledge-gaps.md` KG-C1.
 
 ## Findings by topic
 
@@ -642,8 +642,57 @@
   > "A deload week involves reducing both volume and intensity to allow for supercompensation (adaptation leading to higher performance post-training), with the most common pattern being 3 weeks on 1 week off."
 
 
+## 2026-07-02 decision-round batch
+
+Adjudicated to settle the four open prescription decisions (KG-B2/B3/C5/A6/A5). Same 3-vote adversarial method as the original pass (kept at ≤1 refutation of 3). 29 claims run → **25 kept, 4 refuted** (the 4 are in the Refuted section below). Grouped by the decision they informed.
+
+### Deload cadence (KG-B3 → ADR-0004)
+
+- **Scheduling deload weeks more frequently keeps accumulated fatigue lower, and the prescription should stay flexible because each cycle differs.** (3-0) — [latticetraining.com](https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/)
+- **Connective tissue (tendons/pulleys) adapts more slowly than muscle, which is why deloads are needed to protect those structures.** (3-0) — [megabetaclimbing.com](https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases)
+- **A deload is personalized and variable in length — a few days to over a week depending on age, condition, and goals — and matters less for recreational climbers than for those training hard.** (3-0) — [trainingforclimbing.com](https://trainingforclimbing.com/training-cafe-43-the-important-of-deload-weeks-in-climbing-and-training/)
+- **Weekly session load rises only modestly with grade — 240 at V1–V4 to 375 at V12+, a 1.6× increase across the full spectrum.** (3-0) — [latticetraining.com](https://latticetraining.com/blog/data-dive-training-days-weekly-exercise-v4-v12/)
+- **Elite climbers separate training aspects across their ~4 days, giving each session a single tighter focus rather than adding overall volume.** (2-1) — [latticetraining.com](https://latticetraining.com/blog/data-dive-training-days-weekly-exercise-v4-v12/)
+- **During a deload you can drop volume but retain some high-intensity sessions (especially if strength is the focus); retained hard sessions should be cut roughly in half and kept short and fewer.** (3-0) — [latticetraining.com](https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/)
+
+### Base/Build hangboard (KG-B2 → ADR-0005)
+
+- **The low-volume max-hang protocol (Eva López-based) is an entry-level fingerboard program; a few multi-week cycles bring noticeable finger-strength gains for intermediates and prepare them for weighted hangs.** (3-0) — [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)
+- **For max-strength weighted hangs the ideal edge is 14–20mm — moderate depth that reduces skin pain and distal-joint strain while building max strength that carries over to other edge sizes.** (3-0) — [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)
+- **Repeaters use 7s hang / 3s rest in sets of 6 (~1 min/set), one set per grip entry-level up to three sets advanced, focusing on half-crimp and open-crimp.** (3-0) — [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)
+- **A max-hang session targets roughly 6–8 reps in total.** (3-0) — [climbing.com](https://www.climbing.com/skills/lattice-hangboarding-part-2/)
+- **Top sets on max hangs and pull-ups should be RPE 8–9, leaving ~a rep or 1–2s in reserve.** (3-0) — [hikingmanual.com](https://www.hikingmanual.com/posts/best-strength-program-for-climbers-ultimate-plans-schedules-guide)
+- **Load is margin-autoregulated: if margin exceeds ~3s, add 2–5 kg next set; if margin approaches zero, subtract 2–5 kg (scaled to bodyweight).** (3-0) — [strengthclimbing.com](https://strengthclimbing.com/eva-lopez-maxhangs/)
+- **Total weekly climbing + finger-training days should not exceed four, and the intense max-strength fingerboard protocol should be limited to two days per week.** (3-0) — [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)
+
+### Power-endurance taxonomy & dosing (KG-C5/A6 → ADR-0006)
+
+- **Hörst's weekly energy-system template for sport climbers: one max-strength (alactic) session, two power-endurance (anaerobic-lactic) sessions, one aerobic-capacity (oxidative) session per week.** (3-0) — [trainingforclimbing.com](https://trainingforclimbing.com/power-endurance-training-protocols-for-climbers/)
+- **Aerobic power adapts quickly but plateaus sooner than other capacities, so it need not be trained longer than ~6–8 weeks; maximizing aerobic energy production is the real anti-pump key for route climbers.** (3-0) — [latticetraining.com](https://latticetraining.com/2023/05/02/5-tips-for-power-endurance-training-for-route-climbing/)
+- **Discipline emphasis differs: boulderers should bias toward anaerobic-capacity training, route climbers toward aerobic-power training.** (3-0) — [ukclimbing.com](https://www.ukclimbing.com/articles/skills/series/lattice_training_series_with_tom_randall/part_2_power_endurance-11352)
+- **Long power-endurance work carries an overtraining caution — too often or too high a volume diminishes performance, especially in-season for route climbers climbing outside multiple days/week.** (3-0) — [trainingforclimbing.com](https://trainingforclimbing.com/podcast-24-energy-system-training-part-3/)
+- **Each workout should target a single energy system rather than all systems at once; PE sessions can be supplemented with anaerobic-lactic exercises (e.g. campus ladder laps).** (3-0) — [treadwallfitness.com](https://treadwallfitness.com/athletes-community/training/brewers-ledge-treadwall-training-guide/)
+- **Power-endurance workouts must approach or reach failure (getting pumped / powered out) — never reaching failure fails to maximize adaptations.** (3-0) — [latticetraining.com](https://latticetraining.com/2023/05/02/5-tips-for-power-endurance-training-for-route-climbing/)
+
+### Taper (KG-A5 → ADR-0007)
+
+- **A step taper applies a >50% immediate volume cut then holds it; exponential fast-decay (halve volume ~every 2 days) produces the most beneficial outcomes.** (3-0) — [nsca.com](https://www.nsca.com/education/articles/kinetic-select/tapering-and-peaking/)
+- **Recommended taper reduces training load 41–60% from pre-taper while intensity is maintained (consistent with a ~40–60% deload load cut).** (2-1) — [latticetraining.com](https://latticetraining.com/blog/training-tips-for-climbers-structuring-your-training-during-a-peak-phase/)
+- **Cutting training intensity 30–60% decreased aerobic and anaerobic performance by 20–30% — the cost of dropping intensity during a taper.** (3-0) — [latticetraining.com](https://latticetraining.com/blog/training-tips-for-climbers-structuring-your-training-during-a-peak-phase/)
+- **In-season performance phases place a full rest day before every outside climbing day, with lower-volume sessions to keep power/strength topped out.** (3-0) — [youtube.com](https://www.youtube.com/watch?v=IZgNzx63M3g)
+- **A climbing performance peak can be sustained ~1 month, during which an athlete may get two or three really hard sends.** (3-0) — [youtube.com](https://www.youtube.com/watch?v=IZgNzx63M3g)
+- **The Performance/Redpoint phase is governed by deliberate redpoint-campaign strategy (route selection, project planning, beta memorization, focus/intensity control).** (3-0) — [cragmama.com](https://www.cragmama.com/2015/05/rock-climbers-training-manual-performance-phase-aka-results/)
+
+
 ## Refuted claims (for transparency)
 
 - ✗ (0-3) For lower-to-intermediate climbers specifically, the two-arm bent-arm hang test is NOT sufficiently reliable, implying that an intermediate (V4-V6 / 6c-7a) climber should prefer a fixed-edge maximal isometric pull (e.g., load-cell or weighted edge) over a bodyweight bent-arm hang for trustworthy benchmarking. — [ncbi.nlm.nih.gov](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12521219/)
 - ✗ (0-3) A full periodized macrocycle for climbing energy-system development uses an extended base phase of roughly 4 months followed by a ~2-month peak phase, allowing time for complete aerobic and anaerobic adaptation before performance. — [unlevel-edge.com](https://unlevel-edge.com/blogs/climbing-blog/climbing-endurance-training-methods-protocols-and-progressions)
 - ✗ (0-3) The taper produces a peaking effect by recalibrating the brain's central governor, unlocking higher power output, increased stamina, and a new performance extreme. — [trainingforclimbing.com](https://trainingforclimbing.com/tag/redpoint-tips/)
+
+### 2026-07-02 batch (refuted)
+
+- ✗ (1-2) For serious climbers, deload every 4–6 weeks; casual, every 6–8; serious + strength work, every 6–12 — the specific frequency-by-training-load buckets over-specify beyond what the source supports. — [megabetaclimbing.com](https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases) *(the general "every 4–6 weeks" guidance survives via other kept claims; only the tiered buckets were refuted)*
+- ✗ (0-3) Minimum-edge training primarily develops pain tolerance, DIP-joint connective-tissue integrity, and small-hold strength, and is unnecessary unless working crimps since sub-8mm edges mostly appear at V8+. — [stevenlow.org](https://stevenlow.org/repeaters-and-max-hang-analysis-for-strength-and-hypertrophy-ft-power-company-podcast-and-steve-maisch/) *(this was the pro-min-edge rationale; its refutation reinforces ADR-0005's deletion of min-edge)*
+- ✗ (0-3) Hörst frames the 60/60 protocol as exhausting alactic power while deliberately avoiding lactic/acidy stress to lower overtraining risk over multiple weeks — the specific mechanistic framing overreaches the source. — [trainingforclimbing.com](https://trainingforclimbing.com/power-endurance-training-protocols-for-climbers/) *(the two-band taxonomy in ADR-0006 rests on other kept claims, not this one)*
+- ✗ (1-2) Anaerobic-lactic capacity work targets 20s–2min efforts trained at a ~1:5 work-to-rest ratio — the specific ratio/duration numbers were not reliably supported as stated. — [trainingforclimbing.com](https://trainingforclimbing.com/tag/redpoint-tips/)
