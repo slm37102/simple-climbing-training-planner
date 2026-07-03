@@ -1,6 +1,6 @@
-# 12-Week Climbing Macrocycle — Training Plan Summary
+# Climbing Macrocycle — Training Plan Summary
 
-A periodised 84-day plan for intermediate–advanced climbers (bouldering or sport focus).  
+A periodised plan for intermediate–advanced climbers (bouldering or sport focus). Cycle length is configurable (8–40 weeks; the phase split is derived — see `adr/0002-configurable-cycle-length.md`); the tables below show the **default 12-week** layout.  
 Load targets are calculated automatically from your benchmarks (max 20mm hang, 1RM pull-up, bodyweight).
 
 ---
@@ -28,7 +28,7 @@ Load targets are calculated automatically from your benchmarks (max 20mm hang, 1
 |----|-------|--------|-------|
 | 1 | **Base** | — | |
 | 2 | **Base** | — | |
-| 3 | **Base** | ✓ Deload + **Retest** | Re-test benchmarks → loads recalculate |
+| 3 | **Base** | ✓ Deload | |
 | 4 | **Base** | — | |
 | 5 | **Base** | — | |
 | 6 | **Base** | ✓ Deload + **Retest** | Re-test benchmarks → loads recalculate |
@@ -147,9 +147,10 @@ Replaces the normal Mon hangboard session. Record results → tap **"Save as Ben
 
 ## Deload Rules
 
-- Hangboard: no S&C antagonist block, reduced volume
-- Climbing sessions: reduce sets/attempts by ~30%; focus on quality, not quantity
-- No new PRs — RPE target ~7.5–8 max
+- Volume cut ~40% (numeric sets ×0.6, min 1) with **intensity held** — kg stays at working level (see `adr/0003-deload-as-volume-cut.md`)
+- Hangboard days: no S&C antagonist block
+- Climbing sessions: same ~40% volume cut; focus on quality, not quantity
+- No new PRs — keep efforts crisp, stop well short of failure
 - Sleep, nutrition, and recovery are the priority
 
 ---
@@ -159,8 +160,9 @@ Replaces the normal Mon hangboard session. Record results → tap **"Save as Ben
 1. **Benchmark %** — load range set from `maxHang20mm` or `pullup1RM`
 2. **Seed** — previous actual kg if logged; else range midpoint
 3. **Auto-adjust** ±5% based on previous session's avg RPE vs target RPE
-4. **Readiness multiplier** — from daily readiness check-in: ×0.85 / ×1.0 / ×1.05 (or 0 = rest)
-5. **Deload override** — ×0.85 on top of the above
+4. **Readiness multiplier** — from daily readiness check-in: ×0.85 / ×1.0 / ×1.05 (or a rest suggestion instead of a load)
+
+Deload weeks do **not** scale kg — they cut prescribed volume instead (handled in `js/program.js`, see the Deload Rules above).
 
 Each step is shown in the "reason" tooltip next to the suggested load on the Today tab.
 

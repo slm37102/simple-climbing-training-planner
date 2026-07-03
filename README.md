@@ -1,6 +1,6 @@
 # Simple Climbing Training Planner
 
-A personal, single-user **PWA** that prescribes training every day for a 12-week periodized macrocycle (Base → Build → Peak → Taper) for an intermediate climber doing **both bouldering and sport**.
+A personal, single-user **PWA** that prescribes training every day for a periodized macrocycle (Base → Build → Peak → Taper, configurable 8–40 weeks, default 12) for an intermediate climber doing **both bouldering and sport**.
 
 - **Static**: plain HTML / CSS / vanilla JS ES modules. **No build step.**
 - **Offline-first**: PWA (service worker + manifest). Installable to phone home screen.
@@ -17,7 +17,7 @@ A personal, single-user **PWA** that prescribes training every day for a 12-week
 3. On the auth gate, click **"Use locally only"**.
 4. Fill in **Benchmarks** (bodyweight, max 10s hang on 20mm, 1RM weighted pull-up, grades, dominant style/angle) and a **cycle start date** (a Monday is recommended).
 5. The **Today** tab is your default view. Each main day (Mon/Thu/Sat) gets a session with calculated load ranges and an explicit suggested kg. Use the ◀ / ▶ arrows above the session card to log a day you missed; tap **Jump to today** to return.
-6. The **Cycle** tab shows a month-view calendar with phase colors and a comp-day marker. Tap any day to jump back to it in Today.
+6. The **Cycle** tab shows the whole macrocycle as a month-grouped week grid with phase colors, deload hatching, and a comp-day marker. Tap any day for its session detail, then open it in Today. Benchmarks, plans, and app settings live in the **Profile** tab; new plans start with a guided 5-step wizard.
 
 ## Smoke tests
 
@@ -53,10 +53,10 @@ The service worker requires the app to be served over **https** (or localhost) t
 
 ## How the program is built
 
-- **Macrocycle** (12 weeks): Base wk 1–6 (`B B D B B D`), Build wk 7–9 (`B B D`), Peak wk 10–11 (`P P`), Taper wk 12 (`T`). Deload weeks (3, 6, 9) drop volume −50% and intensity −15%, and skip the accessory block. Weeks 3 and 6 run a **retest** session.
+- **Macrocycle** (default 12 weeks; length configurable 8–40, phase split derived — see `docs/adr/0002`): Base wk 1–6 (`B B D B B D`), Build wk 7–9 (`B B D`), Peak wk 10–11 (`P P`), Taper wk 12 (`T`). Deload weeks (3, 6, 9) cut **volume ~40% (sets ×0.6) while holding intensity** — kg is never scaled down on a deload (see `docs/adr/0003`) — and skip the accessory block. The **last Base week** (wk 6 here) is also the **retest** session.
 - **Weekly schedule**: Mon/Thu/Sat main, Wed/Fri rest, Tue/Sun light/optional. 3 finger-loading days/week (within Hörst's ≤4 cap, with 48–72h tendon recovery between hard days).
-- **Hangboard protocols by phase**: Min-Edge (Base) → Max-Weight 10s (Build) → 7-53 (Peak) → 7/3 Repeaters (Taper). All from Hörst.
-- **Load resolution**: prev-actual → auto-adjust ±5% by RPE → readiness multiplier (×0.85/1.0/1.05) → deload ×0.85.
+- **Hangboard protocols by phase**: Min-Edge (Base) → Max-Weight 10s (Build) → 7-53 (Peak) → 7/3 Repeaters (Taper). Drawn from the Hörst / López protocol families — see `docs/training-philosophy.md` (and `docs/knowledge-gaps.md` KG-B2 for an open sequencing question).
+- **Load resolution**: prev-actual → auto-adjust ±5% by RPE → readiness multiplier (×0.85/1.0/1.05, or rest suggestion). No deload step here — deload is a volume cut, not an intensity cut.
 - **Antagonist block** (push-ups / rows / wrist extensors / farmer's carry / core) on Mon main days; auto-dropped during deloads.
 - **Campus board** is gated to Peak boulder weeks only.
 - **ARC** sessions appear on sport-emphasis Saturdays during Base.
@@ -81,14 +81,31 @@ firestore.rules          Per-user access rules
 icons/                   192/512/apple-touch (placeholders — replace with your own)
 css/styles.css           Mobile-first styles
 js/app.js                Entry, router, SW registration, auth gate
-js/program.js            12-week macrocycle, phase patterns, session library
-js/loads.js              Load ranges → kg, auto-adjust, readiness, deload
+js/program.js            Macrocycle (configurable length), phase patterns, session library
+js/loads.js              Load ranges → kg, auto-adjust, readiness
 js/storage.js            LocalStorage + JSON import/export + LWW remote merge
 js/sync.js               Firebase Google sign-in + Firestore mirror
 js/warmup.js             Warm-up & cooldown checklists
 js/exercise-inputs.js    Shared per-kind input-visibility helper (Today + Log)
-js/views/                Today, Calendar, Benchmarks, Log, Settings, Plans
+js/dates.js              Shared local-time date helpers
+js/ui.js                 Shared UI helpers (toast, HTML escape)
+js/views/                Today, Calendar (Cycle), Log, Profile, Onboarding wizard
 tests/index.html         In-browser smoke-test runner
+```
+
+## Documentation
+
+Start at [`docs/project-goals.md`](docs/project-goals.md) — why this exists, the three goals, and how the other docs relate.
+
+```
+docs/project-goals.md         Goals & design principles (entry point)
+docs/knowledge-gaps.md        What we don't know yet — gaps, divergences, open decisions
+docs/training-philosophy.md   What we believe and why (protocols, sources, evidence tiers)
+docs/training-plan.md         Human-readable prescription tables
+docs/adr/                     Decisions and trade-offs
+docs/research/                Evidence corpus (verified claims + raw gathered claims)
+docs/improvement-audit.md     Engineering audit (implemented; status note inside)
+CONTEXT.md                    Domain glossary (repo root by convention)
 ```
 
 ## Disclaimer

@@ -1,5 +1,14 @@
 # Improvement audit — 2026-06-24
 
+> **Status (2026-07-02): implemented.** All four phases below shipped and merged to `main`
+> (commits `e5d8a1b` phase 1 · `9efceeb` phase 2 · `f4bc0cc` phase 3 · `e1da784` phase 4 ·
+> `2d778cd` review fixes; merged in `5c08003`), verified against current code. Remaining:
+> **Q1 is partial** — `js/dates.js` exists and `storage.js` uses it, but the views still carry
+> local date-helper copies; **S3's** whole-state replace on import is now intentional behavior
+> behind an explicit destructive confirm. Treat the findings below as a historical record, not
+> a to-do list. New engineering findings belong here; training-content gaps live in
+> [`knowledge-gaps.md`](knowledge-gaps.md).
+
 A multi-agent review of the whole app across 6 dimensions (correctness, dates/timezone, sync/data-integrity, UX/a11y, code quality, PWA/offline). Each finding was independently re-checked by a skeptical verifier; **33 of 34 raw findings survived**. Severities below are the *verified* (post-adversarial) ones, which are often lower than the initial flag.
 
 Distribution: **1 high · 6 medium · the rest low/enhancement.**

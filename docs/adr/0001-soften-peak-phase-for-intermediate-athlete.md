@@ -19,3 +19,14 @@ Trade-off: the athlete gives up the theoretical maximal peaking stimulus in exch
 - Gresham N. climbing.com — Phases 3, 5, 8 of the year-long training plan.
 - López-Rivera & González-Badillo. *J Hum Kinet.* 2019;66:183–195. PMID 30988852.
 - Mundry S et al. *Sci Rep.* 2021;11:13530. PMID 34188125.
+
+## Addendum (2026-07-02) — implementation status & re-adjudication
+
+This ADR was accepted as a docs-only change and **was never implemented** — `js/program.js` kept the original pre-ADR Peak prescriptions (tracked as KG-B1 in `../knowledge-gaps.md`). Before implementing, the four decisions were re-checked against the verified research corpus (`../research/verified-findings.md`):
+
+- **Campus removal — confirmed, and strengthened.** The verified campus-readiness benchmarks (2–5 yr experience, V5–V6 ability, 15–20 strict pull-ups, 1-2-3-4-5 ladder without matching) put this athlete *at the floor* of campus readiness, not above it; the intermediate entry protocol is 2 sets × 2 reps of basic movements on big rungs. Addition beyond the original ADR: the basic-ladder prescription now carries an explicit **readiness gate** ("15–20 strict pull-ups + 1-2-3-4-5 ladder without matching · skip on any finger tweak").
+- **Pull-up cap 85–90% — confirmed.** Peaking research holds intensity but prioritizes freshness; nothing in the corpus supports a 95% ceiling for this profile.
+- **Reduced limit volume — confirmed.** Verified limit-bouldering guidance: 3–5 move problems, ~100% quality efforts, end the session before power drops ("fatigue has no place in limit bouldering").
+- **No max-stimulus stacking — confirmed.** Lattice peak-phase guidance: short, intense sessions so the athlete stays recruited *and* rested. Campus is removed from Peak Mondays entirely (7-53 + max pull-ups remain); Thursday keeps the only Peak campus exposure, as gated basic ladders at RPE ≤9.
+
+Implemented in `js/program.js` (`pullupPrescription`, `buildMonHangboard`, `buildThuMain` peak-boulder, `buildSatMain` peak-boulder) with regression tests in `tests/index.html` (`[ADR-0001]` cases). Closes **KG-B1** / **KG-D1**.

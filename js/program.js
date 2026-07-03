@@ -157,15 +157,18 @@ const HANGBOARD = {
     edge: '20mm',
     loadPctRange: [0.85, 0.95]
   },
+  // Taper holds intensity and cuts volume (ADR-0007): a short near-max touch keeps
+  // the nervous system sharp; the old 50–60% "light repeaters" shed fitness
+  // (cutting intensity 30–60% costs 20–30% performance — verified taper research).
   taper: {
-    name: '7/3 Repeaters (light)',
-    hang: '7s × 6 reps',
-    rest: '3s within / 3 min between sets',
-    sets: '1–2 sets per grip',
-    prescribedSets: 1, prescribedReps: 6,
-    rpeRange: [7.5, 8.5],
+    name: 'Near-max hangs (taper touch)',
+    hang: '10s weighted',
+    rest: '3 min',
+    sets: '2–3 hangs × 1 set — short & crisp, stop fresh',
+    prescribedSets: 1, prescribedReps: 3,
+    rpeRange: [8.5, 9],
     edge: '20mm',
-    loadPctRange: [0.50, 0.60]
+    loadPctRange: [0.80, 0.85]
   }
 };
 
@@ -183,8 +186,10 @@ const ANTAGONIST_BLOCK = [
 function pullupPrescription(phase) {
   if (phase === 'base')  return { pctRange: [0.55, 0.70], reps: '5 × 5', prescribedSets: 5, prescribedReps: 5, rpe: [7, 8.5] };
   if (phase === 'build') return { pctRange: [0.80, 0.90], reps: '5 × 3', prescribedSets: 5, prescribedReps: 3, rpe: [8.5, 9.5] };
-  if (phase === 'peak')  return { pctRange: [0.85, 0.95], reps: '5 × 2', prescribedSets: 5, prescribedReps: 2, rpe: [9, 9.5] };
-  return { pctRange: [0.50, 0.60], reps: '3 × 5', prescribedSets: 3, prescribedReps: 5, rpe: [7, 8] }; // taper
+  // Peak capped at 90% 1RM (not 95) for this athlete's shoulder/tendon recovery — ADR-0001.
+  if (phase === 'peak')  return { pctRange: [0.85, 0.90], reps: '5 × 2', prescribedSets: 5, prescribedReps: 2, rpe: [9, 9.5] };
+  // Taper: intensity held near peak, volume cut to a single low-set touch (ADR-0007).
+  return { pctRange: [0.80, 0.90], reps: '2 × 2', prescribedSets: 2, prescribedReps: 2, rpe: [9, 9.5] }; // taper
 }
 
 function buildMonHangboard(phase, isDeload, focus = 'hybrid') {
@@ -211,9 +216,9 @@ function buildMonHangboard(phase, isDeload, focus = 'hybrid') {
   if (focus === 'boulder' && phase === 'build') {
     exercises.push({ kind: 'campus', name: 'Campus warmup ladders', prescribed: '2–3 ladders × 5 min rest', rpeRange: [7, 8] });
   }
-  if (focus === 'boulder' && phase === 'peak') {
-    exercises.push({ kind: 'campus', name: 'Campus board (1-5-9 / bumps)', prescribed: '3–5 reps × 5 min rest · 20 min cap', rpeRange: [9, 9.5] });
-  }
+  // No campus on Peak Mondays: 7-53 hangs + max pull-ups + campus in one session
+  // stacks max stimuli beyond this athlete's connective-tissue recovery — ADR-0001.
+  // Peak campus work (basic ladders only) lives in Thursday's session.
   if (!isDeload) {
     if (focus === 'sport' && (phase === 'base' || phase === 'build')) {
       exercises.push({ kind: 'hangboard', name: '7/3 Repeaters (endurance)', hang: '7s × 6 reps on 20mm', rest: '3s within / 3 min between sets', sets: '3–4 sets', rpeRange: [7.5, 8.5], edge: '20mm', loadPctRange: null });
@@ -231,14 +236,15 @@ function buildMonHangboard(phase, isDeload, focus = 'hybrid') {
 function buildThuMain(phase, flavor, isDeload) {
   if (flavor === 'boulder') {
     if (phase === 'peak') {
-      // Limit + campus
+      // Softened per ADR-0001: reduced limit volume (quality over fatigue), basic
+      // campus ladders only (1-5-9 / bumps / jump-catch removed for this athlete's level).
       return {
         sessionId: 'thu-limit-campus',
         label: 'Limit Bouldering + Campus (Peak)',
         energySystem: 'Strength → Power',
         exercises: [
-          { kind:'limit-boulder', name: 'Limit boulders', prescribed: '3–5 problems · 3–5 attempts · 3–5 min rest · 2–3 sets', rpeRange: [9, 9.5] },
-          { kind:'campus', name: 'Campus board (rotate: ladders / bumps / 1-5-9 / jump-catch)', prescribed: '3–6 reps × 2–5 min rest · 20–30 min cap', rpeRange: [9, 9.5] }
+          { kind:'limit-boulder', name: 'Limit boulders', prescribed: '1–3 limit move-sequences (3–5 moves) · 4–8 attempts each · 3–5 min rest · stop when power drops (~20–30 min)', rpeRange: [9, 9.5] },
+          { kind:'campus', name: 'Campus board: basic ladders (1-3-5, matched feet)', prescribed: '2–3 attempts × 2 sets · 3–5 min rest · gate: 15–20 strict pull-ups + 1-2-3-4-5 ladder without matching · skip on any finger tweak', rpeRange: [8.5, 9] }
         ]
       };
     }
@@ -322,7 +328,7 @@ function buildSatMain(phase, flavor, isDeload) {
         label: 'Project boulder session',
         energySystem: 'Strength / Power',
         exercises: [
-          { kind: 'limit-boulder', name: 'Project attempts', prescribed: '3–5 hard problems · max 5 attempts each · 5+ min rest', rpeRange: [9, 9.5] },
+          { kind: 'limit-boulder', name: 'Project attempts', prescribed: '1–3 hard problems · max 5 quality attempts each · 5+ min rest · stop when power drops', rpeRange: [9, 9.5] },
           { kind: 'boulder', name: 'Flash/onsight attempts', prescribed: '3–5 problems at 1 grade below max', rpeRange: [8, 9] }
         ]
       };

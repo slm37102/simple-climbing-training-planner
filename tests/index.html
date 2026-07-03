@@ -544,6 +544,78 @@ test('Retest week skips volume cut (it has its own structure)', () => {
   assert(!sess.deloadNote, 'retest week should not emit volume-cut note');
 });
 
+// ─── ADR-0001: softened Peak phase (closes KG-B1) ────────────────────────
+// start Mon 2026-05-04, 12-wk cycle → peak = wks 10–11
+// Mon wk10 = 2026-07-06 · Thu wk10 = 2026-07-09 · Sat wk10 = 2026-07-11
+
+test('[ADR-0001] Peak weighted pull-ups capped at 90% 1RM', () => {
+  const ctx = Program.resolveDate('2026-07-06', '2026-05-04', 12);
+  assertEq(ctx.phase, 'peak');
+  const sess = Program.prescribeForContext(ctx, 'boulder');
+  const pull = sess.exercises.find(e => e.kind === 'pullup');
+  assert(pull, 'peak Monday should have weighted pull-ups');
+  assert(pull.pctRange[1] <= 0.90, `peak pull-up ceiling must be ≤0.90, got ${pull.pctRange[1]}`);
+});
+
+test('[ADR-0001] Mon Peak does not stack campus with 7-53 hangboard', () => {
+  const ctx = Program.resolveDate('2026-07-06', '2026-05-04', 12);
+  const sess = Program.prescribeForContext(ctx, 'boulder');
+  assert(sess.exercises.some(e => e.kind === 'hangboard'), 'peak Monday keeps the 7-53 protocol');
+  assert(!sess.exercises.some(e => e.kind === 'campus'), 'campus must not share a session with 7-53 at max RPE');
+});
+
+test('[ADR-0001] no 1-5-9 / bumps / jump-catch anywhere in Peak sessions', () => {
+  const banned = /1-5-9|bumps|jump-catch/i;
+  for (const iso of ['2026-07-06', '2026-07-09', '2026-07-11']) {
+    const ctx = Program.resolveDate(iso, '2026-05-04', 12);
+    assertEq(ctx.phase, 'peak', `${iso} should resolve to peak`);
+    const sess = Program.prescribeForContext(ctx, 'boulder');
+    for (const ex of sess.exercises) {
+      const txt = `${ex.name} ${ex.prescribed || ''}`;
+      assert(!banned.test(txt), `${iso}: banned campus move in "${txt}"`);
+    }
+  }
+});
+
+test('[ADR-0001] Thu Peak campus is gated basic ladders at sub-max RPE', () => {
+  const ctx = Program.resolveDate('2026-07-09', '2026-05-04', 12);
+  const sess = Program.prescribeForContext(ctx, 'boulder');
+  const campus = sess.exercises.find(e => e.kind === 'campus');
+  assert(campus, 'Thu peak boulder session keeps a campus exercise');
+  assert(/ladder/i.test(campus.name), `campus should be basic ladders, got "${campus.name}"`);
+  assert(/gate/i.test(campus.prescribed), 'campus prescription must carry the readiness gate');
+  assert(campus.rpeRange[1] <= 9, `campus RPE ceiling should be ≤9, got ${campus.rpeRange[1]}`);
+});
+
+// ─── ADR-0007: taper holds intensity, cuts volume ─────────────────────────
+// start Mon 2026-05-04, 12-wk cycle → taper = wk 12; Mon wk12 = 2026-07-20
+
+test('[ADR-0007] Taper holds near-peak intensity and cuts volume', () => {
+  const ctx = Program.resolveDate('2026-07-20', '2026-05-04', 12);
+  assertEq(ctx.phase, 'taper');
+  const sess = Program.prescribeForContext(ctx, 'boulder');
+  const hang = sess.exercises.find(e => e.kind === 'hangboard');
+  const pull = sess.exercises.find(e => e.kind === 'pullup');
+  assert(hang && hang.loadPctRange[0] >= 0.75,
+    `taper hangboard must hold near-peak load%, got ${hang && hang.loadPctRange}`);
+  assert(pull && pull.pctRange[0] >= 0.75,
+    `taper pull-up must hold near-peak load%, got ${pull && pull.pctRange}`);
+  assert(hang.prescribedSets <= 2 && pull.prescribedSets <= 3,
+    'taper volume must stay low (the cut is volume, not intensity)');
+});
+
+test('[ADR-0001] Peak limit-boulder volume reduced (quality over fatigue)', () => {
+  const thu = Program.prescribeForContext(Program.resolveDate('2026-07-09', '2026-05-04', 12), 'boulder');
+  const limit = thu.exercises.find(e => e.kind === 'limit-boulder');
+  assert(limit, 'Thu peak should have limit boulders');
+  assert(/1–3/.test(limit.prescribed) && /power drops/i.test(limit.prescribed),
+    `expected reduced-volume prescription, got "${limit.prescribed}"`);
+  const sat = Program.prescribeForContext(Program.resolveDate('2026-07-11', '2026-05-04', 12), 'boulder');
+  const proj = sat.exercises.find(e => e.kind === 'limit-boulder');
+  assert(proj && /1–3/.test(proj.prescribed) && /power drops/i.test(proj.prescribed),
+    `expected reduced Sat project volume, got "${proj && proj.prescribed}"`);
+});
+
 // ─── Calendar view ────────────────────────────────────────────────────────
 
 test('Cycle: summary card shows week progress + cycle bests', () => {
