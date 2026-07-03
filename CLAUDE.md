@@ -31,7 +31,7 @@ Static host anywhere. Canonical target is Firebase Hosting (`public: "."` — se
 firebase deploy --only hosting
 ```
 
-Hosting URL: <https://simple-climbing-planner.web.app>. Repo: <https://github.com/slm37102/simple-climbing-training-planner> (pushes to `origin/main`). No CI runs build/test on push. Use conventional-commit subjects + the `Co-authored-by` trailer (see git log).
+Hosting URL: <https://simple-climbing-planner.web.app>. Repo: <https://github.com/slm37102/simple-climbing-training-planner> (pushes to `origin/main`). **Auto-deploy:** every push to `main` deploys via GitHub Actions (`.github/workflows/firebase-deploy.yml`; needs the `FIREBASE_SERVICE_ACCOUNT_SIMPLE_CLIMBING_PLANNER` repo secret — a service-account JSON with Firebase Hosting Admin). Manual re-deploys: the workflow's "Run workflow" button, or the CLI command above. No CI runs the test suite on push (tests are the in-browser suite). Use conventional-commit subjects + the `Co-authored-by` trailer (see git log).
 
 ## Architecture
 
