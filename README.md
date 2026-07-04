@@ -53,9 +53,10 @@ The service worker requires the app to be served over **https** (or localhost) t
 
 ## How the program is built
 
-- **Macrocycle** (default 12 weeks; length configurable 8–40, phase split derived — see `docs/adr/0002`): Base wk 1–6 (`B B D B B D`), Build wk 7–9 (`B B D`), Peak wk 10–11 (`P P`), Taper wk 12 (`T`). Deload weeks (3, 6, 9) cut **volume ~40% (sets ×0.6) while holding intensity** — kg is never scaled down on a deload (see `docs/adr/0003`) — and skip the accessory block. The **last Base week** (wk 6 here) is also the **retest** session.
+- **Macrocycle** (default 12 weeks; length configurable 8–40, phase split derived — see `docs/adr/0002`): Base wk 1–6 (`B B B D B D`), Build wk 7–9 (`B B B`), Peak wk 10–11 (`P P`), Taper wk 12 (`T`). Deloads land every **4th** week (3 hard : 1 deload — `docs/adr/0004`) and cut **volume ~40% (sets ×0.6) while holding intensity** — kg is never scaled down on a deload (see `docs/adr/0003`) — and skip the accessory block. The **last Base week** (wk 6 here) is also the **retest** session. Taper length follows the plan's **peak type** (comp 1 wk, trip/project 2 wk — `docs/adr/0007`), the taper keeps near-peak loads with cut volume, and the day before the goal is a forced rest day.
 - **Weekly schedule**: Mon/Thu/Sat main, Wed/Fri rest, Tue/Sun light/optional. 3 finger-loading days/week (within Hörst's ≤4 cap, with 48–72h tendon recovery between hard days).
-- **Hangboard protocols by phase**: Min-Edge (Base) → Max-Weight 10s (Build) → 7-53 (Peak) → 7/3 Repeaters (Taper). Drawn from the Hörst / López protocol families — see `docs/training-philosophy.md` (and `docs/knowledge-gaps.md` KG-B2 for an open sequencing question).
+- **Hangboard protocols by phase**: 7/3 Repeaters + intro max-hangs (Base) → Max-Weight 10s, 2×4 @ RPE 8–9 (Build) → 7-53 (Peak) → near-max taper touch. Drawn from the Hörst / López / Lattice protocol families — see `docs/training-philosophy.md` and `docs/adr/0005`.
+- **Power-endurance** runs a two-band model (`docs/adr/0006`): 60/60 threshold intervals in Build (sport weeks), 30/30 lactic sharpening only in the final ≤4 weeks, with interval rest tightening 5s/week toward the goal.
 - **Load resolution**: prev-actual → auto-adjust ±5% by RPE → readiness multiplier (×0.85/1.0/1.05, or rest suggestion). No deload step here — deload is a volume cut, not an intensity cut.
 - **Antagonist block** (push-ups / rows / wrist extensors / farmer's carry / core) on Mon main days; auto-dropped during deloads.
 - **Campus board** is gated to Peak boulder weeks only.

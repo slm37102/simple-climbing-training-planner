@@ -1,6 +1,6 @@
 # Power-endurance: two-band model, comp-date-anchored sharpening
 
-**Status:** Accepted — implementation deferred to the design phase (KG-C5 + KG-A6). No code changed by this ADR.
+**Status:** Accepted — implemented 2026-07-04 (Build sport Thu = 60/60 threshold, Peak sport Thu = 30/30 lactic, density rest cuts in the final 4 weeks, single-system Sat triples; closes KG-C5 + KG-A6).
 
 ## Context
 

@@ -43,6 +43,7 @@ export function openOnboarding({ onDone } = {}) {
       weeks: Program.DEFAULT_CYCLE_WEEKS,
     },
     schedMode: 'start-weeks', // start-weeks | start-end | end-weeks
+    peakType: 'comp',         // comp | trip | project — taper length lever (ADR-0007)
     activeField: 'start',     // which date the calendar edits in start-end mode
     startDate: null,
     endDate: null,
@@ -227,6 +228,15 @@ export function openOnboarding({ onDone } = {}) {
         <div style="font:600 11px 'Archivo';color:var(--text2)">Sessions land on <b>Mon · Thu · Sat</b> — Tue light, Sun optional, Wed/Fri rest. The weekly layout is fixed by the program.</div>
       </div>
       <div>
+        <div class="section-label" style="margin-bottom:9px">Peaking for</div>
+        <div class="choice-row">
+          <div class="choice ${state.peakType === 'comp' ? 'active' : ''}" data-peaktype="comp" role="button" tabindex="0">Comp</div>
+          <div class="choice ${state.peakType === 'trip' ? 'active' : ''}" data-peaktype="trip" role="button" tabindex="0">Trip</div>
+          <div class="choice ${state.peakType === 'project' ? 'active' : ''}" data-peaktype="project" role="button" tabindex="0">Project</div>
+        </div>
+        <div style="font:400 11px 'Archivo';color:var(--muted);margin-top:8px">Comp: 1-week taper + full rest before the day. Trip / project: 2-week taper riding the peak window.</div>
+      </div>
+      <div>
         <div class="section-label" style="margin-bottom:9px">I know my…</div>
         <div class="choice-stack">
           ${mode('start-weeks', 'Start date + Duration')}
@@ -277,6 +287,7 @@ export function openOnboarding({ onDone } = {}) {
         <div class="rr"><span class="rk">Target grade</span><span class="rv">${grade}</span></div>
         <div class="rr"><span class="rk">Training days</span><span class="rv">Mon · Thu · Sat (+Tue/Sun)</span></div>
         <div class="rr"><span class="rk">Length</span><span class="rv">${d.weeks} weeks</span></div>
+        <div class="rr"><span class="rk">Peaking for</span><span class="rv">${state.peakType}</span></div>
         <div class="rr"><span class="rk">Starts</span><span class="rv">${pretty(start)}</span></div>
         <div class="rr"><span class="rk">${d.anchorMode === 'compDate' ? 'Comp / end' : 'Ends'}</span><span class="rv">${pretty(end)}</span></div>
       </div>
@@ -349,6 +360,10 @@ export function openOnboarding({ onDone } = {}) {
     }));
 
     // s3
+    overlay.querySelectorAll('[data-peaktype]').forEach(el => el.addEventListener('click', () => {
+      state.peakType = el.dataset.peaktype;
+      render();
+    }));
     overlay.querySelectorAll('[data-schmode]').forEach(el => el.addEventListener('click', () => {
       state.schedMode = el.dataset.schmode;
       state.activeField = 'start';
@@ -400,6 +415,7 @@ export function openOnboarding({ onDone } = {}) {
       startDate: d.startDate,
       compDate: d.compDate,
       cycleWeeks: d.weeks,
+      peakType: state.peakType,
     });
     // Benchmarks are global; target grade lands in the matching grade field(s).
     const benchPatch = {

@@ -1,6 +1,6 @@
 # Deload cadence: move from every-3rd-week (2:1) to every-4th-week (3:1)
 
-**Status:** Accepted — implementation deferred to the design phase (KG-B3). No code changed by this ADR.
+**Status:** Accepted — implemented 2026-07-04 (`buildPhasePattern` deload cadence `%4`; closes KG-B3).
 
 ## Context
 

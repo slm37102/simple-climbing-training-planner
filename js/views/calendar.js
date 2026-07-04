@@ -99,7 +99,7 @@ export function renderCalendar(root) {
       for (let i = 0; i < 7; i++) {
         const iso = addDays(weekStart, i);
         const d = new Date(iso + 'T00:00:00');
-        const ctx = Program.resolveDate(iso, start, weeks);
+        const ctx = Program.resolveDate(iso, start, weeks, activePlan.settings?.peakType);
         const classes = ['cyc-cell'];
         if (ctx && !ctx.outOfCycle) {
           classes.push(ctx.phase);
@@ -129,7 +129,7 @@ export function renderCalendar(root) {
 
   function detailCardHtml(iso) {
     const weeks = Program.cycleWeeksOf(activePlan.settings);
-    const ctx = Program.resolveDate(iso, start, weeks);
+    const ctx = Program.resolveDate(iso, start, weeks, activePlan.settings?.peakType);
     if (!ctx || ctx.outOfCycle) {
       return `<div class="card detail-card"><p class="muted">${pretty(iso)} — outside the cycle window.</p></div>`;
     }
@@ -172,7 +172,7 @@ function summaryCardHtml(settings, days = {}) {
 
   const cycleWeeks = Program.cycleWeeksOf(settings);
   const totalDays  = Program.cycleDays(cycleWeeks);
-  const pattern    = Program.buildPhasePattern(cycleWeeks);
+  const pattern    = Program.buildPhasePattern(cycleWeeks, settings?.peakType);
   const todayIso = isoDate(new Date());
   const rawDayIndex = daysBetween(startIso, todayIso);
   const clampedDayIndex = Math.max(0, Math.min(totalDays - 1, rawDayIndex));
@@ -188,7 +188,7 @@ function summaryCardHtml(settings, days = {}) {
 
   for (let i = 0; i < 7; i++) {
     const iso = addDays(weekStartIso, i);
-    const ctx = Program.resolveDate(iso, startIso, cycleWeeks);
+    const ctx = Program.resolveDate(iso, startIso, cycleWeeks, settings?.peakType);
     if (!ctx || ctx.outOfCycle || ctx.isRest) continue;
     scheduledSessions++;
     if (days[iso]?.exercises?.some(ex => actualHasResult(ex?.actual))) loggedSessions++;

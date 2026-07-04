@@ -21,8 +21,8 @@ What making a good climbing plan requires that neither the docs nor the code cur
 | KG-A2 | No intra-phase progressive overload | P1 | G1 | Open |
 | KG-A3 | No missed-session replanning | P1 | G1 G2 G3 | Open |
 | KG-A4 | No monitoring model | P1 | G3 G1 | Open |
-| KG-A5 | Taper knowledge is a stub | P2 | G2 | Decided (ADR-0007) — impl pending |
-| KG-A6 | Power-endurance dosing unresolved | P2 | G2 G3 | Decided (ADR-0006) — impl pending |
+| KG-A5 | Taper knowledge is a stub | P2 | G2 | Closed (ADR-0007, 2026-07-04) |
+| KG-A6 | Power-endurance dosing unresolved | P2 | G2 G3 | Closed (ADR-0006, 2026-07-04) |
 | KG-A7 | Injury-prevention dosing partial | P2 | G3 | Open |
 | KG-A8 | No inter-cycle progression model | P2 | G1 | Open |
 | KG-A9 | No technique/skill programming | P2 | G1 | Open |
@@ -64,7 +64,7 @@ What making a good climbing plan requires that neither the docs nor the code cur
 
 - *Pointers:* `js/program.js` — `buildPhasePattern` (taper = 1–2 weeks by formula) and the taper session templates; verified-findings § Peaking & tapering.
 - *Verdict:* close — the evidence is already verified; this is a translation gap. Feeds KG-D4.
-- **DECIDED 2026-07-02 → [ADR-0007](adr/0007-taper-hold-intensity-peaktype.md) (implementation pending design phase).** Hold intensity, step-cut volume (reuse `applyDeloadVolume`), mandatory rest day before the goal, + a `settings.peakType` length lever (comp/trip/project). The load-bearing correction is removing the current intensity drop (taper loads sit at 50–60% — a −20–30% performance cost); progressive decay was rejected (evidence is for ≥10-day tapers). `peakType` carries a `SCHEMA_VERSION` bump when implemented.
+- **DECIDED 2026-07-02 → [ADR-0007](adr/0007-taper-hold-intensity-peaktype.md); IMPLEMENTED 2026-07-04.** Hold intensity, step-cut volume (`applyTaperVolume`), mandatory rest day before the goal (`rest-pre-goal` at `totalDays − 2`), + a `settings.peakType` length lever (comp 1 wk / trip 2 / project 2). The load-bearing correction was removing the intensity drop (shipped 2026-07-03); progressive decay was rejected (evidence is for ≥10-day tapers). `peakType` shipped **without** a schema bump — `defaultSettings()` shallow-merge backfills it per the CLAUDE.md convention.
 
 ### KG-A6 — Power-endurance dosing and placement unresolved (P2, G2+G3)
 
@@ -72,7 +72,7 @@ What making a good climbing plan requires that neither the docs nor the code cur
 
 - *Pointers:* `js/program.js` — `buildThuMain`/`buildSatMain` build-phase sport sessions; verified-findings § Power-endurance, § Peaking. The two sources may describe different energy systems — adjudicate KG-C5 first.
 - *Verdict:* close after KG-C5.
-- **DECIDED 2026-07-02 → [ADR-0006](adr/0006-power-endurance-two-band-model.md) (implementation pending design phase).** KG-C5 taxonomy settled (two energy-system bands, not a conflict). Adopt the two-band model: Build = aerobic-power/capacity engine; final 2–4 wks = compDate-anchored lactic sharpening (5s/wk density cuts); boulder/sport flavor biases the band; single-system sessions; ≤1 lactic session/wk + 72h spacing. Land Option A's guardrails (compDate anchor + lactic cap) first.
+- **DECIDED 2026-07-02 → [ADR-0006](adr/0006-power-endurance-two-band-model.md); IMPLEMENTED 2026-07-04.** KG-C5 taxonomy settled (two energy-system bands, not a conflict). Shipped: Build sport Thu = 60/60 threshold intervals RPE 7–8.5 (band 1); Peak sport Thu = 30/30 lactic RPE 9.5–10 (band 2, confined to the final ≤4 weeks); interval rest tightens 5s/week inside the final 4 weeks (`densityRest`, clamped ≥2:30); Sat triples/4×4 are single-system with the open-climb cool-down optional. ≤1 lactic session/wk holds by construction (band 2 lives on Thu only).
 
 ### KG-A7 — Injury-prevention dosing is partial (P2, G3)
 
@@ -116,8 +116,8 @@ The app was built before the research; these are the places where its decisions 
 | ID | Gap | Priority | Goals | Status |
 |----|-----|----------|-------|--------|
 | KG-B1 | Peak prescription conflict (ADR-0001 unimplemented) | **P1 — critical** | G3 | Closed (2026-07-02) |
-| KG-B2 | Hangboard protocol identity/sequencing | P2 | G1 G3 | Decided (ADR-0005) — impl pending |
-| KG-B3 | Deload cadence 2:1 vs 3:1 | P2 | G1 G3 | Decided (ADR-0004) — impl pending |
+| KG-B2 | Hangboard protocol identity/sequencing | P2 | G1 G3 | Closed (ADR-0005, 2026-07-04) |
+| KG-B3 | Deload cadence 2:1 vs 3:1 | P2 | G1 G3 | Closed (ADR-0004, 2026-07-04) |
 | KG-B4 | ARC under-dosed in hybrid mode | P2 | G1 | Open |
 | KG-B5 | No "targets hit → progress" rule | P2 | G1 | Open |
 | KG-B6 | Doc drift (stale deload rule etc.) | P2 | — | Closed (this commit) |
@@ -148,14 +148,14 @@ The philosophy doc, the code, and the verified research each say something diffe
 Peak (7-53) and Taper match across sources. Which Base/Build sequencing is right for this athlete needs adjudication; the philosophy table carries a divergence marker pointing here until then.
 
 - *Verdict:* adjudicate (short ADR), then fix whichever side is wrong.
-- **DECIDED 2026-07-02 → [ADR-0005](adr/0005-base-build-hangboard-protocols.md) (implementation pending design phase).** Base = 7/3 repeaters (capacity) + intro weighted max-hangs; Build = weighted max-hangs at corrected dose (6–8 hangs, RPE 8–9, margin cue); **delete min-edge entirely** (unprovenanced, trains to failure; its pro-min-edge rationale was refuted, claim 291). Un-swaps the philosophy table's Base/Build rows. Strict López MAW→MED rejected (needs an mm-benchmark the app can't express; leaves no capacity stimulus).
+- **DECIDED 2026-07-02 → [ADR-0005](adr/0005-base-build-hangboard-protocols.md); IMPLEMENTED 2026-07-04.** Base = 7/3 repeaters (capacity) + intro weighted max-hangs; Build = weighted max-hangs at corrected dose (2×4 = 8 hangs, RPE 8–9, margin cue); **min-edge deleted entirely** (unprovenanced, trains to failure; its pro-min-edge rationale was refuted, claim 291), and the sport-flavor bonus repeater block deleted with it (repeaters are first-class in Base now). Strict López MAW→MED rejected (needs an mm-benchmark the app can't express; leaves no capacity stimulus).
 
 ### KG-B3 — Deload cadence: code is 2:1, doc says "3:1", Lattice's 3:1 is every 4th week (P2, G1+G3)
 
 The code deloads every 3rd week — 2 hard : 1 deload (`js/program.js` — `(i+1)%3===0` in `buildPhasePattern`). `training-philosophy.md` labels this "3:1", but Lattice's published 3:1 = 3 hard weeks then a deload (every 4th week). The current cadence matches neither the label nor the source convention. More frequent deloads are the *conservative* direction (G3-friendly) but cost ~8% of hard training weeks (G1) — a deliberate choice should be recorded either way.
 
 - *Verdict:* adjudicate 2:1 vs 3:1 for this athlete (Hörst: "every 3–4 weeks for the aging athlete", § Deload); update doc label + code together.
-- **DECIDED 2026-07-02 → [ADR-0004](adr/0004-deload-cadence-3-to-1.md) (implementation pending design phase).** Move to **3:1** (`%3`→`%4`, deload every 4th week). Matches Lattice/Hörst/the doc's own label; recovers +1 full-dose Build week (+50% strength-conversion stimulus) with zero added intensity risk — the correct lever for the localized under-dosing the total-dose check found. Deeper ~50% cut kept as a fast follow-up only if 3-week tolerance proves poor.
+- **DECIDED 2026-07-02 → [ADR-0004](adr/0004-deload-cadence-3-to-1.md); IMPLEMENTED 2026-07-04** (`%3`→`%4` at all six loop sites in `buildPhasePattern`). Move to **3:1** (deload every 4th week). Matches Lattice/Hörst/the doc's own label; recovers +1 full-dose Build week (+50% strength-conversion stimulus) with zero added intensity risk — the correct lever for the localized under-dosing the total-dose check found. Deeper ~50% cut kept as a fast follow-up only if 3-week tolerance proves poor.
 
 ### KG-B4 — ARC/aerobic base under-dosed in hybrid mode (P2, G1)
 
@@ -230,7 +230,7 @@ App capabilities blocked on the knowledge above. Each names its prerequisite; no
 | KG-D1 | ~~Implement the adjudicated Peak in `js/program.js` (+ campus readiness gate)~~ **Closed 2026-07-02** with KG-B1 | P1 | KG-B1 decision |
 | KG-D2 | Limiter readout (read the 4 dead benchmark fields + norms table → "likely limiter" on Settings/Log) | P1 | KG-A1, KG-C6 |
 | KG-D3 | Missed-session detection + replan (shift/extend/compress; decay stale prev-actual seeds) | P1 | KG-A3 rules |
-| KG-D4 | Peak-date-aware taper generator (progressive cut, strength touch every 5–10 days, event type) | P2 | KG-A5 |
+| KG-D4 | ~~Peak-date-aware taper generator~~ **Closed 2026-07-04** with ADR-0007 (step cut + rest-pre-goal + `peakType`; progressive decay rejected by the ADR) | P2 | KG-A5 |
 | KG-D5 | Intra-phase progression engine (ARC ramp, PE rest-cuts, targets-hit → +2.5–10%) | P2 | KG-A2, KG-B5 |
 | KG-D6 | Monitoring signals in the Log tab (readiness trend, RPE drift, retest trajectory) | P2 | KG-A4 |
 | KG-D7 | End-of-cycle review checklist (may be a doc, not code) | P3 | KG-A8 |
@@ -246,18 +246,18 @@ If only five things get done, in this order:
 
 1. **KG-B1 → KG-D1** — adjudicate and implement the Peak prescription (G3) — *done 2026-07-02*.
 2. **KG-B6** — doc drift — *done 2026-07-02*.
-3. **KG-B2/B3/C5/A6/A5** — the four prescription decisions — *adjudicated & locked as ADRs 0004–0007, 2026-07-02* (implementation pending the design phase).
+3. **KG-B2/B3/C5/A6/A5** — the four prescription decisions — *adjudicated & locked as ADRs 0004–0007, 2026-07-02; implemented in `js/program.js` 2026-07-04*.
 4. **KG-A1 + KG-C6** — limiter-diagnosis norms (biggest G1 lever).
 5. **KG-A3 → KG-D3** — missed-session rules (protects all three goals).
 
-## Decided, implementation pending (design phase)
+## Decided → shipped (2026-07-04)
 
-These four are locked as ADRs but **not yet in code** — the deliberate ADR-0001 lesson made visible so nothing goes silently unimplemented. Effective-from: next cycle, except the ADR-0007 taper intensity fix (safe to apply immediately).
+All four ADRs are now in code (this section stays as the record that nothing went silently unimplemented — the ADR-0001 lesson). The owner chose **immediate effect** mid-cycle: the only live disruption is the wk3 deload shifting to wk4, in exchange for deleting the min-edge injury exposure for the remaining weeks. Already-logged days keep their stored data untouched.
 
-- [ ] **ADR-0004** — deload cadence `%3`→`%4` (6 loop sites in `buildPhasePattern`) + tests + doc label.
-- [ ] **ADR-0005** — Base repeaters+intro-maxhang, Build corrected max-hang dose, delete min-edge (`HANGBOARD`/`buildMonHangboard`) + tests + philosophy table.
-- [ ] **ADR-0006** — PE two-band model, compDate-anchored lactic block (`buildThuMain`/`buildSatMain`/`buildPhasePattern`) — land Option A guardrails first.
-- [x] **ADR-0007 (intensity fix only, shipped 2026-07-03)** — taper now holds near-peak load% (`HANGBOARD.taper` [0.80,0.85], pull-ups [0.80,0.90]) with low volume; flagged safe-immediately by the ADR. Still pending: taper volume step-cut via `applyDeloadVolume`, rest-day-before-goal, and the `settings.peakType` length lever (schema bump).
+- [x] **ADR-0004 (shipped 2026-07-04)** — deload cadence `%3`→`%4` (6 loop sites in `buildPhasePattern`) + tests + doc label.
+- [x] **ADR-0005 (shipped 2026-07-04)** — Base repeaters+intro-maxhang, Build corrected max-hang dose (2×4 @ RPE 8–9), min-edge and the sport-flavor bonus repeaters deleted + tests + philosophy table.
+- [x] **ADR-0006 (shipped 2026-07-04)** — PE two-band model: Build sport Thu 60/60 threshold, Peak sport Thu 30/30 lactic, 5s/wk density rest cuts inside the final 4 weeks, single-system Sat sessions.
+- [x] **ADR-0007 (intensity fix shipped 2026-07-03; remainder 2026-07-04)** — taper holds near-peak load% with a step volume cut (`applyTaperVolume` + `taperNote`), forced rest day before the goal (`rest-pre-goal`), and the `settings.peakType` taper-length lever (comp/trip/project — onboarding wizard + Profile edit; no schema bump, `defaultSettings()` backfills).
 
 ## Deliberately out of scope
 
@@ -268,3 +268,4 @@ Multi-user / product features · AI-coach chat · wearables/HRV integration · n
 - **2026-07-02** — Document created from a goal interview + a 5-agent verification of every code/doc claim against the current source. KG-B6 closed in the same commit (stale-doc corrections + folder restructure).
 - **2026-07-02** — **KG-B1 + KG-D1 closed.** Peak prescription re-adjudicated against the verified corpus (all four ADR-0001 decisions confirmed; campus readiness gate added) and implemented in `js/program.js` with `[ADR-0001]` regression tests. See the ADR-0001 addendum.
 - **2026-07-02** — **Decision round: KG-B2, KG-B3, KG-C5, KG-A6, KG-A5 decided** and locked as ADRs 0004–0007 (implementation deferred to the design phase). Backed by a targeted claim adjudication (29 gathered claims → 25 kept, 4 refuted; dated batch appended to `verified-findings.md`). Research was scoped strictly to what these decisions needed — the rest of the KG-C1 backlog stays deferred.
+- **2026-07-04** — **ADRs 0004–0007 implemented; KG-B2, KG-B3, KG-A5, KG-A6 (and KG-D4) closed.** All four prescriptions now live in `js/program.js` with regression tests in `tests/index.html` (`[ADR-0004…0007]` cases; suite fully green). `settings.peakType` added (no schema bump). Owner chose immediate effect mid-cycle.

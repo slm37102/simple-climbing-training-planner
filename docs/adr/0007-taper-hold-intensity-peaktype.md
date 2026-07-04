@@ -1,6 +1,6 @@
 # Taper: hold intensity, step-cut volume, event-type length lever
 
-**Status:** Accepted — implementation deferred to the design phase (KG-A5). No code changed by this ADR.
+**Status:** Accepted — fully implemented 2026-07-04 (intensity fix shipped 2026-07-03; taper volume step-cut, rest-day-before-goal, and `settings.peakType` taper lever shipped 2026-07-04; closes KG-A5).
 
 ## Context
 
@@ -27,9 +27,9 @@ The current taper **drops intensity**: `HANGBOARD.taper.loadPctRange` and `pullu
 ## Consequences
 
 - Confidence: **high** on the intensity fix (the load-bearing change); **moderate** on step-vs-progressive shape and on length. The intensity fix *reduces* an existing over-softening — it does not stack a new conservatism and never raises injury risk (volume falls, not load), so it is safe against the compounding-conservatism concern while directly serving G2.
-- `peakType` is the one decision in this round that carries a **schema cost** when implemented (new setting → `SCHEMA_VERSION` bump).
+- `peakType` is the one decision in this round that carries a **schema cost** when implemented (new setting → `SCHEMA_VERSION` bump). *Implementation note (2026-07-04): shipped without a `SCHEMA_VERSION` bump — the repo's standing convention (CLAUDE.md, ADR-0002 precedent) is that new `settings` fields backfill via `defaultSettings()` + `migrate()`'s shallow-merge; a version bump is reserved for shape changes.*
 
-## Implementation checklist (deferred round)
+## Implementation checklist (completed 2026-07-04)
 
 - `js/program.js`: raise `HANGBOARD.taper` load to a near-peak band + RPE ~8.5–9, rename from "7/3 Repeaters (light)" to a low-volume near-max hang; raise `pullupPrescription('taper')` to ~`[0.80, 0.90]`, RPE ~`[9, 9.5]`, low sets. Extend the deload-volume guard in `prescribeForContext` to also apply a step volume cut on taper weeks (taper-specific note, not `deloadNote`). Force a rest day on the day before the final cycle day / `compDate`.
 - `settings.peakType`: add to `defaultSettings()` (backfilled by `migrate()`'s shallow-merge); **bump `SCHEMA_VERSION` in `storage.js`**. Taper length in `_composeSingle`/`_composeDouble` becomes a function of `peakType` rather than the `weeks >= 14 ? 2 : 1` rule; taper session builders branch on `peakType`. New UI in the settings/plan view; add `peakType` to `CONTEXT.md` glossary.

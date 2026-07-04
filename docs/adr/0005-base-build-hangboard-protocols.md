@@ -1,6 +1,6 @@
 # Base/Build hangboard: capacity→strength path, delete min-edge
 
-**Status:** Accepted — implementation deferred to the design phase (KG-B2). No code changed by this ADR.
+**Status:** Accepted — implemented 2026-07-04 (Base = repeaters + intro max-hangs, Build dose 2×4 @ RPE 8–9, min-edge and bonus repeaters deleted; closes KG-B2).
 
 ## Context
 
