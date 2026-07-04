@@ -190,6 +190,14 @@ export function renderProfile(root) {
         <div class="muted" id="pf-cycle-hint" style="font-size:.8rem;margin-top:4px"></div>
       </div>
       <div class="field">
+        <label for="pf-peakType">Peaking for</label>
+        <select id="pf-peakType">
+          <option value="comp" ${(settings.peakType || 'comp') === 'comp' ? 'selected' : ''}>Comp — 1-wk taper + rest day before</option>
+          <option value="trip" ${settings.peakType === 'trip' ? 'selected' : ''}>Trip — 2-wk taper</option>
+          <option value="project" ${settings.peakType === 'project' ? 'selected' : ''}>Project — 2-wk rolling taper</option>
+        </select>
+      </div>
+      <div class="field">
         <label>Cycle anchor</label>
         <div class="radio-group" style="margin-bottom:8px">
           <label><input type="radio" name="pf-anchor" value="startDate" ${anchorMode === 'startDate' ? 'checked' : ''}> Start on a date</label>
@@ -361,7 +369,7 @@ export function renderProfile(root) {
     const cycleHint = document.getElementById('pf-cycle-hint');
     const weeks = currentCycleWeeks();
     const span  = Program.cycleDays(weeks) - 1;
-    const pattern = Program.buildPhasePattern(weeks);
+    const pattern = Program.buildPhasePattern(weeks, document.getElementById('pf-peakType')?.value);
     const phaseCounts = { base: 0, build: 0, peak: 0, taper: 0 };
     pattern.forEach(p => { phaseCounts[p.phase]++; });
     const isDouble = weeks > 20;
@@ -397,6 +405,7 @@ export function renderProfile(root) {
       focus:      document.querySelector('input[name="pf-focus"]:checked')?.value || 'hybrid',
       color:      document.querySelector('.color-swatch.swatch-sel')?.dataset.color || COLORS[0],
       cycleWeeks: currentCycleWeeks(),
+      peakType: document.getElementById('pf-peakType')?.value || 'comp',
       anchorMode,
       startDate:  (anchorMode === 'startDate') ? (pickerState.startDate || null) : null,
       compDate:   (anchorMode === 'compDate')  ? (pickerState.compDate  || null) : null,
@@ -404,11 +413,11 @@ export function renderProfile(root) {
   }
 
   function saveForm() {
-    const { name, focus, color, cycleWeeks, anchorMode, startDate, compDate } = readForm();
+    const { name, focus, color, cycleWeeks, peakType, anchorMode, startDate, compDate } = readForm();
     if (!name) { flash('Please enter a plan name.'); return; }
     if (formState.mode === 'edit' && formState.editId) {
       Storage.updatePlan(formState.editId, { name, focus, color });
-      Storage.setPlanSettings(formState.editId, { anchorMode, startDate, compDate, cycleWeeks });
+      Storage.setPlanSettings(formState.editId, { anchorMode, startDate, compDate, cycleWeeks, peakType });
       flash('Plan updated.');
     }
     formState = { mode: null, editId: null };
@@ -537,6 +546,7 @@ export function renderProfile(root) {
           refreshHints();
         });
       });
+      document.getElementById('pf-peakType')?.addEventListener('change', refreshHints);
       const cwInput = document.getElementById('pf-cycleWeeks');
       if (cwInput) {
         cwInput.addEventListener('input', () => {

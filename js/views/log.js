@@ -417,14 +417,14 @@ export function renderLog(root) {
         if (startISO) {
           const now = new Date();
           const nowIso = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-          const nowCtx = Program.resolveDate(nowIso, startISO, cycleWeeks);
+          const nowCtx = Program.resolveDate(nowIso, startISO, cycleWeeks, plan.settings?.peakType);
           if (nowCtx && !nowCtx.outOfCycle) curWeek = nowCtx.weekIdx;
         }
         const minWeek = rangeWeeks ? Math.max(1, curWeek - rangeWeeks + 1) : 1;
 
         for (const [date, entry] of Storage.listDays(plan.id)) {
           if (!startISO) continue;
-          const ctx = Program.resolveDate(date, startISO, cycleWeeks);
+          const ctx = Program.resolveDate(date, startISO, cycleWeeks, plan.settings?.peakType);
           if (!ctx || ctx.outOfCycle) continue;
           const w = ctx.weekIdx;
           if (w < minWeek) continue;
@@ -528,7 +528,7 @@ export function renderLog(root) {
     const html = plans.map(plan => {
       const startISO = Program.effectiveStart(plan.settings);
       const cycleWeeks = Program.cycleWeeksOf(plan.settings);
-      const pattern = Program.buildPhasePattern(cycleWeeks);
+      const pattern = Program.buildPhasePattern(cycleWeeks, plan.settings?.peakType);
 
       // Expected main sessions per phase (3 main days/week × weeks in phase) — per-plan.
       const phaseWeekCount = { base: 0, build: 0, peak: 0, taper: 0 };
@@ -549,7 +549,7 @@ export function renderLog(root) {
         if (entry.status !== 'completed' && entry.status !== 'partial') continue;
         let ph = null;
         if (startISO) {
-          const ctx = Program.resolveDate(date, startISO, cycleWeeks);
+          const ctx = Program.resolveDate(date, startISO, cycleWeeks, plan.settings?.peakType);
           if (ctx && !ctx.outOfCycle) ph = ctx.phase;
         } else if (entry.phase && Object.prototype.hasOwnProperty.call(loggedByPhase, entry.phase)) {
           ph = entry.phase;

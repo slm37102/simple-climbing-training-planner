@@ -23,7 +23,7 @@ The three converge more than they diverge. Where they differ — e.g. Anderson f
 | Peak | Peak performance | Power phase tail | Performance | 7-53 (Lattice) — heaviest, lowest volume |
 | Taper | Taper | Performance week | Performance | Low-volume near-max hang — hold intensity, cut volume |
 
-The Base/Build hangboard protocols above reflect the **decided** design ([ADR-0005](adr/0005-base-build-hangboard-protocols.md), 2026-07-02): repeaters build capacity in Base, weighted max hangs build recruitment in Build, and the old min-edge-to-failure Base protocol is dropped. ⚠ **Decided, implementation pending** — the current `js/program.js` still prescribes the old min-edge Base / max-weight-10s Build; the code catches up in the design-phase implementation round (see [KG-B2](knowledge-gaps.md#kg-b2--hangboard-protocol-identitysequencing-three-way-disagreement-p2-g1g3)). The Taper row likewise reflects [ADR-0007](adr/0007-taper-hold-intensity-peaktype.md) (hold intensity), not the current code's 50–60% load drop.
+The Base/Build hangboard protocols above are the decided **and implemented** design ([ADR-0005](adr/0005-base-build-hangboard-protocols.md), implemented 2026-07-04): repeaters build capacity in Base, weighted max hangs build recruitment in Build, and the old min-edge-to-failure Base protocol is deleted. The Taper row matches [ADR-0007](adr/0007-taper-hold-intensity-peaktype.md) (hold intensity, cut volume), also in code.
 
 The Peak protocol was softened from the published Lattice/Anderson defaults for this athlete — see ADR 0001 (re-adjudicated against the verified research and implemented 2026-07-02; see the ADR's addendum).
 
@@ -35,7 +35,7 @@ For longer cycles the planner switches to a **double-block** structure above 20 
 
 ## Deload cadence (3:1 — every 4th week)
 
-Three weeks hard, one week deload — across Base and Build. The last Base deload is also a **retest** (re-measure max hang, weighted pull-up 1RM, current best boulder grade). Updated benchmarks reset load prescriptions for the Build phase. This 3:1 cadence matches Lattice's published default and sits inside Hörst's "every 3–4 weeks of hard training" bound. ⚠ **Decided, implementation pending** ([ADR-0004](adr/0004-deload-cadence-3-to-1.md), 2026-07-02): the current `js/program.js` still deloads every **3rd** week (a 2:1 cadence that was mislabeled "3:1" — an artifact of `(i+1)%3`); the code moves to `%4` in the design-phase implementation round (see [KG-B3](knowledge-gaps.md#kg-b3--deload-cadence-code-is-21-doc-says-31-lattices-31-is-every-4th-week-p2-g1g3)).
+Three weeks hard, one week deload — across Base and Build. The last Base deload is also a **retest** (re-measure max hang, weighted pull-up 1RM, current best boulder grade). Updated benchmarks reset load prescriptions for the Build phase. This 3:1 cadence matches Lattice's published default and sits inside Hörst's "every 3–4 weeks of hard training" bound. Decided in [ADR-0004](adr/0004-deload-cadence-3-to-1.md) and implemented 2026-07-04 (`(i+1)%4` in `buildPhasePattern`) — the code previously deloaded every 3rd week, a 2:1 cadence mislabeled "3:1" (see [KG-B3](knowledge-gaps.md#kg-b3--deload-cadence-code-is-21-doc-says-31-lattices-31-is-every-4th-week-p2-g1g3), Closed).
 
 ## Half-crimp dominance in Base
 

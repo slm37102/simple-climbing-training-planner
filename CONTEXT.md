@@ -13,15 +13,19 @@ A **single periodised training block** with a configurable length (8–40 weeks,
 - **Base** (~50% of weeks) — capacity & half-crimp finger strength
 - **Build** (~25% of weeks) — power-endurance & projecting prep
 - **Peak** (fixed 2 weeks) — max-intensity expression
-- **Taper** (1–2 weeks) — recover into the comp / send window
+- **Taper** (1–2 weeks by peak type) — sharpen into the comp / send window: volume cut ~40%, intensity **held** near peak (see `docs/adr/0007`)
 
 For cycles longer than 20 weeks the schedule switches to a **double block** (two base → build cycles, then a single peak + taper) because empirically single-block adaptations plateau. See `docs/adr/0002-configurable-cycle-length.md`.
 
-The macrocycle is anchored either by a chosen **start date** or by a **competition date** (in which case start = comp − (cycleWeeks × 7 − 1) days, so the final taper day = comp day).
+The macrocycle is anchored either by a chosen **start date** or by a **competition date** (in which case start = comp − (cycleWeeks × 7 − 1) days, so the final taper day = comp day). The day before the final cycle day is always a **forced rest day** (`rest-pre-goal`), whatever weekday it lands on.
+
+## Peak type
+
+`settings.peakType: 'comp' | 'trip' | 'project'` (default `comp`) — what the cycle is peaking *for*, chosen in the onboarding wizard or Profile → plan settings. It drives taper length (`docs/adr/0007`): a **comp** peaks on one day → 1-week taper; a **trip** or open-ended **project** window rides a longer peak → 2-week taper.
 
 ## Deload week
 
-A scheduled recovery week interleaved every third week (2 hard : 1 deload) inside Base and Build. A deload **drops prescribed volume ~40% while holding intensity** (load kg unchanged) — this preserves the neuromuscular stimulus while letting connective tissue recover. See `docs/adr/0003-deload-as-volume-cut.md`. The last Base deload is also a **retest** week.
+A scheduled recovery week interleaved every fourth week (3 hard : 1 deload — see `docs/adr/0004-deload-cadence-3-to-1.md`) inside Base and Build. A deload **drops prescribed volume ~40% while holding intensity** (load kg unchanged) — this preserves the neuromuscular stimulus while letting connective tissue recover. See `docs/adr/0003-deload-as-volume-cut.md`. The last Base deload is also a **retest** week.
 
 ## Retest
 

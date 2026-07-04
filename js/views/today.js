@@ -250,7 +250,7 @@ export function renderToday(root) {
     return;
   }
 
-  const ctx = Program.resolveDate(date, Program.effectiveStart(activePlan.settings), Program.cycleWeeksOf(activePlan.settings));
+  const ctx = Program.resolveDate(date, Program.effectiveStart(activePlan.settings), Program.cycleWeeksOf(activePlan.settings), activePlan.settings?.peakType);
   if (ctx?.outOfCycle) {
     if (showCycleComplete) {
       root.innerHTML = dateNavHtml + planSwitcherHtml + completionHtml;

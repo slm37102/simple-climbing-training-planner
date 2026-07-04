@@ -23,6 +23,7 @@ function defaultSettings() {
     compDate: null,
     anchorMode: 'startDate', // 'startDate' | 'compDate'
     cycleWeeks: 12, // configurable macrocycle length (8–40, see js/program.js clampCycleWeeks)
+    peakType: 'comp', // 'comp' | 'trip' | 'project' — drives taper length (ADR-0007)
     units: 'kg',
     syncEnabled: true,
     localOnly: false,
