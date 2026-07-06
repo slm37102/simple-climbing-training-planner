@@ -80,48 +80,80 @@ export function renderCalendar(root) {
     const weeks = Program.cycleWeeksOf(activePlan.settings);
     const todayIso = isoDate(new Date());
     const days = activePlan?.days || {};
+    const totalDays = weeks * 7;
+
+    // One record per cycle day: Mon-based weekday column + training-week number
+    // (training weeks are always 7-day blocks from the Monday-snapped cycle start).
+    const dayRecords = [];
+    for (let i = 0; i < totalDays; i++) {
+      const iso = addDays(start, i);
+      const d = new Date(iso + 'T00:00:00');
+      dayRecords.push({ iso, d, dow: (d.getDay() + 6) % 7, trainingWeek: Math.floor(i / 7) + 1 });
+    }
+
+    // Group by calendar month first — a training week can straddle two months, and
+    // each side needs to land in its own month's block rather than the row's month.
+    const sections = [];
+    let cur = null;
+    for (const rec of dayRecords) {
+      const key = `${rec.d.getFullYear()}-${rec.d.getMonth()}`;
+      if (!cur || cur.key !== key) {
+        cur = { key, label: `${MON_SHORT[rec.d.getMonth()]} ${rec.d.getFullYear()}`, days: [] };
+        sections.push(cur);
+      }
+      cur.days.push(rec);
+    }
+
+    function cellHtml(rec) {
+      const { iso, d } = rec;
+      const ctx = Program.resolveDate(iso, start, weeks, activePlan.settings?.peakType);
+      const classes = ['cyc-cell'];
+      if (ctx && !ctx.outOfCycle) {
+        classes.push(ctx.phase);
+        if (ctx.deload) classes.push('deload');
+        if (ctx.isRest) classes.push('rest');
+      } else {
+        classes.push('out');
+      }
+      if (iso === todayIso) classes.push('today');
+      if (iso === selectedIso) classes.push('selected');
+
+      const entry = days[iso];
+      const logged = entry?.exercises?.some(ex => actualHasResult(ex?.actual));
+      const missed = !logged && entry?.status === 'missed';
+      const dot = logged ? '<span class="cdot"></span>' : missed ? '<span class="cdot missed"></span>' : '';
+      const comp = activePlan.settings?.compDate === iso ? '<span class="comp-mark"></span>' : '';
+      const aria = `${iso}${ctx && !ctx.outOfCycle ? ': ' + ctx.phase + (ctx.deload ? ', deload' : '') : ''}`;
+      return `<button type="button" class="${classes.join(' ')}" data-date="${iso}" aria-label="${aria}">
+          <span>${d.getDate()}</span>${dot}${comp}
+        </button>`;
+    }
 
     let html = `<div>
       <div class="wk-dowhead"><div class="rail"></div>
         <div class="days">${['M','T','W','T','F','S','S'].map(d => `<span>${d}</span>`).join('')}</div>
       </div>`;
 
-    let lastMonth = -1;
-    for (let w = 0; w < weeks; w++) {
-      const weekStart = addDays(start, w * 7);
-      const wd = new Date(weekStart + 'T00:00:00');
-      if (wd.getMonth() !== lastMonth) {
-        lastMonth = wd.getMonth();
-        html += `<div class="wk-month"><div class="rail"></div>
-          <div class="mlabel">${MON_SHORT[lastMonth]} ${wd.getFullYear()}</div><div class="mline"></div></div>`;
-      }
-      html += `<div class="wk-row"><div class="rail">${w + 1}</div><div class="cells">`;
-      for (let i = 0; i < 7; i++) {
-        const iso = addDays(weekStart, i);
-        const d = new Date(iso + 'T00:00:00');
-        const ctx = Program.resolveDate(iso, start, weeks, activePlan.settings?.peakType);
-        const classes = ['cyc-cell'];
-        if (ctx && !ctx.outOfCycle) {
-          classes.push(ctx.phase);
-          if (ctx.deload) classes.push('deload');
-          if (ctx.isRest) classes.push('rest');
-        } else {
-          classes.push('out');
-        }
-        if (iso === todayIso) classes.push('today');
-        if (iso === selectedIso) classes.push('selected');
+    for (const sec of sections) {
+      html += `<div class="wk-month"><div class="rail"></div>
+        <div class="mlabel">${sec.label}</div><div class="mline"></div></div>`;
 
-        const entry = days[iso];
-        const logged = entry?.exercises?.some(ex => actualHasResult(ex?.actual));
-        const missed = !logged && entry?.status === 'missed';
-        const dot = logged ? '<span class="cdot"></span>' : missed ? '<span class="cdot missed"></span>' : '';
-        const comp = activePlan.settings?.compDate === iso ? '<span class="comp-mark"></span>' : '';
-        const aria = `${iso}${ctx && !ctx.outOfCycle ? ': ' + ctx.phase + (ctx.deload ? ', deload' : '') : ''}`;
-        html += `<button type="button" class="${classes.join(' ')}" data-date="${iso}" aria-label="${aria}">
-          <span>${d.getDate()}</span>${dot}${comp}
-        </button>`;
+      // Leading blanks align the section's first real day to its weekday column;
+      // trailing blanks complete the last row instead of borrowing next month's days.
+      const rows = [];
+      let row = new Array(sec.days[0].dow).fill(null);
+      for (const rec of sec.days) {
+        if (row.length === 7) { rows.push(row); row = []; }
+        row.push(rec);
       }
-      html += `</div></div>`;
+      if (row.length) { while (row.length < 7) row.push(null); rows.push(row); }
+
+      for (const cells of rows) {
+        const railWeek = cells.find(Boolean)?.trainingWeek ?? '';
+        html += `<div class="wk-row"><div class="rail">${railWeek}</div><div class="cells">`;
+        html += cells.map(rec => rec ? cellHtml(rec) : '<div></div>').join('');
+        html += `</div></div>`;
+      }
     }
     html += `</div>`;
     return html;
