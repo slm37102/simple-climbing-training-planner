@@ -5,6 +5,7 @@ import { Program } from '../program.js';
 import { Loads } from '../loads.js';
 import { Sync } from '../sync.js';
 import { flash, escHtml } from '../ui.js';
+import { mondayDow } from '../dates.js';
 import { openOnboarding } from './onboarding.js';
 
 const COLORS = ['#5FD4E8', '#F0607A', '#3FB6A8', '#E0A53C', '#6E8BF0', '#F07850'];
@@ -235,7 +236,7 @@ export function renderProfile(root) {
       </div>
       <div class="setting-row">
         <div><div class="s-name">Sync</div><div class="s-sub" id="signedAs">${user?.email || 'Not signed in'}</div></div>
-        <div class="row" style="gap:6px">
+        <div class="setting-actions">
           ${user
             ? '<button class="mini-btn ghost-mini" id="signOutBtn">Sign out</button>'
             : '<button class="mini-btn" id="signInBtn2">Sign in</button>'}
@@ -244,7 +245,7 @@ export function renderProfile(root) {
       </div>
       <div class="setting-row">
         <div><div class="s-name">Data</div><div class="s-sub">Backup &amp; restore as JSON</div></div>
-        <div class="row" style="gap:6px">
+        <div class="setting-actions">
           <button class="mini-btn ghost-mini" id="exportBtn">Export</button>
           <button class="mini-btn ghost-mini" id="importBtn">Import</button>
         </div>
@@ -310,8 +311,7 @@ export function renderProfile(root) {
       }
     }
 
-    const dow    = new Date(year, month - 1, 1).getDay(); // 0=Sun … 6=Sat
-    const offset = (dow === 0) ? 6 : dow - 1;
+    const offset = mondayDow(new Date(year, month - 1, 1));
     const cursor = new Date(year, month - 1, 1 - offset);
 
     const headerHtml = ['Mo','Tu','We','Th','Fr','Sa','Su'].map(h => `<div>${h}</div>`).join('');

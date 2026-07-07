@@ -25,6 +25,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # Installed PWAs only refetch shell assets when sw.js's CACHE version changes,
+      # so a forgotten bump ships silently-stale clients. Fail the deploy instead.
+      - name: Check sw.js CACHE bumped when shell assets change
+        if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
+        run: |
+          if ! git cat-file -e "${{ github.event.before }}" 2>/dev/null; then
+            echo "Base commit unavailable (force push?) — skipping cache-bump check."
+            exit 0
+          fi
+          changed=$(git diff --name-only "${{ github.event.before }}" "${{ github.event.after }}")
+          if echo "$changed" | grep -qE '^(js/|css/)'; then
+            before_cache=$(git show "${{ github.event.before }}:sw.js" | grep -m1 'const CACHE' || true)
+            after_cache=$(git show "${{ github.event.after }}:sw.js" | grep -m1 'const CACHE' || true)
+            if [ "$before_cache" = "$after_cache" ]; then
+              echo "::error file=sw.js,line=2::js/ or css/ changed but sw.js CACHE was not bumped — installed PWA clients would keep serving stale assets."
+              exit 1
+            fi
+          fi
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

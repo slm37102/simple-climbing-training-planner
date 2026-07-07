@@ -7,6 +7,7 @@
 import { Storage } from '../storage.js';
 import { Program } from '../program.js';
 import { flash } from '../ui.js';
+import { mondayDow } from '../dates.js';
 
 const V_GRADES = ['V4', 'V5', 'V6', 'V7', 'V8', 'V9', 'V10', 'V11'];
 const F_GRADES = ['6c', '7a', '7a+', '7b', '7b+', '7c', '7c+', '8a'];
@@ -181,8 +182,7 @@ export function openOnboarding({ onDone } = {}) {
       bandStart = state.startDate; bandEnd = state.endDate;
     }
 
-    const dow = new Date(year, month - 1, 1).getDay();
-    const offset = (dow === 0) ? 6 : dow - 1;
+    const offset = mondayDow(new Date(year, month - 1, 1));
     const cursor = new Date(year, month - 1, 1 - offset);
     let cells = '';
     for (let i = 0; i < 42; i++) {

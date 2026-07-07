@@ -814,6 +814,38 @@ test('Cycle: summary card shows future-cycle messaging', () => {
   assert(text.includes(snappedStartIso), text);
 });
 
+test('Cycle: grid groups days under their calendar month (straddling week splits)', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  // Mon 2026-07-06 start → training week 4 (Jul 27 – Aug 2) straddles July/August.
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-07-06' });
+
+  const root = document.createElement('div');
+  renderCalendar(root);
+
+  // Walk month labels and day cells in document order: every cell must sit
+  // under the header of its own calendar month.
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let curLabel = null;
+  let checked = 0;
+  root.querySelectorAll('.wk-month .mlabel, .cyc-cell[data-date]').forEach(node => {
+    if (node.classList.contains('mlabel')) { curLabel = node.textContent.trim(); return; }
+    assert(curLabel, 'day cell rendered before any month label');
+    const d = new Date(node.dataset.date + 'T00:00:00');
+    assertEq(curLabel, `${MONTHS[d.getMonth()]} ${d.getFullYear()}`,
+      `cell ${node.dataset.date} under wrong month header`);
+    checked++;
+  });
+  assertEq(checked, 12 * 7, 'every cycle day should render exactly once');
+
+  // The straddling week splits across sections but keeps its rail number on both halves.
+  const julRow = root.querySelector('[data-date="2026-07-27"]').closest('.wk-row');
+  const augRow = root.querySelector('[data-date="2026-08-01"]').closest('.wk-row');
+  assert(julRow !== augRow, 'straddling week should split across month sections');
+  assertEq(julRow.querySelector('.rail').textContent, '4', 'July half keeps week number');
+  assertEq(augRow.querySelector('.rail').textContent, '4', 'August half keeps week number');
+});
+
 // ─── Phase 1 regression stubs (RED until implemented) ─────────────────────
 // These assertions are EXPECTED TO FAIL against the current code. They encode
 // the target behavior for Phase 1 of docs/improvement-audit.md. Make them green

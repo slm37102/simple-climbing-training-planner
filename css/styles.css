@@ -256,10 +256,10 @@ label{display:block;font:600 10px 'Archivo';letter-spacing:.06em;text-transform:
 .bench-row .b-val{font:800 18px 'Archivo';font-variant-numeric:tabular-nums}
 .bench-row .b-val small{font:600 11px 'Archivo';color:var(--muted)}
 .bench-rows{display:flex;flex-direction:column;gap:12px}
-.setting-row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 12px;padding:14px 0;border-bottom:1px solid var(--line2)}
+.setting-row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--line2)}
 .setting-row:last-child{border-bottom:0}
-.setting-row>div:first-child{flex:1 1 auto;min-width:0}
-.setting-row>.row{flex:1 0 100%;justify-content:flex-start}
+/* Multi-button groups take their own full-width line so Sync/Data rows look identical regardless of label width */
+.setting-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;flex:1 0 100%}
 .setting-row .s-name{font:600 14px 'Archivo'}
 .setting-row .s-sub{font:400 11px 'Archivo';color:var(--muted);margin-top:2px}
 .setting-row .chev{font:400 18px 'Archivo';color:var(--muted)}

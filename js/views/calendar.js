@@ -3,9 +3,8 @@
 import { Storage } from '../storage.js';
 import { Program } from '../program.js';
 import { actualHasResult } from '../exercise-inputs.js';
+import { localIso, today, addDays, daysBetween, mondayDow } from '../dates.js';
 
-const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'];
 const MON_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DOW_SHORT = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
@@ -34,23 +33,37 @@ export function renderCalendar(root) {
       + gridHtml()
       + `<div id="dayPanel">${selectedIso ? detailCardHtml(selectedIso) : ''}</div>`;
 
-    root.querySelectorAll('[data-date]').forEach(cell => {
-      cell.addEventListener('click', () => {
-        selectedIso = cell.dataset.date;
-        sessionStorage.setItem('cycleSelectedDay', selectedIso);
-        render();
-        root.querySelector('#dayPanel')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      });
+    wire();
+  }
+
+  // Two delegated listeners instead of one per cell — a tap only moves the
+  // selection highlight and swaps the detail card, never rebuilds the view.
+  function wire() {
+    root.querySelector('[data-cycle-grid]')?.addEventListener('click', e => {
+      const cell = e.target.closest('[data-date]');
+      if (cell) selectDay(cell.dataset.date);
     });
-    root.querySelector('[data-open-today]')?.addEventListener('click', () => {
+    root.querySelector('#dayPanel')?.addEventListener('click', e => {
+      if (!e.target.closest('[data-open-today]')) return;
       sessionStorage.setItem('todaySelectedDate', selectedIso);
       location.hash = '#today';
     });
   }
 
+  function selectDay(iso) {
+    selectedIso = iso;
+    sessionStorage.setItem('cycleSelectedDay', iso);
+    root.querySelector('.cyc-cell.selected')?.classList.remove('selected');
+    root.querySelector(`[data-date="${iso}"]`)?.classList.add('selected');
+    const panel = root.querySelector('#dayPanel');
+    if (!panel) return;
+    panel.innerHTML = detailCardHtml(iso);
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
   function currentWeekLabel() {
     const weeks = Program.cycleWeeksOf(activePlan.settings);
-    const idx = daysBetween(start, isoDate(new Date()));
+    const idx = daysBetween(start, today());
     const total = Program.cycleDays(weeks);
     if (idx < 0) return `Starts ${start}`;
     if (idx >= total) return 'Complete';
@@ -78,17 +91,18 @@ export function renderCalendar(root) {
 
   function gridHtml() {
     const weeks = Program.cycleWeeksOf(activePlan.settings);
-    const todayIso = isoDate(new Date());
+    const todayIso = today();
     const days = activePlan?.days || {};
-    const totalDays = weeks * 7;
+    const totalDays = Program.cycleDays(weeks);
 
     // One record per cycle day: Mon-based weekday column + training-week number
     // (training weeks are always 7-day blocks from the Monday-snapped cycle start).
     const dayRecords = [];
+    const cursor = new Date(start + 'T00:00:00');
     for (let i = 0; i < totalDays; i++) {
-      const iso = addDays(start, i);
-      const d = new Date(iso + 'T00:00:00');
-      dayRecords.push({ iso, d, dow: (d.getDay() + 6) % 7, trainingWeek: Math.floor(i / 7) + 1 });
+      const d = new Date(cursor);
+      dayRecords.push({ iso: localIso(d), d, dow: mondayDow(d), trainingWeek: Math.floor(i / 7) + 1 });
+      cursor.setDate(cursor.getDate() + 1);
     }
 
     // Group by calendar month first — a training week can straddle two months, and
@@ -129,7 +143,7 @@ export function renderCalendar(root) {
         </button>`;
     }
 
-    let html = `<div>
+    let html = `<div data-cycle-grid>
       <div class="wk-dowhead"><div class="rail"></div>
         <div class="days">${['M','T','W','T','F','S','S'].map(d => `<span>${d}</span>`).join('')}</div>
       </div>`;
@@ -205,7 +219,7 @@ function summaryCardHtml(settings, days = {}) {
   const cycleWeeks = Program.cycleWeeksOf(settings);
   const totalDays  = Program.cycleDays(cycleWeeks);
   const pattern    = Program.buildPhasePattern(cycleWeeks, settings?.peakType);
-  const todayIso = isoDate(new Date());
+  const todayIso = today();
   const rawDayIndex = daysBetween(startIso, todayIso);
   const clampedDayIndex = Math.max(0, Math.min(totalDays - 1, rawDayIndex));
   const weekIdx = Math.floor(clampedDayIndex / 7);
@@ -279,23 +293,7 @@ function titleCase(value) {
   return value ? value.charAt(0).toUpperCase() + value.slice(1) : '—';
 }
 
-function isoDate(d) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-
-function addDays(iso, n) {
-  const d = new Date(iso + 'T00:00:00');
-  d.setDate(d.getDate() + n);
-  return isoDate(d);
-}
-
-function daysBetween(isoA, isoB) {
-  return Math.floor(
-    (new Date(isoB + 'T00:00:00') - new Date(isoA + 'T00:00:00')) / 86400000
-  );
-}
-
 function pretty(iso) {
   const d = new Date(iso + 'T00:00:00');
-  return `${DOW_SHORT[(d.getDay() + 6) % 7]} ${d.getDate()} ${MON_SHORT[d.getMonth()]}`;
+  return `${DOW_SHORT[mondayDow(d)]} ${d.getDate()} ${MON_SHORT[d.getMonth()]}`;
 }

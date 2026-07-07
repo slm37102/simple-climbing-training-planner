@@ -5,6 +5,8 @@
 //
 // See docs/training-philosophy.md and docs/adr/0002-configurable-cycle-length.md for rationale.
 
+import { snapToMonday } from './dates.js';
+
 export const MIN_CYCLE_WEEKS = 8;
 export const MAX_CYCLE_WEEKS = 40;
 export const DEFAULT_CYCLE_WEEKS = 12;
@@ -22,16 +24,6 @@ export function cycleDays(weeks) {
   return clampCycleWeeks(weeks) * 7;
 }
 
-// Snap an ISO date to the Monday of its calendar week.
-// dow=0 (Sun) steps back 6 days; dow=1 (Mon) stays; others subtract (dow-1).
-function snapToMonday(iso) {
-  const d = new Date(iso + 'T00:00:00');
-  const dow = d.getDay();
-  d.setDate(d.getDate() - (dow === 0 ? 6 : dow - 1));
-  const m   = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${d.getFullYear()}-${m}-${day}`;
-}
 
 // Build the per-week phase pattern for any supported cycle length.
 // Single block ≤ DOUBLE_BLOCK_THRESHOLD weeks; double block above.
