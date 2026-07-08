@@ -5,7 +5,7 @@
 //
 // See docs/training-philosophy.md and docs/adr/0002-configurable-cycle-length.md for rationale.
 
-import { snapToMonday } from './dates.js';
+import { snapToMonday, addDays } from './dates.js';
 
 export const MIN_CYCLE_WEEKS = 8;
 export const MAX_CYCLE_WEEKS = 40;
@@ -571,12 +571,18 @@ export const Program = {
 
   // Resolve the effective cycle start date based on settings.anchorMode + cycleWeeks.
   // Always snapped to Monday so all days in a calendar week share the same weekIdx (C1).
+  // In startDate mode, settings.scheduleShiftDays (ADR-0008) pushes the start forward to
+  // absorb a missed-session gap; ignored in compDate mode where the goal date is fixed.
   effectiveStart(settings) {
     if (!settings) return null;
     if (settings.anchorMode === 'compDate' && settings.compDate) {
       return this.computeStartFromComp(settings.compDate, this.cycleWeeksOf(settings));
     }
-    return settings.startDate ? snapToMonday(settings.startDate) : null;
+    if (!settings.startDate) return null;
+    const base = snapToMonday(settings.startDate);
+    const shift = Number(settings.scheduleShiftDays) || 0;
+    // Re-snap after shifting so C1 holds even if a non-multiple-of-7 shift is ever stored.
+    return shift > 0 ? snapToMonday(addDays(base, shift)) : base;
   },
 
   // Returns {weekIdx 1..N, dayIdx 0..6, phase, deload, retest, flavor, slot} for a given date relative to startDate.

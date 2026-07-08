@@ -19,7 +19,7 @@ What making a good climbing plan requires that neither the docs nor the code cur
 |----|-----|----------|-------|--------|
 | KG-A1 | No limiter diagnosis | P1 | G1 | Open |
 | KG-A2 | No intra-phase progressive overload | P1 | G1 | Open |
-| KG-A3 | No missed-session replanning | P1 | G1 G2 G3 | Open |
+| KG-A3 | No missed-session replanning | P1 | G1 G2 G3 | Closed (ADR-0008, 2026-07-08) |
 | KG-A4 | No monitoring model | P1 | G3 G1 | Open |
 | KG-A5 | Taper knowledge is a stub | P2 | G2 | Closed (ADR-0007, 2026-07-04) |
 | KG-A6 | Power-endurance dosing unresolved | P2 | G2 G3 | Closed (ADR-0006, 2026-07-04) |
@@ -48,8 +48,9 @@ What making a good climbing plan requires that neither the docs nor the code cur
 
 **The plan is pure calendar math** — `Program.resolveDate` derives everything from the date; miss two weeks sick and the app acts as if the training happened. Hits all three goals: G2 (a hole in Build produces a mistimed taper), G3 (**load suggestions seed from previous-actual kg with no decay for elapsed time** — returning at full load after a layoff is a classic pulley-injury trigger, `js/loads.js:76-83`), G1 (lost adaptations untracked). Coach rules needed: miss ≤1 wk → resume; miss ≥2 wk in Base → extend Base/shift start; miss during Peak with a fixed comp date → decide which phase to sacrifice.
 
-- *Pointers:* `js/program.js` — `resolveDate`/`effectiveStart`; no code path reads the log to detect absence.
+- *Pointers:* `js/program.js` — `resolveDate`/`effectiveStart`; `js/replan.js` (new) now reads `plan.days` to detect absence.
 - *Verdict:* close — high frequency in real life for a working adult training 3×/week. Feeds KG-D3.
+- **CLOSED 2026-07-08 → [ADR-0008](adr/0008-missed-session-replanning.md).** Implemented the "≤1 wk / ≥2 wk" split mechanically: `Replan.detectGap` flags a gap once a main-slot (Mon/Thu/Sat) day has gone unlogged for ≥8 days (soft, informational) or ≥14 days (major); the Today-tab banner offers a whole-week "extend plan" lever (`settings.scheduleShiftDays`, `startDate` mode only) that pushes `effectiveStart` forward and re-snaps to Monday. The G3 load-seeding risk this gap named directly is fixed too: `Loads.layoffDecay` now cuts a stale previous-actual seed up to 15% by ~5 weeks off before it ever reaches `autoAdjust`. The third rule — "miss during Peak with a fixed comp date → decide which phase to sacrifice" — was deliberately **not** automated: in `compDate` mode the banner is informational only (goal date can't move), leaving that judgment call to the athlete via Profile, the same posture ADR-0007 took on taper length.
 
 ### KG-A4 — No monitoring model (P1, G3+G1)
 
@@ -231,7 +232,7 @@ App capabilities blocked on the knowledge above. Each names its prerequisite; no
 |----|---------|----------|--------|
 | KG-D1 | ~~Implement the adjudicated Peak in `js/program.js` (+ campus readiness gate)~~ **Closed 2026-07-02** with KG-B1 | P1 | KG-B1 decision |
 | KG-D2 | Limiter readout (read the 4 dead benchmark fields + norms table → "likely limiter" on Settings/Log) | P1 | KG-A1, KG-C6 |
-| KG-D3 | Missed-session detection + replan (shift/extend/compress; decay stale prev-actual seeds) | P1 | KG-A3 rules |
+| KG-D3 | ~~Missed-session detection + replan (shift/extend/compress; decay stale prev-actual seeds)~~ **Closed 2026-07-08** with KG-A3/ADR-0008 (shift/extend + decay shipped; "compress" deliberately left manual — see ADR) | P1 | KG-A3 rules |
 | KG-D4 | ~~Peak-date-aware taper generator~~ **Closed 2026-07-04** with ADR-0007 (step cut + rest-pre-goal + `peakType`; progressive decay rejected by the ADR) | P2 | KG-A5 |
 | KG-D5 | Intra-phase progression engine (ARC ramp, PE rest-cuts, targets-hit → +2.5–10%) | P2 | KG-A2, KG-B5 |
 | KG-D6 | Monitoring signals in the Log tab (readiness trend, RPE drift, retest trajectory) | P2 | KG-A4 |
@@ -250,7 +251,7 @@ If only five things get done, in this order:
 2. **KG-B6** — doc drift — *done 2026-07-02*.
 3. **KG-B2/B3/C5/A6/A5** — the four prescription decisions — *adjudicated & locked as ADRs 0004–0007, 2026-07-02; implemented in `js/program.js` 2026-07-04*.
 4. **KG-A1 + KG-C6** — limiter-diagnosis norms (biggest G1 lever) — *KG-C6 done 2026-07-08; KG-A1/KG-D2 (the in-app readout) deliberately left small-scope, see `benchmark-norms.md`*.
-5. **KG-A3 → KG-D3** — missed-session rules (protects all three goals).
+5. **KG-A3 → KG-D3** — missed-session rules (protects all three goals) — *done 2026-07-08 (ADR-0008)*.
 
 ## Decided → shipped (2026-07-04)
 
@@ -272,3 +273,4 @@ Multi-user / product features · AI-coach chat · wearables/HRV integration · n
 - **2026-07-02** — **Decision round: KG-B2, KG-B3, KG-C5, KG-A6, KG-A5 decided** and locked as ADRs 0004–0007 (implementation deferred to the design phase). Backed by a targeted claim adjudication (29 gathered claims → 25 kept, 4 refuted; dated batch appended to `verified-findings.md`). Research was scoped strictly to what these decisions needed — the rest of the KG-C1 backlog stays deferred.
 - **2026-07-04** — **ADRs 0004–0007 implemented; KG-B2, KG-B3, KG-A5, KG-A6 (and KG-D4) closed.** All four prescriptions now live in `js/program.js` with regression tests in `tests/index.html` (`[ADR-0004…0007]` cases; suite fully green). `settings.peakType` added (no schema bump). Owner chose immediate effect mid-cycle.
 - **2026-07-08** — **KG-C6 closed.** 12-agent adversarial verification (3 lenses × 4 source clusters) of the corpus's assessment/benchmarks subtopic (29 claims → 25 kept, 4 refuted; dated batch in `research/verified-findings.md`), plus two supplementary gathers, produced a grade-anchored finger/pulling-strength norms table with confidence labels at `benchmark-norms.md`. Caught and corrected a total-load-vs-added-load unit bug in a widely-quoted Lattice benchmark table before it could propagate into the app. KG-A1/KG-D2 remain open but are now unblocked, with an explicit scope recommendation to keep any in-app readout small given the tier's weak R² (~17% finger, ~8–12% pulling).
+- **2026-07-08** — **KG-A3 + KG-D3 closed → [ADR-0008](adr/0008-missed-session-replanning.md).** New `js/replan.js` (`Replan.detectGap`) flags a missed-session gap once a main-slot day goes unlogged ≥8 days (soft/informational) or ≥14 days (major); the Today-tab banner offers a whole-week "extend plan" lever in `startDate` mode (`settings.scheduleShiftDays`, re-snapped to Monday) and stays informational-only in `compDate` mode, per the ADR's decision to keep "which phase to sacrifice" a human call. `Loads.layoffDecay` closes the G3 risk KG-A3 named directly: a stale previous-actual seed now decays up to 15% by ~5 weeks off before `autoAdjust` runs. `[ADR-0008]` regression tests added to `tests/index.html`; `sw.js` `SHELL`/`CACHE` updated for the new module.
