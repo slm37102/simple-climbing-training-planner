@@ -17,6 +17,15 @@ export const Loads = {
     return { multiplier: 0,  label: 'Suggest rest / mobility only', avg };
   },
 
+  // ===== Layoff decay (ADR-0008) =====
+  // Decay a previous-actual seed for time off *that session type*: full credit
+  // within the grace window, then −3% per week, floored at ×0.85 (~5 weeks off).
+  // Guards the classic pulley-injury trigger of resuming at full load after a layoff.
+  layoffDecay(daysSincePrevious) {
+    if (daysSincePrevious == null || daysSincePrevious <= LAYOFF_GRACE_DAYS) return 1.0;
+    return Math.max(LAYOFF_FLOOR, 1 - LAYOFF_DECAY_PER_WEEK * (daysSincePrevious - LAYOFF_GRACE_DAYS) / 7);
+  },
+
   // ===== Auto-adjust from previous actual =====
   // Given previous actual avg RPE vs target rpeRange, returns multiplier to apply to previous actual load.
   autoAdjust(previousAvgRpe, rpeRange) {
@@ -59,9 +68,9 @@ export const Loads = {
   },
 
   // Resolve effective kg for today's session, applying:
-  //   (1) prev-actual seed, (2) auto-adjust, (3) readiness.
+  //   (1) prev-actual seed, (2) layoff decay, (3) auto-adjust, (4) readiness.
   // Deload weeks cut volume (handled in program.js), not intensity — kg is held constant.
-  resolveEffective({ exercise, previousActualKg, previousAvgRpe, readinessMultiplier = 1.0, benchmarks = null }) {
+  resolveEffective({ exercise, previousActualKg, previousAvgRpe, daysSincePrevious = null, readinessMultiplier = 1.0, benchmarks = null }) {
     const base = this.prescribeLoadKg(exercise, benchmarks);
     if (!base) return null;
 
@@ -74,9 +83,11 @@ export const Loads = {
     let kg;
 
     if (previousActualKg != null) {
+      const decay = this.layoffDecay(daysSincePrevious);
       const adj = this.autoAdjust(previousAvgRpe, exercise.rpeRange);
-      kg = previousActualKg * adj;
+      kg = previousActualKg * decay * adj;
       reason.push(`prev ${previousActualKg}kg × auto-adj ${adj.toFixed(2)} (RPE ${previousAvgRpe ?? '—'})`);
+      if (decay < 1) reason.push(`layoff decay ×${decay.toFixed(2)} (${daysSincePrevious} days since this session type)`);
     } else {
       // start at midpoint of range
       kg = (range[0] + range[1]) / 2;
@@ -98,3 +109,9 @@ export const Loads = {
 };
 
 function round(x) { return Math.round(x * 2) / 2; } // 0.5 kg precision
+
+// ADR-0008 layoff-decay constants. App convention (like the readiness multipliers,
+// see docs/knowledge-gaps.md KG-C7) — direction is evidence-backed, exact numbers are not.
+const LAYOFF_GRACE_DAYS = 10;
+const LAYOFF_DECAY_PER_WEEK = 0.03;
+const LAYOFF_FLOOR = 0.85;

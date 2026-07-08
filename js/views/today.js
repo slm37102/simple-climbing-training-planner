@@ -4,6 +4,8 @@ import { Storage } from '../storage.js';
 import { Program } from '../program.js';
 import { Loads } from '../loads.js';
 import { Warmup } from '../warmup.js';
+import { Replan } from '../replan.js';
+import { daysBetween } from '../dates.js';
 import { inputVisibility, repsLabel, actualHasResult } from '../exercise-inputs.js';
 
 const SELECTED_DATE_KEY = 'todaySelectedDate';
@@ -41,7 +43,7 @@ function findPrevSameSession(date, sessionId) {
   for (let i = days.length - 1; i >= 0; i--) {
     const [d, entry] = days[i];
     if (d >= date) continue;
-    if (entry.sessionId === sessionId && entry.exercises) return entry;
+    if (entry.sessionId === sessionId && entry.exercises) return { ...entry, _prevDate: d };
   }
   return null;
 }
@@ -209,6 +211,49 @@ function headerHtml(date, ctx, session) {
   </div>`;
 }
 
+// ADR-0008: informational for a short gap, actionable for a ≥2wk gap.
+function gapBannerHtml(gap) {
+  if (!gap) return '';
+  if (gap.severity === 'soft') {
+    return `<div class="gap-note">⏸ ${gap.gapDays} days since your last main session — easing back in; suggested loads below account for the time off.</div>`;
+  }
+  const weeks = gap.shiftDays / 7;
+  const missedTxt = `${gap.missedCount} main session${gap.missedCount === 1 ? '' : 's'} missed`;
+  if (gap.canShift) {
+    return `<div class="gap-note major">
+      <p>⏸ It's been ${gap.gapDays} days (${missedTxt}). Extend the plan to resume where you left off, or keep the original schedule.</p>
+      <div class="row" style="gap:8px;margin-top:8px">
+        <button type="button" class="primary" data-gap-extend>Extend plan by ${weeks} week${weeks === 1 ? '' : 's'}</button>
+        <button type="button" class="ghost" data-gap-ack>Keep original schedule</button>
+      </div>
+    </div>`;
+  }
+  return `<div class="gap-note major">
+    <p>⏸ It's been ${gap.gapDays} days (${missedTxt}). Your goal date is fixed, so the schedule can't shift — consider adjusting your cycle or peak settings.</p>
+    <div class="row" style="gap:8px;margin-top:8px">
+      <button type="button" class="ghost" onclick="location.hash='#profile'">Adjust in Profile</button>
+      <button type="button" class="ghost" data-gap-ack>Got it</button>
+    </div>
+  </div>`;
+}
+
+function wireGapBanner(root, activePlan, gap) {
+  if (!gap) return;
+  root.querySelectorAll('[data-gap-extend]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cur = Number(activePlan.settings.scheduleShiftDays) || 0;
+      Storage.setPlanSettings(activePlan.id, { scheduleShiftDays: cur + gap.shiftDays, gapAcknowledgedThrough: todayIso() });
+      renderToday(root);
+    });
+  });
+  root.querySelectorAll('[data-gap-ack]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      Storage.setPlanSettings(activePlan.id, { gapAcknowledgedThrough: todayIso() });
+      renderToday(root);
+    });
+  });
+}
+
 export function renderToday(root) {
   const activePlan = Storage.getActivePlan();
   const date = getSelectedDate();
@@ -276,10 +321,12 @@ export function renderToday(root) {
   const dayLog = Storage.getDay(date) || {};
   const readiness = dayLog.readiness || { sleep:3, soreness:3, fatigue:3 };
   const { multiplier, label: rdLabel, avg: rdAvg } = Loads.computeReadinessMultiplier(readiness);
+  // Only surface a gap on the real current date — not while browsing history (ADR-0008).
+  const gap = date === realToday ? Replan.detectGap(activePlan, realToday) : null;
 
   const { warmup, cooldown } = Warmup.forSession(session);
 
-  let body = dateNavHtml + planSwitcherHtml + completionHtml + headerHtml(date, ctx, session);
+  let body = dateNavHtml + planSwitcherHtml + completionHtml + headerHtml(date, ctx, session) + gapBannerHtml(gap);
 
   if (session.isRest) {
     body += `<div class="card"><h2>Recovery checklist</h2>
@@ -296,6 +343,7 @@ export function renderToday(root) {
     });
     wireDateNav(root);
     wireCycleComplete(root, activePlan);
+    wireGapBanner(root, activePlan, gap);
     wirePlanSwitcher(root, root);
     return;
   }
@@ -368,6 +416,7 @@ export function renderToday(root) {
   root.innerHTML = body;
   wireDateNav(root);
   wireCycleComplete(root, activePlan);
+  wireGapBanner(root, activePlan, gap);
   wire(root, date, session, ctx, multiplier);
   wirePlanSwitcher(root, root);
 }
@@ -569,6 +618,7 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
       exercise: ex,
       previousActualKg: prevActual?.kg ?? null,
       previousAvgRpe: prevActual?.rpe ?? null,
+      daysSincePrevious: prev ? daysBetween(prev._prevDate, date) : null,
       readinessMultiplier: readinessMult,
     });
     const rangeStr = suggestion?.range ? `${suggestion.range[0]}–${suggestion.range[1]} kg` : '';
@@ -661,6 +711,7 @@ function wire(root, date, session, ctx, readinessMult) {
           exercise: ex,
           previousActualKg: prevActual?.kg ?? null,
           previousAvgRpe: prevActual?.rpe ?? null,
+          daysSincePrevious: prev ? daysBetween(prev._prevDate, date) : null,
           readinessMultiplier: multiplier,
         });
         if (eff && eff.suggestedKg != null) {

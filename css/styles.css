@@ -166,6 +166,12 @@ label{display:block;font:600 10px 'Archivo';letter-spacing:.06em;text-transform:
 .optional-done input[type=checkbox]{width:20px;height:20px;cursor:pointer;accent-color:var(--accent)}
 .deload-note{background:rgba(224,165,60,.1);border:1px solid rgba(224,165,60,.4);color:var(--taper);border-radius:11px;padding:10px 13px;font:600 12px 'Archivo'}
 
+/* ADR-0008: missed-session gap banner — soft is informational, major asks for a decision */
+.gap-note{background:rgba(138,147,166,.1);border:1px solid rgba(138,147,166,.4);color:var(--text2);border-radius:11px;padding:10px 13px;font:600 12px 'Archivo';margin-top:10px}
+.gap-note p{margin:0;font:inherit;color:inherit}
+.gap-note.major{background:rgba(240,96,122,.1);border:1px solid rgba(240,96,122,.4);color:var(--peak)}
+.gap-note.major .row button{font:700 11px 'Archivo'}
+
 /* Date nav */
 .date-nav-card{display:flex;align-items:center;gap:8px;padding:0}
 .date-nav-card button{padding:9px 14px}
