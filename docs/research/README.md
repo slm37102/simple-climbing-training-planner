@@ -37,11 +37,14 @@ disciplines. Deepest coverage on (1) **periodization & planning** and (2)
 
 ## Status (as of this commit)
 
-- **175 distinct claims verified** (150 original + a 25-claim 2026-07-02 decision-round batch); **7 refuted**.
-- **~123 gathered claims remain un-adjudicated**, resumable from `data/gathered-claims.json`.
+- **200 distinct claims verified** (150 original + a 25-claim 2026-07-02 decision-round batch +
+  a 25-claim 2026-07-08 assessment-norms batch); **11 refuted**.
+- **~94 gathered claims remain un-adjudicated**, resumable from `data/gathered-claims.json`, plus
+  25 supplementary claims gathered 2026-07-08 outside the original corpus (not yet 3-vote verified).
   Verification is now scoped to what pending decisions need rather than run to completion
   (see `../knowledge-gaps.md` KG-C1); the 2026-07-02 batch settled the KG-B2/B3/C5/A6/A5
-  prescription decisions (ADRs 0004–0007).
+  prescription decisions (ADRs 0004–0007), and the 2026-07-08 batch settled KG-C6, producing
+  a grade-anchored norms table at `../benchmark-norms.md`.
 
 ## Relationship to the app
 

@@ -43,6 +43,7 @@ When trade-offs bite, the priority order is: **safety (G3) > prescription correc
 | [`training-philosophy.md`](training-philosophy.md) | What we believe and why — protocols, sources, evidence tiers |
 | [`knowledge-gaps.md`](knowledge-gaps.md) | What we don't know yet — gaps, divergences, open adjudications |
 | [`research/`](research/README.md) | The evidence corpus (verified claims + raw gathered claims) |
+| [`benchmark-norms.md`](benchmark-norms.md) | Grade-anchored finger/pulling-strength norms, with confidence labels (closes KG-C6) |
 | [`adr/`](adr/) | Decisions and their trade-offs |
 | [`improvement-audit.md`](improvement-audit.md) | Engineering findings (sync, correctness, UX, PWA) — not training content |
 | [`training-plan.md`](training-plan.md) | Human-readable prescription tables (mirror of `js/program.js`) |

@@ -186,7 +186,7 @@ Weaknesses in the evidence base itself.
 | KG-C3 | Deload cadence consensus-only | P3 | Won't-fix |
 | KG-C4 | Half-crimp dominance not externally replicated | P3 | Accepted |
 | KG-C5 | Hörst vs Lattice PE contradiction unreconciled | P2 | Resolved (ADR-0006) |
-| KG-C6 | Benchmark-vs-grade norms provenance | P2 | Open |
+| KG-C6 | Benchmark-vs-grade norms provenance | P2 | Closed (2026-07-08) |
 | KG-C7 | Readiness/RPE multipliers are app inventions | P3 | Open |
 | KG-C8 | Refuted-claim dependency check | P3 | Open |
 
@@ -210,6 +210,8 @@ Hörst's ">2–4 weeks of PE → overtraining risk" warning (§ Peaking) vs Latt
 ### KG-C6 — Norms data provenance (P2)
 
 The benchmark-vs-grade tables KG-A1 needs rest on proprietary, self-reported data (Lattice member data; Hörst self-assessment tables). Gather what is public, record confidence per number.
+
+- **CLOSED 2026-07-08.** A 12-agent adversarial round (3 lenses × 4 source clusters) verified the corpus's "Assessment, benchmarks & finger-strength metrics" subtopic (29 claims → 25 kept, 4 refuted — dated batch in [`research/verified-findings.md`](research/verified-findings.md#2026-07-08-assessment-norms-batch)), plus two supplementary single-pass gathers (pull-up norms; independent finger-strength cross-checks). The most load-bearing finding was a **unit bug**: the widely-quoted Lattice grade table (V4=128% … V11=170%) is TOTAL load as %BW (bodyweight + added), not added load as the corpus originally logged it — this app's own `maxHang20mm`/`pullup1RM` fields store *added* kg, so the two conventions had to be reconciled before the numbers were usable. Synthesized into a grade-anchored norms table with confidence labels at [`benchmark-norms.md`](benchmark-norms.md), independently cross-validated by a 2025 peer-reviewed study (Buraas et al., EJAP) whose N=19 mean finger strength at ~7b+ redpoint (+44% BW added) lands within 2 points of Lattice's V7 anchor (+46%). The table also surfaces the sobering caveat that matters most for KG-D2: within this athlete's own Advanced tier, finger strength explains only ~17% of grade variance and pulling strength ~8–12% — the norms are a rough sanity check, not a precise diagnostic instrument. KG-A1 stays Open (the norms table doesn't diagnose anything by itself); KG-D2 is now unblocked but its scope should stay to the size discussed in `benchmark-norms.md`'s "Should this become a feature?" section.
 
 ### KG-C7 — The autoregulation constants are uncited (P3)
 
@@ -247,7 +249,7 @@ If only five things get done, in this order:
 1. **KG-B1 → KG-D1** — adjudicate and implement the Peak prescription (G3) — *done 2026-07-02*.
 2. **KG-B6** — doc drift — *done 2026-07-02*.
 3. **KG-B2/B3/C5/A6/A5** — the four prescription decisions — *adjudicated & locked as ADRs 0004–0007, 2026-07-02; implemented in `js/program.js` 2026-07-04*.
-4. **KG-A1 + KG-C6** — limiter-diagnosis norms (biggest G1 lever).
+4. **KG-A1 + KG-C6** — limiter-diagnosis norms (biggest G1 lever) — *KG-C6 done 2026-07-08; KG-A1/KG-D2 (the in-app readout) deliberately left small-scope, see `benchmark-norms.md`*.
 5. **KG-A3 → KG-D3** — missed-session rules (protects all three goals).
 
 ## Decided → shipped (2026-07-04)
@@ -269,3 +271,4 @@ Multi-user / product features · AI-coach chat · wearables/HRV integration · n
 - **2026-07-02** — **KG-B1 + KG-D1 closed.** Peak prescription re-adjudicated against the verified corpus (all four ADR-0001 decisions confirmed; campus readiness gate added) and implemented in `js/program.js` with `[ADR-0001]` regression tests. See the ADR-0001 addendum.
 - **2026-07-02** — **Decision round: KG-B2, KG-B3, KG-C5, KG-A6, KG-A5 decided** and locked as ADRs 0004–0007 (implementation deferred to the design phase). Backed by a targeted claim adjudication (29 gathered claims → 25 kept, 4 refuted; dated batch appended to `verified-findings.md`). Research was scoped strictly to what these decisions needed — the rest of the KG-C1 backlog stays deferred.
 - **2026-07-04** — **ADRs 0004–0007 implemented; KG-B2, KG-B3, KG-A5, KG-A6 (and KG-D4) closed.** All four prescriptions now live in `js/program.js` with regression tests in `tests/index.html` (`[ADR-0004…0007]` cases; suite fully green). `settings.peakType` added (no schema bump). Owner chose immediate effect mid-cycle.
+- **2026-07-08** — **KG-C6 closed.** 12-agent adversarial verification (3 lenses × 4 source clusters) of the corpus's assessment/benchmarks subtopic (29 claims → 25 kept, 4 refuted; dated batch in `research/verified-findings.md`), plus two supplementary gathers, produced a grade-anchored finger/pulling-strength norms table with confidence labels at `benchmark-norms.md`. Caught and corrected a total-load-vs-added-load unit bug in a widely-quoted Lattice benchmark table before it could propagate into the app. KG-A1/KG-D2 remain open but are now unblocked, with an explicit scope recommendation to keep any in-app readout small given the tier's weak R² (~17% finger, ~8–12% pulling).
