@@ -19,19 +19,11 @@ python -m http.server 8765
 
 Then open `http://127.0.0.1:8765/` and click **"Use locally only"** on the auth gate. The service worker only activates over `https://` or `localhost`.
 
-**Tests** are an in-browser smoke suite at `tests/index.html` (open `http://127.0.0.1:8765/tests/` — they auto-run on load). They cover `Storage` round-trips, `Today` input persistence + pre-fill defaults, `Log` edit/save, `inputVisibility` per kind, optional Done, `Program.resolveDate`, `buildPhasePattern` for various cycle lengths, deload semantics, and the Cycle summary card. To run a single test, comment out the others or temporarily filter `tests` in the runner — there is no CLI test runner. **The page mutates `localStorage`** — click **Clear** before returning to the live app. Add a case here before/after any bug fix or input/storage change so it can't silently regress.
-
-The Playwright MCP browser is available for end-to-end checks. Init scripts for `Date` overrides do not reliably apply — prefer seeding fake data via module imports (`evaluate('async () => { const {Storage} = await import("/js/storage.js"); ... }')`) over time-travel.
+**Tests** are an in-browser smoke suite at `tests/index.html`, no CLI runner. See the `test` skill for how to run it, what it covers, and Playwright MCP notes.
 
 ## Deploy
 
-Static host anywhere. Canonical target is Firebase Hosting (`public: "."` — serves repo root, see `firebase.json`):
-
-```powershell
-firebase deploy --only hosting
-```
-
-Hosting URL: <https://simple-climbing-planner.web.app>. Repo: <https://github.com/slm37102/simple-climbing-training-planner> (pushes to `origin/main`). **Auto-deploy:** every push to `main` deploys via GitHub Actions (`.github/workflows/firebase-deploy.yml`; needs the `FIREBASE_SERVICE_ACCOUNT_SIMPLE_CLIMBING_PLANNER` repo secret — a service-account JSON with Firebase Hosting Admin). Manual re-deploys: the workflow's "Run workflow" button, or the CLI command above. No CI runs the test suite on push (tests are the in-browser suite). Use conventional-commit subjects + the `Co-authored-by` trailer (see git log).
+Static host anywhere; canonical target is Firebase Hosting. See the `deploy` skill for the command, auto-deploy pipeline, and hosting URL.
 
 ## Architecture
 
@@ -50,7 +42,7 @@ js/sync.js   → subscribes Storage.onChange, debounced 800ms upload to
 
 ### Domain model (the parts that need multiple files to understand)
 
-The training logic lives in two modules and is grounded in `docs/training-philosophy.md` + the ADRs in `docs/adr/`. **Read those before changing prescriptions** — the values are deliberate, evidence-based, and sometimes intentionally softened from the source frameworks (Lattice / Hörst / Anderson) for this athlete's injury risk. **Also read `docs/knowledge-gaps.md`**: known doc/code divergences are tracked there with stable KG-* IDs and a status per gap — don't "fix" a divergence without checking its gap entry first. ADRs 0001 and 0004–0007 are all implemented in code as of 2026-07-04. Project goals live in `docs/project-goals.md`.
+The training logic lives in two modules and is grounded in `docs/training-philosophy.md` + the ADRs in `docs/adr/`. **Read those before changing prescriptions** — the values are deliberate, evidence-based, and sometimes intentionally softened from the source frameworks (Lattice / Hörst / Anderson) for this athlete's injury risk. **Also read `docs/knowledge-gaps.md`**: known doc/code divergences are tracked there with stable KG-* IDs and a status per gap — don't "fix" a divergence without checking its gap entry first. Project goals live in `docs/project-goals.md`.
 
 - **`js/program.js`** — the macrocycle. `Program.build(plan, dateISO)` is the primary entry point: it resolves the date to a `{weekIdx, phase, deload, retest, flavor, slot}` context, then builds the prescribed session (exercise list with prescriptions, but no kg yet).
 - **`js/loads.js`** — turns prescribed % ranges + benchmarks into kg, then applies the adjustment chain.
