@@ -1,5 +1,5 @@
 {
-  "mode": "reasoning-verify (paused, partial)",
+  "mode": "reasoning-verify (partial, in progress)",
   "confirmed": [
     {
       "id": 2,
@@ -1184,12 +1184,112 @@
     {
       "id": 136,
       "angle": "Deload, recovery, frequency & weekly volume",
-      "vote": "2-0",
+      "vote": "3-0",
       "claim": "Lattice recommends a deload pattern of 3 weeks on / 1 week off (a 3:1 ratio) as the most common deload cadence for climbers.",
       "quote": "A deload week involves reducing both volume and intensity to allow for supercompensation (adaptation leading to higher performance post-training), with the most common pattern being 3 weeks on 1 week off.",
       "source": "https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/",
       "sourceQuality": "secondary",
       "evidence": "The claim faithfully restates its supporting quote, which explicitly says \"the most common pattern being 3 weeks on 1 week off.\" The claim's \"3:1 ratio\" is the correct expression of \"3 weeks on / 1 week off,\" and it attributes the statement to the Lattice source rather than inventing a universal law. The 3:1 load-to-deload cadence is a standard, widely cited periodization pattern in both mainstream S&C and climbing training (consistent with Lattice/Hörst/Anderson-style programming), so it is plausible and consensus-aligned. Minor nuance: the source frames deload as cutting BOTH volume and intensity, whereas this project's ADR-0003 deliberately holds intensity and cuts only volume — but the claim is specifically about cadence/ratio, not mechanism, so this does not undermine it. No implausible numbers, no overreach beyond the quote."
+    },
+    {
+      "id": 137,
+      "angle": "Deload, recovery, frequency & weekly volume",
+      "vote": "3-0",
+      "claim": "A deload week reduces volume and/or intensity (not complete rest) so the climber feels fully recovered and motivated to start the next training cycle, while still keeping selected sessions.",
+      "quote": "A deload week is a time of reduced training (this could be volume and/or intensity) so that we feel fully recovered & motivated to start another training cycle. A common misconception is that it is complete rest, but it is about choosing what sessions are right for you to keep up, whilst ensuring you still feel recovered by the end of the week.",
+      "source": "https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, non-overreaching paraphrase of the supplied Lattice quote: it correctly captures (1) reduced volume and/or intensity rather than complete rest, (2) the goal of feeling recovered and motivated for the next cycle, and (3) the idea of selectively keeping certain sessions rather than stopping all training. It adds no unsupported specifics (no numeric percentages, no claim of universal mandatory practice) and is consistent with mainstream periodization theory in climbing training (Hörst's Training for Climbing, Anderson's RCTM, and general strength & conditioning literature all treat deload/taper weeks as reduced-load recovery periods rather than complete rest, precisely to manage fatigue while preserving motivation and readiness for the next block). The claim is presented as a general description of what a deload week is, matching how it's broadly understood, not as one coach's idiosyncratic protocol dressed up as universal law — Lattice's framing here is itself a fairly standard description of deload practice shared across the field. No contradiction with established consensus, no implausible claims."
+    },
+    {
+      "id": 138,
+      "angle": "Deload, recovery, frequency & weekly volume",
+      "vote": "3-0",
+      "claim": "During a deload, you can drop volume but retain some high-intensity sessions, especially if strength is the current training focus; high-intensity sessions kept should be cut roughly in half and kept short and fewer.",
+      "quote": "You can drop volume but maintain some high-intensity sessions, particularly if strength is your current training focus... If completing higher intensity sessions during deload, cut them in half and keep sessions short and fewer.",
+      "source": "https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, non-overreaching paraphrase of the supporting quote: \"drop volume but maintain some high-intensity sessions, particularly if strength is your current training focus\" → \"drop volume but retain some high-intensity sessions, especially if strength is the current training focus\" (near-verbatim); \"cut them in half and keep sessions short and fewer\" → \"cut roughly in half and kept short and fewer\" (accurate paraphrase, not an overstatement — \"roughly\" appropriately hedges the precision of \"in half\"). The claim uses permissive language (\"you can... especially if\") rather than asserting a universal law, and it is attributed to a named source (Lattice) as a secondary citation, which the rubric explicitly permits for a specific protocol. Substantively it also aligns with mainstream deload theory (Hörst, Anderson RCTM, general S&C): deload = reduce volume while preserving some intensity/neural stimulus, and if high-intensity work is retained during a reduced-volume week it should be trimmed in dose (fewer/shorter sessions) rather than eliminated — this is a common, plausible periodization tactic, not an implausible number or a contradiction of consensus. No overreach, no fabricated numbers, no misreading of the quote."
+    },
+    {
+      "id": 139,
+      "angle": "Deload, recovery, frequency & weekly volume",
+      "vote": "3-0",
+      "claim": "Deload weeks can be timed to the menstrual cycle, ideally falling during the late luteal or menstruation phase when energy is typically lowest.",
+      "quote": "The timing for a deload week often falls during the late luteal or menstruation phase. It can be helpful to sync your deload week with your period, when you're potentially feeling your lowest energy, or simply rearrange your sessions for the week so you're resting or having gentle exercise whilst your period is heaviest.",
+      "source": "https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, appropriately-hedged restatement of the source quote. Source: \"timing for a deload week often falls during the late luteal or menstruation phase... helpful to sync your deload week with your period, when you're potentially feeling your lowest energy.\" Claim: \"can be timed to the menstrual cycle, ideally falling during the late luteal or menstruation phase when energy is typically lowest.\" The hedging language matches (\"can be\" vs \"can be helpful,\" \"ideally\" vs \"often/helpful\") — no overreach into a universal mandate. Menstrual-cycle-informed periodization for female athletes is a recognized (if still-developing) area within contemporary strength/endurance and climbing-specific coaching (Lattice's female climber series is a known resource on this), and the claim is attributed to that specific source's guidance rather than presented as a hard universal law applicable to all climbers regardless of sex/cycle status. It doesn't contradict Horst/Anderson/mainstream deload principles (deload = reduced load/volume for recovery); it merely adds a cycle-timing heuristic layered on top, which is a plausible, non-implausible extension for female athletes with regular cycles."
+    },
+    {
+      "id": 140,
+      "angle": "Deload, recovery, frequency & weekly volume",
+      "vote": "3-0",
+      "claim": "For climbers training seriously (4-5 structured days/week), deload every 4-6 weeks; for casual climbers (2-3 days/week), deload every 6-8 weeks; for serious climbers adding strength work, deload every 6-12 weeks.",
+      "quote": "deload every 4-6 weeks if training seriously (4-5 days/week structured), every 6-8 weeks if climbing casually (2-3 days/week), and 6-12 weeks for serious climbers adding strength work",
+      "source": "https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a verbatim-faithful restatement of the supporting quote — no numbers added, no overreach, no rounding distortion. It presents this as a specific source's rule of thumb rather than dressing it up as universal law, which is permitted per the decision criteria.\n\nOn plausibility: the core structure (higher frequency/volume training → more frequent deloads) is directionally correct and consistent with basic dose-response/fatigue-accumulation principles used by Hörst, Anderson (RCTM), and Lattice-style periodization. Their commonly cited load:deload cadences (e.g., 3-4 week loading blocks, or 4-6 week autoregulated blocks before a rest week) overlap comfortably with the \"4-6 weeks for serious 4-5 day/week training\" and \"6-8 weeks for casual 2-3 day/week training\" figures — these are not outlandish and fall within the range seen across mainstream climbing-training sources.\n\nThe one soft wrinkle: \"6-12 weeks for serious climbers adding strength work\" is longer than the 4-6 week figure for serious climbing-only training, which is mildly counterintuitive since added max-strength/hangboard work stresses slower-recovering connective tissue (tendons/pulleys) and is often associated with recommendations for equal-or-more caution, not less. This is a plausible internal tension in the source's own framework, but it's not implausible on its face — many hangboard/strength mesocycle protocols (e.g., extended low-frequency max-hang blocks) do legitimately run longer between deloads than high-volume climbing-day-count training, because volume/frequency and peak-tension strength work accumulate fatigue differently. This is a specific, named protocol attributed to one source, not asserted as settled universal consensus, so per the decision rule it doesn't clear the bar for refutation — but it's worth a lower confidence flag rather than a clean pass."
+    },
+    {
+      "id": 141,
+      "angle": "Deload, recovery, frequency & weekly volume",
+      "vote": "3-0",
+      "claim": "During a deload you decrease volume but NOT intensity: keep the high-quality, high-intensity sessions (limit bouldering, fingerboarding, hardest moves) and cut the extra mileage.",
+      "quote": "During deloads decrease volume, NOT intensity: keep quality sessions (limit bouldering, fingerboarding, hardest moves), cut the extra mileage",
+      "source": "https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, near-verbatim restatement of its source quote — no exaggeration, no added numbers, no scope creep. Substantively, \"cut volume, hold intensity\" during a deload/taper is the mainstream periodization principle across strength and endurance sports (e.g., Mujika & Padilla's tapering literature, Bosquet et al.'s taper meta-analysis showing volume reduction with maintained intensity/frequency is the superior taper strategy) and is specifically how deload is treated in climbing-training frameworks (Hörst, Lattice, Bechtel): reduce session volume/mileage while preserving a few high-quality, high-intensity stimuli (limit bouldering, max hangs) so neuromuscular/tendon adaptations aren't lost during the recovery window. This is also consistent with this repo's own documented invariant (docs/adr/0003, CLAUDE.md: \"Deload = volume cut, intensity held... This was inverted historically\"), which reflects the same evidence-based correction from an earlier common misconception (cutting intensity during deload). The claim presents this as a general principle, not as one coach's idiosyncratic protocol dressed up as universal law, and the principle itself is genuinely close to consensus. No implausible numbers or overreach are present."
+    },
+    {
+      "id": 142,
+      "angle": "Deload, recovery, frequency & weekly volume",
+      "vote": "3-0",
+      "claim": "Connective tissue (tendons/pulleys) adapts more slowly than muscle, which is why deloads are needed to protect those structures.",
+      "quote": "Connective tissue adapts slower than muscle, so deloads protect tendons/pulleys",
+      "source": "https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases",
+      "sourceQuality": "secondary",
+      "evidence": "The claim faithfully restates its quote and is a standard, well-supported mechanistic rationale in climbing (and broader sports-science) training literature. Tendons and pulleys are less vascularized than muscle and have much slower collagen turnover/remodeling rates, so they lag behind muscle and neuromuscular strength gains during a training block — this mismatch (fast muscle/tendon-loading-capacity gains vs. slow connective-tissue remodeling) is exactly why finger pulley and tendon overuse injuries are the dominant injury category in climbing (well documented by Schöffl, Lattice Training, and Hörst). Using periodic deloads (reduced volume/load) to let connective tissue \"catch up\" and dissipate accumulated microtrauma is a standard, non-controversial rationale cited across mainstream climbing-training sources (Lattice, Hörst's Training for Climbing, Anderson's RCTM) — it is not a single coach's idiosyncratic protocol, nor does it state implausible numbers or contradict consensus. The claim is a general mechanistic statement (not a specific quantitative protocol) and doesn't overreach beyond what the quote says."
+    },
+    {
+      "id": 143,
+      "angle": "Finger/pulley injury prevention, load mgmt & antagonists",
+      "vote": "3-0",
+      "claim": "Eric Hörst's protective finger protocol is a roughly 6-minute, low-to-moderate-intensity routine designed to nourish and strengthen the finger flexor tendons and annular pulleys (A2), suitable for almost-daily use as rest-day prehab or pre-climbing warm-up.",
+      "quote": "Eric Hörst has developed a simple 6-minute \"protective\" finger training protocol that will nourish and strengthen your finger flexor tendons and annular pulleys. ... This is one climbing exercise that you can do almost daily.",
+      "source": "https://trainingforclimbing.com/climbing-training-protocol-for-stronger-finger-tendons-and-pulleys/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim's core assertions—roughly 6 minutes, low-to-moderate intensity, purpose to \"nourish and strengthen\" finger flexor tendons and annular pulleys, and suitability for near-daily use as rest-day prehab/pre-climbing warm-up—map directly onto the supporting quote (\"simple 6-minute 'protective' finger training protocol that will nourish and strengthen your finger flexor tendons and annular pulleys... you can do almost daily\"). This is consistent with how Hörst's protocol is broadly described in climbing-training literature: a sub-maximal, high-rep, low-load routine (open-hand/half-crimp holds on a hangboard or similar) meant as connective-tissue conditioning rather than a strength stimulus, commonly recommended as a warm-up or rest-day maintenance drill. The one detail added beyond the literal quote is the parenthetical specification \"(A2)\" — the source quote just says \"annular pulleys\" generically, not A2 specifically. This is a minor unsupported narrowing rather than a fabrication or numeric implausibility: A2 is well-established in climbing-injury literature as the most frequently injured pulley and the one such protocols are most often framed around, so the addition is a reasonable, non-contradictory elaboration rather than an overreach that misrepresents the source or contradicts consensus. No numbers here are implausible (6 minutes, near-daily frequency, low-moderate intensity all fit standard descriptions of this specific named protocol), and the claim correctly attributes it to Hörst as his specific protocol rather than asserting it as universal law. On balance the claim is faithful enough to stand."
+    },
+    {
+      "id": 144,
+      "angle": "Finger/pulley injury prevention, load mgmt & antagonists",
+      "vote": "3-0",
+      "claim": "The repeater component of the protocol is 1 minute of 10-second-on / 5-second-off repeaters (four 10-second hangs) performed on large-to-medium-sized holds using open-hand, open-crimp, or half-crimp grip positions.",
+      "quote": "The protocol includes 1 minute of 10″/5″ Repeaters (four 10-second hangs) on large to medium-sized holds using open hand, open crimp, or half-crimp grip positions.",
+      "source": "https://trainingforclimbing.com/climbing-training-protocol-for-stronger-finger-tendons-and-pulleys/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, near-verbatim restatement of the supporting quote: \"1 minute of 10″/5″ Repeaters (four 10-second hangs) on large to medium-sized holds using open hand, open crimp, or half-crimp grip positions\" matches \"1 minute of 10-second-on/5-second-off repeaters (four 10-second hangs)... on large-to-medium-sized holds using open-hand, open-crimp, or half-crimp grip positions\" almost word-for-word. The claim correctly frames this as a specific named protocol (\"the protocol\"), not as a universal law of climbing training, which is the appropriate epistemic framing per the decision criteria. The numbers are internally plausible: 4 x 10s hangs with 5s rests totals ~55s, consistent with being described as \"1 minute.\" Low-intensity repeaters on large/medium holds with varied grip types (rather than max hangs on small edges) is a well-established approach in finger-tendon/pulley rehab and injury-prevention protocols in the climbing-training literature (consistent with Hörst/Lattice-style low-load tendon-loading progressions), so nothing here contradicts mainstream climbing-training consensus. No numeric distortion, no overreach beyond the source, no misrepresentation of a niche protocol as universal law."
+    },
+    {
+      "id": 145,
+      "angle": "Finger/pulley injury prevention, load mgmt & antagonists",
+      "vote": "3-0",
+      "claim": "The full circuit (per the search excerpt: ~30s finger rolls at moderate load + ~30s finger extensions + 1 min of repeaters) is repeated two additional times for an effective 6 minutes of non-fatiguing loading.",
+      "quote": "Steps #1 through #3 are repeated two more times, making for an effective 6-minutes of non-fatiguing loading. ... 30s finger rolls at moderate load + 30s finger extensions + 1 min of repeaters on large-to-medium holds using open-hand or open-crimp grips.",
+      "source": "https://trainingforclimbing.com/climbing-training-protocol-for-stronger-finger-tendons-and-pulleys/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful restatement of its own supporting quote, including the arithmetic: one circuit = 30s finger rolls + 30s finger extensions + 60s repeaters = 2 minutes; the quote says \"steps #1-3 are repeated two more times\" (i.e., 3 total rounds), and 3 × 2 min = 6 min, matching the source's stated \"effective 6-minutes of non-fatiguing loading.\" The claim attributes this to a specific named source/protocol (\"per the search excerpt\") rather than asserting it as universal climbing-training law, which is the correct framing per the decision rule. Substantively, using light/moderate loads and large-to-medium holds with open-hand/open-crimp grips for short, sub-fatiguing bouts is a plausible and fairly standard approach to tendon/pulley conditioning and antagonist work in climbing training literature (consistent with general Hörst/Lattice-style low-intensity tendon-loading and antagonist protocols) — it does not contradict mainstream consensus or contain implausible numbers. No overreach or misreading detected."
+    },
+    {
+      "id": 146,
+      "angle": "Finger/pulley injury prevention, load mgmt & antagonists",
+      "vote": "3-0",
+      "claim": "Hooper's Beta's A2 pulley rehab uses a staged progressive-loading protocol whose first ~2 weeks are light isometrics on large edges, OPEN-HAND only, at low intensity (~20-30% effort). The explicit goal is controlled loading rather than complete avoidance/rest.",
+      "quote": "First 2 weeks: light isometrics on large edges, OPEN-HAND only, low intensity ~20-30% — goal is controlled loading, not avoidance.",
+      "source": "https://www.hoopersbeta.com/library/a2-pulley-manual-for-climbers",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful restatement of its own quote (same 2-week timeframe, large edges, open-hand only, ~20-30% intensity, \"controlled loading not avoidance\" framing) and is attributed explicitly to Hooper's Beta's specific protocol rather than asserted as universal law, which satisfies the \"named protocol as a named protocol\" exception. It is also plausible against mainstream sports-medicine and climbing-injury knowledge: (1) graded/controlled early loading of connective tissue (mechanotherapy) is the accepted alternative to full immobilization for ligament/pulley-type injuries across sports-med literature, not just this source; (2) open-hand grip is well documented (e.g., Schweizer's biomechanical work on crimp vs. open-hand pulley loading) to markedly reduce A2 pulley strain relative to crimping, so prescribing open-hand-only work during early rehab is biomechanically sound and consistent with other climbing-rehab sources (Lattice, physio-authored protocols); (3) a low ~20-30% isometric effort on large edges for the first fortnight is a conservative, non-implausible starting intensity for a partial pulley tear/strain, not an extreme or physiologically unreasonable number. Nothing here contradicts Hörst/Lattice/Anderson-style consensus — those sources likewise emphasize progressive reloading over complete rest for finger connective tissue injuries."
     }
   ],
   "genuineRefuted": [
@@ -1210,5 +1310,5 @@
       "source": "https://trainingforclimbing.com/tag/redpoint-tips/"
     }
   ],
-  "abstainedRemaining": 152
+  "abstainedCount": 142
 }

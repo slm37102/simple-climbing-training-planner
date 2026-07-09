@@ -36,9 +36,10 @@ disciplines. Deepest coverage on (1) **periodization & planning** and (2)
 
 ## Status (as of this commit)
 
-- **150 distinct claims verified** (31 search-verified + 119 reasoning-verified); **3 refuted**.
-- Verification was **paused mid-way** (weekly usage limit). **~152 gathered claims
-  remain un-adjudicated** and are resumable from `data/gathered-claims.json`.
+- **160 distinct claims verified** (31 search-verified + 129 reasoning-verified); **3 refuted**.
+- Verification is **in progress, resumable**. **~142 gathered claims remain
+  un-adjudicated** in `data/gathered-claims.json`. Progress is throttled by daily/weekly
+  usage limits — each resume nets a partial batch before hitting the wall again.
 
 ## Relationship to the app
 

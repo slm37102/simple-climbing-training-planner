@@ -9,9 +9,9 @@
 
 ## Summary
 
-- **150 distinct claims verified** (31 search-verified, 119 reasoning-verified)
+- **160 distinct claims verified** (31 search-verified, 129 reasoning-verified)
 - **3 claims refuted** (listed at the end for transparency)
-- Verification was paused partway: ~152 gathered claims remain un-adjudicated (held in `data/gathered-claims.json`; resumable).
+- Verification is still in progress: ~142 gathered claims remain un-adjudicated (held in `data/gathered-claims.json`; resumable). Progress is slow due to daily/weekly usage limits — each resume nets a partial batch.
 
 ## Findings by topic
 
@@ -607,7 +607,7 @@
   > "The ideal size edge for weighted fingerboard hangs is between 14mm and 20mm (⅝ to ⅞-inch). ... Eric recommends setting the weight so that you can hang for 10-seconds. ... Intensity must be at your limit but it must not bring you to failure."
 
 
-### Deload, recovery, frequency & weekly volume  (8)
+### Deload, recovery, frequency & weekly volume  (14)
 
 - **A V4 climber training with Lattice logs an average of 3 training days per week, while a V12+ climber logs an average of 4 training days per week.**  
   _search · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/data-dive-training-days-weekly-exercise-v4-v12/)_
@@ -638,8 +638,51 @@
   > "the episode addresses how fatigue accumulates with training and why strategic deload weeks are essential for managing that fatigue and optimizing climbing fitness... diminishing returns after several weeks of hard training"
 
 - **Lattice recommends a deload pattern of 3 weeks on / 1 week off (a 3:1 ratio) as the most common deload cadence for climbers.**  
-  _reasoning · vote 2-0 · [latticetraining.com](https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/)_
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/)_
   > "A deload week involves reducing both volume and intensity to allow for supercompensation (adaptation leading to higher performance post-training), with the most common pattern being 3 weeks on 1 week off."
+
+- **A deload week reduces volume and/or intensity (not complete rest) so the climber feels fully recovered and motivated to start the next training cycle, while still keeping selected sessions.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/)_
+  > "A deload week is a time of reduced training (this could be volume and/or intensity) so that we feel fully recovered & motivated to start another training cycle. A common misconception is that it is complete rest, but it is about choosing what sessions are right for you to keep up, whilst ensuring yo…"
+
+- **During a deload, you can drop volume but retain some high-intensity sessions, especially if strength is the current training focus; high-intensity sessions kept should be cut roughly in half and kept short and fewer.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/)_
+  > "You can drop volume but maintain some high-intensity sessions, particularly if strength is your current training focus... If completing higher intensity sessions during deload, cut them in half and keep sessions short and fewer."
+
+- **Deload weeks can be timed to the menstrual cycle, ideally falling during the late luteal or menstruation phase when energy is typically lowest.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/)_
+  > "The timing for a deload week often falls during the late luteal or menstruation phase. It can be helpful to sync your deload week with your period, when you're potentially feeling your lowest energy, or simply rearrange your sessions for the week so you're resting or having gentle exercise whilst yo…"
+
+- **For climbers training seriously (4-5 structured days/week), deload every 4-6 weeks; for casual climbers (2-3 days/week), deload every 6-8 weeks; for serious climbers adding strength work, deload every 6-12 weeks.**  
+  _reasoning · vote 3-0 · [megabetaclimbing.com](https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases)_
+  > "deload every 4-6 weeks if training seriously (4-5 days/week structured), every 6-8 weeks if climbing casually (2-3 days/week), and 6-12 weeks for serious climbers adding strength work"
+
+- **During a deload you decrease volume but NOT intensity: keep the high-quality, high-intensity sessions (limit bouldering, fingerboarding, hardest moves) and cut the extra mileage.**  
+  _reasoning · vote 3-0 · [megabetaclimbing.com](https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases)_
+  > "During deloads decrease volume, NOT intensity: keep quality sessions (limit bouldering, fingerboarding, hardest moves), cut the extra mileage"
+
+- **Connective tissue (tendons/pulleys) adapts more slowly than muscle, which is why deloads are needed to protect those structures.**  
+  _reasoning · vote 3-0 · [megabetaclimbing.com](https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases)_
+  > "Connective tissue adapts slower than muscle, so deloads protect tendons/pulleys"
+
+
+### Finger/pulley injury prevention, load mgmt & antagonists  (4)
+
+- **Eric Hörst's protective finger protocol is a roughly 6-minute, low-to-moderate-intensity routine designed to nourish and strengthen the finger flexor tendons and annular pulleys (A2), suitable for almost-daily use as rest-day prehab or pre-climbing warm-up.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/climbing-training-protocol-for-stronger-finger-tendons-and-pulleys/)_
+  > "Eric Hörst has developed a simple 6-minute "protective" finger training protocol that will nourish and strengthen your finger flexor tendons and annular pulleys. ... This is one climbing exercise that you can do almost daily."
+
+- **The repeater component of the protocol is 1 minute of 10-second-on / 5-second-off repeaters (four 10-second hangs) performed on large-to-medium-sized holds using open-hand, open-crimp, or half-crimp grip positions.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/climbing-training-protocol-for-stronger-finger-tendons-and-pulleys/)_
+  > "The protocol includes 1 minute of 10″/5″ Repeaters (four 10-second hangs) on large to medium-sized holds using open hand, open crimp, or half-crimp grip positions."
+
+- **The full circuit (per the search excerpt: ~30s finger rolls at moderate load + ~30s finger extensions + 1 min of repeaters) is repeated two additional times for an effective 6 minutes of non-fatiguing loading.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/climbing-training-protocol-for-stronger-finger-tendons-and-pulleys/)_
+  > "Steps #1 through #3 are repeated two more times, making for an effective 6-minutes of non-fatiguing loading. ... 30s finger rolls at moderate load + 30s finger extensions + 1 min of repeaters on large-to-medium holds using open-hand or open-crimp grips."
+
+- **Hooper's Beta's A2 pulley rehab uses a staged progressive-loading protocol whose first ~2 weeks are light isometrics on large edges, OPEN-HAND only, at low intensity (~20-30% effort). The explicit goal is controlled loading rather than complete avoidance/rest.**  
+  _reasoning · vote 3-0 · [hoopersbeta.com](https://www.hoopersbeta.com/library/a2-pulley-manual-for-climbers)_
+  > "First 2 weeks: light isometrics on large edges, OPEN-HAND only, low intensity ~20-30% — goal is controlled loading, not avoidance."
 
 
 ## Refuted claims (for transparency)
