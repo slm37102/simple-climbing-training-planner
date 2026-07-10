@@ -11,7 +11,10 @@
 
 const NO_INPUT_KINDS = new Set(['antagonist-block', 'mobility', 'skill']);
 const KG_KINDS       = new Set(['hangboard', 'pullup', 'test']);
-const NO_SETS_KINDS  = new Set(['arc', 'open-climb', 'test']);
+// Climbing-kind exercises carry a single concrete prescribedTarget (see
+// js/program.js) instead of a separate sets+reps pair — one count input,
+// labelled by the target's unit (see repsLabel), replaces both.
+const NO_SETS_KINDS  = new Set(['arc', 'open-climb', 'test', 'boulder', 'route', 'circuit', 'limit-boulder', 'campus']);
 
 export function inputVisibility(ex) {
   if (!ex) return { kg: false, sets: false, reps: false, rpe: false, optional: false, none: true };
@@ -32,7 +35,26 @@ export function inputVisibility(ex) {
 }
 
 export function repsLabel(ex) {
-  return (ex.kind === 'arc' || ex.kind === 'open-climb') ? 'min' : 'reps';
+  if (ex?.prescribedTarget?.unit) return ex.prescribedTarget.unit;
+  return (ex?.kind === 'arc' || ex?.kind === 'open-climb') ? 'min' : 'reps';
+}
+
+// Per-kind default execution cues (gym-ready spec: docs/specs/gym-ready-prescription-format-spec.md
+// §4 — hybrid how-to). A session can override with its own `ex.howto` string for
+// phase-specific nuance; this map covers what's true of the kind in any phase.
+const HOWTO_BY_KIND = {
+  boulder: 'Pick problems near the target grade. Rest until fresh between attempts.',
+  route: 'Climb at the target grade/intensity. Full rest between goes.',
+  circuit: 'Complete each set back-to-back as prescribed. Rest fully between sets.',
+  arc: 'Climb continuously, never stopping. Hold a mild, sustainable pump — never a deep pump.',
+  'open-climb': 'Easy mileage. Move well, don\'t push grade.',
+  'limit-boulder': 'One all-out go per attempt. Rest fully between attempts. Stop the session when power output drops.',
+  campus: 'Big rungs, big moves, minimal contact time on the lower rung. Skip entirely on any finger tweak.',
+};
+
+export function howto(ex) {
+  if (!ex) return '';
+  return ex.howto ?? HOWTO_BY_KIND[ex.kind] ?? '';
 }
 
 // Returns true when an actual object has at least one logged value.

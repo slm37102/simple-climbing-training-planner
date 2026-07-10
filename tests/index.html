@@ -35,7 +35,7 @@ import { Storage, newer } from '../js/storage.js';
 import { Program, buildPhasePattern, DEFAULT_CYCLE_WEEKS, MIN_CYCLE_WEEKS, MAX_CYCLE_WEEKS } from '../js/program.js';
 import { Loads } from '../js/loads.js';
 import { Replan, MAJOR_GAP_DAYS } from '../js/replan.js';
-import { inputVisibility, repsLabel, actualHasResult } from '../js/exercise-inputs.js';
+import { inputVisibility, repsLabel, actualHasResult, howto } from '../js/exercise-inputs.js';
 import { today as datesToday, addDays as datesAddDays, daysBetween, snapToMonday as datesSnapToMonday } from '../js/dates.js';
 import { renderToday } from '../js/views/today.js';
 import { renderLog }   from '../js/views/log.js';
@@ -77,9 +77,9 @@ test('inputVisibility hangboard → kg+sets+reps+rpe', () => {
   assertEq(v, { kg: true, sets: true, reps: true, rpe: true, optional: false, none: false });
 });
 
-test('inputVisibility boulder → sets+reps+rpe (no kg)', () => {
+test('inputVisibility boulder → reps+rpe (no kg, no sets — gym-ready spec: one count input)', () => {
   const v = inputVisibility({ kind: 'boulder' });
-  assertEq(v, { kg: false, sets: true, reps: true, rpe: true, optional: false, none: false });
+  assertEq(v, { kg: false, sets: false, reps: true, rpe: true, optional: false, none: false });
 });
 
 test('inputVisibility test → kg+reps+rpe (no sets — single effort)', () => {
@@ -913,6 +913,130 @@ test('[ADR-0008] resolveEffective applies layoff decay to a stale previous-actua
   const stale = Loads.resolveEffective({ exercise, previousActualKg: 20, previousAvgRpe: 8.5, daysSincePrevious: 60, benchmarks });
   assertEq(stale.suggestedKg, 17, '20kg × 0.85 floor × auto-adj 1.0 = 17kg');
   assert(stale.reason.some(r => /layoff/i.test(r)), 'reason should mention the layoff decay');
+});
+
+// ─── Gym-ready prescription format (map #8, docs/specs/gym-ready-prescription-format-spec.md) ──
+// Fixed anchor 2026-05-04 (Mon), 12-wk cycle, comp peakType unless noted:
+// base wks1–6, build wks7–9, peak wks10–11, taper wk12 (comp) / wks11–12 (trip).
+// week4 (i=3) is a natural Base deload (not retest — retest is week6).
+
+const CLIMBING_KINDS = new Set(['boulder', 'route', 'circuit', 'arc', 'open-climb', 'limit-boulder', 'campus']);
+
+test('[Gym-ready] every climbing-kind exercise across all phases carries a concrete prescribedTarget', () => {
+  const fixtures = [
+    ['2026-05-04', 'hybrid'],        // base Mon (no climbing-kind unless build+boulder)
+    ['2026-05-07', 'boulder'],       // base Thu boulder
+    ['2026-05-07', 'sport'],         // base Thu sport
+    ['2026-05-09', 'boulder'],       // base Sat boulder
+    ['2026-05-09', 'sport'],         // base Sat sport
+    ['2026-06-15', 'boulder'],       // build Mon (campus warmup ladders, boulder focus)
+    ['2026-06-25', 'boulder'],       // build Thu boulder
+    ['2026-06-25', 'sport'],         // build Thu sport
+    ['2026-07-04', 'boulder'],       // build Sat boulder
+    ['2026-07-04', 'sport'],         // build Sat sport
+    ['2026-07-09', 'boulder'],       // peak Thu boulder
+    ['2026-07-09', 'sport'],         // peak Thu sport
+    ['2026-07-11', 'boulder'],       // peak Sat boulder
+    ['2026-07-11', 'sport'],         // peak Sat sport
+    ['2026-07-23', 'boulder'],       // taper Thu boulder (comp)
+    ['2026-07-23', 'sport'],         // taper Thu sport (comp)
+    ['2026-07-18', 'boulder', 'trip'], // taper Sat boulder (comp's taper Sat is the forced rest-pre-goal day; use trip's 2-wk taper to reach sat-volume-down)
+    ['2026-07-18', 'sport', 'trip'],   // taper Sat sport → sat-route-mileage
+    ['2026-05-10', 'hybrid'],        // wk1 Sun (sun-optional open-climb)
+  ];
+  let checked = 0;
+  for (const [iso, focus, peakType] of fixtures) {
+    const ctx = Program.resolveDate(iso, '2026-05-04', 12, peakType);
+    const sess = Program.prescribeForContext(ctx, focus);
+    for (const ex of sess.exercises || []) {
+      if (!CLIMBING_KINDS.has(ex.kind)) continue;
+      assert(ex.prescribedTarget, `${iso}/${focus}: ${ex.kind} "${ex.name}" missing prescribedTarget`);
+      assert(typeof ex.prescribedTarget.value === 'number' && ex.prescribedTarget.value > 0,
+        `${iso}/${focus}: ${ex.kind} "${ex.name}" prescribedTarget.value must be a positive number`);
+      assert(typeof ex.prescribedTarget.unit === 'string' && ex.prescribedTarget.unit.length > 0,
+        `${iso}/${focus}: ${ex.kind} "${ex.name}" prescribedTarget.unit must be a non-empty string`);
+      checked++;
+    }
+  }
+  assert(checked >= 20, `expected to check at least 20 climbing-kind exercise occurrences, got ${checked}`);
+});
+
+test('[Gym-ready] deload week scales a count-unit prescribedTarget: floor(×0.6), min 1', () => {
+  const iso = addIsoDays('2026-05-04', (4 - 1) * 7 + 5); // wk4 Sat = 2026-05-30
+  const deloadCtx = Program.resolveDate(iso, '2026-05-04', 12);
+  assertEq(deloadCtx.phase, 'base');
+  assert(deloadCtx.deload && !deloadCtx.retest, `wk4 should be a natural (non-retest) deload, got deload=${deloadCtx.deload} retest=${deloadCtx.retest}`);
+  const sess = Program.prescribeForContext(deloadCtx, 'boulder');
+  assertEq(sess.sessionId, 'sat-boulder-triples');
+  const triples = sess.exercises.find(e => e.kind === 'circuit');
+  assert(triples.originalTarget, 'deload circuit exercise missing originalTarget');
+  assertEq(triples.originalTarget, { value: 4, unit: 'sets' });
+  assertEq(triples.prescribedTarget, { value: 2, unit: 'sets' }, 'floor(4 × 0.6) = 2 sets');
+});
+
+test('[Gym-ready] deload week rounds a duration-unit ("min") prescribedTarget to the nearest 5', () => {
+  const iso = addIsoDays('2026-05-04', (4 - 1) * 7 + 5); // wk4 Sat (base, natural deload)
+  const ctx = Program.resolveDate(iso, '2026-05-04', 12);
+  assert(ctx.deload && !ctx.retest, 'fixture must be a natural deload week');
+  const sess = Program.prescribeForContext(ctx, 'sport');
+  assertEq(sess.sessionId, 'sat-arc');
+  const arc = sess.exercises.find(e => e.kind === 'arc');
+  assertEq(arc.originalTarget, { value: 30, unit: 'min' });
+  assertEq(arc.prescribedTarget, { value: 20, unit: 'min' }, 'round(30 × 0.6 / 5) × 5 = 20 min');
+});
+
+test('[Gym-ready] taper week also scales prescribedTarget (same mechanics as deload — ADR-0007)', () => {
+  const iso = addIsoDays('2026-05-04', (12 - 1) * 7 + 3); // wk12 Thu (comp taper)
+  const ctx = Program.resolveDate(iso, '2026-05-04', 12);
+  assertEq(ctx.phase, 'taper');
+  const sess = Program.prescribeForContext(ctx, 'boulder');
+  assertEq(sess.sessionId, 'thu-flash');
+  const flash = sess.exercises.find(e => e.kind === 'boulder');
+  assertEq(flash.originalTarget, { value: 8, unit: 'problems' });
+  assertEq(flash.prescribedTarget, { value: 4, unit: 'problems' }, 'floor(8 × 0.6) = 4 problems');
+});
+
+test('[Gym-ready] KG-B7: boulder-triples 4×4 grade corrected to "2–3 grades below max"', () => {
+  const ctx = Program.resolveDate('2026-05-09', '2026-05-04', 12); // wk1 Sat, base, non-deload
+  const sess = Program.prescribeForContext(ctx, 'boulder');
+  const triples = sess.exercises.find(e => e.kind === 'circuit');
+  assert(/2–3 grades below max/.test(triples.prescribed), `expected "2–3 grades below max", got "${triples.prescribed}"`);
+  assert(!/1–2 grades below max/.test(triples.prescribed), 'the pre-KG-B7 "1–2 grades below max" text must be gone');
+});
+
+test('[Gym-ready] KG-B8: ARC no longer states a "% effort" figure', () => {
+  const ctx = Program.resolveDate('2026-05-09', '2026-05-04', 12); // wk1 Sat, base
+  const sess = Program.prescribeForContext(ctx, 'sport');
+  assertEq(sess.sessionId, 'sat-arc');
+  const arc = sess.exercises.find(e => e.kind === 'arc');
+  assert(!/%\s*effort/i.test(arc.prescribed), `"% effort" figure must be gone, got "${arc.prescribed}"`);
+  assert(/just below pump/i.test(arc.prescribed), 'RPE + "just below pump" should still carry the intensity');
+  assertEq(arc.prescribedTarget, { value: 30, unit: 'min' });
+});
+
+test('[Gym-ready] KG-B9: base route pyramid RPE capped at [7, 8] (was [7.5, 9])', () => {
+  const ctx = Program.resolveDate('2026-05-07', '2026-05-04', 12); // wk1 Thu, base
+  const sess = Program.prescribeForContext(ctx, 'sport');
+  assertEq(sess.sessionId, 'thu-route-pyramid');
+  const pyramid = sess.exercises.find(e => e.kind === 'route');
+  assertEq(pyramid.rpeRange, [7, 8], `expected RPE capped to [7, 8], got ${pyramid.rpeRange}`);
+});
+
+test('[Gym-ready] exercise-inputs: climbing-kind exercises show one count input, no separate sets', () => {
+  const ex = { kind: 'boulder', prescribedTarget: { value: 4, unit: 'problems' } };
+  const vis = inputVisibility(ex);
+  assertEq(vis.sets, false, 'climbing-kind exercises must not show a separate Sets input');
+  assertEq(vis.reps, true, 'the single count input reuses the reps slot');
+  assertEq(repsLabel(ex), 'problems', 'repsLabel should surface prescribedTarget.unit');
+});
+
+test('[Gym-ready] howto(): per-kind default, per-exercise override', () => {
+  assert(howto({ kind: 'limit-boulder' }).length > 0, 'limit-boulder should have a per-kind default how-to');
+  assert(howto({ kind: 'arc' }).length > 0, 'arc should have a per-kind default how-to');
+  assertEq(howto(null), '');
+  assertEq(howto({ kind: 'unknown-kind-xyz' }), '', 'unknown kind with no override should return empty string');
+  const overridden = howto({ kind: 'boulder', howto: 'custom cue' });
+  assertEq(overridden, 'custom cue', 'a per-exercise howto override must win over the kind default');
 });
 
 // ─── Calendar view ────────────────────────────────────────────────────────

@@ -238,7 +238,7 @@ function buildMonHangboard(phase, isDeload, focus = 'hybrid') {
     ...pullupPrescription(phase)
   });
   if (focus === 'boulder' && phase === 'build') {
-    exercises.push({ kind: 'campus', name: 'Campus warmup ladders', prescribed: '2–3 ladders × 5 min rest', rpeRange: [7, 8] });
+    exercises.push({ kind: 'campus', name: 'Campus warmup ladders', prescribed: '2–3 ladders × 5 min rest', rpeRange: [7, 8], prescribedTarget: { value: 3, unit: 'ladders' } });
   }
   // No campus on Peak Mondays: 7-53 hangs + max pull-ups + campus in one session
   // stacks max stimuli beyond this athlete's connective-tissue recovery — ADR-0001.
@@ -274,8 +274,8 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null) {
         label: 'Limit Bouldering + Campus (Peak)',
         energySystem: 'Strength → Power',
         exercises: [
-          { kind:'limit-boulder', name: 'Limit boulders', prescribed: '1–3 limit move-sequences (3–5 moves) · 4–8 attempts each · 3–5 min rest · stop when power drops (~20–30 min)', rpeRange: [9, 9.5] },
-          { kind:'campus', name: 'Campus board: basic ladders (1-3-5, matched feet)', prescribed: '2–3 attempts × 2 sets · 3–5 min rest · gate: 15–20 strict pull-ups + 1-2-3-4-5 ladder without matching · skip on any finger tweak', rpeRange: [8.5, 9] }
+          { kind:'limit-boulder', name: 'Limit boulders', prescribed: '1–3 limit move-sequences (3–5 moves) · 4–8 attempts each · 3–5 min rest · stop when power drops (~20–30 min)', rpeRange: [9, 9.5], prescribedTarget: { value: 2, unit: 'sequences' } },
+          { kind:'campus', name: 'Campus board: basic ladders (1-3-5, matched feet)', prescribed: '2–3 attempts × 2 sets · 3–5 min rest · gate: 15–20 strict pull-ups + 1-2-3-4-5 ladder without matching · skip on any finger tweak', rpeRange: [8.5, 9], prescribedTarget: { value: 2, unit: 'sets' } }
         ]
       };
     }
@@ -285,7 +285,7 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null) {
         label: 'Limit Bouldering (Build)',
         energySystem: 'Strength',
         exercises: [
-          { kind:'limit-boulder', name: 'Limit boulders', prescribed: '3–5 problems · 3–5 attempts · 3–5 min rest · 2–3 sets', rpeRange: [8.5, 9.5] }
+          { kind:'limit-boulder', name: 'Limit boulders', prescribed: '3–5 problems · 3–5 attempts · 3–5 min rest · 2–3 sets', rpeRange: [8.5, 9.5], prescribedTarget: { value: 4, unit: 'problems' } }
         ]
       };
     }
@@ -295,7 +295,8 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null) {
         label: 'Flash-grade boulders (Taper)',
         energySystem: 'Power',
         exercises: [
-          { kind:'boulder', name: 'Flash-grade boulders', prescribed: '6–10 problems below max · long rest', rpeRange: [7, 8.5] }
+          { kind:'boulder', name: 'Flash-grade boulders', prescribed: '6–10 problems below max · long rest', rpeRange: [7, 8.5], prescribedTarget: { value: 8, unit: 'problems' },
+            howto: 'Flash or send quickly on problems below your max. Long rest between goes — stay fresh, don’t chase pump.' }
         ]
       };
     }
@@ -305,7 +306,7 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null) {
       label: 'Projecting / technique boulders',
       energySystem: 'Skill / Strength',
       exercises: [
-        { kind:'boulder', name: 'Projecting (mid-grade)', prescribed: '60–90 min of 4×4-style projecting on submaximal problems', rpeRange: [7.5, 9] }
+        { kind:'boulder', name: 'Projecting (mid-grade)', prescribed: '60–90 min of 4×4-style projecting on submaximal problems', rpeRange: [7.5, 9], prescribedTarget: { value: 75, unit: 'min' } }
       ]
     };
   }
@@ -314,9 +315,16 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null) {
     return {
       sessionId: 'thu-route-pyramid',
       label: 'Route pyramid (Base)',
-      energySystem: 'Aerobic power / Anaerobic capacity',
+      // KG-B9: energy system corrected to base-appropriate capacity work — the
+      // prior "Aerobic power / Anaerobic capacity" label matched Build/PE
+      // intensity, not what a base-phase session should be training.
+      energySystem: 'Aerobic capacity',
       exercises: [
-        { kind:'route', name: 'Route pyramid', prescribed: 'pyramid 4-3-2-1 routes climbed back to back; 1 grade below redpoint', rpeRange: [7.5, 9] }
+        // KG-B9: RPE capped 7.5–9 → 7–8 so Build's 60/60 threshold work remains
+        // a genuine step up — otherwise base already runs near-Build intensity
+        // and the base→build progression flattens.
+        { kind:'route', name: 'Route pyramid', prescribed: 'pyramid 4-3-2-1 routes climbed back to back; 1 grade below redpoint', rpeRange: [7, 8], prescribedTarget: { value: 10, unit: 'routes' },
+          howto: 'Climb 4, then 3, then 2, then 1 routes back-to-back, resting between routes. Comfortably hard — save intensity for Build.' }
       ]
     };
   }
@@ -329,7 +337,7 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null) {
       label: '60/60 threshold intervals (Build)',
       energySystem: 'Aerobic power',
       exercises: [
-        { kind:'circuit', name: '60/60 intervals', prescribed: '60s moderately hard climbing / 60s rest · 10–30 min total · stop before the deep pump (never above 8.5)', rpeRange: [7, 8.5] }
+        { kind:'circuit', name: '60/60 intervals', prescribed: '60s moderately hard climbing / 60s rest · 10–30 min total · stop before the deep pump (never above 8.5)', rpeRange: [7, 8.5], prescribedTarget: { value: 20, unit: 'min' } }
       ]
     };
   }
@@ -342,7 +350,8 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null) {
       label: '30/30 lactic sharpening (Peak)',
       energySystem: 'Anaerobic lactic',
       exercises: [
-        { kind:'circuit', name: '30/30 intervals', prescribed: `30s all-out / 30s rest × 6 = 1 set · ${rest} between sets · 2–3 sets · deep pump expected, stop when movement degrades`, rpeRange: [9.5, 10] }
+        { kind:'circuit', name: '30/30 intervals', prescribed: `30s all-out / 30s rest × 6 = 1 set · ${rest} between sets · 2–3 sets · deep pump expected, stop when movement degrades`, rpeRange: [9.5, 10], prescribedTarget: { value: 2, unit: 'sets' },
+          howto: 'All-out 30s bursts, full 30s rest, 6 = 1 set. Expect a deep pump — that\'s the point. Stop the session when movement quality degrades.' }
       ]
     };
   }
@@ -352,7 +361,8 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null) {
     label: 'Project routes (Taper)',
     energySystem: 'Sport-specific',
     exercises: [
-      { kind:'route', name: 'Project / redpoint attempts', prescribed: '2–3 quality goes on a project', rpeRange: [9, 9.5] }
+      { kind:'route', name: 'Project / redpoint attempts', prescribed: '2–3 quality goes on a project', rpeRange: [9, 9.5], prescribedTarget: { value: 2, unit: 'goes' },
+        howto: 'A few quality, well-rested goes on your project. Stop while still fresh — don’t grind out fatigued attempts.' }
     ]
   };
 }
@@ -365,8 +375,8 @@ function buildSatMain(phase, flavor, isDeload, weeksLeft = null) {
         label: 'Project boulder session',
         energySystem: 'Strength / Power',
         exercises: [
-          { kind: 'limit-boulder', name: 'Project attempts', prescribed: '1–3 hard problems · max 5 quality attempts each · 5+ min rest · stop when power drops', rpeRange: [9, 9.5] },
-          { kind: 'boulder', name: 'Flash/onsight attempts', prescribed: '3–5 problems at 1 grade below max', rpeRange: [8, 9] }
+          { kind: 'limit-boulder', name: 'Project attempts', prescribed: '1–3 hard problems · max 5 quality attempts each · 5+ min rest · stop when power drops', rpeRange: [9, 9.5], prescribedTarget: { value: 2, unit: 'problems' } },
+          { kind: 'boulder', name: 'Flash/onsight attempts', prescribed: '3–5 problems at 1 grade below max', rpeRange: [8, 9], prescribedTarget: { value: 4, unit: 'problems' } }
         ]
       };
     }
@@ -376,7 +386,8 @@ function buildSatMain(phase, flavor, isDeload, weeksLeft = null) {
         label: 'Low volume bouldering (Taper)',
         energySystem: 'Maintenance',
         exercises: [
-          { kind: 'boulder', name: 'Fun submaximal bouldering', prescribed: '45–60 min at 2–3 grades below max · no projecting', rpeRange: [6, 7.5] }
+          { kind: 'boulder', name: 'Fun submaximal bouldering', prescribed: '45–60 min at 2–3 grades below max · no projecting', rpeRange: [6, 7.5], prescribedTarget: { value: 50, unit: 'min' },
+            howto: 'Easy, fun mileage well below max. No projecting — this is about staying sharp and fresh, not building fitness.' }
         ]
       };
     }
@@ -388,8 +399,11 @@ function buildSatMain(phase, flavor, isDeload, weeksLeft = null) {
       label: 'Boulder triples + open climb',
       energySystem: 'Anaerobic capacity',
       exercises: [
-        { kind:'circuit', name: 'Boulder triples (4×4)', prescribed: `4 boulders · climbed back-to-back · ${triplesRest} rest · 3–4 sets · 1–2 grades below max`, rpeRange: [8.5, 9.5] },
-        { kind:'open-climb', name: 'Open climbing (technique)', prescribed: '30–45 min mileage on submax problems', rpeRange: [6, 7.5], optional: true }
+        // KG-B7 / ADR-0006 addendum: grade corrected "1–2" → "2–3 grades below max" —
+        // 1–2 below collapsed the intensity gap with dedicated limit bouldering,
+        // losing the distinct power-endurance "engine" stimulus this format needs.
+        { kind:'circuit', name: 'Boulder triples (4×4)', prescribed: `4 boulders · climbed back-to-back · ${triplesRest} rest · 3–4 sets · 2–3 grades below max`, rpeRange: [8.5, 9.5], prescribedTarget: { value: 4, unit: 'sets' } },
+        { kind:'open-climb', name: 'Open climbing (technique)', prescribed: '30–45 min mileage on submax problems', rpeRange: [6, 7.5], optional: true, prescribedTarget: { value: 40, unit: 'min' } }
       ]
     };
   }
@@ -400,7 +414,10 @@ function buildSatMain(phase, flavor, isDeload, weeksLeft = null) {
       label: 'ARC — aerobic base',
       energySystem: 'Aerobic base',
       exercises: [
-        { kind:'arc', name: 'ARC (continuous easy climbing)', prescribed: '2 × 30 min @ 60–70% effort, just below pump · OR 90 min easy laps', rpeRange: [4, 6] }
+        // KG-B8: "@ 60–70% effort" dropped — it contradicted both published ARC
+        // intensity (10–40% of max) and this line's own RPE 4–6. RPE + "just
+        // below pump" already carry ARC's easy-sustained-pump intent precisely.
+        { kind:'arc', name: 'ARC (continuous easy climbing)', prescribed: '2 × 30 min, just below pump · OR 90 min easy laps', rpeRange: [4, 6], prescribedTarget: { value: 30, unit: 'min' } }
       ]
     };
   }
@@ -413,7 +430,7 @@ function buildSatMain(phase, flavor, isDeload, weeksLeft = null) {
       label: '4×4 power-endurance (Build)',
       energySystem: 'Anaerobic capacity',
       exercises: [
-        { kind: 'circuit', name: '4×4 circuits', prescribed: `4 routes/links back-to-back · ${rest} rest · 3 sets · at 50–60% redpoint`, rpeRange: [8.5, 9.5] }
+        { kind: 'circuit', name: '4×4 circuits', prescribed: `4 routes/links back-to-back · ${rest} rest · 3 sets · at 50–60% redpoint`, rpeRange: [8.5, 9.5], prescribedTarget: { value: 3, unit: 'sets' } }
       ]
     };
   }
@@ -423,7 +440,7 @@ function buildSatMain(phase, flavor, isDeload, weeksLeft = null) {
       label: 'Redpoint session (Peak)',
       energySystem: 'Sport-specific',
       exercises: [
-        { kind: 'route', name: 'Redpoint attempts', prescribed: '2–4 quality redpoint attempts · 20+ min rest between goes', rpeRange: [9, 9.5] }
+        { kind: 'route', name: 'Redpoint attempts', prescribed: '2–4 quality redpoint attempts · 20+ min rest between goes', rpeRange: [9, 9.5], prescribedTarget: { value: 3, unit: 'attempts' } }
       ]
     };
   }
@@ -433,7 +450,7 @@ function buildSatMain(phase, flavor, isDeload, weeksLeft = null) {
     label: 'Sport route mileage',
     energySystem: 'Aerobic power',
     exercises: [
-      { kind:'route', name: 'Route mileage', prescribed: '6–10 routes 1–2 grades below redpoint, walking rest', rpeRange: [7, 8.5] }
+      { kind:'route', name: 'Route mileage', prescribed: '6–10 routes 1–2 grades below redpoint, walking rest', rpeRange: [7, 8.5], prescribedTarget: { value: 8, unit: 'routes' } }
     ]
   };
 }
@@ -486,6 +503,20 @@ const REST_DAY = {
 // Intensity (kg %) is NOT scaled — see docs/adr/0003-deload-as-volume-cut.md.
 const DELOAD_VOLUME_MULTIPLIER = 0.6; // keep 60% of sets
 
+// Gym-ready spec (docs/specs/gym-ready-prescription-format-spec.md §5): scale a
+// climbing-kind exercise's concrete prescribedTarget the same way prescribedSets
+// is cut, producing a real integer instead of a vague "drop ~40%" note. Count
+// units floor to a whole number (min 1); the 'min' duration unit rounds to the
+// nearest 5.
+function scaleTarget(target) {
+  if (!target) return target;
+  if (target.unit === 'min') {
+    const scaled = Math.max(5, Math.round((target.value * DELOAD_VOLUME_MULTIPLIER) / 5) * 5);
+    return { value: scaled, unit: target.unit };
+  }
+  return { value: Math.max(1, Math.floor(target.value * DELOAD_VOLUME_MULTIPLIER)), unit: target.unit };
+}
+
 function applyDeloadVolume(session) {
   if (!session?.exercises) return session;
   const out = { ...session, exercises: session.exercises.map(applyDeloadToExercise) };
@@ -499,10 +530,17 @@ function applyDeloadToExercise(ex) {
   if (typeof next.prescribedSets === 'number' && next.prescribedSets > 1) {
     next.prescribedSets = Math.max(1, Math.floor(next.prescribedSets * DELOAD_VOLUME_MULTIPLIER));
   }
+  if (next.prescribedTarget) {
+    next.originalTarget = next.prescribedTarget;
+    next.prescribedTarget = scaleTarget(next.prescribedTarget);
+  }
   if (next.kind === 'antagonist-block' && Array.isArray(next.items)) {
     next.items = next.items.map(i => ({ ...i, prescribed: appendDeloadNote(i.prescribed) }));
   }
-  if (typeof next.prescribed === 'string') next.prescribed = appendDeloadNote(next.prescribed);
+  // Climbing-kind exercises now show the concrete scaled prescribedTarget
+  // instead — appending the vague "drop ~40% volume" suffix to their text
+  // would restate the same information less precisely.
+  if (typeof next.prescribed === 'string' && !next.prescribedTarget) next.prescribed = appendDeloadNote(next.prescribed);
   if (typeof next.sets === 'string')       next.sets       = appendDeloadNote(next.sets);
   return next;
 }
@@ -525,6 +563,10 @@ function applyTaperVolume(session) {
       const next = { ...ex };
       if (typeof next.prescribedSets === 'number' && next.prescribedSets > 1) {
         next.prescribedSets = Math.max(1, Math.floor(next.prescribedSets * DELOAD_VOLUME_MULTIPLIER));
+      }
+      if (next.prescribedTarget) {
+        next.originalTarget = next.prescribedTarget;
+        next.prescribedTarget = scaleTarget(next.prescribedTarget);
       }
       return next;
     })
@@ -649,7 +691,7 @@ export const Program = {
         label: 'Optional: easy open climb or rest',
         energySystem: 'Aerobic base / —',
         exercises: [
-          { kind:'open-climb', name: 'Easy open climbing (optional)', prescribed: '45–90 min mileage well below max', rpeRange: [4, 6], optional: true }
+          { kind:'open-climb', name: 'Easy open climbing (optional)', prescribed: '45–90 min mileage well below max', rpeRange: [4, 6], optional: true, prescribedTarget: { value: 60, unit: 'min' } }
         ]
       };
     }

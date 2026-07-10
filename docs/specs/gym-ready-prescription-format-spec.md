@@ -1,6 +1,6 @@
 # Spec: gym-ready concrete prescriptions for climbing-kind exercises
 
-**Status:** Spec ready for implementation hand-off. Produced by wayfinder [map #8](https://github.com/slm37102/simple-climbing-training-planner/issues/8), ticket [#12](https://github.com/slm37102/simple-climbing-training-planner/issues/12). Format mock (throwaway, for reference): the prototype published from ticket #12.
+**Status:** Implemented 2026-07-10 in `js/program.js` / `js/exercise-inputs.js` / `js/views/today.js` / `css/styles.css`, with `[Gym-ready]` regression tests in `tests/index.html`. Produced by wayfinder [map #8](https://github.com/slm37102/simple-climbing-training-planner/issues/8), ticket [#12](https://github.com/slm37102/simple-climbing-training-planner/issues/12). Format mock (throwaway, for reference): the prototype published from ticket #12.
 
 > **This is a decision/spec, not the change itself.** It defines *what* to build; the `js/` edits are the hand-off. It folds in the three prescription corrections already decided in [ADR-0006 addendum + KG-B7/B8/B9](../knowledge-gaps.md).
 
@@ -87,15 +87,15 @@ The existing volume-cut machinery (`applyDeloadVolume`, `applyTaperVolume` in `j
 
 Pyramid special case: the pyramid shape is the target; deload drops the base tier (`4-3-2-1 → 3-2-1`), which is ~60% of routes — consistent with the count rule.
 
-## 6. Integration points (the hand-off checklist)
+## 6. Integration points (the hand-off checklist) — all shipped 2026-07-10
 
-- **`js/program.js`** — add `prescribedTarget` to every climbing-kind exercise per §3; add optional `howto` overrides where §4 needs them; apply the three corrections (KG-B7 grade → "2–3 below max"; KG-B8 drop ARC "60–70% effort"; KG-B9 cap base pyramid RPE → 7–8); extend `applyDeloadVolume`/`applyTaperVolume` to scale `prescribedTarget.value` per §5.
-- **`js/exercise-inputs.js`** — climbing-kind exercises log a **single count** (matching `prescribedTarget.unit`) + RPE, replacing the current `sets`+`reps` pair (`arc`/`open-climb` already use a single time input via `NO_SETS_KINDS`/`repsLabel` — generalize that). Add the per-kind `howto` template map here (single source of truth, like `inputVisibility`).
-- **`js/views/today.js`** — `accSub` renders the crisp closed sub-line from `prescribedTarget` instead of truncating `prescribed`; `renderExercise` adds the target callout + How line + secondary + the single count stepper (pre-filled from `prescribedTarget.value`, flagged `data-default` like the kg suggestion).
-- **`js/views/log.js`** — mirror the edit form for parity (single count + RPE).
-- **`sw.js`** — bump `CACHE` (any `js/` change); add the new how-to module to `SHELL` if it's a separate file.
-- **`tests/index.html`** — cases: `prescribedTarget` present on every climbing-kind session; deload scales the target integer correctly per unit (count floor≥1; duration round-5); the three corrections land.
-- **Docs** — once implemented, close KG-B7/B8/B9 and note the concrete-target model in `training-philosophy.md` / `CONTEXT.md`.
+- [x] **`js/program.js`** — `prescribedTarget` added to every climbing-kind exercise per §3; `howto` overrides added where §4 needed them; the three corrections applied (KG-B7 grade → "2–3 below max"; KG-B8 dropped ARC "60–70% effort"; KG-B9 capped base pyramid RPE → 7–8, `energySystem` relabelled "Aerobic capacity"); `applyDeloadVolume`/`applyTaperVolume` extended with a `scaleTarget()` helper per §5.
+- [x] **`js/exercise-inputs.js`** — climbing-kind exercises now log a **single count** (matching `prescribedTarget.unit`) + RPE (`NO_SETS_KINDS` generalized to all climbing-kind kinds; `repsLabel` prefers `prescribedTarget.unit`). Added the per-kind `HOWTO_BY_KIND` template map + exported `howto(ex)`.
+- [x] **`js/views/today.js`** — `accSub` renders the crisp closed sub-line from `prescribedTarget`; `renderExercise` adds the target callout (reusing `.callout`) + How line + secondary text + the single count stepper (pre-filled from `prescribedTarget.value`).
+- **`js/views/log.js`** — parity came for free: it already drives its edit form from the shared `inputVisibility`/`repsLabel` helpers, so the `js/exercise-inputs.js` generalization propagated automatically with no `log.js` edit needed.
+- [x] **`sw.js`** — `CACHE` bumped to `v27`. No new file was added, so `SHELL` needed no change.
+- [x] **`tests/index.html`** — `[Gym-ready]` test block added: `prescribedTarget` present across all phases/flavors; deload/taper scale count and duration units correctly; the three corrections land; `inputVisibility`/`repsLabel`/`howto` behavior. One pre-existing test asserting the old sets+reps boulder behavior was updated to match the new one. 93/93 passing, verified live in-browser via Playwright (single exercise, deload strikethrough, multi-exercise session, hangboard/pullup regression check).
+- [x] **Docs** — KG-B7/B8/B9 closed in `knowledge-gaps.md`; this spec's status updated. `training-philosophy.md`/`CONTEXT.md` were not touched — the existing "Mapped phases" table and glossary didn't reference the old vague-range prescriptions specifically, so nothing there was stale.
 
 ## 7. Disclaimer
 

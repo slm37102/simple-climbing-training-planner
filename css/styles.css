@@ -71,6 +71,12 @@ html{scroll-padding-bottom:calc(78px + env(safe-area-inset-bottom,0px))}
 .callout{margin-top:12px;padding:12px 14px;border-radius:11px;background:linear-gradient(135deg,rgba(95,212,232,.086),rgba(95,212,232,.012));border:1px solid rgba(95,212,232,.2);display:flex;justify-content:space-between;align-items:center;gap:10px}
 .callout .k{font:600 11px 'Archivo';letter-spacing:.02em;color:var(--muted)}
 .callout .v{font:800 17px 'Archivo';color:var(--accent);font-variant-numeric:tabular-nums;white-space:nowrap}
+.callout.deload-target{background:linear-gradient(135deg,rgba(138,147,166,.12),rgba(138,147,166,.02));border-color:rgba(138,147,166,.3)}
+.callout.deload-target .v{color:var(--deload)}
+.callout .v s{color:var(--muted);font-weight:600;font-size:14px;margin-right:6px;text-decoration:line-through}
+/* Gym-ready spec §2/§4: glanceable execution cues under the target callout */
+.howto{font:400 12px 'Archivo';color:var(--text2);margin:0 0 6px;padding-left:10px;border-left:2px solid rgba(95,212,232,.35)}
+.howto b{color:var(--muted);font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:1px}
 
 /* ── Badges ────────────────────────────────────────────── */
 .badge{display:inline-block;padding:3px 9px;border-radius:999px;font:700 10px 'Archivo';letter-spacing:.06em;text-transform:uppercase;background:var(--panel2);color:var(--muted)}

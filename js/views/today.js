@@ -6,7 +6,7 @@ import { Loads } from '../loads.js';
 import { Warmup } from '../warmup.js';
 import { Replan } from '../replan.js';
 import { daysBetween } from '../dates.js';
-import { inputVisibility, repsLabel, actualHasResult } from '../exercise-inputs.js';
+import { inputVisibility, repsLabel, actualHasResult, howto } from '../exercise-inputs.js';
 
 const SELECTED_DATE_KEY = 'todaySelectedDate';
 
@@ -523,7 +523,7 @@ function exerciseInputs(i, ex, actual, suggestion) {
   // All four are marked as "default" until the user touches them — `readExerciseInputs`
   // ignores default-flagged values so we don't persist values the user didn't confirm.
   const setsDefault  = ex.prescribedSets ?? '';
-  const repsDefault  = ex.prescribedReps ?? '';
+  const repsDefault  = ex.prescribedReps ?? ex.prescribedTarget?.value ?? '';
   const kgDefault    = suggestion?.suggestedKg ?? '';
   const rpeDefault   = ex.rpeRange ? Math.round(((ex.rpeRange[0] + ex.rpeRange[1]) / 2) * 2) / 2 : '';
   const setsValue    = actual.sets ?? setsDefault;
@@ -541,7 +541,7 @@ function exerciseInputs(i, ex, actual, suggestion) {
   if (vis.kg)   row += stepper(`ex-${i}-kg`,   n(kgValue),  'Added load · kg', 0.5, kgIsDefault);
   if (vis.rpe)  row += stepper(`ex-${i}-rpe`,  n(rpeValue), ex.rpeRange ? `RPE · target ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : 'RPE', 0.5, rpeIsDefault);
   if (vis.sets) row += stepper(`ex-${i}-sets`, n(setsValue), 'Sets', 1, setsIsDefault);
-  if (vis.reps) row += stepper(`ex-${i}-reps`, n(repsValue), repsLabel(ex) === 'min' ? 'Minutes' : 'Reps', 1, repsIsDefault);
+  if (vis.reps) row += stepper(`ex-${i}-reps`, n(repsValue), stepperCountLabel(ex), 1, repsIsDefault);
   row += '</div>';
 
   let suggestionBtn = '';
@@ -551,6 +551,15 @@ function exerciseInputs(i, ex, actual, suggestion) {
     suggestionBtn = `<button class="suggest-btn" data-suggest-btn="${i}" data-suggest-kg="${suggestion.suggestedKg}">Suggested: ${suggestion.suggestedKg} kg → tap to use</button>`;
   }
   return suggestionBtn + row;
+}
+
+// Stepper label for the "count" input: capitalized unit from prescribedTarget
+// (e.g. 'problems' → 'Problems'), 'min' → 'Minutes', else the generic 'Reps'.
+function stepperCountLabel(ex) {
+  const label = repsLabel(ex);
+  if (label === 'min') return 'Minutes';
+  if (label === 'reps') return 'Reps';
+  return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
 function stepper(id, value, label, step, isDefault = false) {
@@ -567,23 +576,49 @@ function stepper(id, value, label, step, isDefault = false) {
 }
 
 // One-line summary under the accordion title: "2×5 · 62 kg suggested · RPE 8–9"
+// (hangboard/pullup) or "4 problems · RPE 8–9" (climbing-kind, from prescribedTarget)
 function accSub(ex, actual, suggestion) {
   const parts = [];
-  const sets = actual.sets ?? ex.prescribedSets;
-  const reps = actual.reps ?? ex.prescribedReps;
-  if (sets && reps) parts.push(`${sets}×${reps}`);
-  else if (ex.sets) parts.push(ex.sets);
+  if (ex.prescribedTarget) {
+    const val = actual.reps ?? ex.prescribedTarget.value;
+    parts.push(`${val} ${ex.prescribedTarget.unit}`);
+  } else {
+    const sets = actual.sets ?? ex.prescribedSets;
+    const reps = actual.reps ?? ex.prescribedReps;
+    if (sets && reps) parts.push(`${sets}×${reps}`);
+    else if (ex.sets) parts.push(ex.sets);
+  }
   if (suggestion?.suggestedKg != null) {
     parts.push(suggestion.restSuggested ? 'rest suggested' : `${suggestion.suggestedKg} kg suggested`);
   } else if (suggestion?.restSuggested) {
     parts.push('rest suggested');
   } else if (ex.hang) {
     parts.push(ex.hang);
-  } else if (ex.prescribed) {
+  } else if (!ex.prescribedTarget && ex.prescribed) {
     parts.push(ex.prescribed.length > 46 ? ex.prescribed.slice(0, 44) + '…' : ex.prescribed);
   }
   if (ex.rpeRange) parts.push(`RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}`);
   return parts.join(' · ');
+}
+
+// Crisp headline target for climbing-kind exercises (gym-ready spec §2):
+// "Today's target → 4 problems", or on a deload/taper week with the original
+// struck through: "Deload target → 4 sets 2 sets".
+function targetCalloutHtml(ex) {
+  if (!ex.prescribedTarget) return '';
+  const { value, unit } = ex.prescribedTarget;
+  if (ex.originalTarget) {
+    const { value: ov, unit: ou } = ex.originalTarget;
+    return `<div class="callout deload-target"><span class="k">Deload target</span><span class="v"><s>${ov} ${ou}</s>${value} ${unit}</span></div>`;
+  }
+  return `<div class="callout"><span class="k">Today's target</span><span class="v">${value} ${unit}</span></div>`;
+}
+
+// Glanceable execution cues (gym-ready spec §4 — hybrid how-to).
+function howtoHtml(ex) {
+  const text = howto(ex);
+  if (!text) return '';
+  return `<div class="howto"><b>How</b>${text}</div>`;
 }
 
 function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
@@ -625,10 +660,21 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
     const sets = ex.sets || ex.reps || '';
     const rpe  = ex.rpeRange ? `RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : '';
     prescribedStr = [ex.hang, sets, rangeStr, rpe].filter(Boolean).join(' · ');
+  } else if (ex.prescribedTarget) {
+    const rpe = ex.rpeRange ? `RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : '';
+    prescribedStr = targetCalloutHtml(ex) + howtoHtml(ex) +
+      `<div class="exercise-prescribe" style="margin:0 0 6px">${[ex.prescribed, rpe].filter(Boolean).join(' · ')}</div>`;
   } else {
     const rpe = ex.rpeRange ? ` · RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : '';
     prescribedStr = (ex.prescribed || '') + rpe;
   }
+
+  // Climbing-kind exercises build their own wrapping (target callout + how-to +
+  // a nested .exercise-prescribe secondary line); everything else still gets
+  // the single .exercise-prescribe wrapper it always had.
+  const prescribeBlock = ex.prescribedTarget
+    ? prescribedStr
+    : `<div class="exercise-prescribe" style="margin-top:0">${prescribedStr}</div>`;
 
   const openAttr = i === 0 ? ' open' : '';
   return `<details class="acc" data-ex="${i}"${openAttr}>
@@ -640,7 +686,7 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
       <span class="acc-cv">＋</span>
     </summary>
     <div class="acc-body">
-      <div class="exercise-prescribe" style="margin-top:0">${prescribedStr}</div>
+      ${prescribeBlock}
       ${exerciseInputs(i, ex, actual, suggestion)}
       ${notesField(i, notes, !!notes)}
     </div>
