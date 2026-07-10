@@ -42,3 +42,11 @@ Hörst and Lattice describe **two different energy-system bands**, and both fram
 - Optional new `kind` (`threshold`/`interval`) only if distinct input UI is wanted (then register in `js/exercise-inputs.js` + `today.js`/`log.js`, mirroring `arc`); not required if reusing `route`/`circuit`.
 - `tests/index.html`: compDate-anchored density progression + the 2–4-week lactic cap.
 - `sw.js`: bump `CACHE`. **Effective-from:** next cycle.
+
+## Addendum 2026-07-10 — 4×4 boulder-triples grade correction (wayfinder map #8 / ticket #11)
+
+A climbing-kind prescription review ([wayfinder map #8](https://github.com/slm37102/simple-climbing-training-planner/issues/8)) found the shipped boulder-triples 4×4 (`js/program.js`, `buildSatMain` boulder base/build) prescribes **"1–2 grades below max"**, contradicting this ADR's own cited band-1 target of **"2–4 grades below max"** [verified :439/:487]. This is a KG-B1-style decision-vs-code drift, not a taxonomy problem — the two-band model stands.
+
+**Clarification (the taxonomy was never self-contradictory):** "2–4 grades below max" is the *per-problem grade*; "near-failure" [verified 237] is the *cumulative effort* across all 16 climbs. A 4×4 works precisely because submaximal problems accumulate into near-failure — the two describe different axes, not a conflict. Running each problem at 1–2 below max instead makes the format overlap the athlete's dedicated Thursday limit bouldering (losing the distinct anaerobic-capacity/power-endurance adaptation) and adds injury exposure for no new stimulus.
+
+**Decision:** the boulder-triples 4×4 per-problem grade target is **2–3 grades below max** — a one-notch-harder narrowing of the published 2–4 band, biased for this intermediate athlete who already gets limit work elsewhere, but kept clearly submaximal so the "engine" stays distinct from the limit stimulus. RPE 8.5–9.5 and the 3–4-set / back-to-back structure are unchanged. Tracked as [KG-B7](../knowledge-gaps.md#kg-b7--4×4-boulder-triples-grade-too-hard-p2-g1g3). **Implementation deferred** — this map produces the decision; the `js/program.js` edit is a separate hand-off.

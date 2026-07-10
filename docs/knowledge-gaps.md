@@ -122,6 +122,9 @@ The app was built before the research; these are the places where its decisions 
 | KG-B4 | ARC under-dosed in hybrid mode | P2 | G1 | Open |
 | KG-B5 | No "targets hit → progress" rule | P2 | G1 | Open |
 | KG-B6 | Doc drift (stale deload rule etc.) | P2 | — | Closed (this commit) |
+| KG-B7 | 4×4 boulder-triples grade too hard | P2 | G1 G3 | Decided (ADR-0006 addendum, 2026-07-10); impl deferred |
+| KG-B8 | ARC "60–70% effort" contradicts its own RPE | P2 | G1 | Decided (map #8/#11, 2026-07-10); impl deferred |
+| KG-B9 | Base sport-Thursday pyramid runs too hot | P2 | G1 | Decided (map #8/#11, 2026-07-10); impl deferred |
 
 ### KG-B1 — Peak prescription conflict: ADR-0001 was accepted but never implemented (P1 — CRITICAL, G3)
 
@@ -173,6 +176,24 @@ Research (§ Strength): progress load **+2.5–10%** (or smaller edge / fewer fi
 ### KG-B6 — Documented-knowledge drift (P2) — **Closed by this commit**
 
 `README.md` and `training-plan.md` taught the *refuted* deload rule (intensity ×0.85 — exactly the policy [ADR-0003](adr/0003-deload-as-volume-cut.md) calls "the worst of both worlds"); `CONTEXT.md` had a duplicated stale Retest definition; `CLAUDE.md`/`.github/copilot-instructions.md` described a removed `isDeload` arg, dead `setPlanBenchmarks` archiving, and a stale cache version; `improvement-audit.md` listed findings as open that shipped in phases 1–4. All corrected in the same commit that adds this file. Stale docs are wrong coach knowledge lying around — kept closed here as a reminder of *why* doc drift matters.
+
+### KG-B7 — 4×4 boulder-triples grade too hard (P2, G1+G3)
+
+The boulder-triples 4×4 (`js/program.js`, `buildSatMain` boulder base/build) prescribes "1–2 grades below max"; ADR-0006 band 1 cites the verified target as "2–4 grades below max". At 1–2 below across 16 climbs the format overlaps the athlete's Thursday limit bouldering — it loses the distinct anaerobic-capacity/power-endurance adaptation the two-band model needs, and adds injury exposure for no new stimulus. A KG-B1-style decision-vs-code drift (the taxonomy is fine; the code diverges from it). Surfaced by the [climbing-kind exercise research](research/climbing-kind-exercise-prescriptions.md) and validated in [wayfinder map #8](https://github.com/slm37102/simple-climbing-training-planner/issues/8).
+
+- **DECIDED 2026-07-10 → [ADR-0006 addendum](adr/0006-power-endurance-two-band-model.md#addendum-2026-07-10--4×4-boulder-triples-grade-correction-wayfinder-map-8--ticket-11).** Target = **2–3 grades below max** (one notch harder than the published 2–4, biased for this athlete who gets limit work elsewhere, still clearly submaximal). RPE 8.5–9.5 and set structure unchanged. **Implementation deferred** — the `js/program.js` edit (change "1–2 grades below max" → "2–3 grades below max" in the boulder-triples line) is a hand-off from map #8, not done here.
+
+### KG-B8 — ARC "60–70% effort" contradicts sources and its own RPE (P2, G1)
+
+The base Saturday ARC line (`js/program.js`, `buildSatMain` sport base) reads "2 × 30 min @ **60–70% effort**, just below pump" at RPE 4–6. Published ARC intensity is 10–40% of max / 3–4 grades below limit ([research](research/climbing-kind-exercise-prescriptions.md), § ARC); "60–70% effort" is both above every published figure and internally inconsistent with the same line's RPE 4–6 — it reads as moderately-hard right next to a signal that says easy, which is exactly the gym-time confusion map #8 exists to remove. Distinct from KG-B4 (which is ARC *frequency* under-dosing; this is the *intensity number*).
+
+- **DECIDED 2026-07-10 (map #8/#11).** **Drop the "% effort" figure entirely** — RPE 4–6 + "just below pump" already carry ARC's easy-sustained-pump intent precisely, so removing the number increases clarity rather than needing a replacement. (If a numeric anchor is ever wanted, the defensible published one is "~2 grades below redpoint / 3–4 below limit" — but RPE + "just below pump" is the cleaner single signal.) **Implementation deferred** — edit the ARC `prescribed` string in `js/program.js`.
+
+### KG-B9 — Base sport-Thursday pyramid runs too hot (P2, G1)
+
+The sport-flavor **base** Thursday route pyramid (`js/program.js`, `buildThuMain` sport base) is "4-3-2-1 routes back-to-back, 1 grade below redpoint" at **RPE 7.5–9**, energy-labelled "Aerobic power / Anaerobic capacity" — a build/PE intensity sitting in the base phase (whose target is capacity/aerobic base). If base Thursday already runs at RPE 9 near redpoint, there's no intensity headroom left for Build's 60/60 threshold work to be a step *up*, flattening the base→build progression. Lower-confidence than B7/B8 (rests on reading `CONTEXT.md`'s loose "capacity"; the "4-3-2-1 in base" framing was flagged as author synthesis with no published basis). Never ADR'd (unlike the two-band Build/Peak work).
+
+- **DECIDED 2026-07-10 (map #8/#11).** **Cap base sport-Thursday intensity at RPE 7–8** ("comfortably hard", aerobic-capacity), keeping the pyramid *structure*. Preserves a clean base→build intensity ramp and pulls the session back inside base's actual adaptation target. **Implementation deferred** — edit the route-pyramid `rpeRange`/prescription in `js/program.js`; consider correcting the "Anaerobic capacity" energy-system label too.
 
 ---
 
