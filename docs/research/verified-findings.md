@@ -9,9 +9,9 @@
 
 ## Summary
 
-- **160 distinct claims verified** (31 search-verified, 129 reasoning-verified)
-- **3 claims refuted** (listed at the end for transparency)
-- Verification is still in progress: ~142 gathered claims remain un-adjudicated (held in `data/gathered-claims.json`; resumable). Progress is slow due to daily/weekly usage limits — each resume nets a partial batch.
+- **198 distinct claims verified** (31 search-verified, 167 reasoning-verified)
+- **5 claims refuted** (listed at the end for transparency)
+- Verification is **paused at user request**. ~102 gathered claims remain un-adjudicated (held in `data/gathered-claims.json`; resumable — resume on request only).
 
 ## Findings by topic
 
@@ -78,7 +78,7 @@
   > "The periodized program includes 4 distinct training phases – Base Fitness, Strength, Power and Power Endurance, after completing which climbers can look forward to several weeks of "peak" performance."
 
 
-### Periodization models & macrocycle architecture  (22)
+### Periodization models & macrocycle architecture  (24)
 
 - **Lattice describes block periodization as splitting a macrocycle into mesocycle blocks of roughly 3-12 weeks, each with a single training focus (e.g. a base-building block for muscular endurance, or a dedicated strength-development block for grip/finger strength).**  
   _search · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/how-to-structure-your-training/)_
@@ -167,6 +167,14 @@
 - **A microcycle is the shortest unit of a periodized plan, typically 1 to 2 weeks (most commonly a seven-day period), composed of multiple training sessions with set volumes and intensities used to organize short-term progression, recovery, or adaptation.**  
   _reasoning · vote 3-0 · [setforset.com](https://www.setforset.com/blogs/news/macrocycle-mesocycle-microcycle-explained)_
   > "The microcycle refers to the shortest unit of time within a traditional periodized training program, typically lasting 1 to 2 weeks. A microcycle is composed of multiple training sessions and is generally used to organize short-term progression, recovery, or adaptation within a broader mesocycle or …"
+
+- **Undulating/non-linear periodization specifically suits in-season climbers (who must maintain multiple qualities at once) and beginners who need to develop a broad base across qualities rather than specializing in one block at a time.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/how-to-structure-your-training/)_
+  > "Undulating/non-linear ... suits in-season climbers and beginners needing a broad base."
+
+- **Lattice defines the standard periodization hierarchy as macrocycle (the overall long-term plan) divided into mesocycles (focus blocks) divided into microcycles, where a microcycle is the smallest unit of a periodized plan, usually one week of training.**  
+  _reasoning · vote 2-0 · [latticetraining.com](https://latticetraining.com/blog/how-to-structure-your-training/)_
+  > "A microcycle refers to the smallest unit within a periodised training plan; usually a week of training."
 
 
 ### Base / aerobic-capacity phase programming  (23)
@@ -264,7 +272,7 @@
   > "improving the forearm muscles' ability to sustain effort over long periods by increasing capillary density, enhancing oxygen delivery, and improving recovery ... you'll develop more small blood vessels in your forearms, and existing ones will become wider, making it harder for a pump to set in."
 
 
-### Strength phase programming (fingers + pulling)  (18)
+### Strength phase programming (fingers + pulling)  (22)
 
 - **Hörst's core hypergravity max-strength protocol is 5 sets of 5 weighted pull-ups, performed with 3 minutes of rest between each set.**  
   _search · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/hypergravity-pull-up-training-for-increased-strength-power-and-endurance/)_
@@ -338,8 +346,24 @@
   _reasoning · vote 3-0 · [strengthclimbing.com](https://strengthclimbing.com/eva-lopez-maxhangs/)_
   > "Start with four weeks of MaxHangs MAW, followed by four weeks of MaxHangs MED, to complete a full 8-week cycle and maximize gains."
 
+- **For max-strength weighted fingerboard hangs, the ideal edge size is 14-20mm (5/8 to 7/8 inch), a little less than one finger-pad depth, which reduces skin pain and distal-joint strain while still building max strength that carries over to other edge sizes.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)_
+  > "The ideal size edge for weighted fingerboard hangs is between 14mm and 20mm (5/8 to 7/8 inch), or a little less than one finger-pad depth—this moderate size lessens skin pain, reduces strain on the distal finger joint, and has been proven effective to develop maximum-strength gains that will carry o…"
 
-### Power phase: limit bouldering & campus  (19)
+- **The 7-53 max-weight protocol uses enough added weight that a 10-second hang would be extremely difficult, but each hang is terminated at 7 seconds (just before failure) followed by exactly 53 seconds rest, at an RPE of 9-9.5/10.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)_
+  > "Use enough weight to make a 10-second hang extremely difficult, yet each training hang must terminate at 7 seconds (a few seconds before failure). Rest for exactly 53 seconds... Each hang should be near maximal (rating of perceived exertion of 9 to 9.5 out of 10), but not quite take you to failure."
+
+- **The 7-53 protocol is structured as 3 near-maximal hangs per set, with 3 to 5 minutes of rest between sets, performed twice per week.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)_
+  > "This totals 3 hangs per set. Rest 3 to 5 minutes before doing a second set of three hangs... Experienced climbers can employ one of these maximum-grip-strength protocols on a twice-a-week basis."
+
+- **The low-volume max-hang protocol (based on Eva López-Rivera's research) is recommended as an entry-level fingerboard program (not a beginner's program), and a few multi-week cycles bring noticeable finger-strength gains for intermediate climbers and prepare them for weighted hangs.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)_
+  > "a low-volume protocol is recommended as an entry-level fingerboard program, with a few multi-week cycles bringing noticeable gains in finger strength for intermediate climbers, as well as serving as preparation for delving into weighted fingerboard hangs."
+
+
+### Power phase: limit bouldering & campus  (23)
 
 - **Limit bouldering should target maximum effort on short sequences of no more than 3-5 moves (six or fewer hand moves); anything beyond that shifts the stimulus from pure strength/power into power-endurance.**  
   _search · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/limit-bouldering-for-building-max-climbing-strength-and-power/)_
@@ -416,6 +440,22 @@
 - **Limit sessions should be kept short and stopped once power output drops off — you should avoid getting totally wrecked or pumped, because power cannot be trained effectively when tired and depleted.**  
   _reasoning · vote 3-0 · [trainingbeta.com](https://www.trainingbeta.com/4-keys-to-limit-bouldering/)_
   > "You should avoid the feeling of being totally wrecked when limit bouldering... Once your power levels drop off, it's better to call it quits, recover, and come back fresh for another session."
+
+- **The power phase is about neurological gains — recruiting muscle and teaching it to be more powerful — as distinct from the preceding strength phase, which strengthens/builds the muscle itself.**  
+  _reasoning · vote 3-0 · [saltpumpclimbing.com](https://www.saltpumpclimbing.com/five-phases-climbing-training/)_
+  > "The power phase is all about making neurological gains. While the strength phase focuses on strengthening your muscles, the power phase recruits those muscles and teaches them to be more powerful."
+
+- **Limit bouldering and campus board sessions are the two primary tools used to develop power during the power phase.**  
+  _reasoning · vote 3-0 · [saltpumpclimbing.com](https://www.saltpumpclimbing.com/five-phases-climbing-training/)_
+  > "The two most common ways to increase your power is through limit bouldering and campusing sessions."
+
+- **Limit boulder problems should be 2-3 move problems at the climber's absolute limit; the goal is NOT to send them — sending means they are too easy.**  
+  _reasoning · vote 3-0 · [saltpumpclimbing.com](https://www.saltpumpclimbing.com/five-phases-climbing-training/)_
+  > "Limit boulder problems are generally 2-3 move problems that are at your absolute limit. The idea here is not to send boulder problems—if you are sending the boulders, that means they are too easy."
+
+- **Campus board workouts should consist of 2-3 movements; max ladders, double dynos, and up-downs are cited as three of the best exercises to increase power.**  
+  _reasoning · vote 3-0 · [saltpumpclimbing.com](https://www.saltpumpclimbing.com/five-phases-climbing-training/)_
+  > "Campus board workouts should consist of 2-3 movements. Max ladders, double dynos, and up-downs are three of the best exercises to increase your power."
 
 
 ### Power-endurance / anaerobic-capacity protocols  (21)
@@ -666,7 +706,7 @@
   > "Connective tissue adapts slower than muscle, so deloads protect tendons/pulleys"
 
 
-### Finger/pulley injury prevention, load mgmt & antagonists  (4)
+### Finger/pulley injury prevention, load mgmt & antagonists  (15)
 
 - **Eric Hörst's protective finger protocol is a roughly 6-minute, low-to-moderate-intensity routine designed to nourish and strengthen the finger flexor tendons and annular pulleys (A2), suitable for almost-daily use as rest-day prehab or pre-climbing warm-up.**  
   _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/climbing-training-protocol-for-stronger-finger-tendons-and-pulleys/)_
@@ -684,9 +724,126 @@
   _reasoning · vote 3-0 · [hoopersbeta.com](https://www.hoopersbeta.com/library/a2-pulley-manual-for-climbers)_
   > "First 2 weeks: light isometrics on large edges, OPEN-HAND only, low intensity ~20-30% — goal is controlled loading, not avoidance."
 
+- **Stage 1 of the protocol prescribes 7-second-on / 3-second-off isometric repeaters, 3 sets of 7 reps, with 3 minutes rest between sets, performed 3x/week, open-hand grip only.**  
+  _reasoning · vote 3-0 · [hoopersbeta.com](https://www.hoopersbeta.com/library/a2-pulley-manual-for-climbers)_
+  > "Stage 1: 7s-on / 3s-off repeaters, 3 sets x 7 reps, 3 min rest, 3x/week, open-hand only."
+
+- **Stage 2 keeps the identical loading parameters as Stage 1 (7s-on/3s-off repeaters, 3x7, 3 min rest, 3x/week) but progresses grip position by adding the half-crimp.**  
+  _reasoning · vote 3-0 · [hoopersbeta.com](https://www.hoopersbeta.com/library/a2-pulley-manual-for-climbers)_
+  > "Stage 2: same parameters but adds half-crimp."
+
+- **Grip mechanics drive A2 load: open-hand keeps flexor-tendon force vectors near-parallel to the bone so the A2 is barely loaded, whereas a full crimp with the PIP joint flexed at or beyond 90 degrees turns the A2 into a fulcrum and spikes pulley load — the biomechanical rationale for staging open-hand before crimp.**  
+  _reasoning · vote 3-0 · [hoopersbeta.com](https://www.hoopersbeta.com/library/a2-pulley-manual-for-climbers)_
+  > "open hand keeps force vectors near-parallel to bone (A2 barely loaded); full crimp with PIP flexed ≥90° turns A2 into a fulcrum and spikes load."
+
+- **For finger extensor antagonist work ('Finger Flashes'), place all five fingers inside a medium-resistance rubber band so it rests over the fingernails, then repeatedly open/extend the hand against the band's resistance for 3 sets of 10 reps.**  
+  _reasoning · vote 3-0 · [climbing.com](https://www.climbing.com/skills/antagonist-workouts-for-climbers-improve-performance-and-prevent-injury/)_
+  > "Hold your hand as if it were inside a puppet; repeatedly open your fingers using a rubber band (of medium intensity), for resistance, with 3 sets of 10 "flashing lights". Place all five fingers inside the rubber band so that it rests over the fingernails, then extend or open up your hand against tha…"
+
+- **Antagonist push-ups should be performed with hands shoulder-width apart and elbows kept tight/in to the body, lowering under control until the chest is about one inch from the ground, for roughly 3 sets of 20-30 reps.**  
+  _reasoning · vote 3-0 · [climbing.com](https://www.climbing.com/skills/antagonist-workouts-for-climbers-improve-performance-and-prevent-injury/)_
+  > "starting in a high plank position with hands shoulder-width apart, elbows in, shoulders pulled away from ears, and core tight. You lower down with control keeping arms and elbows tight to the body until your chest is one inch from the ground, then press back up into plank position for 20-30 reps ove…"
+
+- **Push-ups are the classic antagonist exercise because pushing opposes climbing's pulling; the proper position engages scapular stabilizers and external rotator cuffs not used in climbing, helping prevent shoulder and elbow injuries.**  
+  _reasoning · vote 3-0 · [climbing.com](https://www.climbing.com/skills/antagonist-workouts-for-climbers-improve-performance-and-prevent-injury/)_
+  > "This exercise properly works the upper back muscles and external rotator cuffs that aren't typically used while climbing. These muscles are strengthened to bring stability and support to the shoulders while climbing."
+
+- **Antagonist training for climbers should target the muscle groups that oppose the primary climbing movers: the posterior forearm (wrist and finger extensors), triceps, mid-anterior deltoids, and chest (pectoralis) — because climbing chronically overloads the anterior forearm, biceps, lats and upper back.**  
+  _reasoning · vote 3-0 · [theclimbingdoctor.com](https://theclimbingdoctor.com/how-to-train-antagonist-muscle-strength-for-climbing/)_
+  > "Antagonist training for climbers targets these opposing muscles: posterior forearm (wrist and finger extensors), triceps, mid-anterior deltoids and chest (pectoralis)."
+
+- **Wrist and finger extensors are predominantly endurance muscles, so they should be trained to a pump over roughly 1 to 5 minutes of constant work; a recommended protocol is 20–30 reps for 3 sets (up to 3–5 sets).**  
+  _reasoning · vote 3-0 · [theclimbingdoctor.com](https://theclimbingdoctor.com/how-to-train-antagonist-muscle-strength-for-climbing/)_
+  > "For wrist extensor training specifically, one recommended protocol is 20-30 reps, 3 sets. Wrist and finger extensors are generally endurance muscles so training them to a pump within a minute to 5 minutes of constant work is suggested, with 3-5 sets."
+
+- **Chronic overuse of climbing-agonist muscles, without antagonist balance, drives elbow tendinopathy, shoulder impingement, rotator cuff injury, and finger strains — the injuries antagonist/prehab training is meant to prevent.**  
+  _reasoning · vote 3-0 · [theclimbingdoctor.com](https://theclimbingdoctor.com/how-to-train-antagonist-muscle-strength-for-climbing/)_
+  > "Overuse of climbing muscles can lead to elbow tendinopathies, shoulder impingements, rotator cuff injuries and finger strains."
+
+- **Hörst's medial-epicondylitis (climber's elbow) protocol prescribes antagonist/forearm-balancing exercises specifically to correct forearm-muscle imbalance, including Reverse Wrist Curls with a dumbbell, Wide Pinches with Wrist Extension, Pronator Isolation, and finger extension against a rubber band.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/treating-climbers-elbow-medial-epicondylitis/)_
+  > "Recommended exercises to strengthen the finger/wrist extensor muscles include Reverse Wrist Curls (with a dumbbell), Wide Pinches with Wrist Extension, Pronator Isolation, and finger extension against a rubber band... Since forearm-muscle imbalance plays a role in many elbow injuries, it's vital to …"
+
+- **During recovery from climber's elbow, climbing-specific high finger-flexor loads — pull-ups, fingerboard/hangboard training, and campus training — should be restricted to small doses or avoided entirely until the condition resolves (load management).**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/treating-climbers-elbow-medial-epicondylitis/)_
+  > "Conventional pull-ups, fingerboard training, campus training, and the like are often problematic and should only be done in small doses, if at all, until the condition has resolved."
+
+
+### Assessment, benchmarks & finger-strength metrics  (17)
+
+- **Lattice's core finger-strength benchmark is the 7-second two-arm max hang on a 20mm edge, expressed as a percentage of bodyweight (%BW): the maximum weight an athlete can hold on two arms on a 20mm edge for 7 seconds.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/predictors-for-performance/)_
+  > "The 7-second 20mm two-arm max hang test measures the maximum amount of weight an athlete can hold on 2 arms on a 20mm edge for 7 seconds, presented as a percentage of bodyweight."
+
+- **Across the combined dataset (901 participants), the 7-sec 20mm max hang (%BW) is a moderate-to-strong predictor of best boulder grade worked: R = 0.704 and R-squared = 0.496, i.e. it explains ~49.6% of the variance in boulder grade (F(1,899) = 885.74, p < 0.001).**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/predictors-for-performance/)_
+  > "The analysis yielded a correlation coefficient (R) of 0.704... The model explained 49.6% of the variance in the grade (R² = 0.496). A significant effect was observed, F(1, 899) = 885.74, p < 0.001"
+
+- **Among Advanced climbers specifically, finger strength's predictive power drops sharply to R = 0.411 with an adjusted R-squared of 0.167 — only ~17% of grade variation is explained by finger strength at that level (versus ~50% in the combined sample).**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/predictors-for-performance/)_
+  > "Finger Strength has a moderate predictive power with R = 0.411 and an adjusted R² of 0.167, meaning about 17% of the variation in grade can be explained by Finger Strength among advanced climbers."
+
+- **The number-1 measure of sport-climbing performance per Lattice is the 7-second Max Hang: the maximum weight held on two arms on a 20mm edge for 7 seconds, scored as a percentage of bodyweight.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/what-is-the-number-1-measure-of-performance-for-sport-climbers/)_
+  > "The primary test measures the maximum amount of weight an athlete can hold on 2 arms on a 20mm edge for 7 seconds, with the score presented as a percentage of bodyweight. This test is a good indicator of finger strength."
+
+- **The assessment protocol is 4 to 8 dead-hang sets, each a 7-second two-arm hang in the same (half-crimp) grip on a 20mm edge, with load increased each set to reach max within 4-8 sets to avoid fatigue.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/what-is-the-number-1-measure-of-performance-for-sport-climbers/)_
+  > "The assessment consists of 4 to 8 dead hang sets, with each set involving a 7-second hang on both arms while maintaining the same grip position. Each subsequent set becomes harder by increasing load on the fingers, aiming to reach max load within 4 to 8 sets to avoid fatigue."
+
+- **Lattice provides a grade-anchored two-arm finger-strength benchmark table (added load as % bodyweight, 7s hang, 20mm edge, half-crimp): V4=128%, V5=134%, V6=140%, V7=146%, V8=152%, V9=158%, V10=164%, V11=170%.**  
+  _reasoning · vote 2-1 · [latticetraining.com](https://latticetraining.com/blog/what-is-the-number-1-measure-of-performance-for-sport-climbers/)_
+  > "For two-arm hangs on a 20mm edge for 7 seconds at a half-crimp position, the grades are: V4 — 128% V5 — 134% V6 — 140% V7 — 146% V8 — 152% V9 — 158% V10 — 164% V11 — 170% ... These percentages represent the added load as a percentage of bodyweight. This data is from men performing 7 second two-arm h…"
+
+- **The 7-second Max Hang (%BW) correlates moderately-to-strongly with the hardest route worked: regression R=0.660, explaining 43.6% of variance in performance, F(1,420)=324.32, p<0.001.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/what-is-the-number-1-measure-of-performance-for-sport-climbers/)_
+  > "A regression analysis showed a correlation coefficient (R) of 0.660, indicating a moderate-to-strong relationship between 7-sec Max Hang (%BW) and best route worked. The model explained 43.6% of the variance in climbing performance, with a statistically significant effect (F(1, 420) = 324.32, p < 0.…"
+
+- **Climbing-specific finger strength (isometric hang from a 22 mm edge, normalized to bodyweight) correlated very strongly with bouldering performance (r = 0.89, equivalent to r² ≈ 0.79, i.e. ~79% of bouldering variance explained) in a sample of 19 males.**  
+  _reasoning · vote 3-0 · [pmc.ncbi.nlm.nih.gov](https://pmc.ncbi.nlm.nih.gov/articles/PMC12479556/)_
+  > "climbing-specific finger strength showed very strong and strong associations with bouldering (r = 0.89) and redpoint (r = 0.67) climbing performance ... assessed hanging from a 22 mm edge"
+
+- **The same climbing-specific finger strength measure correlated less strongly with redpoint (sport/lead) performance, r = 0.67 (r² ≈ 0.45, ~45% of variance), establishing a clear boulder-vs-route evidence gap: the finger-strength association is markedly weaker for sport than for bouldering.**  
+  _reasoning · vote 2-1 · [pmc.ncbi.nlm.nih.gov](https://pmc.ncbi.nlm.nih.gov/articles/PMC12479556/)_
+  > "climbing-specific finger strength showed very strong and strong associations with bouldering (r = 0.89) and redpoint (r = 0.67) climbing performance"
+
+- **In stepwise regression, maximal strength in the half-crimp plus the front-three drag together explained 66% of the variance in climbing performance, and half-crimp strength was the single most important performance indicator — supporting the half-crimp on a ~20–22 mm edge as the key benchmark test position.**  
+  _reasoning · vote 3-0 · [pmc.ncbi.nlm.nih.gov](https://pmc.ncbi.nlm.nih.gov/articles/PMC12479556/)_
+  > "in a stepwise regression analysis, maximal strength in the half crimp and the front 3 drag collectively explained 66% of the variance for performance ... strength in the half crimp proved the most important performance indicator"
+
+- **Hörst's max finger-strength test: hang for 5 seconds from a 10mm edge in a half-crimp grip with weight strapped on, determining the maximum added weight; rest ~3 minutes between attempts. Elite climbers can do this with about 1/3 of bodyweight added.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/3-hangboard-tests-to-gauge-your-climbing-ability/)_
+  > "you strap weight to your body and hang for five seconds from a 10 millimeter edge in a half-crimp grip, with the goal to determine the max weight you can add. Elite climbers can often successfully perform this test with 1/3 of their bodyweight added on. (max hang: ~5-7s hold, 3 min rest between atte…"
+
+- **Hörst's endurance-hang test: half-crimp on a 10mm (per excerpt ~20mm) edge with NO added weight, measuring total hang time. Climbers hang anywhere from 20 seconds to 2 minutes depending on ability.**  
+  _reasoning · vote 2-1 · [trainingforclimbing.com](https://trainingforclimbing.com/3-hangboard-tests-to-gauge-your-climbing-ability/)_
+  > "The second test measures endurance on a 10 millimeter edge throughout a series of five-second hangs, with no added weight... You can expect to hang in a half-crimp for anywhere between twenty seconds and two minutes"
+
+- **Endurance-hang benchmarks by ability: moderately-advanced climbers average ~45 seconds, advanced/5.13 climbers 60-90 seconds, and elite climbers approach ~120 seconds (2 minutes).**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/3-hangboard-tests-to-gauge-your-climbing-ability/)_
+  > "moderately advanced climbers averaging 45 seconds per hang, advanced climbers at the 5.13 level ranging from 60 to 90 seconds, and elite climbers pushing toward the two minute mark"
+
+- **Power Company Climbing derived its strength/endurance standards from a dataset of more than 600 climbers, with table values given as a range from the mean minus one standard deviation to the mean plus one standard deviation for each measurement at each max-outdoor-grade column.**  
+  _reasoning · vote 3-0 · [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/metrics-for-climbers)_
+  > "Power Company Climbing compiled data from 600+ rock climbers... The grades listed across the top are the max outdoor grade. Within each cell of the table you'll find a range. This range is the mean minus one standard deviation (smaller number) to the mean plus one standard deviation (larger number) …"
+
+- **Max Hang combined with Max Weighted Pull-Up are the two strongest predictors of climbing performance, holding for both sport and bouldering, though the predictive model is more convincing for bouldering.**  
+  _reasoning · vote 3-0 · [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/metrics-for-climbers)_
+  > "Max Hang and Max Weighted Pull-Up, when looked at in combination, are the strongest predictors of climbing performance. This holds true for both sport climbing and bouldering, though the model for bouldering is much more convincing."
+
+- **The max hang test is standardized as a weighted 10-second hang on a 20mm edge, but a climber whose max hang falls below the range for their project grade is advised to add hangs roughly twice per week.**  
+  _reasoning · vote 3-0 · [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/metrics-for-climbers)_
+  > "if your Max Hang measurement is below the provided range for your project grade, you might start adding some hangs into your sessions twice per week. However, just because the measurement is taken on a 20mm edge with weight for 10 seconds doesn't mean that's always the most effective way to build th…"
+
+- **The metrics are framed explicitly as diagnostic guides rather than goals, and the article cautions that they capture only a small piece of the puzzle and ignore mental, tactical, and movement skills.**  
+  _reasoning · vote 3-0 · [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/metrics-for-climbers)_
+  > "All of these numbers are suggestions and intended to guide training in an efficient and effective way. They are not, and never will be, a replacement for a complete understanding of the needs of the climber... assessments don't capture the whole picture of a climber - not even close - as they don't …"
+
 
 ## Refuted claims (for transparency)
 
 - ✗ (0-3) For lower-to-intermediate climbers specifically, the two-arm bent-arm hang test is NOT sufficiently reliable, implying that an intermediate (V4-V6 / 6c-7a) climber should prefer a fixed-edge maximal isometric pull (e.g., load-cell or weighted edge) over a bodyweight bent-arm hang for trustworthy benchmarking. — [ncbi.nlm.nih.gov](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12521219/)
 - ✗ (0-3) A full periodized macrocycle for climbing energy-system development uses an extended base phase of roughly 4 months followed by a ~2-month peak phase, allowing time for complete aerobic and anaerobic adaptation before performance. — [unlevel-edge.com](https://unlevel-edge.com/blogs/climbing-blog/climbing-endurance-training-methods-protocols-and-progressions)
 - ✗ (0-3) The taper produces a peaking effect by recalibrating the brain's central governor, unlocking higher power output, increased stamina, and a new performance extreme. — [trainingforclimbing.com](https://trainingforclimbing.com/tag/redpoint-tips/)
+- ✗ (1-2) Wrist extensor training (back of the forearm, the antagonist to the climbing-loaded wrist flexors) should be done at 20-30 reps for 3 sets to increase grip strength, stability, and reduce finger injury risk. — [climbing.com](https://www.climbing.com/skills/antagonist-workouts-for-climbers-improve-performance-and-prevent-injury/)
+- ✗ (1-2) Increasing wrist extensor strength increases grip strength and joint stability and reduces the risk of finger injury — the core evidence-based rationale for prehab extensor training in climbers. — [theclimbingdoctor.com](https://theclimbingdoctor.com/how-to-train-antagonist-muscle-strength-for-climbing/)
