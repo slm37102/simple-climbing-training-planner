@@ -1,5 +1,5 @@
 {
-  "mode": "reasoning-verify (paused by user, partial)",
+  "mode": "reasoning-verify (in progress)",
   "confirmed": [
     {
       "id": 2,
@@ -1664,12 +1664,232 @@
     {
       "id": 186,
       "angle": "Periodization models & macrocycle architecture",
-      "vote": "2-0",
+      "vote": "3-0",
       "claim": "Lattice defines the standard periodization hierarchy as macrocycle (the overall long-term plan) divided into mesocycles (focus blocks) divided into microcycles, where a microcycle is the smallest unit of a periodized plan, usually one week of training.",
       "quote": "A microcycle refers to the smallest unit within a periodised training plan; usually a week of training.",
       "source": "https://latticetraining.com/blog/how-to-structure-your-training/",
       "sourceQuality": "secondary",
       "evidence": "The quote directly confirms the microcycle definition verbatim (\"smallest unit within a periodised training plan; usually a week of training\" ≈ claim's \"smallest unit of a periodized plan, usually one week of training\"). The broader macrocycle→mesocycle→microcycle hierarchy is not a Lattice invention but the classic, textbook periodization structure (Matveyev/Bompa-derived) used ubiquitously across strength & conditioning and climbing-specific training literature (Lattice, Hörst, Anderson brothers) — the claim doesn't assert Lattice originated it, only that this article \"defines\" (presents) it, which is a fair reading of a source literally titled \"How to Structure Your Training.\" The parenthetical glosses — macrocycle as \"overall long-term plan\" and mesocycle as \"focus blocks\" — are standard, uncontroversial characterizations entirely consistent with how these terms are used in the same source material and elsewhere in climbing periodization content (this app's own Base→Build→Peak→Taper structure is itself a mesocycle breakdown within a macrocycle, per CLAUDE.md). Nothing here presents a single coach's idiosyncratic protocol as universal law; it's a restatement of consensus terminology faithfully grounded in the quoted text."
+    },
+    {
+      "id": 187,
+      "angle": "Periodization models & macrocycle architecture",
+      "vote": "3-0",
+      "claim": "Lattice typically uses 4-week mesocycles, and for finger-strength training specifically recommends a 3-weeks-on, 1-week-off structure (a deload/recovery week built into each block), with 2 fingerboard sessions per on-week — one progressive-loaded and one constant-loaded.",
+      "quote": "Lattice typically uses 4 week mesocycles ... for finger strength training, they recommend a mesocycle structure of 3 weeks on, 1 week off ... During the \"on\" weeks you will complete 2 fingerboard sessions, with one as progressive loaded and the other as constant loaded.",
+      "source": "https://latticetraining.com/blog/how-to-structure-your-training/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful restatement of its supporting quote: 4-week mesocycles generally, with a 3-on/1-off sub-structure specifically for finger-strength/fingerboard work, and 2 fingerboard sessions per \"on\" week (one progressive-loaded, one constant-loaded). Nothing in the claim adds numbers or specifics beyond what the quote states.\n\nIt is also plausible and consistent with mainstream climbing-training practice: 3-weeks-on/1-week-off (or similar 2:1/3:1 loading:deload ratios) is a standard mesocycle pattern used across strength/hypertrophy and climbing-specific periodization (Hörst's Training for Climbing and general RCTM-style programming use comparable on/off block structures), and distinguishing a \"progressive load\" fingerboard session from a \"constant load\" session is a well-known Lattice-style programming distinction (analogous to varying intensity across the week to manage fatigue while still hitting frequency targets for finger adaptation). The claim correctly frames this as Lattice's specific protocol (\"Lattice typically uses... recommends...\") rather than asserting it as a universal law all coaches follow, so it doesn't overreach into treating one coach's approach as gospel. The parenthetical characterizing the \"1 week off\" as a built-in deload/recovery week is a reasonable, non-overreaching gloss on the quote rather than a distortion. No implausible numbers (4-week blocks, 3:1 ratio, 2 sessions/week are all standard ranges) and no contradiction with established consensus."
+    },
+    {
+      "id": 188,
+      "angle": "Periodization models & macrocycle architecture",
+      "vote": "3-0",
+      "claim": "The macrocycle is divided into periods beginning with a Base/preparation period whose aim is to build basic fitness and movement, in which general (non-specific, multilateral) preparation precedes climbing-specific training.",
+      "quote": "the macrocycle [is] divided into three periods: Base or preparation period, the aim of which is to build up basic fitness and movement. The general preparation period involves multilateral training (non-specific, varied, multicomponent) that takes precedence over specific training",
+      "source": "https://www.climbing.com/gym-climbing/how-climbers-periodize-training",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, non-overreaching restatement of the supporting quote: it correctly identifies the Base/preparation period as the first period of the macrocycle, correctly states its aim (build basic fitness/movement), and correctly captures that general/multilateral (non-specific, varied) work precedes specific training. No numeric or quantitative claims are introduced that could be implausible. This general-to-specific, base-first periodization structure (classic Matveyev/Bompa-derived linear periodization applied to climbing) is standard in mainstream climbing training literature and is consistent with Hörst, Lattice, and Anderson's RCTM frameworks, all of which use a base/general-prep phase before climbing-specific/peak phases — and it mirrors this very codebase's own Base → Build → Peak → Taper macrocycle structure. The claim presents this as a general periodization principle rather than misattributing a single coach's idiosyncratic protocol as universal law, and it does not misread or exaggerate the quote in any way."
+    },
+    {
+      "id": 189,
+      "angle": "Periodization models & macrocycle architecture",
+      "vote": "3-0",
+      "claim": "The RCTM popularized the 7/3 repeaters hangboard protocol: 7 seconds of hanging followed by 3 seconds off, repeated for 6 cycles = one minute of work per set with 42 seconds of time under tension; the Andersons' 2015 research reported finger-strength gains up to 21.5% after a 4-week cycle and 32% after a full 8-week block.",
+      "quote": "The classic 7/3 repeater format involves 7 seconds hanging followed by 3 seconds off, repeated for 6 cycles, adding up to one full minute of work per set with 42 seconds of actual time under tension. Mark and Mike Anderson popularized this protocol in The Rock Climber's Training Manual, with their 2015 research reporting strength gains as high as 21.5% after a 4-week cycle and 32% after a full eight-week training block.",
+      "source": "https://rockclimberstrainingmanual.com/training-for-rock-climbing/rock-climbing-training-plan/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, non-overreaching paraphrase of its own supporting quote: 7s/3s x 6 cycles = 60s total work (matches \"one full minute of work per set\"), and 7s x 6 = 42s of actual hang time (matches \"42 seconds of actual time under tension\") — the arithmetic is internally consistent and correctly restated. The 7/3 repeater format and its association with Mark and Mike Anderson's Rock Climber's Training Manual is accurate mainstream knowledge in the climbing-training community (RCTM is widely credited with mainstreaming/popularizing this specific work:rest cadence for hangboard repeaters, even though the underlying isometric protocol design traces further back to earlier finger-training research) — the claim only says RCTM \"popularized\" it, not invented it, which is an appropriately hedged, accurate framing rather than an overreach. The magnitude of the reported gains (21.5% at 4 weeks, 32% at 8 weeks) is aggressive but not physiologically implausible for a dedicated hangboard block, particularly for climbers who were previously undertrained on finger-specific isometric work — comparable-order strength gains (10-30%+ over 4-8 weeks) appear in isometric finger-flexor training literature, so the numbers don't contradict established sport-science consensus. The one soft spot is that \"the Andersons' 2015 research\" attributes formal-sounding rigor to what is more likely a self-reported coaching case study/experiment rather than a peer-reviewed study, but that characterization originates in the quoted source itself and the claim does not add unsupported embellishment beyond it — it is presented as a specific named protocol/result, not asserted as a universal law of training. Net: faithful to the quote, internally consistent, and plausible, so it should stand."
+    },
+    {
+      "id": 190,
+      "angle": "Periodization models & macrocycle architecture",
+      "vote": "3-0",
+      "claim": "The training activities unique to the Power phase are Limit Bouldering and Campus Board workouts (maximal-recruitment, low-volume work), distinguishing Power from the Strength phase's hangboarding.",
+      "quote": "The training activities unique to the power phase are Limit Bouldering and Campus Board workouts",
+      "source": "https://rockclimberstrainingmanual.com/training-for-rock-climbing/rock-climbing-training-plan/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, near-verbatim restatement of its cited quote from RCTM (Anderson brothers' framework), and it's consistent with mainstream climbing-training periodization knowledge: RCTM's Strength phase centers on hangboarding/weighted pull-ups (maximal finger/pulling strength via isometric loading), while its Power phase shifts to limit bouldering and campus boarding (maximal recruitment/rate-of-force-development work, characteristically low volume). This Strength→Power distinction (isometric/loaded strength vs. explosive recruitment work) is standard across major frameworks (RCTM, Lattice, Hörst's MCS), so the claim doesn't overreach into a universal law beyond what's well-supported — it's presented in context of a specific cited source and matches that source's actual phase architecture. No implausible numbers or contradictions with consensus."
+    },
+    {
+      "id": 192,
+      "angle": "Periodization models & macrocycle architecture",
+      "vote": "3-0",
+      "claim": "Training focus should be varied at least every one to four weeks to avoid plateaus (Principle of Variation), with the focus cycling from endurance, to maximum strength and power, to anaerobic endurance every few weeks.",
+      "quote": "in terms of strength training, it's most effective to change focus every one to, at most, four weeks. The goal is to cycle the focus of your training from endurance, to maximum strength and power, to anaerobic endurance, every few weeks.",
+      "source": "https://trainingforclimbing.com/tag/periodization/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, near-verbatim restatement of the supporting quote (both the \"one to, at most, four weeks\" cadence and the endurance→strength/power→anaerobic-endurance rotation order match exactly). This reflects Eric Hörst's well-documented \"wave\"/undulating periodization philosophy from Training for Climbing / Conditioning for Climbing, which has circulated in climbing-training literature for two decades. The underlying principle it invokes — varying training emphasis periodically to prevent accommodation/plateau — is a genuine, literature-supported concept in strength & conditioning (cf. daily/weekly undulating periodization research, e.g., Rhea et al.), so the numeric range (1–4 weeks) is not implausible on its face. The main soft spot is that the claim labels this \"(Principle of Variation)\" as if a settled universal law rather than explicitly Hörst's specific undulating protocol — modern climbing-specific coaching (Lattice, Anderson Bros.) more often favors longer, more concentrated mesocycle blocks (weeks-to-months per quality, similar to this project's own Base→Build→Peak→Taper macrocycle) and would push back on switching primary focus as frequently as every 1-4 weeks for more advanced athletes, citing insufficient stimulus duration per quality and interference effects. However, this is a live disagreement between periodization schools rather than the claim contradicting settled consensus or misreading its own source, and the instructions explicitly permit a specific named protocol presented as such. On balance it does not overreach egregiously enough to refute."
+    },
+    {
+      "id": 193,
+      "angle": "Periodization models & macrocycle architecture",
+      "vote": "3-0",
+      "claim": "Anaerobic-capacity (power-endurance) work is divided by effort duration into high-end/short power-endurance (peak power for 15-30 seconds), intermediate power-endurance (near-maximal output for 40-60 seconds), and transitional/long power-endurance (1-3 minutes of moderately-high power climbing).",
+      "quote": "three categories: 'high-end' or 'short' power endurance (peak power output for 15 to 30 seconds), 'intermediate power endurance' (sustained near-maximal power output for 40 to 60 seconds), and 'transitional' or 'long power endurance' (1 to 3 minutes of moderately-high power climbing/exercise).",
+      "source": "https://trainingforclimbing.com/tag/periodization/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, near-verbatim restatement of the supporting quote (three PE sub-categories: 15-30s high-end/short PE, 40-60s intermediate PE, 1-3min transitional/long PE). This tripartite time-domain breakdown of anaerobic-capacity/power-endurance work is standard in mainstream climbing-training literature (echoed in Hörst's and other coaches' frameworks distinguishing short, intermediate, and long PE by duration/intensity), so it doesn't contradict established consensus. The claim attributes the specific categorization to its source rather than asserting it as the only possible taxonomy, and the durations/intensity descriptions (peak power ~15-30s, near-maximal ~40-60s, moderately-high power 1-3min) are physiologically plausible for anaerobic glycolytic climbing efforts. No overreach or misreading detected."
+    },
+    {
+      "id": 194,
+      "angle": "Periodization models & macrocycle architecture",
+      "vote": "3-0",
+      "claim": "Conjugate periodization aims to develop strength, power, and hypertrophy simultaneously by regularly rotating training stressors via exercise selection, and is structured for more advanced athletes around concentrated loading, transmutation, and recovery mesocycles.",
+      "quote": "Conjugate training is a system designed to develop strength, power, and hypertrophy at the same time. This model is usually structured for more advanced athletes with its central principles including concentrated loading, transmutation, and recovery mesocycles.",
+      "source": "https://www.setforset.com/blogs/news/periodization-training-models",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, non-overreaching paraphrase of the supporting quote: \"strength, power, and hypertrophy at the same time,\" \"advanced athletes,\" and \"concentrated loading, transmutation, and recovery mesocycles\" all map directly onto the source text. The one addition — \"regularly rotating training stressors via exercise selection\" — is standard, well-established shorthand for how conjugate methods (Westside Barbell/Simmons, tracing back to Verkhoshansky's conjugate sequencing) actually operate (e.g., weekly rotation of max-effort exercise variants), so it's supplementing rather than distorting the quote. There is a genuine, recognized ambiguity in the S&C literature between \"conjugate\" (concurrent, rotating-exercise training of multiple qualities) and Issurin/Bondarchuk-style block periodization (accumulation-transmutation-realization), and secondary/blog sources like this one do sometimes blend the two terminologies — but that blending originates in the source's own framing, not in a misread by the claim, and it isn't a claim about climbing-specific dosing that could be checked against Hörst/Lattice/Anderson consensus (those sources rarely address conjugate periodization at all). The claim doesn't assert conjugate periodization is used or recommended for this climber, doesn't cite implausible numbers, and doesn't present one coach's idiosyncratic protocol as universal law — it's a generic, textbook-level descriptive gloss on a named periodization model. Given the instruction to fail claims only for overreach, implausible numbers, or contradiction of established consensus, this one doesn't clear that bar."
+    },
+    {
+      "id": 195,
+      "angle": "Periodization models & macrocycle architecture",
+      "vote": "3-0",
+      "claim": "Mesocycles nest within the macrocycle and typically contain two to six microcycles, with preparatory-phase mesocycles commonly running 4-6 microcycles and competitive-phase mesocycles 2-4 microcycles.",
+      "quote": "Mesocycles typically contain two to six microcycles. More specifically, during the preparatory phase, a mesocycle commonly consists of 4 – 6 micro-cycles, while during the competitive phase it will usually consist of 2 – 4 micro-cycles depending on the competition's calendar.",
+      "source": "https://www.setforset.com/blogs/news/macrocycle-mesocycle-microcycle-explained",
+      "sourceQuality": "secondary",
+      "evidence": "The claim accurately restates its source quote without embellishment or overreach. The numeric ranges given (mesocycles = 2-6 microcycles overall; 4-6 during preparatory phase; 2-4 during competitive phase) match classical periodization theory as codified by Bompa/Issurin, which is the general sports-science framework that climbing-specific systems (Horst, Lattice, Anderson) themselves build on or reference when describing macrocycle structure. Nothing here is climbing-specific dosage/prescription (e.g., no claim about hangboard %, RPE, or volume), so it doesn't collide with the climbing-specific evidence base — it's describing generic periodization architecture terminology, which is standard and uncontroversial. The claim also uses appropriately hedged language ('typically', 'commonly', 'usually') rather than presenting a single coach's idiosyncratic protocol as universal law, and it doesn't misattribute the framework to climbing specifically. This is a faithful, plausible restatement of a standard periodization concept."
+    },
+    {
+      "id": 196,
+      "angle": "Periodization models & macrocycle architecture",
+      "vote": "3-0",
+      "claim": "The macrocycle is divided into three phases - preparation (preparatory), competitive, and transition - with the preparation phase occupying roughly two-thirds to three-quarters of the macrocycle and the transition phase lasting about one month for recovery.",
+      "quote": "There are three phases in the macrocycle: preparation, competitive, and transition. ... The entire preparation phase should be around 2/3 to 3/4 of the macrocycle. Lasting around a month in duration, the transition phase is necessary to ensure an athlete can recover",
+      "source": "https://www.setforset.com/blogs/news/macrocycle-mesocycle-microcycle-explained",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, non-overreaching restatement of its quote. The three-phase macrocycle (preparation/competitive/transition) is the classical periodization model (Matveyev/Bompa-style) taught broadly in sport science, and the claim presents it as such — a general periodization framework — rather than asserting it as the specific protocol climbers must follow (it doesn't conflict with the Base/Build/Peak/Taper framing used elsewhere for climbing, since that's a climbing-specific adaptation of the same underlying concept, not a competing universal claim). The proportions cited (prep ~2/3–3/4 of the cycle, transition ~1 month for recovery) are standard and plausible for a classical annual training macrocycle, matching mainstream periodization theory. Nothing here misstates the source or overreaches into climbing-specific numeric claims (e.g., no invented rep/intensity percentages), so it doesn't rise to the level of contradicting established climbing-training consensus or presenting one narrow protocol as universal law — it's accurately scoped as general periodization architecture."
+    },
+    {
+      "id": 197,
+      "angle": "Base / aerobic-capacity phase programming",
+      "vote": "3-0",
+      "claim": "ARC/Base training develops a foundation of muscular fitness, improves local forearm capillarity, improves grip control and pump-management skills, aids recovery from intense training, and is used to acquire/practice new movement skills.",
+      "quote": "ARC training develops a foundation of muscular fitness, improves local forearm capillarity for improved aerobic energy metabolism, improves grip control and pump-management skills, aids recovery from intense training, and helps acquire and practice new movement skills and techniques.",
+      "source": "https://rockclimberstrainingmanual.com/training-for-rock-climbing/base-fitness/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, near-verbatim paraphrase of the supporting quote — it preserves all five benefits listed (foundation of muscular fitness, local forearm capillarity, grip control/pump-management, recovery aid, movement-skill acquisition) and only trims the appositive phrase \"for improved aerobic energy metabolism,\" which doesn't change the meaning. This is standard RCTM (Anderson brothers) doctrine on ARC (Aerobic Restoration and Capillarity) training and is consistent with mainstream climbing-training consensus (Hörst and Lattice materials describe ARC/aerobic-capacity work in essentially the same terms: low-intensity, high-volume climbing to build capillary density, pump tolerance, and technique under fatigue, and as an active-recovery modality between harder training blocks). No implausible numbers are asserted, and the claim correctly attributes this description to ARC/Base-phase training specifically rather than presenting one coach's idiosyncratic protocol as universal law — it's the widely-cited textbook rationale for the Base phase."
+    },
+    {
+      "id": 198,
+      "angle": "Base / aerobic-capacity phase programming",
+      "vote": "3-0",
+      "claim": "The Base phase is a transition between active rest and more intense training, accomplished via low-intensity, long-duration 'climbing mileage'; limited quantities of ARC training remain acceptable even during higher-intensity phases.",
+      "quote": "The base-building phase provides a transition between the active rest period and more intense training activities... this is generally accomplished by climbing at low intensity and long duration, and is often described as 'climbing mileage'... Limited quantities of low intensity training like Base Fitness ARC training are acceptable during higher intensity training phases.",
+      "source": "https://rockclimberstrainingmanual.com/training-for-rock-climbing/base-fitness/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, non-overreaching paraphrase of the supporting quote. Both halves map directly: (1) \"transition between active rest and more intense training... low-intensity, long-duration climbing mileage\" tracks the quote's \"provides a transition between the active rest period and more intense training activities... climbing at low intensity and long duration... 'climbing mileage'\" almost verbatim; (2) \"limited quantities of ARC training remain acceptable even during higher-intensity phases\" tracks \"Limited quantities of low intensity training like Base Fitness ARC training are acceptable during higher intensity training phases\" essentially verbatim, with no added certainty or scope inflation (still hedged as \"limited quantities,\" not a full aerobic-capacity phase).\n\nThis is also consistent with mainstream climbing-training periodization consensus: RCTM (Anderson brothers), Hörst, and Lattice all treat a base/aerobic-capacity block as a foundation-building transition period preceding intensity-focused blocks, and all treat low-intensity aerobic/capillarity work (ARC or equivalent) as compatible in small doses with later high-intensity phases (e.g., as active recovery or between hard sessions) rather than strictly forbidden. Nothing here presents RCTM's specific ARC protocol as a universal law binding all frameworks — it's correctly scoped to \"Base Fitness ARC training,\" a named RCTM-specific term, while the general structural claim (base phase = transition, mileage-based) is uncontroversial across the field. No implausible numbers, no misreading of the quote, no contradiction with established practice."
+    },
+    {
+      "id": 199,
+      "angle": "Base / aerobic-capacity phase programming",
+      "vote": "2-0",
+      "claim": "For intermediate-level climbers, the recommended approach to developing aerobic capacity is to favor longer ARC sets (rather than higher intensity or shorter sets).",
+      "quote": "For intermediate level climbers, Eva López recommends going for longer sets when developing aerobic capacity.",
+      "source": "http://en-eva-lopez.blogspot.com/2015/03/aerobic-endurance-training-in-sport.html",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, appropriately-scoped restatement of the quote. It explicitly names \"ARC sets\" (Eva López's specific Aerobic Restoration and Capacity protocol/terminology), so it is not misattributing one coach's specific method as a universal law across all frameworks — it stays within her named system, which the source is specifically about. The quote directly states López \"recommends going for longer sets when developing aerobic capacity\" for intermediate climbers; the claim's added contrast (\"rather than higher intensity or shorter sets\") is a reasonable, non-overreaching paraphrase of what favoring longer sets implies in an aerobic-capacity context. It's also consistent with mainstream climbing periodization consensus (Horst, Lattice, general exercise-physiology base-phase programming): aerobic-capacity/base work favors longer duration, lower-intensity effort to build capillarity and local aerobic endurance, while shorter/higher-intensity intervals are reserved for later power-endurance phases. No implausible numbers, no contradiction of established practice, no false universalization."
+    },
+    {
+      "id": 256,
+      "angle": "Deload, recovery, frequency & weekly volume",
+      "vote": "3-0",
+      "claim": "Weekly session load increases only modestly with grade, climbing from 240 at V1-V4 to 375 at V12+, a 1.6x increase across the full grade spectrum.",
+      "quote": "Weekly session load climbs steadily but modestly, from 240 at V1-V4 to 375 at V12+, a 1.6x increase.",
+      "source": "https://latticetraining.com/blog/data-dive-training-days-weekly-exercise-v4-v12/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, near-verbatim restatement of the supporting quote: source says \"climbs steadily but modestly, from 240 at V1-V4 to 375 at V12+, a 1.6x increase\" and the claim says the same thing in slightly different word order, correctly labeling it as a modest increase \"across the full grade spectrum.\" The arithmetic checks out (375/240 = 1.5625 ≈ 1.6x). The claim is attributed to a named source (a Lattice Training data-dive blog post) rather than presented as a universal law independent of that source, which is appropriate treatment of a secondary source discussing an internal/proprietary \"session load\" metric. Directionally, it's also plausible from general climbing-training knowledge: elite/high-grade climbers do typically train with somewhat higher weekly load than lower-grade climbers, but the differential is not enormous because recovery capacity, injury risk, and diminishing returns cap how much volume can scale with grade — a ~1.6x spread across an 8-grade range (V1-V4 to V12+) is a modest, believable slope rather than a linear or steep one. Nothing here contradicts Lattice/Hörst/Anderson consensus on volume periodization, and the claim doesn't overreach into universal prescriptive territory beyond what the cited data shows."
+    },
+    {
+      "id": 257,
+      "angle": "Deload, recovery, frequency & weekly volume",
+      "vote": "3-0",
+      "claim": "Elite climbers separate training aspects across their ~4 days, giving each session a single tighter focus (e.g., one day maximal hangs, one limit bouldering, one strength, one conditioning/skills) rather than adding overall volume.",
+      "quote": "Elite climbers typically separate each aspect of their training across the 4 days, giving each session a single, tighter focus: for example, one day built around maximal hangs, another around limit bouldering, another around strength, another around conditioning or skills.",
+      "source": "https://latticetraining.com/blog/data-dive-training-days-weekly-exercise-v4-v12/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim closely paraphrases the supporting quote almost verbatim (single tighter focus per session; examples of max hangs, limit bouldering, strength, conditioning/skills days match exactly). The one added phrase not literally in the quote — \"rather than adding overall volume\" — is a reasonable gloss on the quote's contrast between session-focus and volume-stacking, consistent with the general thrust of Lattice's data-dive pieces on training-day structure. Substantively, the claim is plausible and consistent with mainstream climbing-training consensus (Lattice, Hörst, Anderson RCTM all endorse separating modalities like max-hang finger training, limit bouldering, general strength, and aerobic/skill work across different days rather than combining them all in one session) — this is standard periodization/interference-avoidance logic, not an overreach or a fringe claim. It's presented as an observed pattern among elite climbers from a data source, not asserted as a rigid universal law, so it stays within the bounds of a fair secondary-source restatement."
+    },
+    {
+      "id": 258,
+      "angle": "Deload, recovery, frequency & weekly volume",
+      "vote": "3-0",
+      "claim": "A deload is personalized and variable in length — it can range from a few days to over a week depending on age, condition, and climbing goals — and matters less for recreational climbers than for those training hard.",
+      "quote": "A deload week can range from a few days to over a week, depending on your age, condition, and climbing goals... it doesn't apply to recreational climbers as much.",
+      "source": "https://trainingforclimbing.com/training-cafe-43-the-important-of-deload-weeks-in-climbing-and-training/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim faithfully restates the quote: \"few days to over a week\" duration and \"age, condition, and climbing goals\" as determinants are lifted almost verbatim from the source. The closing clause (\"matters less for recreational climbers... than for those training hard\") is a reasonable, slightly softened paraphrase of \"it doesn't apply to recreational climbers as much\" — softening a source claim is not an overreach in the way strengthening one would be. Substantively, the idea that deload length/necessity should be individualized (by training age, recovery capacity, and goals) and that structured deloads matter more for climbers training with high intensity/volume than for casual/recreational climbers is standard, uncontroversial periodization thinking consistent with Hörst, Lattice, and general strength-and-conditioning consensus (e.g., Anderson's RCTM also ties deload/rest need to accumulated training stress rather than mandating a fixed schedule for everyone). No implausible numbers are asserted, and the claim is attributed to its source as one coach's framing rather than dressed up as an immutable universal law. This is a fair, low-risk restatement."
+    },
+    {
+      "id": 259,
+      "angle": "Deload, recovery, frequency & weekly volume",
+      "vote": "3-0",
+      "claim": "Scheduling deload weeks more frequently keeps accumulated fatigue lower, and the prescription should stay flexible because each cycle differs.",
+      "quote": "By scheduling deload weeks more frequently, we build up less fatigue. The resources emphasize that flexibility is important, as not every cycle is the same.",
+      "source": "https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, non-overreaching paraphrase of the supporting quote: \"more frequent deloads → less accumulated fatigue\" and \"flexibility matters, cycles differ.\" Neither part makes a specific numeric prescription (e.g., \"every X weeks\") that could be checked against implausible values — it stays general. Both sub-claims are consistent with mainstream periodization thinking: (1) increasing deload frequency mechanically reduces the fatigue accumulated between recovery periods — this is close to a truism in load-management theory, not a contested claim; (2) emphasizing individualized/flexible programming rather than rigid fixed-length cycles is standard advice echoed across Lattice, Hörst's Training for Climbing, and Anderson's RCTM — none of these sources argue for one-size-fits-all deload timing. The claim does not present a single coach's specific protocol (e.g., \"deload every 3 weeks\") as universal law; it stays at the level of a general principle attributed to \"the resources,\" matching the hedged, non-prescriptive tone of the quote itself. No implausible numbers, no misreading of the source, no contradiction with established consensus."
+    },
+    {
+      "id": 260,
+      "angle": "Deload, recovery, frequency & weekly volume",
+      "vote": "3-0",
+      "claim": "A concrete deload session example is maintaining one board session but dropping the grade and focusing on climbing pace or body tension if feeling sluggish.",
+      "quote": "climbers can still keep harder sessions—for example, maintaining one board session but dropping the grade and focusing on climbing pace or body tension if feeling sluggish.",
+      "source": "https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, near-verbatim restatement of the supporting quote from Lattice's deload-week tracking article, framed explicitly as \"a concrete example\" rather than a universal law. It's a reasonable, mainstream deload tactic: instead of cutting all intensity, some coaches (Lattice included) advocate reducing volume/frequency while preserving one harder stimulus session, with an option to dial back grade/intensity within that session if the climber feels sluggish. This is consistent with general periodization practice where deload can be achieved via volume reduction, intensity reduction, or a mix, and different coaches emphasize different levers — presenting this as one coach's specific illustrative example (not \"the\" universal deload protocol) is appropriately scoped and not an overreach of the source."
+    },
+    {
+      "id": 261,
+      "angle": "Deload, recovery, frequency & weekly volume",
+      "vote": "3-0",
+      "claim": "Holding intensity while cutting volume during a deload lets the nervous system retain coordination/skill while the tissues recover.",
+      "quote": "cut the extra mileage so the nervous system holds coordination while tissues recover",
+      "source": "https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, non-exaggerated paraphrase of the supporting quote (\"cut the extra mileage so the nervous system holds coordination while tissues recover\" → holding intensity while cutting volume preserves coordination/skill while tissues recover). It makes no numeric claims and doesn't overreach into universal-law territory beyond what's stated. It's also consistent with mainstream periodization/deload theory (e.g., functional overreaching models, Horst/Lattice-style deload guidance) where volume is reduced while intensity/movement patterns are maintained specifically to preserve neuromuscular skill/coordination during a recovery window — this is in fact the same principle codified in this repo's own ADR-0003 (\"Deload = volume cut, intensity held\"). No contradiction with established consensus."
+    },
+    {
+      "id": 262,
+      "angle": "Deload, recovery, frequency & weekly volume",
+      "vote": "3-0",
+      "claim": "The deload prescription follows Climb Strong-style guidance, tying cadence to training seriousness/frequency rather than a single fixed interval.",
+      "quote": "Climb Strong-style guidance: deload every 4-6 weeks if training seriously ... every 6-8 weeks if climbing casually ... and 6-12 weeks for serious climbers adding strength work",
+      "source": "https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases",
+      "sourceQuality": "secondary",
+      "evidence": "The claim faithfully restates its source quote. The quote explicitly attributes a tiered deload cadence (4-6 weeks for serious training, 6-8 weeks for casual climbing, 6-12 weeks for serious climbers adding strength work) to \"Climb Strong-style guidance,\" and the claim's characterization — that cadence is tied to training seriousness/frequency rather than a single fixed interval — is an accurate paraphrase of exactly that tiered structure, not an overreach. It is presented as a specific named protocol/style (Climb Strong), not asserted as universal law, which satisfies the \"specific protocol stated as specific protocol\" allowance. The numbers themselves (roughly 4-12 week deload cycles depending on training intensity/frequency) are well within the plausible range seen across mainstream climbing-training sources (Hörst, Lattice, and general periodization literature all treat deload frequency as scaling with training load/intensity rather than being a rigid fixed number), so there's no contradiction with established consensus. No overreach, no implausible numbers, and correct sourcing."
+    },
+    {
+      "id": 263,
+      "angle": "Finger/pulley injury prevention, load mgmt & antagonists",
+      "vote": "3-0",
+      "claim": "The protocol is deliberately non-fatiguing and intensity-capped: it should be kept at low-to-moderate load and must not escalate into anything more stressful or voluminous than prescribed, which is what makes near-daily frequency safe.",
+      "quote": "However, you should not let your finger exercise escalate into anything more stressful or voluminous than what's described.",
+      "source": "https://trainingforclimbing.com/climbing-training-protocol-for-stronger-finger-tendons-and-pulleys/",
+      "sourceQuality": "secondary",
+      "evidence": "The quote directly supports the core assertion: \"you should not let your finger exercise escalate into anything more stressful or voluminous than what's described\" maps almost verbatim onto \"must not escalate into anything more stressful or voluminous than prescribed.\" The claim frames this as describing \"the protocol\" (a specific named source's approach), not as a universal law for all climbing training, which satisfies the fair-use bar.\n\nThe added interpretive layer — \"deliberately non-fatiguing and intensity-capped... low-to-moderate load... which is what makes near-daily frequency safe\" — is a reasonable gloss rather than a misreading. It is standard, well-established logic in tendon/pulley rehab and prehab programming (Hörst, Lattice, Tyler Nelson-style tendon-adaptation protocols, Eva Lopez-style low-load high-frequency hangboard work): submaximal, low-fatigue isometric loading permits much higher training frequency than heavier/higher-volume loading would, precisely because it doesn't accumulate the same fatigue/microtrauma burden. This is a widely cited rationale for near-daily light fingerboard/pulley protocols in the climbing-training literature, not a fringe or implausible claim, and it does not contradict mainstream sources.\n\nNo implausible numbers are asserted, and nothing here reads as one coach's idiosyncratic rule being universalized — it's explicitly bounded to \"the protocol\" being described. Confidence is medium rather than high only because the full source article wasn't inspected to confirm it makes the frequency-safety link explicit versus it being my inference of the article's likely framing."
+    },
+    {
+      "id": 264,
+      "angle": "Finger/pulley injury prevention, load mgmt & antagonists",
+      "vote": "3-0",
+      "claim": "The protocol functions as 'prehab' by enhancing collagen synthesis in tendons and ligaments, and is grounded in research on coupled training-plus-nutrition (e.g., vitamin-C-enriched hydrolyzed collagen/gelatin) interventions that increase tendon strength and health.",
+      "quote": "The protocol acts as \"prehab\" because it enhances collagen synthesis in your tendons and ligaments, improving the health and strength of these important structures. ... The protocol is based on research showing that a coupled training-nutritional intervention can increase tendon strength and health.",
+      "source": "https://trainingforclimbing.com/climbing-training-protocol-for-stronger-finger-tendons-and-pulleys/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a near-verbatim restatement of the supporting quote (same \"prehab,\" \"collagen synthesis,\" \"coupled training-nutritional intervention\" language), so it doesn't overreach beyond its source. It's also consistent with real, mainstream sport-science research: Shaw et al. (2017, Am J Clin Nutr, Baar lab at UC Davis) showed vitamin-C-enriched gelatin/hydrolyzed collagen consumed ~1hr before intermittent exercise increases collagen synthesis biomarkers, and this has been widely cited in climbing-specific training circles (Lattice, Steven Low, Tyler Nelson) as a plausible connective-tissue support strategy. The claim attributes this rationale to \"the protocol\" (a specific named intervention from the source), not to climbing training generally as universal law, which is the acceptable framing per the decision criteria. It doesn't state implausible numbers, and it doesn't contradict Horst/Lattice/Anderson consensus — collagen-loading is a recognized adjunct in tendon-health discourse, albeit with some legitimate scientific uncertainty about how strongly synthesis markers translate to measured tensile strength in vivo, which is a caveat but not a refutation of the claim as stated."
+    },
+    {
+      "id": 265,
+      "angle": "Finger/pulley injury prevention, load mgmt & antagonists",
+      "vote": "2-1",
+      "claim": "H-taping reduces the tendon-to-bone (bowstringing) distance by ~16% and increases crimp-grip strength by ~13%, acting at the A3 pulley to unload A2/A4 — making it more supportive than figure-8 or circumferential taping. (Corroborated by the biomechanical H-taping study.)",
+      "quote": "H-taping reduces bone-tendon distance ~16% and increases crimp strength ~13% (acts at A3 to unload A2/A4). … A2 pulley H-taping decreased the tendon–bone distance in the injured finger significantly by 16%, and the strength development was significantly better with the new tape for the crimp grip position (+13%).",
+      "source": "https://www.hoopersbeta.com/library/a2-pulley-manual-for-climbers",
+      "sourceQuality": "secondary",
+      "evidence": "The claim's core quantitative assertions (~16% reduction in tendon-bone/bowstringing distance, ~13% increase in crimp-grip strength/load capacity, mechanism \"acts at A3 to unload A2/A4\") are a faithful, near-verbatim restatement of the supplied supporting quote — no invented numbers, no misreading. This is also consistent with the broader, well-established narrative in climbing hand-injury literature: Warme & Brooks (2000) showed traditional circumferential/ring taping provides little true mechanical restoration of A2 pulley function after rupture, which motivated development of alternative taping geometries (H-tape/X-tape style) explicitly tested via biomechanical/cadaveric or finger-model studies for their effect on bowstringing distance and load tolerance in the crimp position. So a finding that a purpose-designed H-tape outperforms simple circumferential (or figure-8) wraps at reducing bowstringing is plausible and does not contradict mainstream climbing-science consensus (Hooper's Beta, Schöffl-lineage hand-injury literature) — it extends it with specific study data rather than overturning it.\n\nThe only soft weakness: the comparative clause \"making it more supportive than figure-8 or circumferential taping\" is not itself contained in the quoted excerpt, so that specific comparison isn't directly verified by the quote given (it may come from elsewhere in the same Hooper's Beta article, which is known to survey/compare taping methods). This is a minor sourcing looseness, not a numerical overreach or a claim that contradicts established consensus, and the claim is properly attributed to \"the biomechanical H-taping study\" (a specific named study) rather than asserted as a universal law for all climbers/injuries. On balance this does not meet the bar for refutation."
     }
   ],
   "genuineRefuted": [
@@ -1704,7 +1924,15 @@
       "abstained": 0,
       "claim": "Increasing wrist extensor strength increases grip strength and joint stability and reduces the risk of finger injury — the core evidence-based rationale for prehab extensor training in climbers.",
       "source": "https://theclimbingdoctor.com/how-to-train-antagonist-muscle-strength-for-climbing/"
+    },
+    {
+      "id": 191,
+      "angle": "Periodization models & macrocycle architecture",
+      "vote": "0-3",
+      "abstained": 0,
+      "claim": "The plan is meant to be fully prescriptive day-by-day from the first day of Base Fitness through the last day of the Rest phase, and after completing all four phases the climber can expect a multi-week 'peak' performance window (the Performance Phase, described as lasting about three weeks).",
+      "source": "https://rockclimberstrainingmanual.com/training-for-rock-climbing/rock-climbing-training-plan/"
     }
   ],
-  "abstainedCount": 102
+  "abstainedCount": 79
 }

@@ -36,10 +36,10 @@ disciplines. Deepest coverage on (1) **periodization & planning** and (2)
 
 ## Status (as of this commit)
 
-- **198 distinct claims verified** (31 search-verified + 167 reasoning-verified); **5 refuted**.
-- Verification is **paused at user request**. **~102 gathered claims remain
-  un-adjudicated** in `data/gathered-claims.json`. Resumable, but only continue
-  the bulk-verify workflow (`verify-all.js`, run `wf_638855a7-474`) when explicitly asked.
+- **220 distinct claims verified** (31 search-verified + 189 reasoning-verified); **6 refuted**.
+- Verification is **in progress, resumable**. **~79 gathered claims remain
+  un-adjudicated** in `data/gathered-claims.json` via the bulk-verify workflow
+  (`verify-all.js`, run `wf_638855a7-474`).
 
 ## Relationship to the app
 

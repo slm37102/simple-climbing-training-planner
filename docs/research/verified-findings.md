@@ -9,9 +9,9 @@
 
 ## Summary
 
-- **198 distinct claims verified** (31 search-verified, 167 reasoning-verified)
-- **5 claims refuted** (listed at the end for transparency)
-- Verification is **paused at user request**. ~102 gathered claims remain un-adjudicated (held in `data/gathered-claims.json`; resumable — resume on request only).
+- **220 distinct claims verified** (31 search-verified, 189 reasoning-verified)
+- **6 claims refuted** (listed at the end for transparency)
+- Verification is **in progress**. ~79 gathered claims remain un-adjudicated (held in `data/gathered-claims.json`; resumable).
 
 ## Findings by topic
 
@@ -78,7 +78,7 @@
   > "The periodized program includes 4 distinct training phases – Base Fitness, Strength, Power and Power Endurance, after completing which climbers can look forward to several weeks of "peak" performance."
 
 
-### Periodization models & macrocycle architecture  (24)
+### Periodization models & macrocycle architecture  (33)
 
 - **Lattice describes block periodization as splitting a macrocycle into mesocycle blocks of roughly 3-12 weeks, each with a single training focus (e.g. a base-building block for muscular endurance, or a dedicated strength-development block for grip/finger strength).**  
   _search · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/how-to-structure-your-training/)_
@@ -173,11 +173,47 @@
   > "Undulating/non-linear ... suits in-season climbers and beginners needing a broad base."
 
 - **Lattice defines the standard periodization hierarchy as macrocycle (the overall long-term plan) divided into mesocycles (focus blocks) divided into microcycles, where a microcycle is the smallest unit of a periodized plan, usually one week of training.**  
-  _reasoning · vote 2-0 · [latticetraining.com](https://latticetraining.com/blog/how-to-structure-your-training/)_
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/how-to-structure-your-training/)_
   > "A microcycle refers to the smallest unit within a periodised training plan; usually a week of training."
 
+- **Lattice typically uses 4-week mesocycles, and for finger-strength training specifically recommends a 3-weeks-on, 1-week-off structure (a deload/recovery week built into each block), with 2 fingerboard sessions per on-week — one progressive-loaded and one constant-loaded.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/how-to-structure-your-training/)_
+  > "Lattice typically uses 4 week mesocycles ... for finger strength training, they recommend a mesocycle structure of 3 weeks on, 1 week off ... During the "on" weeks you will complete 2 fingerboard sessions, with one as progressive loaded and the other as constant loaded."
 
-### Base / aerobic-capacity phase programming  (23)
+- **The macrocycle is divided into periods beginning with a Base/preparation period whose aim is to build basic fitness and movement, in which general (non-specific, multilateral) preparation precedes climbing-specific training.**  
+  _reasoning · vote 3-0 · [climbing.com](https://www.climbing.com/gym-climbing/how-climbers-periodize-training)_
+  > "the macrocycle [is] divided into three periods: Base or preparation period, the aim of which is to build up basic fitness and movement. The general preparation period involves multilateral training (non-specific, varied, multicomponent) that takes precedence over specific training"
+
+- **The RCTM popularized the 7/3 repeaters hangboard protocol: 7 seconds of hanging followed by 3 seconds off, repeated for 6 cycles = one minute of work per set with 42 seconds of time under tension; the Andersons' 2015 research reported finger-strength gains up to 21.5% after a 4-week cycle and 32% after a full 8-week block.**  
+  _reasoning · vote 3-0 · [rockclimberstrainingmanual.com](https://rockclimberstrainingmanual.com/training-for-rock-climbing/rock-climbing-training-plan/)_
+  > "The classic 7/3 repeater format involves 7 seconds hanging followed by 3 seconds off, repeated for 6 cycles, adding up to one full minute of work per set with 42 seconds of actual time under tension. Mark and Mike Anderson popularized this protocol in The Rock Climber's Training Manual, with their 2…"
+
+- **The training activities unique to the Power phase are Limit Bouldering and Campus Board workouts (maximal-recruitment, low-volume work), distinguishing Power from the Strength phase's hangboarding.**  
+  _reasoning · vote 3-0 · [rockclimberstrainingmanual.com](https://rockclimberstrainingmanual.com/training-for-rock-climbing/rock-climbing-training-plan/)_
+  > "The training activities unique to the power phase are Limit Bouldering and Campus Board workouts"
+
+- **Training focus should be varied at least every one to four weeks to avoid plateaus (Principle of Variation), with the focus cycling from endurance, to maximum strength and power, to anaerobic endurance every few weeks.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/tag/periodization/)_
+  > "in terms of strength training, it's most effective to change focus every one to, at most, four weeks. The goal is to cycle the focus of your training from endurance, to maximum strength and power, to anaerobic endurance, every few weeks."
+
+- **Anaerobic-capacity (power-endurance) work is divided by effort duration into high-end/short power-endurance (peak power for 15-30 seconds), intermediate power-endurance (near-maximal output for 40-60 seconds), and transitional/long power-endurance (1-3 minutes of moderately-high power climbing).**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/tag/periodization/)_
+  > "three categories: 'high-end' or 'short' power endurance (peak power output for 15 to 30 seconds), 'intermediate power endurance' (sustained near-maximal power output for 40 to 60 seconds), and 'transitional' or 'long power endurance' (1 to 3 minutes of moderately-high power climbing/exercise)."
+
+- **Conjugate periodization aims to develop strength, power, and hypertrophy simultaneously by regularly rotating training stressors via exercise selection, and is structured for more advanced athletes around concentrated loading, transmutation, and recovery mesocycles.**  
+  _reasoning · vote 3-0 · [setforset.com](https://www.setforset.com/blogs/news/periodization-training-models)_
+  > "Conjugate training is a system designed to develop strength, power, and hypertrophy at the same time. This model is usually structured for more advanced athletes with its central principles including concentrated loading, transmutation, and recovery mesocycles."
+
+- **Mesocycles nest within the macrocycle and typically contain two to six microcycles, with preparatory-phase mesocycles commonly running 4-6 microcycles and competitive-phase mesocycles 2-4 microcycles.**  
+  _reasoning · vote 3-0 · [setforset.com](https://www.setforset.com/blogs/news/macrocycle-mesocycle-microcycle-explained)_
+  > "Mesocycles typically contain two to six microcycles. More specifically, during the preparatory phase, a mesocycle commonly consists of 4 – 6 micro-cycles, while during the competitive phase it will usually consist of 2 – 4 micro-cycles depending on the competition's calendar."
+
+- **The macrocycle is divided into three phases - preparation (preparatory), competitive, and transition - with the preparation phase occupying roughly two-thirds to three-quarters of the macrocycle and the transition phase lasting about one month for recovery.**  
+  _reasoning · vote 3-0 · [setforset.com](https://www.setforset.com/blogs/news/macrocycle-mesocycle-microcycle-explained)_
+  > "There are three phases in the macrocycle: preparation, competitive, and transition. ... The entire preparation phase should be around 2/3 to 3/4 of the macrocycle. Lasting around a month in duration, the transition phase is necessary to ensure an athlete can recover"
+
+
+### Base / aerobic-capacity phase programming  (26)
 
 - **A typical RCTM/ARC workout consists of 2-3 sets of 20-45 minutes of continuous climbing at or just below the Maximum Steady State (MSS), commonly structured as two or three 30-minute sets with 10 minutes of rest between sets.**  
   _search · vote 2-1 · [rockclimberstrainingmanual.com](https://rockclimberstrainingmanual.com/training-for-rock-climbing/base-fitness/)_
@@ -270,6 +306,18 @@
 - **The physiological goal of ARC is to increase forearm capillary density (growing new capillaries and widening existing ones), improving oxygen delivery so a pump sets in later and recovery is faster.**  
   _reasoning · vote 3-0 · [trainclimbsummit.com](https://trainclimbsummit.com/train-aerobic-capacity-for-climbing-with-arcing/)_
   > "improving the forearm muscles' ability to sustain effort over long periods by increasing capillary density, enhancing oxygen delivery, and improving recovery ... you'll develop more small blood vessels in your forearms, and existing ones will become wider, making it harder for a pump to set in."
+
+- **ARC/Base training develops a foundation of muscular fitness, improves local forearm capillarity, improves grip control and pump-management skills, aids recovery from intense training, and is used to acquire/practice new movement skills.**  
+  _reasoning · vote 3-0 · [rockclimberstrainingmanual.com](https://rockclimberstrainingmanual.com/training-for-rock-climbing/base-fitness/)_
+  > "ARC training develops a foundation of muscular fitness, improves local forearm capillarity for improved aerobic energy metabolism, improves grip control and pump-management skills, aids recovery from intense training, and helps acquire and practice new movement skills and techniques."
+
+- **The Base phase is a transition between active rest and more intense training, accomplished via low-intensity, long-duration 'climbing mileage'; limited quantities of ARC training remain acceptable even during higher-intensity phases.**  
+  _reasoning · vote 3-0 · [rockclimberstrainingmanual.com](https://rockclimberstrainingmanual.com/training-for-rock-climbing/base-fitness/)_
+  > "The base-building phase provides a transition between the active rest period and more intense training activities... this is generally accomplished by climbing at low intensity and long duration, and is often described as 'climbing mileage'... Limited quantities of low intensity training like Base F…"
+
+- **For intermediate-level climbers, the recommended approach to developing aerobic capacity is to favor longer ARC sets (rather than higher intensity or shorter sets).**  
+  _reasoning · vote 2-0 · [en-eva-lopez.blogspot.com](http://en-eva-lopez.blogspot.com/2015/03/aerobic-endurance-training-in-sport.html)_
+  > "For intermediate level climbers, Eva López recommends going for longer sets when developing aerobic capacity."
 
 
 ### Strength phase programming (fingers + pulling)  (22)
@@ -647,7 +695,7 @@
   > "The ideal size edge for weighted fingerboard hangs is between 14mm and 20mm (⅝ to ⅞-inch). ... Eric recommends setting the weight so that you can hang for 10-seconds. ... Intensity must be at your limit but it must not bring you to failure."
 
 
-### Deload, recovery, frequency & weekly volume  (14)
+### Deload, recovery, frequency & weekly volume  (21)
 
 - **A V4 climber training with Lattice logs an average of 3 training days per week, while a V12+ climber logs an average of 4 training days per week.**  
   _search · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/data-dive-training-days-weekly-exercise-v4-v12/)_
@@ -705,8 +753,36 @@
   _reasoning · vote 3-0 · [megabetaclimbing.com](https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases)_
   > "Connective tissue adapts slower than muscle, so deloads protect tendons/pulleys"
 
+- **Weekly session load increases only modestly with grade, climbing from 240 at V1-V4 to 375 at V12+, a 1.6x increase across the full grade spectrum.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/data-dive-training-days-weekly-exercise-v4-v12/)_
+  > "Weekly session load climbs steadily but modestly, from 240 at V1-V4 to 375 at V12+, a 1.6x increase."
 
-### Finger/pulley injury prevention, load mgmt & antagonists  (15)
+- **Elite climbers separate training aspects across their ~4 days, giving each session a single tighter focus (e.g., one day maximal hangs, one limit bouldering, one strength, one conditioning/skills) rather than adding overall volume.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/data-dive-training-days-weekly-exercise-v4-v12/)_
+  > "Elite climbers typically separate each aspect of their training across the 4 days, giving each session a single, tighter focus: for example, one day built around maximal hangs, another around limit bouldering, another around strength, another around conditioning or skills."
+
+- **A deload is personalized and variable in length — it can range from a few days to over a week depending on age, condition, and climbing goals — and matters less for recreational climbers than for those training hard.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/training-cafe-43-the-important-of-deload-weeks-in-climbing-and-training/)_
+  > "A deload week can range from a few days to over a week, depending on your age, condition, and climbing goals... it doesn't apply to recreational climbers as much."
+
+- **Scheduling deload weeks more frequently keeps accumulated fatigue lower, and the prescription should stay flexible because each cycle differs.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/)_
+  > "By scheduling deload weeks more frequently, we build up less fatigue. The resources emphasize that flexibility is important, as not every cycle is the same."
+
+- **A concrete deload session example is maintaining one board session but dropping the grade and focusing on climbing pace or body tension if feeling sluggish.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/)_
+  > "climbers can still keep harder sessions—for example, maintaining one board session but dropping the grade and focusing on climbing pace or body tension if feeling sluggish."
+
+- **Holding intensity while cutting volume during a deload lets the nervous system retain coordination/skill while the tissues recover.**  
+  _reasoning · vote 3-0 · [megabetaclimbing.com](https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases)_
+  > "cut the extra mileage so the nervous system holds coordination while tissues recover"
+
+- **The deload prescription follows Climb Strong-style guidance, tying cadence to training seriousness/frequency rather than a single fixed interval.**  
+  _reasoning · vote 3-0 · [megabetaclimbing.com](https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases)_
+  > "Climb Strong-style guidance: deload every 4-6 weeks if training seriously ... every 6-8 weeks if climbing casually ... and 6-12 weeks for serious climbers adding strength work"
+
+
+### Finger/pulley injury prevention, load mgmt & antagonists  (18)
 
 - **Eric Hörst's protective finger protocol is a roughly 6-minute, low-to-moderate-intensity routine designed to nourish and strengthen the finger flexor tendons and annular pulleys (A2), suitable for almost-daily use as rest-day prehab or pre-climbing warm-up.**  
   _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/climbing-training-protocol-for-stronger-finger-tendons-and-pulleys/)_
@@ -767,6 +843,18 @@
 - **During recovery from climber's elbow, climbing-specific high finger-flexor loads — pull-ups, fingerboard/hangboard training, and campus training — should be restricted to small doses or avoided entirely until the condition resolves (load management).**  
   _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/treating-climbers-elbow-medial-epicondylitis/)_
   > "Conventional pull-ups, fingerboard training, campus training, and the like are often problematic and should only be done in small doses, if at all, until the condition has resolved."
+
+- **The protocol is deliberately non-fatiguing and intensity-capped: it should be kept at low-to-moderate load and must not escalate into anything more stressful or voluminous than prescribed, which is what makes near-daily frequency safe.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/climbing-training-protocol-for-stronger-finger-tendons-and-pulleys/)_
+  > "However, you should not let your finger exercise escalate into anything more stressful or voluminous than what's described."
+
+- **The protocol functions as 'prehab' by enhancing collagen synthesis in tendons and ligaments, and is grounded in research on coupled training-plus-nutrition (e.g., vitamin-C-enriched hydrolyzed collagen/gelatin) interventions that increase tendon strength and health.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/climbing-training-protocol-for-stronger-finger-tendons-and-pulleys/)_
+  > "The protocol acts as "prehab" because it enhances collagen synthesis in your tendons and ligaments, improving the health and strength of these important structures. ... The protocol is based on research showing that a coupled training-nutritional intervention can increase tendon strength and health."
+
+- **H-taping reduces the tendon-to-bone (bowstringing) distance by ~16% and increases crimp-grip strength by ~13%, acting at the A3 pulley to unload A2/A4 — making it more supportive than figure-8 or circumferential taping. (Corroborated by the biomechanical H-taping study.)**  
+  _reasoning · vote 2-1 · [hoopersbeta.com](https://www.hoopersbeta.com/library/a2-pulley-manual-for-climbers)_
+  > "H-taping reduces bone-tendon distance ~16% and increases crimp strength ~13% (acts at A3 to unload A2/A4). … A2 pulley H-taping decreased the tendon–bone distance in the injured finger significantly by 16%, and the strength development was significantly better with the new tape for the crimp grip po…"
 
 
 ### Assessment, benchmarks & finger-strength metrics  (17)
@@ -847,3 +935,4 @@
 - ✗ (0-3) The taper produces a peaking effect by recalibrating the brain's central governor, unlocking higher power output, increased stamina, and a new performance extreme. — [trainingforclimbing.com](https://trainingforclimbing.com/tag/redpoint-tips/)
 - ✗ (1-2) Wrist extensor training (back of the forearm, the antagonist to the climbing-loaded wrist flexors) should be done at 20-30 reps for 3 sets to increase grip strength, stability, and reduce finger injury risk. — [climbing.com](https://www.climbing.com/skills/antagonist-workouts-for-climbers-improve-performance-and-prevent-injury/)
 - ✗ (1-2) Increasing wrist extensor strength increases grip strength and joint stability and reduces the risk of finger injury — the core evidence-based rationale for prehab extensor training in climbers. — [theclimbingdoctor.com](https://theclimbingdoctor.com/how-to-train-antagonist-muscle-strength-for-climbing/)
+- ✗ (0-3) The plan is meant to be fully prescriptive day-by-day from the first day of Base Fitness through the last day of the Rest phase, and after completing all four phases the climber can expect a multi-week 'peak' performance window (the Performance Phase, described as lasting about three weeks). — [rockclimberstrainingmanual.com](https://rockclimberstrainingmanual.com/training-for-rock-climbing/rock-climbing-training-plan/)
