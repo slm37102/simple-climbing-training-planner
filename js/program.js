@@ -323,7 +323,7 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null) {
         // KG-B9: RPE capped 7.5–9 → 7–8 so Build's 60/60 threshold work remains
         // a genuine step up — otherwise base already runs near-Build intensity
         // and the base→build progression flattens.
-        { kind:'route', name: 'Route pyramid', prescribed: 'pyramid 4-3-2-1 routes climbed back to back; 1 grade below redpoint', rpeRange: [7, 8], prescribedTarget: { value: 10, unit: 'routes' },
+        { kind:'route', name: 'Route pyramid', prescribed: 'pyramid 4-3-2-1 routes · walking rest between routes; 1 grade below redpoint', rpeRange: [7, 8], prescribedTarget: { value: 10, unit: 'routes' },
           howto: 'Climb 4, then 3, then 2, then 1 routes back-to-back, resting between routes. Comfortably hard — save intensity for Build.' }
       ]
     };
@@ -361,7 +361,7 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null) {
     label: 'Project routes (Taper)',
     energySystem: 'Sport-specific',
     exercises: [
-      { kind:'route', name: 'Project / redpoint attempts', prescribed: '2–3 quality goes on a project', rpeRange: [9, 9.5], prescribedTarget: { value: 2, unit: 'goes' },
+      { kind:'route', name: 'Project / redpoint attempts', prescribed: '2–3 quality goes on a project · 20+ min rest between goes', rpeRange: [9, 9.5], prescribedTarget: { value: 2, unit: 'goes' },
         howto: 'A few quality, well-rested goes on your project. Stop while still fresh — don’t grind out fatigued attempts.' }
     ]
   };
@@ -376,7 +376,7 @@ function buildSatMain(phase, flavor, isDeload, weeksLeft = null) {
         energySystem: 'Strength / Power',
         exercises: [
           { kind: 'limit-boulder', name: 'Project attempts', prescribed: '1–3 hard problems · max 5 quality attempts each · 5+ min rest · stop when power drops', rpeRange: [9, 9.5], prescribedTarget: { value: 2, unit: 'problems' } },
-          { kind: 'boulder', name: 'Flash/onsight attempts', prescribed: '3–5 problems at 1 grade below max', rpeRange: [8, 9], prescribedTarget: { value: 4, unit: 'problems' } }
+          { kind: 'boulder', name: 'Flash/onsight attempts', prescribed: '3–5 problems at 1 grade below max · full rest between attempts', rpeRange: [8, 9], prescribedTarget: { value: 4, unit: 'problems' } }
         ]
       };
     }
@@ -417,7 +417,7 @@ function buildSatMain(phase, flavor, isDeload, weeksLeft = null) {
         // KG-B8: "@ 60–70% effort" dropped — it contradicted both published ARC
         // intensity (10–40% of max) and this line's own RPE 4–6. RPE + "just
         // below pump" already carry ARC's easy-sustained-pump intent precisely.
-        { kind:'arc', name: 'ARC (continuous easy climbing)', prescribed: '2 × 30 min, just below pump · OR 90 min easy laps', rpeRange: [4, 6], prescribedTarget: { value: 30, unit: 'min' } }
+        { kind:'arc', name: 'ARC (continuous easy climbing)', prescribed: '2 × 30 min, just below pump · 10 min rest between sets · OR 90 min easy laps', rpeRange: [4, 6], prescribedTarget: { value: 30, unit: 'min' } }
       ]
     };
   }
