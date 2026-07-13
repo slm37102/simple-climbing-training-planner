@@ -659,7 +659,7 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
     const rangeStr = suggestion?.range ? `${suggestion.range[0]}–${suggestion.range[1]} kg` : '';
     const sets = ex.sets || ex.reps || '';
     const rpe  = ex.rpeRange ? `RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : '';
-    prescribedStr = [ex.hang, sets, rangeStr, rpe].filter(Boolean).join(' · ');
+    prescribedStr = [ex.hang, sets, ex.rest, rangeStr, rpe].filter(Boolean).join(' · ');
   } else if (ex.prescribedTarget) {
     const rpe = ex.rpeRange ? `RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : '';
     prescribedStr = targetCalloutHtml(ex) + howtoHtml(ex) +

@@ -1030,6 +1030,47 @@ test('[Gym-ready] exercise-inputs: climbing-kind exercises show one count input,
   assertEq(repsLabel(ex), 'problems', 'repsLabel should surface prescribedTarget.unit');
 });
 
+test('[Gym-ready] hangboard and pull-up exercises carry a rest field + a well-formed rpeRange across all phases', () => {
+  // Monday, one date per phase, all non-deload/non-retest.
+  const mondays = {
+    base:  '2026-05-04',
+    build: '2026-06-15',
+    peak:  '2026-07-06',
+    taper: '2026-07-20',
+  };
+  for (const [phase, iso] of Object.entries(mondays)) {
+    const ctx = Program.resolveDate(iso, '2026-05-04', 12);
+    assertEq(ctx.phase, phase, `fixture date ${iso} should be ${phase}`);
+    const sess = Program.prescribeForContext(ctx, 'hybrid');
+    for (const ex of sess.exercises || []) {
+      if (ex.kind !== 'hangboard' && ex.kind !== 'pullup') continue;
+      assert(typeof ex.rest === 'string' && ex.rest.length > 0, `${phase} ${ex.kind} "${ex.name}" missing a rest field`);
+      assert(Array.isArray(ex.rpeRange) && ex.rpeRange.length === 2,
+        `${phase} ${ex.kind} "${ex.name}" must carry rpeRange (not a differently-named field), got ${JSON.stringify(ex.rpeRange)}`);
+    }
+  }
+});
+
+test('[Gym-ready] REGRESSION: pull-up rest time and RPE target render in the Today tab', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-04'); // Mon wk1, base
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const hangText = root.querySelector('[data-ex="0"] .exercise-prescribe')?.textContent || '';
+    assert(/min/.test(hangText), `hangboard exercise-prescribe should mention rest, got "${hangText}"`);
+
+    const pullEx = root.querySelector('[data-ex="2"] .acc-title');
+    assert(pullEx && /pull-up/i.test(pullEx.textContent), `expected exercise 2 to be pull-ups, got "${pullEx && pullEx.textContent}"`);
+    const pullText = root.querySelector('[data-ex="2"] .exercise-prescribe')?.textContent || '';
+    assert(/min between sets/.test(pullText), `pull-up exercise-prescribe missing rest time, got "${pullText}"`);
+    assert(/RPE 7–8\.5/.test(pullText), `pull-up exercise-prescribe missing its RPE target, got "${pullText}"`);
+  } finally { root.remove(); }
+});
+
 test('[Gym-ready] howto(): per-kind default, per-exercise override', () => {
   assert(howto({ kind: 'limit-boulder' }).length > 0, 'limit-boulder should have a per-kind default how-to');
   assert(howto({ kind: 'arc' }).length > 0, 'arc should have a per-kind default how-to');

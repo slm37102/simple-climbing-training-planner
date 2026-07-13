@@ -202,12 +202,15 @@ const ANTAGONIST_BLOCK = [
 // ============== Session generators (per slot per phase per flavor) ==============
 
 function pullupPrescription(phase) {
-  if (phase === 'base')  return { pctRange: [0.55, 0.70], reps: '5 × 5', prescribedSets: 5, prescribedReps: 5, rpe: [7, 8.5] };
-  if (phase === 'build') return { pctRange: [0.80, 0.90], reps: '5 × 3', prescribedSets: 5, prescribedReps: 3, rpe: [8.5, 9.5] };
+  // NOTE: this field must be named rpeRange, not rpe — Loads.autoAdjust and every
+  // rendering path (today.js/log.js) read exercise.rpeRange; a differently-named
+  // field is silently ignored (no RPE target shown, autoAdjust always no-ops).
+  if (phase === 'base')  return { pctRange: [0.55, 0.70], reps: '5 × 5', rest: '2 min between sets', prescribedSets: 5, prescribedReps: 5, rpeRange: [7, 8.5] };
+  if (phase === 'build') return { pctRange: [0.80, 0.90], reps: '5 × 3', rest: '3 min between sets', prescribedSets: 5, prescribedReps: 3, rpeRange: [8.5, 9.5] };
   // Peak capped at 90% 1RM (not 95) for this athlete's shoulder/tendon recovery — ADR-0001.
-  if (phase === 'peak')  return { pctRange: [0.85, 0.90], reps: '5 × 2', prescribedSets: 5, prescribedReps: 2, rpe: [9, 9.5] };
+  if (phase === 'peak')  return { pctRange: [0.85, 0.90], reps: '5 × 2', rest: '3 min between sets', prescribedSets: 5, prescribedReps: 2, rpeRange: [9, 9.5] };
   // Taper: intensity held near peak, volume cut to a single low-set touch (ADR-0007).
-  return { pctRange: [0.80, 0.90], reps: '2 × 2', prescribedSets: 2, prescribedReps: 2, rpe: [9, 9.5] }; // taper
+  return { pctRange: [0.80, 0.90], reps: '2 × 2', rest: '3 min between sets', prescribedSets: 2, prescribedReps: 2, rpeRange: [9, 9.5] }; // taper
 }
 
 function hangboardExercise(proto) {
