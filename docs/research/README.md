@@ -34,12 +34,12 @@ disciplines. Deepest coverage on (1) **periodization & planning** and (2)
      consistency with established climbing-training science, without live search (lighter check).
 3. **Synthesize** — confirmed claims folded into the report.
 
-## Status (as of this commit)
+## Status: verification complete ✅
 
-- **278 distinct claims verified** (31 search-verified + 247 reasoning-verified); **7 refuted**.
-- Verification is **almost complete**. **~20 gathered claims remain
-  un-adjudicated** in `data/gathered-claims.json` via the bulk-verify workflow
-  (`verify-all.js`, run `wf_638855a7-474`).
+- **297 distinct claims verified** (31 search-verified + 266 reasoning-verified); **8 refuted**.
+- Every claim gathered from the research corpus (~300 falsifiable statements
+  extracted from 51+ sources) has been adjudicated by the 3-vote adversarial
+  fact-check. Nothing remains un-checked in `data/gathered-claims.json`.
 
 ## Relationship to the app
 

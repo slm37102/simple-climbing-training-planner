@@ -1,5 +1,5 @@
 {
-  "mode": "reasoning-verify (in progress)",
+  "mode": "reasoning-verify (COMPLETE)",
   "confirmed": [
     {
       "id": 2,
@@ -2464,12 +2464,202 @@
     {
       "id": 268,
       "angle": "Finger/pulley injury prevention, load mgmt & antagonists",
-      "vote": "2-0",
+      "vote": "3-0",
       "claim": "The recommended cadence for the antagonist training plan is one or two days per week, adjusting based on how the body and performance respond.",
       "quote": "Try performing the antagonist training plan below one or two days a week, and see how your body and performance respond.",
       "source": "https://www.climbing.com/skills/antagonist-workouts-for-climbers-improve-performance-and-prevent-injury/",
       "sourceQuality": "secondary",
       "evidence": "The claim is a faithful, non-overreaching paraphrase of the supporting quote: \"Try performing the antagonist training plan below one or two days a week, and see how your body and performance respond\" maps directly onto \"cadence...is one or two days per week, adjusting based on how the body and performance respond.\" It doesn't inflate the number, doesn't drop the response-based caveat, and doesn't claim this is a universal law — it's presented as the recommendation for \"the antagonist training plan\" being discussed (i.e., that specific program), consistent with how the source frames it. Substantively, 1-2x/week for antagonist (push-muscle) work is well within mainstream climbing-training guidance (Hörst, Lattice-style programming typically suggest low-to-moderate frequency antagonist work, often 2-3x/week, to avoid excessive volume/interference with pulling-dominant climbing training) — a 1-2 day/week cadence is a plausible, slightly conservative but reasonable figure, not an implausible or contradicted number. No red flags of misreading or overreach."
+    },
+    {
+      "id": 269,
+      "angle": "Finger/pulley injury prevention, load mgmt & antagonists",
+      "vote": "3-0",
+      "claim": "When holding a crimp, the wrist extensors fire to hold the wrist near its optimal angle for maximum grip strength, approximately 30–35 degrees of wrist extension.",
+      "quote": "When you hold a crimp, your wrist extensor muscles fire to keep your wrist at the optimal angle for maximum grip strength at approximately 30-35 degrees of wrist extension.",
+      "source": "https://theclimbingdoctor.com/how-to-train-antagonist-muscle-strength-for-climbing/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a near-verbatim, faithful restatement of the supporting quote (\"keep your wrist at the optimal angle\" → \"hold the wrist near its optimal angle\"; same 30-35° figure). It is also plausible: it's well established in hand/grip biomechanics research (dynamometry studies on wrist position vs. grip force) that maximal grip strength occurs with the wrist in a moderate degree of extension (commonly cited in the ~30-35° range), not neutral or flexed. This aligns with mainstream climbing-injury-prevention rationale (Hörst, Lattice, Anderson RCTM all recommend wrist-extensor antagonist training precisely because these muscles isometrically stabilize the wrist in extension during crimping). The claim states a specific figure tied to its cited source rather than asserting it as a universal law beyond what's supported, so it does not overreach."
+    },
+    {
+      "id": 270,
+      "angle": "Finger/pulley injury prevention, load mgmt & antagonists",
+      "vote": "3-0",
+      "claim": "Eccentric wrist-extensor training is an effective intervention for lateral elbow tendinopathy, with cited improvements of about 79% in strength and 81% in pain.",
+      "quote": "Eccentric exercises focused on the wrist extensors improved strength by 79% and improved pain by 81%.",
+      "source": "https://theclimbingdoctor.com/how-to-train-antagonist-muscle-strength-for-climbing/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim faithfully restates the supporting quote (79% strength, 81% pain) without overreaching into a universal-law framing. Eccentric wrist-extensor training is a well-established sports-medicine intervention for lateral epicondylitis, and this is exactly the antagonist/extensor work climbing-training sources (Lattice, etc.) commonly cite for elbow-tendinopathy prevention in climbers. Magnitudes in the 70-90% relative-improvement range are plausible for small-cohort eccentric-tendinopathy trials, which often show large relative gains from a low baseline. Nothing here contradicts mainstream climbing-training or sports-science consensus on antagonist training as an injury-prevention measure."
+    },
+    {
+      "id": 271,
+      "angle": "Finger/pulley injury prevention, load mgmt & antagonists",
+      "vote": "3-0",
+      "claim": "Return-to-climbing should be graded: begin on easy vertical routes and take one to two months to rebuild to the prior climbing level, while continuing the stretching and strengthening exercises indefinitely as ongoing prehab.",
+      "quote": "Start with easy vertical routes, and take a month or two to return to your original level of climbing. Continue with the stretching and strength-training exercises indefinitely—as long as you are a climber, you must engage in these preventive measures.",
+      "source": "https://trainingforclimbing.com/treating-climbers-elbow-medial-epicondylitis/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, non-overreaching paraphrase of the supporting quote: \"easy vertical routes,\" \"a month or two,\" and \"continue...indefinitely\" all map directly onto \"one to two months,\" \"graded... rebuild,\" and \"indefinitely as ongoing prehab.\" It is presented as this source's specific recommendation for return-to-climbing after elbow tendinopathy treatment, not asserted as a universal law binding all injuries or all coaches. The underlying principle — graded reintroduction of climbing-specific loading plus indefinite antagonist/eccentric prehab work for tendinopathy-prone climbers — is consistent with mainstream sports-medicine rehab practice and with other climbing-training frameworks (e.g., Anderson's tissue-prep philosophy, Lattice's antagonist-training emphasis), so it does not contradict established consensus. No implausible numbers or unsupported claims are introduced."
+    },
+    {
+      "id": 272,
+      "angle": "Finger/pulley injury prevention, load mgmt & antagonists",
+      "vote": "3-0",
+      "claim": "The eccentric FlexBar (Reverse Tyler Twist) protocol for medial epicondylitis is performed as 3 sets of 15 repetitions, each repetition taking about 4 seconds, with a ~30-second rest between sets, progressing to the next-resistance FlexBar color after three weeks at that level.",
+      "quote": "The FlexBar exercise was completed three times for a total of 15 repetitions, with every repetition taking four seconds and a 30-second pause between each set of 15 repetitions. Patients progressed toward the next level color FlexBar after completing three sets of 15 for three weeks.",
+      "source": "https://trainingforclimbing.com/treating-climbers-elbow-medial-epicondylitis/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim faithfully restates the supporting quote: 3 sets of 15 reps, about 4 seconds per rep, a 30-second rest between sets, and progression to the next FlexBar color after three weeks at a level. It is presented as one specific named protocol from one source, not as a universal law. The parameters are plausible and consistent with standard eccentric FlexBar (Tyler Twist style) rehab protocols for epicondylitis described in physical therapy literature, and do not conflict with mainstream climbing-training frameworks (Horst, Lattice, Anderson), which do not specify competing FlexBar dosing. No overreach or misreading of the quote is evident."
+    },
+    {
+      "id": 273,
+      "angle": "Finger/pulley injury prevention, load mgmt & antagonists",
+      "vote": "3-0",
+      "claim": "Tendon loading should be staged by injury phase: early tendinopathy is managed with rest, isometric holds, and stretching, while later-stage tendinopathy is addressed with slow eccentric loading of the forearm flexors/pronators.",
+      "quote": "Early tendinopathies should be addressed with rest, isometric exercise and stretching, but later tendinopathies should be addressed with eccentric exercise.",
+      "source": "https://trainingforclimbing.com/treating-climbers-elbow-medial-epicondylitis/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim faithfully paraphrases the supporting quote (\"Early tendinopathies should be addressed with rest, isometric exercise and stretching, but later tendinopathies should be addressed with eccentric exercise\") and adds specificity that is contextually justified: the source article is specifically about climber's elbow / medial epicondylitis, i.e., flexor-pronator tendinopathy at the elbow, so naming \"forearm flexors/pronators\" matches the article's actual subject rather than overreaching. Describing the eccentric work as \"slow\" eccentric loading is consistent with mainstream tendinopathy rehab protocols (e.g., Alfredson-style slow, controlled eccentric loading commonly used for tendinopathy generally), not an invented detail. This early-phase (rest/isometric/stretch) vs late-phase (eccentric) staging is a widely cited simplification in tendinopathy rehab and climbing-injury literature and does not contradict Horst/Lattice/Anderson-style guidance on tendon injury management. It reads as a staged management principle attributed to a specific source, not asserted as an unchallengeable universal law beyond what the source claims."
+    },
+    {
+      "id": 274,
+      "angle": "Assessment, benchmarks & finger-strength metrics",
+      "vote": "3-0",
+      "claim": "The predictive power of finger strength continues to weaken at higher ability: among Elite climbers finger strength remains the strongest single predictor but falls to R = 0.319 and adjusted R-squared = 0.099, explaining only ~9.9% of performance variation, with a smaller regression coefficient (weaker effect size).",
+      "quote": "For Elite climbers, Finger Strength remains the strongest predictor but has a lower R of 0.319 and an adjusted R² of 0.099, meaning only 9.9% of the performance variation can be explained by Finger Strength, with a smaller regression coefficient indicating a weaker effect size.",
+      "source": "https://latticetraining.com/blog/predictors-for-performance/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, non-embellished restatement of its supporting quote: \"strongest predictor,\" R=0.319, adjusted R²=0.099, ~9.9% variance explained, and \"smaller regression coefficient indicating a weaker effect size\" all map 1:1 to the source text with no added spin or extra causal claims. It also matches the well-established pattern in climbing-performance regression research (Lattice's predictor studies and similar work): finger strength (typically normalized to bodyweight) is a strong, often top, single predictor at lower/intermediate ability bands, but its explanatory power shrinks at elite levels because most elite climbers already cluster at a high finger-strength floor, so variance in outcome grade becomes driven more by technique, power, endurance, and tactics rather than raw finger strength. A modest R²(~10%) for a single-variable model at the elite tier is entirely plausible and consistent with mainstream sport-science expectations (diminishing marginal predictive value of a single physical trait as competitive level narrows the trait's variance). Nothing here contradicts Hörst/Anderson/Lattice consensus, and it is presented as a specific reported statistic from a specific study, not overgeneralized into a universal law."
+    },
+    {
+      "id": 275,
+      "angle": "Assessment, benchmarks & finger-strength metrics",
+      "vote": "3-0",
+      "claim": "Lattice analyzed predictors separately by ability tier (Combined, Advanced, Elite, Higher Elite) using simple linear regression on 901 participants, with each predictor evaluated independently against highest boulder grade worked.",
+      "quote": "Lattice Training conducted an analysis... using 901 participants in their study. A simple linear regression analysis examined the relationship between predictor variables including the 7 second max hang % bodyweight and climbing performance measured as the highest boulder grade worked, with the analysis performed separately for each predictor... across different ability levels (Combined, Advanced, Elite, and Higher Elite).",
+      "source": "https://latticetraining.com/blog/predictors-for-performance/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, non-overreaching restatement of the supporting quote: it states (1) simple linear regression, (2) 901 participants, (3) each predictor evaluated independently/separately, and (4) stratified by ability tier (Combined, Advanced, Elite, Higher Elite) — all of which appear near-verbatim in the quote. It does not add causal claims beyond \"predictors\" and \"evaluated against,\" does not assert the methodology as a universal law of training, and is presented as a description of a specific Lattice analysis rather than a general climbing-science consensus claim. The numbers and tiering scheme are plausible and consistent with Lattice Training's known public-facing research work (they routinely publish large-sample predictor/benchmark analyses segmented by their standard ability-tier taxonomy, e.g. Combined/Advanced/Elite/Higher Elite, using metrics like 7-second max hang % bodyweight). Using separate simple (univariate) linear regressions per predictor rather than a multivariate model is a real and known methodological choice/limitation of such Lattice write-ups, not an implausible or fabricated detail. Nothing here contradicts mainstream climbing-training science (Lattice/Hörst/Anderson) or overstates the finding as a universal law — it's accurately scoped as \"this analysis, on this dataset.\""
+    },
+    {
+      "id": 276,
+      "angle": "Assessment, benchmarks & finger-strength metrics",
+      "vote": "3-0",
+      "claim": "For Advanced climbers, finger strength and pulling strength are the most influential predictors, while flexibility and 60% power-endurance are weak predictors with low R-squared values of 0.072 and 0.058 respectively (each explaining well under 8% of grade variance).",
+      "quote": "Among Advanced climbers, Finger Strength and Pulling Strength are the most influential factors... Flexibility and 60% Power Endurance have low R² values (0.072 and 0.058, respectively), meaning they explain very little of the variation in the grade for advanced climbers.",
+      "source": "https://latticetraining.com/blog/predictors-for-performance/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is a faithful, arithmetically accurate restatement of the supporting quote. The quote explicitly states Finger Strength and Pulling Strength are \"the most influential factors\" for Advanced climbers, and gives Flexibility and 60% Power Endurance R² values of 0.072 and 0.058 as \"low,\" explaining \"very little\" variation. The claim's added gloss (\"each explaining well under 8% of grade variance\") is correct conversion of R² to percent variance explained (7.2% and 5.8%, both under 8%) — no overreach or misreading. The claim is properly scoped to \"Advanced climbers\" matching the quote, not generalized to all climbers, and is attributed to Lattice's own predictor analysis rather than presented as a universal law. Substantively it's also consistent with mainstream climbing-science understanding that finger/grip and pulling strength are stronger performance determinants than flexibility, and that flexibility in particular tends to show weak correlation with climbing grade in the broader sport-science literature (e.g., Watts, Draper et al.). Nothing here is implausible or contradicts established consensus."
+    },
+    {
+      "id": 277,
+      "angle": "Assessment, benchmarks & finger-strength metrics",
+      "vote": "3-0",
+      "claim": "Finger strength rises about 6 percentage points of bodyweight per V-grade across the benchmark table (each successive grade adds ~6% BW, e.g. V4 128% to V5 134% to V6 140%).",
+      "quote": "V4 — 128% V5 — 134% V6 — 140% V7 — 146% V8 — 152% V9 — 158% V10 — 164% V11 — 170%",
+      "source": "https://latticetraining.com/blog/what-is-the-number-1-measure-of-performance-for-sport-climbers/",
+      "sourceQuality": "secondary",
+      "evidence": "The quoted Lattice table (V4 128%, V5 134%, V6 140%, V7 146%, V8 152%, V9 158%, V10 164%, V11 170%) shows a perfectly uniform +6 percentage-point step at every successive grade (134-128=6, 140-134=6, 146-140=6, etc.), so \"about 6 percentage points of bodyweight per V-grade\" is an accurate arithmetic description of that specific table, and the worked example (128→134→140) is copied correctly. The claim is scoped to \"across the benchmark table\" from a named source (Lattice), not asserted as a universal physiological law for all climbers — it reads as reporting a specific published benchmark progression rather than overreaching into general causal claims. Using finger-strength-as-%-bodyweight as a performance metric tied to bouldering grade is itself a mainstream, well-established idea in the Lattice/Anderson finger-strength literature, so the framing is consistent with established practice even though real-world data (e.g., Lattice's own hangboard/critical-force datasets) show more scatter and some grade-dependent nonlinearity than a perfectly linear table implies. That caveat concerns the underlying construct's real-world noise, not a misreading of the quote, so it doesn't rise to refutation."
+    },
+    {
+      "id": 278,
+      "angle": "Assessment, benchmarks & finger-strength metrics",
+      "vote": "3-0",
+      "claim": "A one-arm conversion of the same dataset (max %BW achieved in a one-arm pull on a 20mm edge within 7-10 seconds) spans from V4 at 49% to V17 at 118%.",
+      "quote": "For one-arm pulls (which converts this data), the maximum value (percentage of body weight) achieved in a one-arm pull on a 20mm edge within 7-10 seconds spans from V4 at 49% to V17 at 118%.",
+      "source": "https://latticetraining.com/blog/what-is-the-number-1-measure-of-performance-for-sport-climbers/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim is essentially a verbatim restatement of its supporting quote (same protocol description — one-arm pull, 20mm edge, 7-10s, %BW — same endpoints V4/49% to V17/118%), so it does not overreach or misread the source. It is also plausible on domain knowledge: it's presented as one named lab's (Lattice) specific derived metric/protocol, not asserted as universal law. The magnitude and slope are consistent with known climbing finger-strength/one-arm-hang literature — elite climbers (~V15-17) are documented performing weighted one-arm hangs/pulls exceeding 100% bodyweight, while intermediate climbers (~V4) typically can only sustain well under bodyweight in an assisted/one-arm pull test (~49% is reasonable for a partially-assisted protocol). The implied per-grade increment (~5-6% BW per V-grade across 13 grades) is in line with the roughly linear grade-vs-finger-strength trends reported in Lattice's public datasets. Nothing here contradicts Horst/Anderson/mainstream sport-science consensus, and it's clearly scoped as this source's specific conversion, not a universal claim."
+    },
+    {
+      "id": 279,
+      "angle": "Assessment, benchmarks & finger-strength metrics",
+      "vote": "3-0",
+      "claim": "Climbing-specific finger strength also correlated strongly with campus board score, r = 0.82 (r² ≈ 0.67, ~67% of variance explained).",
+      "quote": "climbing-specific finger strength exhibited a strong correlation with campus boarding (r = 0.82)",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12479556/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim directly restates the supporting quote (climbing-specific finger strength strongly correlated with campus board score, r = 0.82) and merely appends a correct mechanical derivation: 0.82^2 = 0.6724 ~ 0.67, so \"~67% of variance explained\" is accurate math, not overreach. A strong correlation between finger/grip strength and campus-board performance is plausible and consistent with mainstream climbing-training literature, since contact/finger strength underlies power-endurance movements like campusing. The claim is presented as a specific study finding, not generalized into a universal law, and does not contradict Horst/Lattice/Anderson consensus."
+    },
+    {
+      "id": 281,
+      "angle": "Assessment, benchmarks & finger-strength metrics",
+      "vote": "3-0",
+      "claim": "The study sample was 19 males aged 26 ± 3 years with redpoint levels ranging from 6b+ to 8c (French scale), published in the European Journal of Applied Physiology in 2025 (Volume 125, pp. 2823–2830) — a peer-reviewed primary study, though the small all-male sample limits generalizability.",
+      "quote": "nineteen males aged 26 ± 3 years with a previous redpoint level from 6b + to 8c on the French grading scale ... published in the European Journal of Applied Physiology in 2025 (Volume 125, pages 2823-2830)",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12479556/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim's factual assertions (19 males, 26±3 years, 6b+–8c French redpoint range, EJAP 2025, Vol 125, pp. 2823–2830) are a verbatim, faithful restatement of the supporting quote with no numeric distortion or added specificity beyond what's quoted. The interpretive gloss — \"peer-reviewed primary study\" (EJAP is indeed a peer-reviewed journal, and this is the original study, not the PMC secondary write-up discussing it) and \"small all-male sample limits generalizability\" — is a standard, appropriate methodological caveat rather than an overreach; it doesn't inflate the study's authority or claim universality. Nothing here contradicts mainstream climbing-science consensus (Lattice/Hörst/Anderson) or reads as one coach's protocol dressed as universal law — it's just descriptive sample/publication metadata. No red flags."
+    },
+    {
+      "id": 282,
+      "angle": "Assessment, benchmarks & finger-strength metrics",
+      "vote": "3-0",
+      "claim": "The endurance test is intended to gauge forearm-flexor blood flow and simulate climbing a continuously difficult route with little rest, pairing an endurance metric with the strength metric for a complete profile.",
+      "quote": "The goal is to measure blood flow through the forearm flexors and simulate the experience of climbing a continuously difficult route with little opportunity for rest.",
+      "source": "https://trainingforclimbing.com/3-hangboard-tests-to-gauge-your-climbing-ability/",
+      "sourceQuality": "secondary",
+      "evidence": "The claim tracks its quote closely: \"gauge forearm-flexor blood flow\" and \"simulate climbing a continuously difficult route with little rest\" map directly onto \"measure blood flow through the forearm flexors\" and \"simulate the experience of climbing a continuously difficult route with little opportunity for rest.\" The added framing — that this endurance metric pairs with a strength metric for a complete profile — is a reasonable, non-overreaching gloss consistent with standard climbing-assessment practice (e.g., Lattice/Horst-style batteries combine max finger-strength tests with an endurance/repeater-style test to characterize an athlete's finger profile). No implausible numbers are asserted, and nothing here contradicts mainstream climbing-training consensus or misstates a specific protocol as universal law — it's describing this source's own test rationale. Faithful and plausible."
+    },
+    {
+      "id": 283,
+      "angle": "Strength phase programming (fingers + pulling)",
+      "vote": "3-0",
+      "claim": "Total weekly climbing plus finger-training days should not exceed four, and the intense max-strength fingerboard protocol should be limited to two days per week.",
+      "quote": "with aggregate climbing and finger training days per week not exceeding four... The intense max-strength training protocol should be limited to just two days per week.",
+      "source": "https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/",
+      "sourceQuality": "blog",
+      "evidence": "The claim is a faithful restatement of the supporting quote (aggregate climbing+finger-training days ≤4/week; max-strength fingerboard protocol ≤2 days/week) with no added overreach or altered numbers. The figures are plausible and consistent with mainstream climbing-training consensus: max-strength/max-hangs fingerboard work is universally recommended at 2x/week (Hörst, Lattice, Anderson) due to high tendon/pulley and CNS load requiring 48-72h+ recovery between sessions, and capping total weekly high-intensity climbing+finger days around 4 (leaving rest/active-recovery days) is standard periodization practice to manage finger/connective-tissue injury risk — which aligns with this project's explicitly conservative, injury-risk-aware framing. trainingforclimbing.com (Eric Hörst) is a mainstream, widely-cited source in this domain, not a fringe outlier, and the claim states the constraint as guidance rather than an absolute universal law applicable regardless of context."
+    },
+    {
+      "id": 284,
+      "angle": "Strength phase programming (fingers + pulling)",
+      "vote": "3-0",
+      "claim": "The repeaters strength-endurance protocol uses 7-second hang / 3-second rest intervals in sets of 6 (each set about 1 minute), performing one set per grip for entry-level up to three sets per grip for advanced, focusing initially on half-crimp and open-crimp grips.",
+      "quote": "Each set is comprised of 6 hang-rest intervals consisting of a 7-second hang and 3-second rest. Therefore, each 6-hang set will take about 1 minute... You will perform one (entry-level) to three (advanced) sets of repeaters with each grip position... Initially focus on training the half-crimp and open-crimp grip—one set each.",
+      "source": "https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/",
+      "sourceQuality": "blog",
+      "evidence": "The claim accurately restates the quoted source: 7s hang/3s rest × 6 intervals = 60s per set (math checks out: 6×10s=60s), progression from 1 set (entry) to 3 sets (advanced) per grip, and initial focus on half-crimp/open-crimp — all directly supported by the quote. This is the well-known Eva López/Bechtel \"repeaters\" protocol widely referenced in mainstream climbing training literature (Hörst's Training for Climbing, Lattice content, etc. describe close variants of this same 7:3 or similar duty-cycle scheme for aerobic/anaerobic capacity work on the fingerboard). The claim frames it as \"the repeaters strength-endurance protocol\" (a specific named/established protocol), not as a universal law applicable to all training, and it is presented alongside its source correctly. No implausible numbers, no contradiction of consensus — repeaters as a finger strength-endurance modality with short hang/short rest intervals is standard practice. Minor stylistic quibble: using \"The\" rather than \"A\" repeaters protocol slightly implies singularity when variants exist (e.g., some coaches use 10s hang/3-5s rest), but this is a faithful-enough restatement of a specific, correctly-cited protocol rather than a misleading overreach."
+    },
+    {
+      "id": 285,
+      "angle": "Power phase: limit bouldering & campus",
+      "vote": "3-0",
+      "claim": "Power-phase sessions should be kept short and high-quality (intensity, not volume), because fatigue/long sessions build endurance rather than power; well-conditioned climbers can do up to two to three hard power sessions per week.",
+      "quote": "By keeping these sessions short (fatigue creates endurance, not power), you can do more per week—if you're in shape, up to two or three hard power sessions.",
+      "source": "https://www.saltpumpclimbing.com/five-phases-climbing-training/",
+      "sourceQuality": "blog",
+      "evidence": "The claim is a faithful restatement of the quote: \"keeping sessions short (fatigue creates endurance, not power)... up to two or three hard power sessions\" per week for conditioned climbers maps directly onto the claim's wording, with no added specifics or inflated numbers. The underlying mechanism—that accumulated fatigue/volume shifts the training stimulus toward endurance/capacity rather than true power/max-recruitment adaptations—is standard S&C and climbing-training doctrine (echoed in Hörst's Training for Climbing and Lattice's limit bouldering guidance: short, high-quality, fully-recovered efforts for power work). A frequency of 2-3 power sessions/week for well-conditioned athletes is within the normal range cited across climbing coaches (most commonly 2, with 3 as an upper bound for advanced/conditioned athletes), and the claim appropriately hedges with \"up to\" and \"well-conditioned\" rather than presenting a rigid universal prescription. Nothing here contradicts mainstream consensus or overstates the source's specific, bounded claim."
+    },
+    {
+      "id": 286,
+      "angle": "Power phase: limit bouldering & campus",
+      "vote": "3-0",
+      "claim": "The power phase sits as phase 3 of a five-phase periodized macrocycle, after volume (1) and strength (2) and before power endurance (4) and performance (5), with the final performance phase devoted to redpointing routes and sending boulder projects outdoors.",
+      "quote": "The performance phase is all about getting out and sending your projects—its time to put all of that training to use. Your efforts during this phase should be about getting outside and trying to red point routes or send boulders.",
+      "source": "https://www.saltpumpclimbing.com/five-phases-climbing-training/",
+      "sourceQuality": "blog",
+      "evidence": "The claim faithfully restates the quote for the performance-phase portion (redpointing routes/sending boulder projects outdoors = \"getting outside and trying to red point routes or send boulders\"). The broader claim — a five-phase macrocycle ordered Volume→Strength→Power→Power Endurance→Performance — matches a very common, mainstream climbing periodization structure (echoed in Anderson's RCTM base/strength/power/power-endurance/peak framework and similar Lattice/Hörst-style block models), so it's not implausible or inconsistent with consensus. The claim is presented as describing this specific source's named framework (a \"five-phase\" model from an article literally titled about five phases), not asserted as a universal law all climbers must follow, which the rubric explicitly allows. Minor caveat: the quote itself only supports the performance-phase detail, not the phase-numbering, but that ordering is a standard, unremarkable convention in climbing-training content and not a stretch to attribute to a five-phase article."
+    },
+    {
+      "id": 287,
+      "angle": "Assessment, benchmarks & finger-strength metrics",
+      "vote": "3-0",
+      "claim": "The four primary measurements in the standards tables are max hang, max weighted pull, max reps pull, and the 7:3 repeater, each split by gender (male/female) and discipline (bouldering/sport).",
+      "quote": "Four of their primary measurements are max hang, max weighted pull, max reps pull, and 7:3 repeater, separated by both gender (male and female) and climbing discipline (bouldering and sport climbing).",
+      "source": "https://www.powercompanyclimbing.com/blog/metrics-for-climbers",
+      "sourceQuality": "blog",
+      "evidence": "The claim is a faithful, near-verbatim restatement of the supporting quote (\"max hang, max weighted pull, max reps pull, and 7:3 repeater, separated by both gender... and climbing discipline\"). It attributes these four metrics to a specific source's (\"their\") standards tables rather than asserting them as universal law, and the content is plausible and consistent with mainstream finger/pull-strength assessment practice in climbing training (e.g., Lattice-style testing batteries commonly use max hang, weighted pull, max-rep pull, and repeater protocols, normed by sex and discipline). No numeric values are given that could be implausible, and nothing here contradicts Horst/Lattice/Anderson consensus on assessment metrics."
+    },
+    {
+      "id": 288,
+      "angle": "Assessment, benchmarks & finger-strength metrics",
+      "vote": "3-0",
+      "claim": "Repeating hard, finger-y boulder problems is offered as a more sport-specific (if less quantifiable) alternative to weighted 20mm hangs for building the finger-strength quality the test measures.",
+      "quote": "repeating hard boulders that consist of 'finger-y' holds would be a more sport specific but less quantifiable way",
+      "source": "https://www.powercompanyclimbing.com/blog/metrics-for-climbers",
+      "sourceQuality": "blog",
+      "evidence": "The claim faithfully paraphrases the quote: the source explicitly frames repeating hard, finger-y boulders as \"more sport specific but less quantifiable\" relative to a quantifiable metric like weighted 20mm hangs. This is consistent with mainstream climbing-training discourse (echoed by Lattice, Hörst, and others) that distinguishes lab-like quantifiable tests (hangboard) from more specific but harder-to-measure training stimuli (actual climbing movement on small/incut holds). The claim is presented as one coach's stated tradeoff/option (\"offered as... an alternative\"), not asserted as universal law, and doesn't overreach the quote or misstate numbers. No contradiction with established consensus."
     }
   ],
   "genuineRefuted": [
@@ -2520,7 +2710,15 @@
       "abstained": 0,
       "claim": "To find the starting training weight, begin by adding 5–7% of bodyweight and select a load that still permits ~10–20 total reps across three sets; increase the weight by 5 lb once you can exceed 20 pull-ups.",
       "source": "https://trainingforclimbing.com/hypergravity-pull-up-training-for-increased-strength-power-and-endurance/"
+    },
+    {
+      "id": 280,
+      "angle": "Assessment, benchmarks & finger-strength metrics",
+      "vote": "1-2",
+      "abstained": 0,
+      "claim": "Generic handgrip (dynamometer) strength was only moderately associated with redpoint (r = 0.54) and campus board (r = 0.47) and was NOT associated with bouldering — confirming that climbing-specific, edge-based finger testing is superior to general handgrip for predicting climbing ability.",
+      "source": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12479556/"
     }
   ],
-  "abstainedCount": 20
+  "abstainedCount": 0
 }
