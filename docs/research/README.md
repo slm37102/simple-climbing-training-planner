@@ -36,8 +36,8 @@ disciplines. Deepest coverage on (1) **periodization & planning** and (2)
 
 ## Status (as of this commit)
 
-- **220 distinct claims verified** (31 search-verified + 189 reasoning-verified); **6 refuted**.
-- Verification is **in progress, resumable**. **~79 gathered claims remain
+- **278 distinct claims verified** (31 search-verified + 247 reasoning-verified); **7 refuted**.
+- Verification is **almost complete**. **~20 gathered claims remain
   un-adjudicated** in `data/gathered-claims.json` via the bulk-verify workflow
   (`verify-all.js`, run `wf_638855a7-474`).
 
