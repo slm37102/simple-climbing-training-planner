@@ -1,4 +1,6 @@
 // Warm-up & cooldown checklists by session type.
+import { WARMUP_DRILLS } from './drills.js';
+
 const TWO_STAGE_WARMUP = [
   '5 min easy cardio (jog / bike / row)',
   'Synovial: wrist / elbow / shoulder / hip joint circles 30s each',
@@ -27,11 +29,11 @@ const COOLDOWN_GENERIC = [
 
 export const Warmup = {
   forSession(session) {
-    if (!session) return { warmup: [], cooldown: [] };
+    if (!session) return { warmup: [], cooldown: [], skillDrills: null };
     const id = session.sessionId || '';
     const isHangboard = id.startsWith('mon-hangboard') || id === 'mon-retest';
     const isClimbing  = id.startsWith('thu-') || id.startsWith('sat-');
-    if (session.isRest) return { warmup: [], cooldown: [] };
+    if (session.isRest) return { warmup: [], cooldown: [], skillDrills: null };
 
     let warmup = [...TWO_STAGE_WARMUP];
     if (isHangboard) warmup = warmup.concat(HANGBOARD_PROGRESSION);
@@ -39,7 +41,10 @@ export const Warmup = {
 
     return {
       warmup,
-      cooldown: COOLDOWN_GENERIC
+      cooldown: COOLDOWN_GENERIC,
+      // Optional technique-drill picker (KG-A9 addendum), Thu/Sat only — narrowed
+      // to footwork+positioning so it doesn't clutter the pre-session checklist.
+      skillDrills: isClimbing ? WARMUP_DRILLS : null
     };
   },
   restRecoveryChecklist() {

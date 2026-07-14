@@ -2,6 +2,7 @@ import { Storage } from '../storage.js';
 import { Program } from '../program.js';
 import { inputVisibility, repsLabel } from '../exercise-inputs.js';
 import { escHtml as esc } from '../ui.js';
+import { SKILL_DRILLS, WARMUP_DRILLS } from '../drills.js';
 
 export function renderLog(root) {
   let activeTab = 'feed';
@@ -119,8 +120,12 @@ export function renderLog(root) {
 
     const exRows = (entry.exercises || []).map((x, i) => {
       const a = (x.actual && typeof x.actual === 'object') ? x.actual : {};
-      if (Array.isArray(x.drills)) {
-        const options = x.drills.map(d =>
+      // KG-A9 addendum: the drills array is no longer persisted onto stored
+      // days, so fall back to the js/drills.js catalog; legacy days that still
+      // carry a stored `drills` array (pre-addendum) keep using their own copy.
+      if (x.kind === 'skill' || Array.isArray(x.drills)) {
+        const list = Array.isArray(x.drills) && x.drills.length ? x.drills : SKILL_DRILLS;
+        const options = list.map(d =>
           `<option value="${esc(d.key)}"${a.drill === d.key ? ' selected' : ''}>${esc(d.name)}</option>`
         ).join('');
         return `<div style="padding:6px 0;border-bottom:1px solid #ffffff0f">
@@ -164,6 +169,25 @@ export function renderLog(root) {
       </div>`;
     }).join('');
 
+    // KG-A9 addendum: warm-up drill is a day-level field (not tied to an
+    // exercise index), so it's edited here rather than inside exRows — and
+    // only on Thu/Sat, the only sessions that ever offer it live.
+    const startISO = Program.effectiveStart(plan.settings);
+    const slotCtx = startISO ? Program.resolveDate(date, startISO, Program.cycleWeeksOf(plan.settings), plan.settings?.peakType) : null;
+    let warmupDrillRow = '';
+    if (slotCtx?.slot === 'thu-main' || slotCtx?.slot === 'sat-main') {
+      const wOptions = WARMUP_DRILLS.map(d =>
+        `<option value="${esc(d.key)}"${entry.warmupDrill === d.key ? ' selected' : ''}>${esc(d.name)}</option>`
+      ).join('');
+      warmupDrillRow = `<div class="row" style="gap:6px;margin-bottom:8px;align-items:center">
+        <span style="font-size:.8rem;color:var(--muted)">Warm-up drill:</span>
+        <select data-edit-field="warmupDrill" style="width:190px">
+          <option value="">—</option>
+          ${wOptions}
+        </select>
+      </div>`;
+    }
+
     return `<div class="log-edit-form" data-edit-form="${key}" data-edit-feel-value="${feel != null ? feel : ''}" style="margin-top:10px;border-top:1px solid #ffffff20;padding-top:10px">
       <div class="row" style="gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap">
         <span style="font-size:.8rem;color:var(--muted)">Status:</span>
@@ -174,6 +198,7 @@ export function renderLog(root) {
       <div class="row" style="gap:4px;margin-bottom:8px;align-items:center">
         <span style="font-size:.8rem;color:var(--muted)">Feel:</span>${stars}
       </div>
+      ${warmupDrillRow}
       <textarea data-edit-field="notes" placeholder="Session notes…" style="width:100%;min-height:56px;resize:vertical;border-radius:6px;padding:8px;background:#13161C;border:1px solid #1A1E26;color:var(--text);font-family:inherit;font-size:.9rem;margin-bottom:8px;box-sizing:border-box">${esc(notes)}</textarea>
       ${exRows ? `<details style="margin-bottom:8px"><summary style="cursor:pointer;font-size:.8rem;color:var(--muted)">Edit exercise logs (${(entry.exercises || []).length})</summary>${exRows}</details>` : ''}
       <div class="row" style="gap:8px;justify-content:flex-end">
@@ -250,6 +275,8 @@ export function renderLog(root) {
         const feelRaw    = form.dataset.editFeelValue;
         const sessionFeel = feelRaw !== '' && feelRaw != null ? +feelRaw : null;
         const sessionNotes = form.querySelector('[data-edit-field="notes"]')?.value ?? '';
+        const warmupDrillSel = form.querySelector('[data-edit-field="warmupDrill"]');
+        const warmupDrill = warmupDrillSel && warmupDrillSel.value !== '' ? warmupDrillSel.value : null;
 
         const existing = Storage.getDay(planId, date);
         const exercises = (existing?.exercises || []).map((x, i) => {
@@ -274,6 +301,7 @@ export function renderLog(root) {
         const patch = { exercises, sessionNotes };
         if (status) patch.status = status;
         if (sessionFeel != null) patch.sessionFeel = sessionFeel;
+        if (warmupDrillSel) patch.warmupDrill = warmupDrill;
         Storage.setDay(planId, date, patch);
         editingSet.delete(key);
         renderFeedList();

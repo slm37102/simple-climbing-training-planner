@@ -6,6 +6,7 @@
 // See docs/training-philosophy.md and docs/adr/0002-configurable-cycle-length.md for rationale.
 
 import { snapToMonday, addDays } from './dates.js';
+import { SKILL_DRILLS } from './drills.js';
 
 export const MIN_CYCLE_WEEKS = 8;
 export const MAX_CYCLE_WEEKS = 40;
@@ -474,17 +475,10 @@ function buildRetestSession() {
   };
 }
 
-// ============== Tuesday skill drills (closes KG-A9) ==============
-// A small, finger-neutral technique reference for the optional Tuesday light
-// day. The athlete picks one to focus on that session; picking a drill both
-// records the choice and marks the exercise done. "Falling practice" directly
-// serves the 7b lead goal (project-goals.md G1) that KG-A9 called out as unmet.
-const SKILL_DRILLS = [
-  { key: 'silent-feet', name: 'Silent feet', focus: 'Place each foot once, deliberately, with no readjusting or scraping. Look at the hold, commit, weight it fully before moving your hands.' },
-  { key: 'flagging', name: 'Flagging', focus: 'Use inside/outside flags on steep or off-balance moves instead of pulling in harder. Keep your hips close to the wall.' },
-  { key: 'quiet-hands', name: 'Quiet hands', focus: 'Rest on straight arms between moves. Minimize grip time — move your hands quickly and precisely instead of death-gripping while you look for the next hold.' },
-  { key: 'falling-practice', name: 'Falling practice (lead)', focus: 'With a spotter or top-rope backup, practice controlled falls a few bolts up on steep terrain. Builds fall confidence for lead climbing.' },
-];
+// ============== Tuesday skill drills (KG-A9 + addendum) ==============
+// Catalog lives in js/drills.js (shared with js/warmup.js's Thu/Sat warm-up
+// picker); imported above, re-exported below for callers that still import
+// SKILL_DRILLS from this module.
 
 // Light / rest / optional templates
 const LIGHT_DAY = {

@@ -7,6 +7,7 @@ import { Warmup } from '../warmup.js';
 import { Replan } from '../replan.js';
 import { daysBetween } from '../dates.js';
 import { inputVisibility, repsLabel, actualHasResult, howto } from '../exercise-inputs.js';
+import { DRILL_CATEGORIES, WARMUP_DRILLS } from '../drills.js';
 
 const SELECTED_DATE_KEY = 'todaySelectedDate';
 
@@ -324,7 +325,7 @@ export function renderToday(root) {
   // Only surface a gap on the real current date — not while browsing history (ADR-0008).
   const gap = date === realToday ? Replan.detectGap(activePlan, realToday) : null;
 
-  const { warmup, cooldown } = Warmup.forSession(session);
+  const { warmup, cooldown, skillDrills } = Warmup.forSession(session);
 
   let body = dateNavHtml + planSwitcherHtml + completionHtml + headerHtml(date, ctx, session) + gapBannerHtml(gap);
 
@@ -376,6 +377,7 @@ export function renderToday(root) {
       <summary>Warm-up <span class="count">${checkedCount}/${warmup.length}</span></summary>
       <ul class="checklist">${warmup.map((t,i) =>
         `<li><label style="display:flex;gap:8px;cursor:pointer"><input type="checkbox" data-warmup="${i}" ${dayLog?.warmup?.[i]?'checked':''}> ${t}</label></li>`).join('')}</ul>
+      ${warmupDrillPickerHtml(skillDrills, dayLog?.warmupDrill)}
     </details></div>`;
   }
 
@@ -626,19 +628,43 @@ function howtoHtml(ex) {
   return `<div class="howto"><b>How</b>${text}</div>`;
 }
 
-// Tuesday skill-drill picker (closes KG-A9): a pill per drill option, plus a
-// "Focus" detail panel for whichever drill is selected (defaults to the first
-// so there's always something to read, even before a tap). Picking a drill
-// both records the choice and marks the exercise done — no separate checkbox.
-function drillPickerHtml(i, ex, actual) {
-  const drills = ex.drills;
-  const selectedKey = actual.drill || drills[0].key;
+// Technique-drill picker (KG-A9 + addendum): a category-chip filter narrows a
+// (possibly long) drill list to one category at a time, with a pill per drill
+// in the active category and a "Focus" detail panel for whichever drill is
+// selected (defaults to the first, so there's always something to read even
+// before a tap). `slug` disambiguates DOM ids/data-attrs between the Tuesday
+// exercise picker (slug = exercise index) and the warm-up embed (slug = 'warmup').
+function categoryPillsHtml(drills, selectedKey, slug) {
   const selected = drills.find(d => d.key === selectedKey) || drills[0];
-  const pills = drills.map(d =>
-    `<button type="button" class="pill ${d.key === selectedKey ? 'active' : ''}" data-drill-pill="${d.key}" data-drill-ex="${i}" aria-pressed="${d.key === selectedKey}">${d.name}</button>`
+  const cats = DRILL_CATEGORIES.filter(c => drills.some(d => d.category === c.key));
+  const activeCat = selected ? selected.category : cats[0]?.key;
+  const chips = cats.map(c =>
+    `<button type="button" class="chip ${c.key === activeCat ? 'active' : ''}" data-drill-chip="${c.key}" data-drill-slug="${slug}">${c.name}</button>`
   ).join('');
-  return `<div class="pill-group" role="group" aria-label="Skill drill">${pills}</div>
-    <div class="howto" id="drill-focus-${i}"><b>Focus</b>${selected.focus}</div>`;
+  const groups = cats.map(c => {
+    const pills = drills.filter(d => d.category === c.key).map(d =>
+      `<button type="button" class="pill ${d.key === selectedKey ? 'active' : ''}" data-drill-pill="${d.key}" data-drill-slug="${slug}" aria-pressed="${d.key === selectedKey}">${d.name}</button>`
+    ).join('');
+    return `<div class="pill-group drill-pills" role="group" aria-label="${c.name} drills" data-drill-cat-group="${c.key}" data-drill-slug="${slug}"${c.key === activeCat ? '' : ' style="display:none"'}>${pills}</div>`;
+  }).join('');
+  return `<div class="chip-row" role="tablist" aria-label="Drill category">${chips}</div>${groups}
+    <div class="howto" id="drill-focus-${slug}"><b>Focus</b>${selected ? selected.focus : ''}</div>`;
+}
+
+function drillPickerHtml(i, ex, actual) {
+  const selectedKey = actual.drill || ex.drills[0].key;
+  return categoryPillsHtml(ex.drills, selectedKey, String(i));
+}
+
+// Thu/Sat warm-up embed — same category-chip/pill mechanism, but day-level
+// (dayLog.warmupDrill) rather than tied to an exercise index.
+function warmupDrillPickerHtml(drills, selectedKey) {
+  if (!drills || !drills.length) return '';
+  const key = selectedKey || drills[0].key;
+  return `<div class="warmup-drill-embed">
+    <div class="section-label" style="margin-bottom:8px">Optional: focus on a drill</div>
+    ${categoryPillsHtml(drills, key, 'warmup')}
+  </div>`;
 }
 
 function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
@@ -732,17 +758,21 @@ function wire(root, date, session, ctx, readinessMult) {
       status: cur.status || 'partial',
       readiness: cur.readiness || { sleep:3, soreness:3, fatigue:3 },
       sessionFeel: cur.sessionFeel ?? 3,
-      // Carry kind/optional/drills/prescribedTarget onto the persisted exercise so
+      // Carry kind/optional/prescribedTarget onto the persisted exercise so
       // js/views/log.js's edit form (which reads only the stored day, never the
       // live Program session) can pick the right inputVisibility/repsLabel/drill
       // picker for a past day instead of falling back to generic sets+reps+rpe.
+      // Drill options are NOT persisted here (KG-A9 addendum) — log.js resolves
+      // them from the js/drills.js catalog instead, so a later drill-list edit
+      // doesn't get frozen into every already-logged day.
       exercises: cur.exercises || session.exercises.map(ex => ({
-        name: ex.name, kind: ex.kind, optional: ex.optional, drills: ex.drills,
+        name: ex.name, kind: ex.kind, optional: ex.optional,
         prescribedTarget: ex.prescribedTarget, prescribed: '', actual:{}, notes:''
       })),
       sessionNotes: cur.sessionNotes || '',
       warmup: cur.warmup || {},
-      cooldown: cur.cooldown || {}
+      cooldown: cur.cooldown || {},
+      warmupDrill: cur.warmupDrill
     };
   }
 
@@ -802,20 +832,48 @@ function wire(root, date, session, ctx, readinessMult) {
     });
   });
 
-  // ===== Skill-drill pills (closes KG-A9) =====
-  // Picking a drill both selects it and marks the exercise done — no separate checkbox.
+  // ===== Technique-drill category chips (KG-A9 + addendum) =====
+  // Chips only control which category's pill-group is visible — no persist.
+  root.querySelectorAll('button[data-drill-chip]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const slug = btn.dataset.drillSlug;
+      const cat = btn.dataset.drillChip;
+      root.querySelectorAll(`button[data-drill-chip][data-drill-slug="${slug}"]`).forEach(b => {
+        b.classList.toggle('active', b === btn);
+      });
+      root.querySelectorAll(`[data-drill-cat-group][data-drill-slug="${slug}"]`).forEach(g => {
+        g.style.display = g.dataset.drillCatGroup === cat ? '' : 'none';
+      });
+    });
+  });
+
+  // ===== Technique-drill pills (closes KG-A9; warm-up embed is the addendum) =====
+  // Picking a Tuesday-exercise drill both selects it and marks the exercise
+  // done (no separate checkbox); picking a warm-up drill just records the
+  // choice on the day (dayLog.warmupDrill) — it doesn't gate anything.
   root.querySelectorAll('button[data-drill-pill]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const i = +btn.dataset.drillEx;
+      const slug = btn.dataset.drillSlug;
       const key = btn.dataset.drillPill;
-      const ex = session.exercises[i];
-      const drill = ex.drills.find(d => d.key === key);
-      if (!drill) return;
 
-      root.querySelectorAll(`button[data-drill-ex="${i}"]`).forEach(b => {
+      root.querySelectorAll(`button[data-drill-pill][data-drill-slug="${slug}"]`).forEach(b => {
         b.classList.remove('active'); b.setAttribute('aria-pressed', 'false');
       });
       btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true');
+
+      if (slug === 'warmup') {
+        const drill = WARMUP_DRILLS.find(d => d.key === key);
+        if (!drill) return;
+        const focusEl = root.querySelector('#drill-focus-warmup');
+        if (focusEl) focusEl.innerHTML = `<b>Focus</b>${drill.focus}`;
+        persist({ warmupDrill: key });
+        return;
+      }
+
+      const i = +slug;
+      const ex = session.exercises[i];
+      const drill = ex.drills.find(d => d.key === key);
+      if (!drill) return;
 
       const focusEl = root.querySelector(`#drill-focus-${i}`);
       if (focusEl) focusEl.innerHTML = `<b>Focus</b>${drill.focus}`;
