@@ -183,3 +183,241 @@ Each step is shown in the "reason" tooltip next to the suggested load on the Tod
 | `bodyweight` (kg) | Included in total hanging load display |
 
 Update via the **Retest session** at the end of each Base block (week 6 in the default layout), or manually in Profile.
+
+---
+
+## Generated 12-Week Schedule (hybrid focus, comp peak)
+
+> **Auto-generated from `js/program.js`** (`Program.build`, default 12-week cycle, `focus: hybrid`, `peakType: comp`).
+> Regenerate after changing `js/program.js` — do not hand-edit this section.
+> Loads show the prescribed **% of benchmark added load**; the app converts these to kg from your benchmarks and applies auto-adjust / readiness / layoff-decay on the day.
+> Deload and taper weeks are shown with their volume cuts already applied. Every session gets the standard two-stage warm-up and cool-down from `js/warmup.js`.
+
+### Week 1 — Base · boulder-flavor week
+
+- **Mon** — Hangboard (base) + S&C *(Strength / alactic)*
+  - **7/3 Repeaters** — 7s × 6 reps, 2 sets per grip (half-crimp + open-crimp) · rest 3s within / 3 min between sets · bodyweight · RPE 7.5–8.5
+  - **Max hangs (intro)** — 10s weighted, 3 hangs × 2 sets — low-end load, crisp form · rest 3 min · 55–70% of max-hang added load · RPE 8–9
+  - **Weighted pull-ups** — 5 × 5 · 2 min between sets · 55–70% of 1RM added load · RPE 7–8.5
+  - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
+- **Tue** — Light: mobility or skill drills
+  - **15–20 min mobility** — shoulders, hips, wrists
+  - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+- **Wed** — Rest day
+- **Thu** — Projecting / technique boulders *(Skill / Strength)*
+  - **Projecting (mid-grade)** — 60–90 min of 4×4-style projecting on submaximal problems · RPE 7.5–9 · target: 75 min
+- **Fri** — Rest day
+- **Sat** — Boulder triples + open climb *(Anaerobic capacity)*
+  - **Boulder triples (4×4)** — 4 boulders · climbed back-to-back · 4 min rest · 3–4 sets · 2–3 grades below max · RPE 8.5–9.5 · target: 4 sets
+  - **Open climbing (technique)** — 30–45 min mileage on submax problems · RPE 6–7.5 · target: 40 min · *(optional)*
+- **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
+  - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
+
+### Week 2 — Base · sport-flavor week
+
+- **Mon** — Hangboard (base) + S&C *(Strength / alactic)*
+  - **7/3 Repeaters** — 7s × 6 reps, 2 sets per grip (half-crimp + open-crimp) · rest 3s within / 3 min between sets · bodyweight · RPE 7.5–8.5
+  - **Max hangs (intro)** — 10s weighted, 3 hangs × 2 sets — low-end load, crisp form · rest 3 min · 55–70% of max-hang added load · RPE 8–9
+  - **Weighted pull-ups** — 5 × 5 · 2 min between sets · 55–70% of 1RM added load · RPE 7–8.5
+  - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
+- **Tue** — Light: mobility or skill drills
+  - **15–20 min mobility** — shoulders, hips, wrists
+  - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+- **Wed** — Rest day
+- **Thu** — Route pyramid (Base) *(Aerobic capacity)*
+  - **Route pyramid** — pyramid 4-3-2-1 routes · walking rest between routes; 1 grade below redpoint · RPE 7–8 · target: 10 routes
+- **Fri** — Rest day
+- **Sat** — ARC — aerobic base *(Aerobic base)*
+  - **ARC (continuous easy climbing)** — 2 × 30 min, just below pump · 10 min rest between sets · OR 90 min easy laps · RPE 4–6 · target: 30 min
+- **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
+  - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
+
+### Week 3 — Base · boulder-flavor week
+
+- **Mon** — Hangboard (base) + S&C *(Strength / alactic)*
+  - **7/3 Repeaters** — 7s × 6 reps, 2 sets per grip (half-crimp + open-crimp) · rest 3s within / 3 min between sets · bodyweight · RPE 7.5–8.5
+  - **Max hangs (intro)** — 10s weighted, 3 hangs × 2 sets — low-end load, crisp form · rest 3 min · 55–70% of max-hang added load · RPE 8–9
+  - **Weighted pull-ups** — 5 × 5 · 2 min between sets · 55–70% of 1RM added load · RPE 7–8.5
+  - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
+- **Tue** — Light: mobility or skill drills
+  - **15–20 min mobility** — shoulders, hips, wrists
+  - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+- **Wed** — Rest day
+- **Thu** — Projecting / technique boulders *(Skill / Strength)*
+  - **Projecting (mid-grade)** — 60–90 min of 4×4-style projecting on submaximal problems · RPE 7.5–9 · target: 75 min
+- **Fri** — Rest day
+- **Sat** — Boulder triples + open climb *(Anaerobic capacity)*
+  - **Boulder triples (4×4)** — 4 boulders · climbed back-to-back · 4 min rest · 3–4 sets · 2–3 grades below max · RPE 8.5–9.5 · target: 4 sets
+  - **Open climbing (technique)** — 30–45 min mileage on submax problems · RPE 6–7.5 · target: 40 min · *(optional)*
+- **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
+  - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
+
+### Week 4 — Base (deload) · sport-flavor week
+
+- **Mon** — Hangboard (base) + S&C *(Strength / alactic)* — _deload: volume −40%, intensity held_
+  - **7/3 Repeaters** — 7s × 6 reps, 2 sets per grip (half-crimp + open-crimp) · Deload: drop ~40% volume · rest 3s within / 3 min between sets · bodyweight · RPE 7.5–8.5
+  - **Max hangs (intro)** — 10s weighted, 3 hangs × 2 sets — low-end load, crisp form · Deload: drop ~40% volume · rest 3 min · 55–70% of max-hang added load · RPE 8–9
+  - **Weighted pull-ups** — 5 × 5 · (sets today: 3 × 5) · 2 min between sets · 55–70% of 1RM added load · RPE 7–8.5
+- **Tue** — Light: mobility or skill drills
+  - **15–20 min mobility** — shoulders, hips, wrists
+  - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+- **Wed** — Rest day
+- **Thu** — Route pyramid (Base) *(Aerobic capacity)* — _deload: volume −40%, intensity held_
+  - **Route pyramid** — pyramid 4-3-2-1 routes · walking rest between routes; 1 grade below redpoint · RPE 7–8 · target today: 6 routes (cut from 10)
+- **Fri** — Rest day
+- **Sat** — ARC — aerobic base *(Aerobic base)* — _deload: volume −40%, intensity held_
+  - **ARC (continuous easy climbing)** — 2 × 30 min, just below pump · 10 min rest between sets · OR 90 min easy laps · RPE 4–6 · target today: 20 min (cut from 30)
+- **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
+  - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
+
+### Week 5 — Base · boulder-flavor week
+
+- **Mon** — Hangboard (base) + S&C *(Strength / alactic)*
+  - **7/3 Repeaters** — 7s × 6 reps, 2 sets per grip (half-crimp + open-crimp) · rest 3s within / 3 min between sets · bodyweight · RPE 7.5–8.5
+  - **Max hangs (intro)** — 10s weighted, 3 hangs × 2 sets — low-end load, crisp form · rest 3 min · 55–70% of max-hang added load · RPE 8–9
+  - **Weighted pull-ups** — 5 × 5 · 2 min between sets · 55–70% of 1RM added load · RPE 7–8.5
+  - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
+- **Tue** — Light: mobility or skill drills
+  - **15–20 min mobility** — shoulders, hips, wrists
+  - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+- **Wed** — Rest day
+- **Thu** — Projecting / technique boulders *(Skill / Strength)*
+  - **Projecting (mid-grade)** — 60–90 min of 4×4-style projecting on submaximal problems · RPE 7.5–9 · target: 75 min
+- **Fri** — Rest day
+- **Sat** — Boulder triples + open climb *(Anaerobic capacity)*
+  - **Boulder triples (4×4)** — 4 boulders · climbed back-to-back · 4 min rest · 3–4 sets · 2–3 grades below max · RPE 8.5–9.5 · target: 4 sets
+  - **Open climbing (technique)** — 30–45 min mileage on submax problems · RPE 6–7.5 · target: 40 min · *(optional)*
+- **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
+  - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
+
+### Week 6 — Base (deload + retest) · sport-flavor week
+
+- **Mon** — Re-test benchmarks *(Test)* — _retest — benchmarks recalculate after this_
+  - **Max 10s hang on 20mm edge** — find heaviest 10s hold (RPE 9.5 cap) · 3–5 min rest between attempts
+  - **1RM weighted pull-up** — work up to 1 hard rep · 3–5 min rest between attempts
+  - **Max boulder grade today** — flash/send the hardest you can in 60 min
+  - **(optional) Forearm repeater test** — 7/3 to failure on 20mm @ BW · *(optional)*
+- **Tue** — Light: mobility or skill drills
+  - **15–20 min mobility** — shoulders, hips, wrists
+  - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+- **Wed** — Rest day
+- **Thu** — Route pyramid (Base) *(Aerobic capacity)*
+  - **Route pyramid** — pyramid 4-3-2-1 routes · walking rest between routes; 1 grade below redpoint · RPE 7–8 · target: 10 routes
+- **Fri** — Rest day
+- **Sat** — ARC — aerobic base *(Aerobic base)*
+  - **ARC (continuous easy climbing)** — 2 × 30 min, just below pump · 10 min rest between sets · OR 90 min easy laps · RPE 4–6 · target: 30 min
+- **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
+  - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
+
+### Week 7 — Build · boulder-flavor week
+
+- **Mon** — Hangboard (build) + S&C *(Strength / alactic)*
+  - **Max-Weight 10s** — 10s weighted, 4 hangs × 2 sets — leave 1–2s in reserve; ±2–5 kg between sets by margin · rest 3 min · 80–90% of max-hang added load · RPE 8–9
+  - **Weighted pull-ups** — 5 × 3 · 3 min between sets · 80–90% of 1RM added load · RPE 8.5–9.5
+  - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
+- **Tue** — Light: mobility or skill drills
+  - **15–20 min mobility** — shoulders, hips, wrists
+  - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+- **Wed** — Rest day
+- **Thu** — Limit Bouldering (Build) *(Strength)*
+  - **Limit boulders** — 3–5 problems · 3–5 attempts · 3–5 min rest · 2–3 sets · RPE 8.5–9.5 · target: 4 problems
+- **Fri** — Rest day
+- **Sat** — Boulder triples + open climb *(Anaerobic capacity)*
+  - **Boulder triples (4×4)** — 4 boulders · climbed back-to-back · 4 min rest · 3–4 sets · 2–3 grades below max · RPE 8.5–9.5 · target: 4 sets
+  - **Open climbing (technique)** — 30–45 min mileage on submax problems · RPE 6–7.5 · target: 40 min · *(optional)*
+- **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
+  - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
+
+### Week 8 — Build · sport-flavor week
+
+- **Mon** — Hangboard (build) + S&C *(Strength / alactic)*
+  - **Max-Weight 10s** — 10s weighted, 4 hangs × 2 sets — leave 1–2s in reserve; ±2–5 kg between sets by margin · rest 3 min · 80–90% of max-hang added load · RPE 8–9
+  - **Weighted pull-ups** — 5 × 3 · 3 min between sets · 80–90% of 1RM added load · RPE 8.5–9.5
+  - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
+- **Tue** — Light: mobility or skill drills
+  - **15–20 min mobility** — shoulders, hips, wrists
+  - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+- **Wed** — Rest day
+- **Thu** — 60/60 threshold intervals (Build) *(Aerobic power)*
+  - **60/60 intervals** — 60s moderately hard climbing / 60s rest · 10–30 min total · stop before the deep pump (never above 8.5) · RPE 7–8.5 · target: 20 min
+- **Fri** — Rest day
+- **Sat** — 4×4 power-endurance (Build) *(Anaerobic capacity)*
+  - **4×4 circuits** — 4 routes/links back-to-back · 4 min rest · 3 sets · at 50–60% redpoint · RPE 8.5–9.5 · target: 3 sets
+- **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
+  - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
+
+### Week 9 — Build · boulder-flavor week
+
+- **Mon** — Hangboard (build) + S&C *(Strength / alactic)*
+  - **Max-Weight 10s** — 10s weighted, 4 hangs × 2 sets — leave 1–2s in reserve; ±2–5 kg between sets by margin · rest 3 min · 80–90% of max-hang added load · RPE 8–9
+  - **Weighted pull-ups** — 5 × 3 · 3 min between sets · 80–90% of 1RM added load · RPE 8.5–9.5
+  - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
+- **Tue** — Light: mobility or skill drills
+  - **15–20 min mobility** — shoulders, hips, wrists
+  - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+- **Wed** — Rest day
+- **Thu** — Limit Bouldering (Build) *(Strength)*
+  - **Limit boulders** — 3–5 problems · 3–5 attempts · 3–5 min rest · 2–3 sets · RPE 8.5–9.5 · target: 4 problems
+- **Fri** — Rest day
+- **Sat** — Boulder triples + open climb *(Anaerobic capacity)*
+  - **Boulder triples (4×4)** — 4 boulders · climbed back-to-back · 3:55 rest · 3–4 sets · 2–3 grades below max · RPE 8.5–9.5 · target: 4 sets
+  - **Open climbing (technique)** — 30–45 min mileage on submax problems · RPE 6–7.5 · target: 40 min · *(optional)*
+- **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
+  - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
+
+### Week 10 — Peak · sport-flavor week
+
+- **Mon** — Hangboard (peak) + S&C *(Strength / alactic)*
+  - **7-53 protocol** — 7s weighted, 3 hangs × 3–4 sets · rest 53s within set, 3 min between sets · 85–95% of max-hang added load · RPE 9–9.5
+  - **Weighted pull-ups** — 5 × 2 · 3 min between sets · 85–90% of 1RM added load · RPE 9–9.5
+  - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
+- **Tue** — Light: mobility or skill drills
+  - **15–20 min mobility** — shoulders, hips, wrists
+  - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+- **Wed** — Rest day
+- **Thu** — 30/30 lactic sharpening (Peak) *(Anaerobic lactic)*
+  - **30/30 intervals** — 30s all-out / 30s rest × 6 = 1 set · 3:50 between sets · 2–3 sets · deep pump expected, stop when movement degrades · RPE 9.5–10 · target: 2 sets
+- **Fri** — Rest day
+- **Sat** — Redpoint session (Peak) *(Sport-specific)*
+  - **Redpoint attempts** — 2–4 quality redpoint attempts · 20+ min rest between goes · RPE 9–9.5 · target: 3 attempts
+- **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
+  - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
+
+### Week 11 — Peak · boulder-flavor week
+
+- **Mon** — Hangboard (peak) + S&C *(Strength / alactic)*
+  - **7-53 protocol** — 7s weighted, 3 hangs × 3–4 sets · rest 53s within set, 3 min between sets · 85–95% of max-hang added load · RPE 9–9.5
+  - **Weighted pull-ups** — 5 × 2 · 3 min between sets · 85–90% of 1RM added load · RPE 9–9.5
+  - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
+- **Tue** — Light: mobility or skill drills
+  - **15–20 min mobility** — shoulders, hips, wrists
+  - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+- **Wed** — Rest day
+- **Thu** — Limit Bouldering + Campus (Peak) *(Strength → Power)*
+  - **Limit boulders** — 1–3 limit move-sequences (3–5 moves) · 4–8 attempts each · 3–5 min rest · stop when power drops (~20–30 min) · RPE 9–9.5 · target: 2 sequences
+  - **Campus board: basic ladders (1-3-5, matched feet)** — 2–3 attempts × 2 sets · 3–5 min rest · gate: 15–20 strict pull-ups + 1-2-3-4-5 ladder without matching · skip on any finger tweak · RPE 8.5–9 · target: 2 sets
+- **Fri** — Rest day
+- **Sat** — Project boulder session *(Strength / Power)*
+  - **Project attempts** — 1–3 hard problems · max 5 quality attempts each · 5+ min rest · stop when power drops · RPE 9–9.5 · target: 2 problems
+  - **Flash/onsight attempts** — 3–5 problems at 1 grade below max · full rest between attempts · RPE 8–9 · target: 4 problems
+- **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
+  - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
+
+### Week 12 — Taper · sport-flavor week
+
+- **Mon** — Hangboard (taper) + S&C *(Strength / alactic)* — _taper: volume cut, intensity held_
+  - **Near-max hangs (taper touch)** — 10s weighted, 2–3 hangs × 1 set — short & crisp, stop fresh · rest 3 min · 80–85% of max-hang added load · RPE 8.5–9
+  - **Weighted pull-ups** — 2 × 2 · (sets today: 1 × 2) · 3 min between sets · 80–90% of 1RM added load · RPE 9–9.5
+  - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
+- **Tue** — Light: mobility or skill drills
+  - **15–20 min mobility** — shoulders, hips, wrists
+  - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+- **Wed** — Rest day
+- **Thu** — Project routes (Taper) *(Sport-specific)* — _taper: volume cut, intensity held_
+  - **Project / redpoint attempts** — 2–3 quality goes on a project · 20+ min rest between goes · RPE 9–9.5 · target today: 1 goes (cut from 2)
+- **Fri** — Rest day
+- **Sat** — **Full rest — goal day tomorrow**
+- **Sun** — 🏁 **Goal / comp day** *(app renders this day as “Optional: easy open climb or rest”)*
+
+_Final cycle day (Week 12 Sunday) is the goal/comp day; the day before is always full rest (ADR-0007)._
+
