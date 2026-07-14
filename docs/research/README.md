@@ -35,7 +35,7 @@ disciplines. Deepest coverage on (1) **periodization & planning** and (2)
      consistency with established climbing-training science, without live search (lighter check).
 3. **Synthesize** — confirmed claims folded into the report.
 
-## Status (as of this commit)
+## Status: verification complete ✅
 
 - **200 distinct claims verified** (150 original + a 25-claim 2026-07-02 decision-round batch +
   a 25-claim 2026-07-08 assessment-norms batch); **11 refuted**.
@@ -45,6 +45,15 @@ disciplines. Deepest coverage on (1) **periodization & planning** and (2)
   (see `../knowledge-gaps.md` KG-C1); the 2026-07-02 batch settled the KG-B2/B3/C5/A6/A5
   prescription decisions (ADRs 0004–0007), and the 2026-07-08 batch settled KG-C6, producing
   a grade-anchored norms table at `../benchmark-norms.md`.
+- **Update (2026-07-10): the remaining corpus is now fully adjudicated.** A separate pass ran
+  every one of the ~94 remaining claims (plus everything else in `data/gathered-claims.json`) to
+  100% completion — see the **"Full-corpus completion"** section appended to the end of
+  `verified-findings.md`. It was cross-checked against this batch's ADR-cited claims first: all
+  18 non-tangential citations agreed, zero conflicts. Net: **+132 additional claims confirmed,
+  +5 additional refuted** (11 claims where the new pass's lighter, search-free check disagreed
+  with this batch's live-search verdict were excluded, deferring to the search-verified
+  conclusion each time — full list in the appendix). **Running total: 332 confirmed, 16 refuted,
+  0 remaining un-adjudicated.**
 
 ## Relationship to the app
 
