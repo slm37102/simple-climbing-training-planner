@@ -8,6 +8,7 @@ export function renderLog(root) {
   let planFilter = 'all';
   let fromFilter = '';
   let toFilter = '';
+  let chartRange = 'all'; // '4w' | '8w' | '12w' | 'all' — charts window, most recent N weeks
   let editingSet  = new Set(); // tracks "planId:date" keys with edit form open
   let expandedSet = new Set(); // tracks collapsed/expanded rows
 
@@ -85,19 +86,17 @@ export function renderLog(root) {
     const tab = t => `<button class="log-tab${activeTab === t ? ' active' : ''}" data-log-tab="${t}">${
       t.charAt(0).toUpperCase() + t.slice(1)}</button>`;
     return `
-<div class="card">
-  <div class="row" style="align-items:center;justify-content:space-between">
-    <h2 style="margin:0">Log</h2>
-    <select id="logPlanFilter" style="width:auto">
-      <option value="all"${planFilter === 'all' ? ' selected' : ''}>All plans</option>
-      ${opts}
-    </select>
-  </div>
-  <div class="log-tabs" style="display:flex;gap:6px;margin-top:10px">
-    ${tab('feed')}${tab('charts')}${tab('phases')}
-  </div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+  <div class="screen-title">Progress</div>
+  <select id="logPlanFilter" style="width:auto">
+    <option value="all"${planFilter === 'all' ? ' selected' : ''}>All plans</option>
+    ${opts}
+  </select>
 </div>
-<div id="logContent"></div>`;
+<div class="log-tabs">
+  ${tab('feed')}${tab('charts')}${tab('phases')}
+</div>
+<div id="logContent" style="display:flex;flex-direction:column;gap:14px"></div>`;
   }
 
   // ── Log entry edit form ───────────────────────────────────────────────
@@ -110,12 +109,12 @@ export function renderLog(root) {
 
     const statusBtn = (s, label, selBg, selColor) => {
       const sel = s === status;
-      return `<button style="padding:4px 10px;border-radius:6px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;background:${sel ? selBg : '#334155'};color:${sel ? selColor : '#94a3b8'}" data-edit-status="${s}"${sel ? ' data-selected="1"' : ''}>${label}</button>`;
+      return `<button style="padding:4px 10px;border-radius:6px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;background:${sel ? selBg : '#1A1E26'};color:${sel ? selColor : '#838B99'}" data-edit-status="${s}"${sel ? ' data-selected="1"' : ''}>${label}</button>`;
     };
 
     const stars = [1,2,3,4,5].map(n => {
       const lit = feel != null && n <= feel;
-      return `<button style="background:none;border:none;font-size:1.4rem;cursor:pointer;padding:2px;line-height:1;color:${lit ? '#f59e0b' : '#ffffff30'}" data-edit-feel="${n}">${lit ? '★' : '☆'}</button>`;
+      return `<button style="background:none;border:none;font-size:1.4rem;cursor:pointer;padding:2px;line-height:1;color:${lit ? '#E0A53C' : '#ffffff30'}" data-edit-feel="${n}">${lit ? '★' : '☆'}</button>`;
     }).join('');
 
     const exRows = (entry.exercises || []).map((x, i) => {
@@ -151,14 +150,14 @@ export function renderLog(root) {
     return `<div class="log-edit-form" data-edit-form="${key}" data-edit-feel-value="${feel != null ? feel : ''}" style="margin-top:10px;border-top:1px solid #ffffff20;padding-top:10px">
       <div class="row" style="gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap">
         <span style="font-size:.8rem;color:var(--muted)">Status:</span>
-        ${statusBtn('completed', 'Completed', '#22c55e', '#001')}
-        ${statusBtn('missed',    'Missed',    '#ef4444', '#fff')}
-        ${statusBtn('partial',   'Partial',   '#f59e0b', '#001')}
+        ${statusBtn('completed', 'Completed', '#3FB6A8', '#001')}
+        ${statusBtn('missed',    'Missed',    '#F0607A', '#fff')}
+        ${statusBtn('partial',   'Partial',   '#E0A53C', '#001')}
       </div>
       <div class="row" style="gap:4px;margin-bottom:8px;align-items:center">
         <span style="font-size:.8rem;color:var(--muted)">Feel:</span>${stars}
       </div>
-      <textarea data-edit-field="notes" placeholder="Session notes…" style="width:100%;min-height:56px;resize:vertical;border-radius:6px;padding:8px;background:#1e293b;border:1px solid #334155;color:var(--text);font-family:inherit;font-size:.9rem;margin-bottom:8px;box-sizing:border-box">${esc(notes)}</textarea>
+      <textarea data-edit-field="notes" placeholder="Session notes…" style="width:100%;min-height:56px;resize:vertical;border-radius:6px;padding:8px;background:#13161C;border:1px solid #1A1E26;color:var(--text);font-family:inherit;font-size:.9rem;margin-bottom:8px;box-sizing:border-box">${esc(notes)}</textarea>
       ${exRows ? `<details style="margin-bottom:8px"><summary style="cursor:pointer;font-size:.8rem;color:var(--muted)">Edit exercise logs (${(entry.exercises || []).length})</summary>${exRows}</details>` : ''}
       <div class="row" style="gap:8px;justify-content:flex-end">
         <button class="ghost" data-edit-cancel="${key}" style="font-size:.85rem">Cancel</button>
@@ -199,8 +198,8 @@ export function renderLog(root) {
         form.querySelectorAll('[data-edit-status]').forEach(b => {
           const s = b.dataset.editStatus;
           const isThis = b === btn;
-          b.style.background = isThis ? (s === 'completed' ? '#22c55e' : s === 'missed' ? '#ef4444' : '#f59e0b') : '#334155';
-          b.style.color      = isThis ? (s === 'missed' ? '#fff' : '#001') : '#94a3b8';
+          b.style.background = isThis ? (s === 'completed' ? '#3FB6A8' : s === 'missed' ? '#F0607A' : '#E0A53C') : '#1A1E26';
+          b.style.color      = isThis ? (s === 'missed' ? '#fff' : '#001') : '#838B99';
           if (isThis) b.dataset.selected = '1'; else delete b.dataset.selected;
         });
       });
@@ -215,7 +214,7 @@ export function renderLog(root) {
         form.querySelectorAll('[data-edit-feel]').forEach(b => {
           const i = +b.dataset.editFeel;
           b.textContent = i <= n ? '★' : '☆';
-          b.style.color = i <= n ? '#f59e0b' : '#ffffff30';
+          b.style.color = i <= n ? '#E0A53C' : '#ffffff30';
         });
       });
     });
@@ -339,7 +338,7 @@ export function renderLog(root) {
           ${exRows ? `<ul style="margin:4px 0 6px;padding-left:16px">${exRows}</ul>` : ''}
           ${e.sessionNotes ? `<p class="muted" style="margin:4px 0;font-size:.85rem">${esc(e.sessionNotes)}</p>` : ''}
           <div style="margin-top:8px">
-            <button style="background:none;border:1px solid #334155;border-radius:6px;color:var(--muted);cursor:pointer;font-size:.75rem;padding:4px 10px" data-edit-log="${key}">Edit</button>
+            <button style="background:none;border:1px solid #1A1E26;border-radius:6px;color:var(--muted);cursor:pointer;font-size:.75rem;padding:4px 10px" data-edit-log="${key}">Edit</button>
           </div>
           ${isEditing ? editFormHtml(date, e, plan) : ''}
         </div>
@@ -376,36 +375,59 @@ export function renderLog(root) {
   // ── Tab 2: Charts ─────────────────────────────────────────────────────
 
   function renderCharts() {
+    const rangeBtn = r => `<button data-chart-range="${r}" class="${chartRange === r ? 'active' : ''}">${r === 'all' ? 'All' : r}</button>`;
     document.getElementById('logContent').innerHTML = `
+      <div class="seg" style="width:200px;margin-left:auto">${rangeBtn('4w')}${rangeBtn('8w')}${rangeBtn('12w')}${rangeBtn('all')}</div>
       <div class="card">
-        <h3 style="margin:0 0 10px">Hangboard Max Load (kg)</h3>
-        <canvas id="chartHangboard" style="width:100%;max-width:400px;height:160px"></canvas>
+        <h3 style="margin:0 0 10px">Hangboard Max Load · kg</h3>
+        <canvas id="chartHangboard" style="width:100%;height:130px"></canvas>
       </div>
       <div class="card">
-        <h3 style="margin:0 0 10px">Pull-up 1RM Load (kg)</h3>
-        <canvas id="chartPullup" style="width:100%;max-width:400px;height:160px"></canvas>
+        <h3 style="margin:0 0 10px">Pull-up 1RM Load · kg</h3>
+        <canvas id="chartPullup" style="width:100%;height:130px"></canvas>
       </div>
       <div class="card">
         <h3 style="margin:0 0 10px">Average RPE by Week</h3>
-        <canvas id="chartRpe" style="width:100%;max-width:400px;height:160px"></canvas>
+        <canvas id="chartRpe" style="width:100%;height:130px"></canvas>
       </div>`;
+
+    document.querySelectorAll('[data-chart-range]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        chartRange = btn.dataset.chartRange;
+        renderCharts();
+      });
+    });
 
     requestAnimationFrame(() => {
       const plans = getFilteredPlans();
       const hbSeries = [], puSeries = [], rpeSeries = [];
 
+      // Range window: keep only the most recent N weeks (relative to each plan's current week).
+      const rangeWeeks = chartRange === 'all' ? null : parseInt(chartRange, 10);
+
       for (const plan of plans) {
         const startISO = Program.effectiveStart(plan.settings);
         const cycleWeeks = Program.cycleWeeksOf(plan.settings);
-        const color    = plan.color || '#4f8cff';
+        const color    = plan.color || '#5FD4E8';
         const hbPts = [], puPts = [];
         const rpeMap = {};
 
+        // Current week index for this plan (clamped into cycle) — the range window's right edge.
+        let curWeek = cycleWeeks;
+        if (startISO) {
+          const now = new Date();
+          const nowIso = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+          const nowCtx = Program.resolveDate(nowIso, startISO, cycleWeeks, plan.settings?.peakType);
+          if (nowCtx && !nowCtx.outOfCycle) curWeek = nowCtx.weekIdx;
+        }
+        const minWeek = rangeWeeks ? Math.max(1, curWeek - rangeWeeks + 1) : 1;
+
         for (const [date, entry] of Storage.listDays(plan.id)) {
           if (!startISO) continue;
-          const ctx = Program.resolveDate(date, startISO, cycleWeeks);
+          const ctx = Program.resolveDate(date, startISO, cycleWeeks, plan.settings?.peakType);
           if (!ctx || ctx.outOfCycle) continue;
           const w = ctx.weekIdx;
+          if (w < minWeek) continue;
 
           for (const ex of (entry.exercises || [])) {
             const a = ex.actual;
@@ -442,8 +464,12 @@ export function renderLog(root) {
                        puSeries.every(s => !s.points.length) &&
                        rpeSeries.every(s => !s.points.length);
       if (allEmpty) {
-        document.getElementById('logContent').innerHTML =
-          '<p class="muted" style="padding:10px 0">No data logged yet. Complete sessions to see charts.</p>';
+        const note = chartRange === 'all'
+          ? 'No data logged yet. Complete sessions to see charts.'
+          : `No data in the last ${chartRange}. Try a wider range.`;
+        document.querySelectorAll('#logContent .card').forEach(c => { c.remove(); });
+        document.getElementById('logContent').insertAdjacentHTML('beforeend',
+          `<p class="muted" style="padding:10px 0">${note}</p>`);
         return;
       }
 
@@ -502,7 +528,7 @@ export function renderLog(root) {
     const html = plans.map(plan => {
       const startISO = Program.effectiveStart(plan.settings);
       const cycleWeeks = Program.cycleWeeksOf(plan.settings);
-      const pattern = Program.buildPhasePattern(cycleWeeks);
+      const pattern = Program.buildPhasePattern(cycleWeeks, plan.settings?.peakType);
 
       // Expected main sessions per phase (3 main days/week × weeks in phase) — per-plan.
       const phaseWeekCount = { base: 0, build: 0, peak: 0, taper: 0 };
@@ -523,7 +549,7 @@ export function renderLog(root) {
         if (entry.status !== 'completed' && entry.status !== 'partial') continue;
         let ph = null;
         if (startISO) {
-          const ctx = Program.resolveDate(date, startISO, cycleWeeks);
+          const ctx = Program.resolveDate(date, startISO, cycleWeeks, plan.settings?.peakType);
           if (ctx && !ctx.outOfCycle) ph = ctx.phase;
         } else if (entry.phase && Object.prototype.hasOwnProperty.call(loggedByPhase, entry.phase)) {
           ph = entry.phase;
@@ -566,7 +592,7 @@ export function renderLog(root) {
 
       return `<div class="card">
         <div class="row" style="margin-bottom:10px;gap:6px">
-          <span style="width:10px;height:10px;border-radius:50%;background:${plan.color || '#4f8cff'};flex-shrink:0;display:inline-block"></span>
+          <span style="width:10px;height:10px;border-radius:50%;background:${plan.color || '#5FD4E8'};flex-shrink:0;display:inline-block"></span>
           <b>${esc(plan.name)}</b>
         </div>
         ${phaseRows}
@@ -616,18 +642,18 @@ function drawLineChart(canvas, seriesList, opts) {
   const ctx = canvas.getContext('2d');
 
   ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#0b1220'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#0C0E12'; ctx.fillRect(0, 0, W, H);
 
   // Title
-  ctx.fillStyle = '#e2e8f0'; ctx.font = '11px system-ui';
+  ctx.fillStyle = '#E7EAF0'; ctx.font = '11px Archivo, system-ui';
   ctx.fillText(opts.title, pad.left, 16);
 
   // Axes
-  ctx.strokeStyle = '#ffffff20'; ctx.lineWidth = 1;
+  ctx.strokeStyle = 'rgba(255,255,255,.1)'; ctx.lineWidth = 1;
   ctx.strokeRect(pad.left, pad.top, cw, ch);
 
   // X-axis week labels
-  ctx.fillStyle = '#94a3b8'; ctx.font = '9px system-ui';
+  ctx.fillStyle = '#838B99'; ctx.font = '9px Archivo, system-ui';
   [0, 1, 2, 3].map(i => Math.round(1 + i * (opts.xMax - 1) / 3)).forEach(w => {
     const x = pad.left + ((w - 1) / (opts.xMax - 1)) * cw;
     ctx.fillText('W' + w, x - 6, H - 6);

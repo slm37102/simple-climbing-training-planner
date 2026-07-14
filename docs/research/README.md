@@ -19,6 +19,7 @@ disciplines. Deepest coverage on (1) **periodization & planning** and (2)
 | `verified-findings.md` | Every individual claim that passed the adversarial fact-check, grouped by topic, with vote tallies, sources, and supporting quotes. |
 | `data/gathered-claims.json` | All ~300 falsifiable claims extracted from sources — the raw research corpus. |
 | `data/verification-results.json` | Verdicts from the bulk reasoning-verification pass. |
+| `deep-research-report.md` | **Predecessor artifact** — an earlier single-pass web-research survey (from the repo's initial commit, before this verified corpus existed). Kept for reference; its claims did **not** go through the adversarial fact-check — prefer `verified-findings.md` when the two disagree. |
 
 ## How it was produced
 
@@ -36,10 +37,23 @@ disciplines. Deepest coverage on (1) **periodization & planning** and (2)
 
 ## Status: verification complete ✅
 
-- **297 distinct claims verified** (31 search-verified + 266 reasoning-verified); **8 refuted**.
-- Every claim gathered from the research corpus (~300 falsifiable statements
-  extracted from 51+ sources) has been adjudicated by the 3-vote adversarial
-  fact-check. Nothing remains un-checked in `data/gathered-claims.json`.
+- **200 distinct claims verified** (150 original + a 25-claim 2026-07-02 decision-round batch +
+  a 25-claim 2026-07-08 assessment-norms batch); **11 refuted**.
+- **~94 gathered claims remain un-adjudicated**, resumable from `data/gathered-claims.json`, plus
+  25 supplementary claims gathered 2026-07-08 outside the original corpus (not yet 3-vote verified).
+  Verification is now scoped to what pending decisions need rather than run to completion
+  (see `../knowledge-gaps.md` KG-C1); the 2026-07-02 batch settled the KG-B2/B3/C5/A6/A5
+  prescription decisions (ADRs 0004–0007), and the 2026-07-08 batch settled KG-C6, producing
+  a grade-anchored norms table at `../benchmark-norms.md`.
+- **Update (2026-07-10): the remaining corpus is now fully adjudicated.** A separate pass ran
+  every one of the ~94 remaining claims (plus everything else in `data/gathered-claims.json`) to
+  100% completion — see the **"Full-corpus completion"** section appended to the end of
+  `verified-findings.md`. It was cross-checked against this batch's ADR-cited claims first: all
+  18 non-tangential citations agreed, zero conflicts. Net: **+132 additional claims confirmed,
+  +5 additional refuted** (11 claims where the new pass's lighter, search-free check disagreed
+  with this batch's live-search verdict were excluded, deferring to the search-verified
+  conclusion each time — full list in the appendix). **Running total: 332 confirmed, 16 refuted,
+  0 remaining un-adjudicated.**
 
 ## Relationship to the app
 

@@ -1,6 +1,6 @@
-# 12-Week Climbing Macrocycle — Training Plan Summary
+# Climbing Macrocycle — Training Plan Summary
 
-A periodised 84-day plan for intermediate–advanced climbers (bouldering or sport focus).  
+A periodised plan for intermediate–advanced climbers (bouldering or sport focus). Cycle length is configurable (8–40 weeks; the phase split is derived — see `adr/0002-configurable-cycle-length.md`); the tables below show the **default 12-week** layout.  
 Load targets are calculated automatically from your benchmarks (max 20mm hang, 1RM pull-up, bodyweight).
 
 ---
@@ -24,20 +24,22 @@ Load targets are calculated automatically from your benchmarks (max 20mm hang, 1
 
 ## Phase Overview (12 Weeks)
 
+Deloads land every **4th** week (3 hard : 1 deload — `adr/0004-deload-cadence-3-to-1.md`), plus the forced retest-deload that ends each Base block. Taper length follows the plan's **peak type** (comp 1 wk · trip/project 2 wk — `adr/0007-taper-hold-intensity-peaktype.md`); the day before the goal is always a full rest day.
+
 | Wk | Phase | Deload | Notes |
 |----|-------|--------|-------|
 | 1 | **Base** | — | |
 | 2 | **Base** | — | |
-| 3 | **Base** | ✓ Deload + **Retest** | Re-test benchmarks → loads recalculate |
-| 4 | **Base** | — | |
+| 3 | **Base** | — | |
+| 4 | **Base** | ✓ Deload | |
 | 5 | **Base** | — | |
 | 6 | **Base** | ✓ Deload + **Retest** | Re-test benchmarks → loads recalculate |
 | 7 | **Build** | — | |
 | 8 | **Build** | — | |
-| 9 | **Build** | ✓ Deload | |
+| 9 | **Build** | — | |
 | 10 | **Peak** | — | |
 | 11 | **Peak** | — | |
-| 12 | **Taper** | — | Arrive fresh for comp / project |
+| 12 | **Taper** | — | Volume cut, intensity held; full rest the day before the goal |
 
 ---
 
@@ -47,12 +49,15 @@ The primary strength session. Protocol intensifies each phase.
 
 ### Hangboard Protocol by Phase
 
+Base is a two-exercise pair (`adr/0005-base-build-hangboard-protocols.md`): capacity repeaters plus an introductory low-end max-hang block. The old min-edge-to-failure protocol is deleted.
+
 | Phase | Protocol | Duration | Sets × Reps | Edge | Load |
 |-------|----------|----------|-------------|------|------|
-| **Base** | Min-Edge hangs | 12s on smallest holdable edge | 2 sets × 5 hangs (half-crimp + open-crimp) | Smallest you can hold ~15s | Bodyweight |
-| **Build** | Max-Weight 10s | 10s weighted | 2–3 sets × 5 hangs | 20mm | 80–90% max-hang added load |
+| **Base** (pair, 1 of 2) | 7/3 Repeaters | 7s on / 3s off × 6 reps | 2 sets per grip (half-crimp + open-crimp) | 20mm | Bodyweight |
+| **Base** (pair, 2 of 2) | Max hangs (intro) | 10s weighted | 2 sets × 3 hangs | 20mm | 55–70% max-hang added load |
+| **Build** | Max-Weight 10s | 10s weighted | 2 sets × 4 hangs (RPE 8–9, leave 1–2s in reserve) | 20mm | 80–90% max-hang added load |
 | **Peak** | 7-53 Protocol | 7s on / 53s off | 3–4 sets × 3 hangs | 20mm | 85–95% max-hang added load |
-| **Taper** | 7/3 Repeaters (light) | 7s × 6 reps | 1–2 sets per grip | 20mm | 50–60% max-hang added load |
+| **Taper** | Near-max hangs (touch) | 10s weighted | 1 set × 2–3 hangs — short & crisp, stop fresh | 20mm | 80–85% max-hang added load |
 
 ### Weighted Pull-up Protocol by Phase
 
@@ -60,8 +65,8 @@ The primary strength session. Protocol intensifies each phase.
 |-------|-------------|------|-----|
 | **Base** | 5 × 5 | 55–70% 1RM | 7–8.5 |
 | **Build** | 5 × 3 | 80–90% 1RM | 8.5–9.5 |
-| **Peak** | 5 × 2 | 85–95% 1RM | 9–9.5 |
-| **Taper** | 3 × 5 | 50–60% 1RM | 7–8 |
+| **Peak** | 5 × 2 | 85–90% 1RM (capped — `adr/0001`) | 9–9.5 |
+| **Taper** | 2 × 2 | 80–90% 1RM | 9–9.5 |
 
 ### S&C Antagonist Block *(skipped on deload weeks)*
 
@@ -73,8 +78,7 @@ The primary strength session. Protocol intensifies each phase.
 | Farmer's carry | 3 × 20–30 steps |
 | Core (plank / HKR / L-sit) | Choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit |
 
-**Boulder weeks (Build/Peak):** campus board ladders or 1-5-9 moves added after hangboard.  
-**Sport weeks (Base/Build):** 7/3 endurance repeaters added (3–4 sets × 6 reps on 20mm).
+**Boulder-focus plans, Build Mondays only:** light campus warm-up ladders added after hangboard (2–3 ladders, RPE 7–8). No campus on Peak Mondays (`adr/0001`) — Peak campus work lives in Thursday's session.
 
 ---
 
@@ -88,7 +92,7 @@ Varies by phase and week flavor (boulder / sport).
 |-------|---------|-------------|
 | Base | Projecting / technique boulders | 60–90 min projecting on submaximal problems |
 | Build | Limit bouldering | 3–5 problems · 3–5 attempts · 3–5 min rest · 2–3 sets |
-| Peak | Limit bouldering + Campus | Limit problems + campus board (ladders / bumps / 1-5-9) |
+| Peak | Limit bouldering + Campus | 1–3 limit sequences, stop when power drops + basic campus ladders only, readiness-gated (`adr/0001`) |
 | Taper | Flash-grade boulders | 6–10 problems below max · long rests |
 
 ### Sport-flavor Thursdays
@@ -96,8 +100,8 @@ Varies by phase and week flavor (boulder / sport).
 | Phase | Session | Prescription |
 |-------|---------|-------------|
 | Base | Route pyramid | 4-3-2-1 routes back-to-back · 1 grade below redpoint |
-| Build | 1-on / 1-off intervals | 6–8 routes near redpoint · ~1:1 work:rest |
-| Peak | 4×4 route circuits | 4 routes back-to-back · 4 min rest · 3–4 sets |
+| Build | 60/60 threshold intervals | 60s moderate-hard / 60s rest · 10–30 min · RPE ≤8.5 (band 1 — `adr/0006`) |
+| Peak | 30/30 lactic sharpening | 30s all-out / 30s rest × 6 · 2–3 sets · RPE 9.5–10, rest between sets tightens 5s/week (band 2 — `adr/0006`) |
 | Taper | Project / redpoint attempts | 2–3 quality goes on a project |
 
 ---
@@ -108,8 +112,8 @@ Varies by phase and week flavor (boulder / sport).
 
 | Phase | Session | Prescription |
 |-------|---------|-------------|
-| Base / Build | Boulder triples + open climb | 4×4 triples (4 boulders, 4 min rest, 3–4 sets) + 30–45 min mileage |
-| Peak | Project boulder session | 3–5 hard problems · 5+ min rest + flash/onsight attempts |
+| Base / Build | Boulder triples + open climb | 4×4 triples (4 boulders, 4 min rest — tightens 5s/wk in the final 4 weeks, 3–4 sets) + *optional* 30–45 min mileage |
+| Peak | Project boulder session | 1–3 hard problems · max 5 quality attempts each · 5+ min rest + flash/onsight attempts |
 | Taper | Low-volume bouldering | 45–60 min at 2–3 grades below max · no projecting |
 
 ### Sport-flavor Saturdays
@@ -132,7 +136,7 @@ Varies by phase and week flavor (boulder / sport).
 
 ---
 
-## Retest Sessions (Weeks 3 & 6 — Deload Monday)
+## Retest Session (last Base week — Deload Monday; wk 6 in the default 12-week layout)
 
 Replaces the normal Mon hangboard session. Record results → tap **"Save as Benchmark"** to auto-recalculate all future loads.
 
@@ -147,9 +151,12 @@ Replaces the normal Mon hangboard session. Record results → tap **"Save as Ben
 
 ## Deload Rules
 
-- Hangboard: no S&C antagonist block, reduced volume
-- Climbing sessions: reduce sets/attempts by ~30%; focus on quality, not quantity
-- No new PRs — RPE target ~7.5–8 max
+- Cadence: every 4th week within Base and Build — 3 hard : 1 deload (see `adr/0004-deload-cadence-3-to-1.md`)
+- Volume cut ~40% (numeric sets ×0.6, min 1) with **intensity held** — kg stays at working level (see `adr/0003-deload-as-volume-cut.md`)
+- Taper weeks apply the same volume cut with intensity held (see `adr/0007-taper-hold-intensity-peaktype.md`)
+- Hangboard days: no S&C antagonist block
+- Climbing sessions: same ~40% volume cut; focus on quality, not quantity
+- No new PRs — keep efforts crisp, stop well short of failure
 - Sleep, nutrition, and recovery are the priority
 
 ---
@@ -159,8 +166,9 @@ Replaces the normal Mon hangboard session. Record results → tap **"Save as Ben
 1. **Benchmark %** — load range set from `maxHang20mm` or `pullup1RM`
 2. **Seed** — previous actual kg if logged; else range midpoint
 3. **Auto-adjust** ±5% based on previous session's avg RPE vs target RPE
-4. **Readiness multiplier** — from daily readiness check-in: ×0.85 / ×1.0 / ×1.05 (or 0 = rest)
-5. **Deload override** — ×0.85 on top of the above
+4. **Readiness multiplier** — from daily readiness check-in: ×0.85 / ×1.0 / ×1.05 (or a rest suggestion instead of a load)
+
+Deload weeks do **not** scale kg — they cut prescribed volume instead (handled in `js/program.js`, see the Deload Rules above).
 
 Each step is shown in the "reason" tooltip next to the suggested load on the Today tab.
 
@@ -174,4 +182,4 @@ Each step is shown in the "reason" tooltip next to the suggested load on the Tod
 | `pullup1RM` (kg added) | Pull-up load targets |
 | `bodyweight` (kg) | Included in total hanging load display |
 
-Update via the **Retest sessions** at weeks 3 and 6, or manually in Settings.
+Update via the **Retest session** at the end of each Base block (week 6 in the default layout), or manually in Profile.

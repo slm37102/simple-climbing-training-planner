@@ -1,237 +1,225 @@
+// Cycle view — ASCENT "Macrocycle": the whole cycle as a month-grouped week grid,
+// phase-tinted day cells, logged dots, comp marker, tap → day detail card.
 import { Storage } from '../storage.js';
 import { Program } from '../program.js';
 import { actualHasResult } from '../exercise-inputs.js';
+import { localIso, today, addDays, daysBetween, mondayDow } from '../dates.js';
 
-const DAY_HEADERS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'];
+const MON_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DOW_SHORT = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
 export function renderCalendar(root) {
-  const plans = Storage.listPlans().filter(p => !p.archived);
-  const activePlans = plans
-    .map(p => ({ plan: p, start: Program.effectiveStart(p.settings) }))
-    .filter(x => x.start);
-
-  const todayD = new Date();
-  const todayIso = isoDate(todayD);
-  const todayYear  = todayD.getFullYear();
-  const todayMonth = todayD.getMonth();
-  let currentYear  = todayYear;
-  let currentMonth = todayMonth;
-  const savedMonth = sessionStorage.getItem('cycleCurrentMonth');
-  if (savedMonth) {
-    const parts = savedMonth.split('-');
-    currentYear  = Number(parts[0]);
-    currentMonth = Number(parts[1]) - 1;
-  }
+  const activePlan = Storage.getActivePlan();
+  const start = Program.effectiveStart(activePlan?.settings);
+  let selectedIso = sessionStorage.getItem('cycleSelectedDay') || null;
 
   function render() {
-    sessionStorage.setItem('cycleCurrentMonth',
-      `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`);
+    const header = `<div style="display:flex;align-items:flex-end;justify-content:space-between">
+      <div class="screen-title">Macrocycle</div>
+      ${start ? `<div style="font:700 12px 'Archivo';letter-spacing:.04em;text-transform:uppercase">${currentWeekLabel()}</div>` : ''}
+    </div>`;
 
-    const activePlan = Storage.getActivePlan();
-    root.innerHTML = `<div class="card"><h2>Cycle</h2>${summaryCardHtml(activePlan?.settings, activePlan?.days)}${buildMonthGrid()}</div>`;
-
-    // Month navigation
-    const prevM = root.querySelector('[data-month-nav="-1"]');
-    const nextM = root.querySelector('[data-month-nav="1"]');
-    const goToday = root.querySelector('[data-month-nav="today"]');
-    if (prevM) prevM.addEventListener('click', () => {
-      currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } render();
-    });
-    if (nextM) nextM.addEventListener('click', () => {
-      currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } render();
-    });
-    if (goToday) goToday.addEventListener('click', () => {
-      currentYear = todayYear; currentMonth = todayMonth; render();
-    });
-
-    // Cell clicks → detail panel
-    root.querySelectorAll('[data-date]').forEach(cell => {
-      cell.addEventListener('click', () => showDayPanel(cell.dataset.date));
-    });
-  }
-
-  function buildMonthGrid() {
-    if (activePlans.length === 0) {
-      return `<p class="muted">Configure plans — set a cycle anchor in Plans first.</p>`;
-    }
-
-    const firstOfMonth = new Date(currentYear, currentMonth, 1);
-    const lastOfMonth  = new Date(currentYear, currentMonth + 1, 0);
-    const gridStart = findMonday(isoDate(firstOfMonth));
-    const gridEnd   = findSunday(isoDate(lastOfMonth));
-    const totalDays = daysBetween(gridStart, gridEnd) + 1;
-
-    const monthLabel = `${MONTH_NAMES[currentMonth]} ${currentYear}`;
-    const onCurrent  = currentYear === todayYear && currentMonth === todayMonth;
-    const labelHtml = onCurrent
-      ? `<span class="month-label">${monthLabel}</span>`
-      : `<button class="month-label month-jump-today" data-month-nav="today" title="Jump to current month">${monthLabel}</button>`;
-
-    const navHtml = `
-      <div class="month-nav">
-        <button data-month-nav="-1">◀</button>
-        ${labelHtml}
-        <button data-month-nav="1">▶</button>
-      </div>
-      ${onCurrent ? '' : '<div class="muted" style="text-align:center;font-size:.75rem;margin:0 0 4px">Tap month to jump back to today</div>'}`;
-
-    const legendHtml = `
-      <div class="phase-legend">
-        <div class="phase-legend-item"><div class="phase-legend-dot phase-base"></div>Base</div>
-        <div class="phase-legend-item"><div class="phase-legend-dot phase-build"></div>Build</div>
-        <div class="phase-legend-item"><div class="phase-legend-dot phase-peak"></div>Peak</div>
-        <div class="phase-legend-item"><div class="phase-legend-dot phase-taper"></div>Taper</div>
-        <div class="phase-legend-item"><div class="phase-legend-dot phase-deload"></div>Deload</div>
-      </div>`;
-
-    const headersHtml = `
-      <div class="cycle-day-header">
-        ${DAY_HEADERS.map(h => `<div>${h}</div>`).join('')}
-      </div>`;
-
-    let cellsHtml = '';
-    for (let i = 0; i < totalDays; i++) {
-      const date = addDays(gridStart, i);
-      const d = new Date(date + 'T00:00:00');
-      const isCurrentMonth = d.getMonth() === currentMonth;
-      const isToday = date === todayIso;
-
-      let phase = null;
-      let deload = false;
-      let isMain = false;
-      let sessionLabel = '';
-      let isComp = false;
-
-      for (const { plan, start } of activePlans) {
-        const ctx = Program.resolveDate(date, start, Program.cycleWeeksOf(plan.settings));
-        if (!ctx || ctx.outOfCycle) continue;
-        if (!phase) phase = ctx.phase;
-        if (ctx.deload) deload = true;
-        if (ctx.isMain && !isMain) {
-          isMain = true;
-          try {
-            const session = Program.build(plan, date);
-            if (session?.label) sessionLabel = session.label;
-          } catch (_) { /* ignore */ }
-        }
-        if (plan.settings?.compDate === date) isComp = true;
-      }
-
-      const classes = ['cycle-cell'];
-      if (phase) classes.push(phase);
-      if (deload) classes.push('deload');
-      if (isToday) classes.push('today');
-      if (!isCurrentMonth) classes.push('out');
-
-      const labelHtml = sessionLabel
-        ? `<div class="cell-label">${sessionLabel}</div>` : '';
-      const compIcon = isComp ? `<span class="comp-icon">🏆</span>` : '';
-
-      let dotsHtml = '';
-      if (activePlans.length >= 2) {
-        const dots = activePlans
-          .filter(({ plan, start }) => {
-            const ctx = Program.resolveDate(date, start, Program.cycleWeeksOf(plan.settings));
-            return ctx && !ctx.outOfCycle;
-          })
-          .map(({ plan }) =>
-            `<span style="width:5px;height:5px;border-radius:50%;background:${plan.color};display:inline-block;flex-shrink:0"></span>`)
-          .join('');
-        if (dots) dotsHtml = `<div style="position:absolute;bottom:${isComp ? '14px' : '2px'};left:3px;right:3px;display:flex;flex-wrap:wrap;gap:2px">${dots}</div>`;
-      }
-
-      const ariaLabel = `${date}${phase ? ': ' + phase : ''}${sessionLabel ? ' — ' + sessionLabel : ''}`;
-      cellsHtml += `<button type="button" class="${classes.join(' ')}" data-date="${date}" aria-label="${ariaLabel}">
-        <span class="day-num">${d.getDate()}</span>
-        ${labelHtml}
-        ${dotsHtml}
-        ${compIcon}
-      </button>`;
-    }
-
-    return `${navHtml}${legendHtml}${headersHtml}
-      <div class="cycle-month-grid">${cellsHtml}</div>
-      <div id="dayPanel"></div>`;
-  }
-
-  function showDayPanel(date) {
-    const panel = root.querySelector('#dayPanel');
-    if (!panel) return;
-
-    const entries = [];
-    for (const { plan, start } of activePlans) {
-      const ctx = Program.resolveDate(date, start, Program.cycleWeeksOf(plan.settings));
-      if (!ctx || ctx.outOfCycle) continue;
-      let session = null;
-      try { session = Program.build(plan, date); } catch (_) { /* ignore */ }
-      entries.push({ plan, ctx, session });
-    }
-
-    if (!entries.length) {
-      panel.innerHTML = `<div class="day-panel"><p class="muted">${date} — not in any active plan cycle.</p></div>`;
-      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (!start) {
+      root.innerHTML = header + `<div class="card"><h2>No cycle configured</h2>
+        <p class="muted">Set a cycle start or competition date first.</p>
+        <button class="primary" onclick="location.hash='#profile'">Go to Profile</button></div>`;
       return;
     }
 
-    let html = `<div class="day-panel"><h3>${date}</h3>`;
-    for (const { plan, ctx, session } of entries) {
-      const isComp = plan.settings?.compDate === date;
-      const log = Storage.getDay(plan.id, date);
+    root.innerHTML = header
+      + rangeBarHtml()
+      + legendHtml()
+      + summaryCardHtml(activePlan?.settings, activePlan?.days)
+      + gridHtml()
+      + `<div id="dayPanel">${selectedIso ? detailCardHtml(selectedIso) : ''}</div>`;
 
-      html += `<div style="margin-top:8px;padding:8px;border-radius:6px;border-left:3px solid ${plan.color}">`;
-      html += `<div style="font-weight:600;color:${plan.color}">${plan.name}</div>`;
-      html += `<div style="margin-top:4px">`;
-      html += `<span class="badge ${ctx.phase}">${ctx.phase}</span> `;
-      if (ctx.deload) html += `<span class="badge deload">DELOAD</span> `;
-      if (isComp) html += `<span class="badge">🏆 COMP</span> `;
-      html += `<span class="muted" style="font-size:.8rem">Wk ${ctx.weekIdx}</span>`;
-      html += `</div>`;
-      if (session) {
-        html += `<div style="margin-top:4px"><b>${session.label}</b></div>`;
-        if (session.energySystem && session.energySystem !== '—') {
-          html += `<div class="muted" style="font-size:.8rem">${session.energySystem}</div>`;
-        }
-        const exItems = (session.exercises || [])
-          .map(ex => {
-            const rpe = ex.rpeRange ? ` <span class="muted">RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}</span>` : '';
-            return `<li>${ex.name}${rpe}</li>`;
-          }).join('');
-        if (exItems) html += `<ul style="margin:4px 0 0;padding-left:18px;font-size:.85rem">${exItems}</ul>`;
+    wire();
+  }
+
+  // Two delegated listeners instead of one per cell — a tap only moves the
+  // selection highlight and swaps the detail card, never rebuilds the view.
+  function wire() {
+    root.querySelector('[data-cycle-grid]')?.addEventListener('click', e => {
+      const cell = e.target.closest('[data-date]');
+      if (cell) selectDay(cell.dataset.date);
+    });
+    root.querySelector('#dayPanel')?.addEventListener('click', e => {
+      if (!e.target.closest('[data-open-today]')) return;
+      sessionStorage.setItem('todaySelectedDate', selectedIso);
+      location.hash = '#today';
+    });
+  }
+
+  function selectDay(iso) {
+    selectedIso = iso;
+    sessionStorage.setItem('cycleSelectedDay', iso);
+    root.querySelector('.cyc-cell.selected')?.classList.remove('selected');
+    root.querySelector(`[data-date="${iso}"]`)?.classList.add('selected');
+    const panel = root.querySelector('#dayPanel');
+    if (!panel) return;
+    panel.innerHTML = detailCardHtml(iso);
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function currentWeekLabel() {
+    const weeks = Program.cycleWeeksOf(activePlan.settings);
+    const idx = daysBetween(start, today());
+    const total = Program.cycleDays(weeks);
+    if (idx < 0) return `Starts ${start}`;
+    if (idx >= total) return 'Complete';
+    return `Wk ${Math.floor(idx / 7) + 1} / ${weeks}`;
+  }
+
+  function rangeBarHtml() {
+    const weeks = Program.cycleWeeksOf(activePlan.settings);
+    const endIso = addDays(start, Program.cycleDays(weeks) - 1);
+    return `<div class="cycle-range">
+      <span>${pretty(start)}</span><span class="arrow">→</span><span>${pretty(endIso)}</span>
+      <span class="len">${weeks} weeks</span>
+    </div>`;
+  }
+
+  function legendHtml() {
+    return `<div class="phase-legend">
+      <div class="phase-legend-item"><div class="phase-legend-dot phase-base"></div>Base</div>
+      <div class="phase-legend-item"><div class="phase-legend-dot phase-build"></div>Build</div>
+      <div class="phase-legend-item"><div class="phase-legend-dot phase-peak"></div>Peak</div>
+      <div class="phase-legend-item"><div class="phase-legend-dot phase-taper"></div>Taper</div>
+      <div class="phase-legend-item"><div class="phase-legend-dot phase-deload"></div>Deload</div>
+    </div>`;
+  }
+
+  function gridHtml() {
+    const weeks = Program.cycleWeeksOf(activePlan.settings);
+    const todayIso = today();
+    const days = activePlan?.days || {};
+    const totalDays = Program.cycleDays(weeks);
+
+    // One record per cycle day: Mon-based weekday column + training-week number
+    // (training weeks are always 7-day blocks from the Monday-snapped cycle start).
+    const dayRecords = [];
+    const cursor = new Date(start + 'T00:00:00');
+    for (let i = 0; i < totalDays; i++) {
+      const d = new Date(cursor);
+      dayRecords.push({ iso: localIso(d), d, dow: mondayDow(d), trainingWeek: Math.floor(i / 7) + 1 });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+
+    // Group by calendar month first — a training week can straddle two months, and
+    // each side needs to land in its own month's block rather than the row's month.
+    const sections = [];
+    let cur = null;
+    for (const rec of dayRecords) {
+      const key = `${rec.d.getFullYear()}-${rec.d.getMonth()}`;
+      if (!cur || cur.key !== key) {
+        cur = { key, label: `${MON_SHORT[rec.d.getMonth()]} ${rec.d.getFullYear()}`, days: [] };
+        sections.push(cur);
       }
-      if (log) {
-        html += `<div style="margin-top:4px;font-size:.8rem">`;
-        if (log.status) html += `<span class="badge">${log.status}</span> `;
-        if (log.notes) html += `<span class="muted">${log.notes}</span>`;
-        html += `</div>`;
+      cur.days.push(rec);
+    }
+
+    function cellHtml(rec) {
+      const { iso, d } = rec;
+      const ctx = Program.resolveDate(iso, start, weeks, activePlan.settings?.peakType);
+      const classes = ['cyc-cell'];
+      if (ctx && !ctx.outOfCycle) {
+        classes.push(ctx.phase);
+        if (ctx.deload) classes.push('deload');
+        if (ctx.isRest) classes.push('rest');
+      } else {
+        classes.push('out');
       }
-      html += `</div>`;
+      if (iso === todayIso) classes.push('today');
+      if (iso === selectedIso) classes.push('selected');
+
+      const entry = days[iso];
+      const logged = entry?.exercises?.some(ex => actualHasResult(ex?.actual));
+      const missed = !logged && entry?.status === 'missed';
+      const dot = logged ? '<span class="cdot"></span>' : missed ? '<span class="cdot missed"></span>' : '';
+      const comp = activePlan.settings?.compDate === iso ? '<span class="comp-mark"></span>' : '';
+      const aria = `${iso}${ctx && !ctx.outOfCycle ? ': ' + ctx.phase + (ctx.deload ? ', deload' : '') : ''}`;
+      return `<button type="button" class="${classes.join(' ')}" data-date="${iso}" aria-label="${aria}">
+          <span>${d.getDate()}</span>${dot}${comp}
+        </button>`;
+    }
+
+    let html = `<div data-cycle-grid>
+      <div class="wk-dowhead"><div class="rail"></div>
+        <div class="days">${['M','T','W','T','F','S','S'].map(d => `<span>${d}</span>`).join('')}</div>
+      </div>`;
+
+    for (const sec of sections) {
+      html += `<div class="wk-month"><div class="rail"></div>
+        <div class="mlabel">${sec.label}</div><div class="mline"></div></div>`;
+
+      // Leading blanks align the section's first real day to its weekday column;
+      // trailing blanks complete the last row instead of borrowing next month's days.
+      const rows = [];
+      let row = new Array(sec.days[0].dow).fill(null);
+      for (const rec of sec.days) {
+        if (row.length === 7) { rows.push(row); row = []; }
+        row.push(rec);
+      }
+      if (row.length) { while (row.length < 7) row.push(null); rows.push(row); }
+
+      for (const cells of rows) {
+        const railWeek = cells.find(Boolean)?.trainingWeek ?? '';
+        html += `<div class="wk-row"><div class="rail">${railWeek}</div><div class="cells">`;
+        html += cells.map(rec => rec ? cellHtml(rec) : '<div></div>').join('');
+        html += `</div></div>`;
+      }
     }
     html += `</div>`;
+    return html;
+  }
 
-    panel.innerHTML = html;
-    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  function detailCardHtml(iso) {
+    const weeks = Program.cycleWeeksOf(activePlan.settings);
+    const ctx = Program.resolveDate(iso, start, weeks, activePlan.settings?.peakType);
+    if (!ctx || ctx.outOfCycle) {
+      return `<div class="card detail-card"><p class="muted">${pretty(iso)} — outside the cycle window.</p></div>`;
+    }
+    let session = null;
+    try { session = Program.build(activePlan, iso); } catch (_) { /* ignore */ }
+    const log = Storage.getDay(activePlan.id, iso);
+    const isComp = activePlan.settings?.compDate === iso;
+
+    const items = (session?.exercises || []).map(ex => {
+      const rpe = ex.rpeRange ? ` · RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : '';
+      return `<div class="detail-item">${ex.name}${rpe}</div>`;
+    }).join('');
+
+    return `<div class="card detail-card">
+      <div class="detail-head">
+        <div class="section-label">${pretty(iso)} · Wk ${ctx.weekIdx}${ctx.deload ? ' · Deload' : ''}${isComp ? ' · 🏆 Comp' : ''}</div>
+        <span class="badge ${ctx.phase}">${ctx.phase}</span>
+      </div>
+      <div class="detail-title">${session?.label || '—'}</div>
+      ${session?.energySystem && session.energySystem !== '—' ? `<div class="muted" style="margin:-4px 0 8px">${session.energySystem}</div>` : ''}
+      <div>${items}</div>
+      ${log?.status ? `<div style="margin-top:10px"><span class="badge">${log.status}</span>${log.sessionNotes ? ` <span class="muted">${log.sessionNotes}</span>` : ''}</div>` : ''}
+      <button class="mini-btn" data-open-today style="margin-top:13px">Open in Today</button>
+    </div>`;
   }
 
   render();
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
+// ── Cycle summary (kept for tests + at-a-glance week progress) ──────────────
 
 function summaryCardHtml(settings, days = {}) {
   const startIso = Program.effectiveStart(settings);
   if (!startIso) {
-    return `<div class="card" data-cycle-summary style="margin-bottom:12px">
-      <div style="font-weight:600;margin-bottom:8px">Set up your cycle in Plans</div>
+    return `<div class="card" data-cycle-summary>
+      <div style="font-weight:600;margin-bottom:8px">Set up your cycle in Profile</div>
       <div class="muted">Choose a cycle start or competition date to track progress here.</div>
     </div>`;
   }
 
   const cycleWeeks = Program.cycleWeeksOf(settings);
   const totalDays  = Program.cycleDays(cycleWeeks);
-  const pattern    = Program.buildPhasePattern(cycleWeeks);
-  const todayIso = isoDate(new Date());
+  const pattern    = Program.buildPhasePattern(cycleWeeks, settings?.peakType);
+  const todayIso = today();
   const rawDayIndex = daysBetween(startIso, todayIso);
   const clampedDayIndex = Math.max(0, Math.min(totalDays - 1, rawDayIndex));
   const weekIdx = Math.floor(clampedDayIndex / 7);
@@ -246,7 +234,7 @@ function summaryCardHtml(settings, days = {}) {
 
   for (let i = 0; i < 7; i++) {
     const iso = addDays(weekStartIso, i);
-    const ctx = Program.resolveDate(iso, startIso, cycleWeeks);
+    const ctx = Program.resolveDate(iso, startIso, cycleWeeks, settings?.peakType);
     if (!ctx || ctx.outOfCycle || ctx.isRest) continue;
     scheduledSessions++;
     if (days[iso]?.exercises?.some(ex => actualHasResult(ex?.actual))) loggedSessions++;
@@ -276,10 +264,10 @@ function summaryCardHtml(settings, days = {}) {
     ? ''
     : `<div class="muted" style="margin-bottom:8px">${startIso} → ${cycleEndIso}</div>`;
 
-  return `<div class="card" data-cycle-summary style="margin-bottom:12px">
-    <div style="font-weight:600;margin-bottom:4px">${title}</div>
+  return `<div class="card" data-cycle-summary>
+    <div style="font:700 13px 'Archivo';margin-bottom:6px">${title}</div>
     ${windowHtml}
-    <div class="row" style="gap:16px;flex-wrap:wrap">
+    <div class="row" style="gap:20px;flex-wrap:wrap">
       <div><span class="muted">${statusLabel}</span><br><b>${statusValue}</b></div>
       <div><span class="muted">Best hang</span><br><b>${formatKg(bestHang)}</b></div>
       <div><span class="muted">Best pull</span><br><b>${formatKg(bestPull)}</b></div>
@@ -287,6 +275,7 @@ function summaryCardHtml(settings, days = {}) {
   </div>`;
 }
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 function numericKg(value) {
   if (value == null || value === '') return null;
@@ -304,32 +293,7 @@ function titleCase(value) {
   return value ? value.charAt(0).toUpperCase() + value.slice(1) : '—';
 }
 
-function isoDate(d) {
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-
-function addDays(iso, n) {
+function pretty(iso) {
   const d = new Date(iso + 'T00:00:00');
-  d.setDate(d.getDate() + n);
-  return isoDate(d);
-}
-
-function daysBetween(isoA, isoB) {
-  return Math.floor(
-    (new Date(isoB + 'T00:00:00') - new Date(isoA + 'T00:00:00')) / 86400000
-  );
-}
-
-function findMonday(iso) {
-  const d = new Date(iso + 'T00:00:00');
-  const dow = d.getDay();
-  d.setDate(d.getDate() - (dow === 0 ? 6 : dow - 1));
-  return isoDate(d);
-}
-
-function findSunday(iso) {
-  const d = new Date(iso + 'T00:00:00');
-  const dow = d.getDay();
-  d.setDate(d.getDate() + (dow === 0 ? 0 : 7 - dow));
-  return isoDate(d);
+  return `${DOW_SHORT[mondayDow(d)]} ${d.getDate()} ${MON_SHORT[d.getMonth()]}`;
 }

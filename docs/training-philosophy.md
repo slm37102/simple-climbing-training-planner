@@ -2,6 +2,8 @@
 
 This document grounds the planner's prescriptions in the published coaching literature it draws from. It is descriptive (what the plan does and why), not normative — the plan is built for one athlete (V5–V6 boulder / ~7a lead, ~3 years experience) and the choices are biased toward that profile.
 
+> Known unknowns and doc/code divergences are tracked in [`knowledge-gaps.md`](knowledge-gaps.md) with stable KG-* IDs. Sections below carry a ⚠ marker where a divergence is known — check the referenced gap entry before treating either the doc or the code as authoritative.
+
 ## Three influences
 
 The macrocycle is a synthesis of three widely-cited frameworks:
@@ -16,12 +18,14 @@ The three converge more than they diverge. Where they differ — e.g. Anderson f
 
 | Phase | Lattice equivalent | Hörst equivalent | Anderson equivalent | Planner's hangboard |
 |-------|--------------------|-------------------|----------------------|---------------------|
-| Base | Capacity block | Strength-Endurance + max hangs | Base + Strength | Max hangs (half-crimp + open) at ≤90% max |
-| Build | Power block | Power phase | Power + PE | 7-3 protocol (Hörst) — heavier, shorter hangs |
+| Base | Capacity block | Strength-Endurance + max hangs | Base + Strength | 7/3 repeaters (capacity) + intro weighted max hangs |
+| Build | Power block | Power phase | Power + PE | Weighted max hangs, 6–8 hangs @ RPE 8–9 |
 | Peak | Peak performance | Power phase tail | Performance | 7-53 (Lattice) — heaviest, lowest volume |
-| Taper | Taper | Performance week | Performance | Minimal — keep hands fresh |
+| Taper | Taper | Performance week | Performance | Low-volume near-max hang — hold intensity, cut volume |
 
-The Peak protocol was softened from the published Lattice/Anderson defaults for this athlete — see ADR 0001.
+The Base/Build hangboard protocols above are the decided **and implemented** design ([ADR-0005](adr/0005-base-build-hangboard-protocols.md), implemented 2026-07-04): repeaters build capacity in Base, weighted max hangs build recruitment in Build, and the old min-edge-to-failure Base protocol is deleted. The Taper row matches [ADR-0007](adr/0007-taper-hold-intensity-peaktype.md) (hold intensity, cut volume), also in code.
+
+The Peak protocol was softened from the published Lattice/Anderson defaults for this athlete — see ADR 0001 (re-adjudicated against the verified research and implemented 2026-07-02; see the ADR's addendum).
 
 ## Year-level shape (80/20)
 
@@ -29,9 +33,9 @@ Even within a single macrocycle the planner reflects the **Lattice 80/20 rule**:
 
 For longer cycles the planner switches to a **double-block** structure above 20 weeks (ADR 0002). This mirrors Lattice's stated preference for repeating base→build mesocycles in annual plans over a single long base period.
 
-## Deload cadence (3:1)
+## Deload cadence (3:1 — every 4th week)
 
-Two weeks hard, one week deload, then one more hard before the next deload — across Base and Build. The last Base deload is also a **retest** (re-measure max hang, weighted pull-up 1RM, current best boulder/route). Updated benchmarks reset load prescriptions for the Build phase. This 3:1 cadence is Lattice's published default and matches the connective-tissue recovery timeline Hörst describes in *Training for Climbing*.
+Three weeks hard, one week deload — across Base and Build. The last Base deload is also a **retest** (re-measure max hang, weighted pull-up 1RM, current best boulder grade). Updated benchmarks reset load prescriptions for the Build phase. This 3:1 cadence matches Lattice's published default and sits inside Hörst's "every 3–4 weeks of hard training" bound. Decided in [ADR-0004](adr/0004-deload-cadence-3-to-1.md) and implemented 2026-07-04 (`(i+1)%4` in `buildPhasePattern`) — the code previously deloaded every 3rd week, a 2:1 cadence mislabeled "3:1" (see [KG-B3](knowledge-gaps.md#kg-b3--deload-cadence-code-is-21-doc-says-31-lattices-31-is-every-4th-week-p2-g1g3), Closed).
 
 ## Half-crimp dominance in Base
 

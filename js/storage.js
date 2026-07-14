@@ -23,6 +23,9 @@ function defaultSettings() {
     compDate: null,
     anchorMode: 'startDate', // 'startDate' | 'compDate'
     cycleWeeks: 12, // configurable macrocycle length (8–40, see js/program.js clampCycleWeeks)
+    peakType: 'comp', // 'comp' | 'trip' | 'project' — drives taper length (ADR-0007)
+    scheduleShiftDays: 0, // days added to effectiveStart to absorb a missed-session gap (ADR-0008); ignored in compDate mode
+    gapAcknowledgedThrough: null, // ISO date up to which a detected gap was handled/acknowledged (ADR-0008)
     units: 'kg',
     syncEnabled: true,
     localOnly: false,

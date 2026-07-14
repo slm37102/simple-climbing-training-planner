@@ -9,9 +9,9 @@
 
 ## Summary
 
-- **297 distinct claims verified** (31 search-verified, 266 reasoning-verified)
-- **8 claims refuted** (listed at the end for transparency)
-- **Verification is complete.** All gathered claims have been adjudicated — 0 remaining.
+- **200 distinct claims verified** (150 in the original pass + 25 in the 2026-07-02 decision-round batch + 25 in the 2026-07-08 assessment-norms batch)
+- **11 claims refuted** (3 original + 4 in the 2026-07-02 batch + 4 in the 2026-07-08 batch; all listed at the end for transparency)
+- ~94 gathered claims remain un-adjudicated (held in `data/gathered-claims.json`; resumable), plus 25 supplementary claims gathered 2026-07-08 outside the original corpus (pull-up norms, independent finger-strength cross-checks) that have not yet been through the 3-vote process. Verification is intentionally scoped to what pending decisions need — see `../knowledge-gaps.md` KG-C1.
 
 ## Findings by topic
 
@@ -78,7 +78,7 @@
   > "The periodized program includes 4 distinct training phases – Base Fitness, Strength, Power and Power Endurance, after completing which climbers can look forward to several weeks of "peak" performance."
 
 
-### Periodization models & macrocycle architecture  (33)
+### Periodization models & macrocycle architecture  (22)
 
 - **Lattice describes block periodization as splitting a macrocycle into mesocycle blocks of roughly 3-12 weeks, each with a single training focus (e.g. a base-building block for muscular endurance, or a dedicated strength-development block for grip/finger strength).**  
   _search · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/how-to-structure-your-training/)_
@@ -168,52 +168,8 @@
   _reasoning · vote 3-0 · [setforset.com](https://www.setforset.com/blogs/news/macrocycle-mesocycle-microcycle-explained)_
   > "The microcycle refers to the shortest unit of time within a traditional periodized training program, typically lasting 1 to 2 weeks. A microcycle is composed of multiple training sessions and is generally used to organize short-term progression, recovery, or adaptation within a broader mesocycle or …"
 
-- **Undulating/non-linear periodization specifically suits in-season climbers (who must maintain multiple qualities at once) and beginners who need to develop a broad base across qualities rather than specializing in one block at a time.**  
-  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/how-to-structure-your-training/)_
-  > "Undulating/non-linear ... suits in-season climbers and beginners needing a broad base."
 
-- **Lattice defines the standard periodization hierarchy as macrocycle (the overall long-term plan) divided into mesocycles (focus blocks) divided into microcycles, where a microcycle is the smallest unit of a periodized plan, usually one week of training.**  
-  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/how-to-structure-your-training/)_
-  > "A microcycle refers to the smallest unit within a periodised training plan; usually a week of training."
-
-- **Lattice typically uses 4-week mesocycles, and for finger-strength training specifically recommends a 3-weeks-on, 1-week-off structure (a deload/recovery week built into each block), with 2 fingerboard sessions per on-week — one progressive-loaded and one constant-loaded.**  
-  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/how-to-structure-your-training/)_
-  > "Lattice typically uses 4 week mesocycles ... for finger strength training, they recommend a mesocycle structure of 3 weeks on, 1 week off ... During the "on" weeks you will complete 2 fingerboard sessions, with one as progressive loaded and the other as constant loaded."
-
-- **The macrocycle is divided into periods beginning with a Base/preparation period whose aim is to build basic fitness and movement, in which general (non-specific, multilateral) preparation precedes climbing-specific training.**  
-  _reasoning · vote 3-0 · [climbing.com](https://www.climbing.com/gym-climbing/how-climbers-periodize-training)_
-  > "the macrocycle [is] divided into three periods: Base or preparation period, the aim of which is to build up basic fitness and movement. The general preparation period involves multilateral training (non-specific, varied, multicomponent) that takes precedence over specific training"
-
-- **The RCTM popularized the 7/3 repeaters hangboard protocol: 7 seconds of hanging followed by 3 seconds off, repeated for 6 cycles = one minute of work per set with 42 seconds of time under tension; the Andersons' 2015 research reported finger-strength gains up to 21.5% after a 4-week cycle and 32% after a full 8-week block.**  
-  _reasoning · vote 3-0 · [rockclimberstrainingmanual.com](https://rockclimberstrainingmanual.com/training-for-rock-climbing/rock-climbing-training-plan/)_
-  > "The classic 7/3 repeater format involves 7 seconds hanging followed by 3 seconds off, repeated for 6 cycles, adding up to one full minute of work per set with 42 seconds of actual time under tension. Mark and Mike Anderson popularized this protocol in The Rock Climber's Training Manual, with their 2…"
-
-- **The training activities unique to the Power phase are Limit Bouldering and Campus Board workouts (maximal-recruitment, low-volume work), distinguishing Power from the Strength phase's hangboarding.**  
-  _reasoning · vote 3-0 · [rockclimberstrainingmanual.com](https://rockclimberstrainingmanual.com/training-for-rock-climbing/rock-climbing-training-plan/)_
-  > "The training activities unique to the power phase are Limit Bouldering and Campus Board workouts"
-
-- **Training focus should be varied at least every one to four weeks to avoid plateaus (Principle of Variation), with the focus cycling from endurance, to maximum strength and power, to anaerobic endurance every few weeks.**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/tag/periodization/)_
-  > "in terms of strength training, it's most effective to change focus every one to, at most, four weeks. The goal is to cycle the focus of your training from endurance, to maximum strength and power, to anaerobic endurance, every few weeks."
-
-- **Anaerobic-capacity (power-endurance) work is divided by effort duration into high-end/short power-endurance (peak power for 15-30 seconds), intermediate power-endurance (near-maximal output for 40-60 seconds), and transitional/long power-endurance (1-3 minutes of moderately-high power climbing).**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/tag/periodization/)_
-  > "three categories: 'high-end' or 'short' power endurance (peak power output for 15 to 30 seconds), 'intermediate power endurance' (sustained near-maximal power output for 40 to 60 seconds), and 'transitional' or 'long power endurance' (1 to 3 minutes of moderately-high power climbing/exercise)."
-
-- **Conjugate periodization aims to develop strength, power, and hypertrophy simultaneously by regularly rotating training stressors via exercise selection, and is structured for more advanced athletes around concentrated loading, transmutation, and recovery mesocycles.**  
-  _reasoning · vote 3-0 · [setforset.com](https://www.setforset.com/blogs/news/periodization-training-models)_
-  > "Conjugate training is a system designed to develop strength, power, and hypertrophy at the same time. This model is usually structured for more advanced athletes with its central principles including concentrated loading, transmutation, and recovery mesocycles."
-
-- **Mesocycles nest within the macrocycle and typically contain two to six microcycles, with preparatory-phase mesocycles commonly running 4-6 microcycles and competitive-phase mesocycles 2-4 microcycles.**  
-  _reasoning · vote 3-0 · [setforset.com](https://www.setforset.com/blogs/news/macrocycle-mesocycle-microcycle-explained)_
-  > "Mesocycles typically contain two to six microcycles. More specifically, during the preparatory phase, a mesocycle commonly consists of 4 – 6 micro-cycles, while during the competitive phase it will usually consist of 2 – 4 micro-cycles depending on the competition's calendar."
-
-- **The macrocycle is divided into three phases - preparation (preparatory), competitive, and transition - with the preparation phase occupying roughly two-thirds to three-quarters of the macrocycle and the transition phase lasting about one month for recovery.**  
-  _reasoning · vote 3-0 · [setforset.com](https://www.setforset.com/blogs/news/macrocycle-mesocycle-microcycle-explained)_
-  > "There are three phases in the macrocycle: preparation, competitive, and transition. ... The entire preparation phase should be around 2/3 to 3/4 of the macrocycle. Lasting around a month in duration, the transition phase is necessary to ensure an athlete can recover"
-
-
-### Base / aerobic-capacity phase programming  (35)
+### Base / aerobic-capacity phase programming  (23)
 
 - **A typical RCTM/ARC workout consists of 2-3 sets of 20-45 minutes of continuous climbing at or just below the Maximum Steady State (MSS), commonly structured as two or three 30-minute sets with 10 minutes of rest between sets.**  
   _search · vote 2-1 · [rockclimberstrainingmanual.com](https://rockclimberstrainingmanual.com/training-for-rock-climbing/base-fitness/)_
@@ -307,56 +263,8 @@
   _reasoning · vote 3-0 · [trainclimbsummit.com](https://trainclimbsummit.com/train-aerobic-capacity-for-climbing-with-arcing/)_
   > "improving the forearm muscles' ability to sustain effort over long periods by increasing capillary density, enhancing oxygen delivery, and improving recovery ... you'll develop more small blood vessels in your forearms, and existing ones will become wider, making it harder for a pump to set in."
 
-- **ARC/Base training develops a foundation of muscular fitness, improves local forearm capillarity, improves grip control and pump-management skills, aids recovery from intense training, and is used to acquire/practice new movement skills.**  
-  _reasoning · vote 3-0 · [rockclimberstrainingmanual.com](https://rockclimberstrainingmanual.com/training-for-rock-climbing/base-fitness/)_
-  > "ARC training develops a foundation of muscular fitness, improves local forearm capillarity for improved aerobic energy metabolism, improves grip control and pump-management skills, aids recovery from intense training, and helps acquire and practice new movement skills and techniques."
 
-- **The Base phase is a transition between active rest and more intense training, accomplished via low-intensity, long-duration 'climbing mileage'; limited quantities of ARC training remain acceptable even during higher-intensity phases.**  
-  _reasoning · vote 3-0 · [rockclimberstrainingmanual.com](https://rockclimberstrainingmanual.com/training-for-rock-climbing/base-fitness/)_
-  > "The base-building phase provides a transition between the active rest period and more intense training activities... this is generally accomplished by climbing at low intensity and long duration, and is often described as 'climbing mileage'... Limited quantities of low intensity training like Base F…"
-
-- **For intermediate-level climbers, the recommended approach to developing aerobic capacity is to favor longer ARC sets (rather than higher intensity or shorter sets).**  
-  _reasoning · vote 3-0 · [en-eva-lopez.blogspot.com](http://en-eva-lopez.blogspot.com/2015/03/aerobic-endurance-training-in-sport.html)_
-  > "For intermediate level climbers, Eva López recommends going for longer sets when developing aerobic capacity."
-
-- **For high-level climbers, once set duration and total session volume are maxed out near tolerance limits, reducing the rest time between sets is the most appropriate lever for further load progression; adding more volume beyond that point is not productive and effort should shift to a different endurance objective.**  
-  _reasoning · vote 3-0 · [en-eva-lopez.blogspot.com](http://en-eva-lopez.blogspot.com/2015/03/aerobic-endurance-training-in-sport.html)_
-  > "For high-level climbers, reducing recovery time between sets is probably the most suitable tool for load progression when other variables like set duration and total session volume are maxed out. When a certain volume near the limit of tolerance is reached, it makes no sense to keep adding to it and…"
-
-- **ARC training is performed several sessions per week for several weeks (typically as a Base/aerobic-capacity phase block), accumulating high training volume.**  
-  _reasoning · vote 3-0 · [uphillathlete.com](https://uphillathlete.com/rock-climbing/rock-climbing-training-arcing/)_
-  > "many plans prescribe 90+ min per workout, several sessions/week for several weeks"
-
-- **Corroborating coaching sources operationalize the intensity anchor as climbing for roughly 20-40 minutes without surpassing the anaerobic threshold (the point of strong pump), on routes about 2-3 grades below max onsight.**  
-  _reasoning · vote 3-0 · [uphillathlete.com](https://uphillathlete.com/rock-climbing/rock-climbing-training-arcing/)_
-  > "The goal is to climb for 20 to 40 minutes without surpassing your "anaerobic threshold", the point where you start developing a strong "pump" ... Routes should be at least 2–3 grades below your max onsight level."
-
-- **On-off (interval) circuits for endurance use 30-90 second work intervals followed by short rest periods, as an alternative aerobic/anaerobic-capacity stimulus to continuous ARC climbing.**  
-  _reasoning · vote 3-0 · [unlevel-edge.com](https://unlevel-edge.com/blogs/climbing-blog/climbing-endurance-training-methods-protocols-and-progressions)_
-  > "on-off circuits with 30–90 second work intervals followed by short rests."
-
-- **Endurance-oriented hangboard repeaters use a 7-seconds-on / 3-seconds-off work:rest pattern for 6 to 7 repetitions per set, across 4 to 6 sets.**  
-  _reasoning · vote 3-0 · [unlevel-edge.com](https://unlevel-edge.com/blogs/climbing-blog/climbing-endurance-training-methods-protocols-and-progressions)_
-  > "For endurance, repeaters consist of 7 seconds hanging followed by 3 seconds resting for 6 to 7 repetitions across 4 to 6 sets."
-
-- **Periodization is implemented as block training over 4 to 8 week blocks, each block with one primary focus (aerobic capacity, strength-endurance, or power-endurance) while other qualities are lightly maintained via lower-intensity 'reminder' sessions to prevent detraining.**  
-  _reasoning · vote 3-0 · [unlevel-edge.com](https://unlevel-edge.com/blogs/climbing-blog/climbing-endurance-training-methods-protocols-and-progressions)_
-  > "Each training block should have one primary focus to maximize adaptations... it's important to lightly maintain other qualities during each phase through "reminder" sessions or lower-intensity work... over 4 to 8 week blocks."
-
-- **Hörst distinguishes the aerobic energy system (stamina — sustaining low-to-moderate intensity over long durations, e.g. a consistent long route) from the anaerobic system (muscular endurance), and argues most climbers need proficiency in both.**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/aerobic-versus-anaerobic-training-for-climbing-beat-the-burn-and-climb-all-day/)_
-  > "The aerobic energy system builds stamina, while the anaerobic system builds muscular endurance. Most climbers will benefit from proficiency in both. Stamina refers to an athlete's ability to maintain a low to moderate level of intensity for an extended period of time, like when climbing a long route…"
-
-- **Per the source's framing/excerpt, ARC sessions are typically run 2–3 times per week during a base/capacity phase as continuous low-intensity volume.**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/aerobic-versus-anaerobic-training-for-climbing-beat-the-burn-and-climb-all-day/)_
-  > "ARC sessions typically 20–45 min of continuous low-intensity movement, 2–3 sessions/week. Emphasizes building aerobic/capillary base ... before power phases."
-
-- **ARC sessions emphasize slow, controlled movement and a relaxed grip to promote climbing efficiency rather than power output.**  
-  _reasoning · vote 3-0 · [trainclimbsummit.com](https://trainclimbsummit.com/train-aerobic-capacity-for-climbing-with-arcing/)_
-  > "The focus should be on slow, controlled movements and relaxed grip to promote efficiency."
-
-
-### Strength phase programming (fingers + pulling)  (33)
+### Strength phase programming (fingers + pulling)  (18)
 
 - **Hörst's core hypergravity max-strength protocol is 5 sets of 5 weighted pull-ups, performed with 3 minutes of rest between each set.**  
   _search · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/hypergravity-pull-up-training-for-increased-strength-power-and-endurance/)_
@@ -430,68 +338,8 @@
   _reasoning · vote 3-0 · [strengthclimbing.com](https://strengthclimbing.com/eva-lopez-maxhangs/)_
   > "Start with four weeks of MaxHangs MAW, followed by four weeks of MaxHangs MED, to complete a full 8-week cycle and maximize gains."
 
-- **For max-strength weighted fingerboard hangs, the ideal edge size is 14-20mm (5/8 to 7/8 inch), a little less than one finger-pad depth, which reduces skin pain and distal-joint strain while still building max strength that carries over to other edge sizes.**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)_
-  > "The ideal size edge for weighted fingerboard hangs is between 14mm and 20mm (5/8 to 7/8 inch), or a little less than one finger-pad depth—this moderate size lessens skin pain, reduces strain on the distal finger joint, and has been proven effective to develop maximum-strength gains that will carry o…"
 
-- **The 7-53 max-weight protocol uses enough added weight that a 10-second hang would be extremely difficult, but each hang is terminated at 7 seconds (just before failure) followed by exactly 53 seconds rest, at an RPE of 9-9.5/10.**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)_
-  > "Use enough weight to make a 10-second hang extremely difficult, yet each training hang must terminate at 7 seconds (a few seconds before failure). Rest for exactly 53 seconds... Each hang should be near maximal (rating of perceived exertion of 9 to 9.5 out of 10), but not quite take you to failure."
-
-- **The 7-53 protocol is structured as 3 near-maximal hangs per set, with 3 to 5 minutes of rest between sets, performed twice per week.**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)_
-  > "This totals 3 hangs per set. Rest 3 to 5 minutes before doing a second set of three hangs... Experienced climbers can employ one of these maximum-grip-strength protocols on a twice-a-week basis."
-
-- **The low-volume max-hang protocol (based on Eva López-Rivera's research) is recommended as an entry-level fingerboard program (not a beginner's program), and a few multi-week cycles bring noticeable finger-strength gains for intermediate climbers and prepare them for weighted hangs.**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)_
-  > "a low-volume protocol is recommended as an entry-level fingerboard program, with a few multi-week cycles bringing noticeable gains in finger strength for intermediate climbers, as well as serving as preparation for delving into weighted fingerboard hangs."
-
-- **The protocol claims to increase pull-muscle and lock-off strength, lunging power, and pulling endurance by 20% or more by adapting the neuromuscular system to simulated added gravity.**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/hypergravity-pull-up-training-for-increased-strength-power-and-endurance/)_
-  > "You can increase your pull-muscle and lock-off strength, lunging power, and pulling endurance by 20% or more."
-
-- **A max hang session targets roughly 6-8 reps in total.**  
-  _reasoning · vote 3-0 · [climbing.com](https://www.climbing.com/skills/lattice-hangboarding-part-2/)_
-  > "Rep duration should be anything from 5-10 seconds depending on intensity and training goals, with 6-8 reps in total."
-
-- **Rest between max hang reps is typically 2-3 minutes, and climbers are advised to extend rest if needed.**  
-  _reasoning · vote 3-0 · [climbing.com](https://www.climbing.com/skills/lattice-hangboarding-part-2/)_
-  > "Rest between reps is typically 2-3 minutes, but the article generally advises people to go longer if they feel they need it."
-
-- **Climbers should not hang to failure unless advanced; instead each hang should end 1-3 seconds before the point of failure (leave a little in the tank).**  
-  _reasoning · vote 3-0 · [climbing.com](https://www.climbing.com/skills/lattice-hangboarding-part-2/)_
-  > "Most climbers should not hang to failure unless advanced in their training. Stop with a little left in the tank. In other words: end each hang 1-3 seconds before you feel like you have to stop."
-
-- **Top sets on max hangs and pull-ups should be performed at RPE 8–9, leaving roughly a rep or 1–2 seconds in reserve.**  
-  _reasoning · vote 3-0 · [hikingmanual.com](https://www.hikingmanual.com/posts/best-strength-program-for-climbers-ultimate-plans-schedules-guide)_
-  > "RPE 8–9 for top sets on max hangs and pull-ups (a rep or 1–2 s "in reserve")."
-
-- **To avoid interference, heavy strength training should be placed before or far from high-volume endurance days.**  
-  _reasoning · vote 3-0 · [hikingmanual.com](https://www.hikingmanual.com/posts/best-strength-program-for-climbers-ultimate-plans-schedules-guide)_
-  > "Place heavy strength training before or far from high-volume endurance days to avoid interference."
-
-- **Rest length determines the adaptation pathway: long rests between hangs drive strength gains through neurological factors (recruitment, firing rate), while short rests drive strength gains through hypertrophy.**  
-  _reasoning · vote 3-0 · [stevenlow.org](https://stevenlow.org/repeaters-and-max-hang-analysis-for-strength-and-hypertrophy-ft-power-company-podcast-and-steve-maisch/)_
-  > "Long rests lead to strength gains through neurological factors, such as muscle recruitment and firing rate. Short rests lead to strength gains through hypertrophy (muscle growth)."
-
-- **The standard repeaters protocol is a 7-second hang followed by 3 seconds rest, repeated for 6 hangs per set, with 2–3 minutes rest before moving to the next grip position.**  
-  _reasoning · vote 3-0 · [stevenlow.org](https://stevenlow.org/repeaters-and-max-hang-analysis-for-strength-and-hypertrophy-ft-power-company-podcast-and-steve-maisch/)_
-  > "For repeaters, the standard protocol involves hanging for 7 seconds, resting for 3 seconds, completing a total of 6 hangs, and resting 2–3 minutes before switching to the next grip position."
-
-- **Load is auto-regulated by margin: if your margin exceeds ~3 s on a set, add 2-5 kg for the next set; if your margin approaches zero, subtract 2-5 kg, scaled to bodyweight.**  
-  _reasoning · vote 3-0 · [strengthclimbing.com](https://strengthclimbing.com/eva-lopez-maxhangs/)_
-  > "If you feel like your margin exceeds 3 seconds, add 2-5 kg for the next set, depending on bodyweight; if your margin approaches zero, subtract 2-5 kg for the next set, depending on bodyweight."
-
-- **Total weekly climbing plus finger-training days should not exceed four, and the intense max-strength fingerboard protocol should be limited to two days per week.**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)_
-  > "with aggregate climbing and finger training days per week not exceeding four... The intense max-strength training protocol should be limited to just two days per week."
-
-- **The repeaters strength-endurance protocol uses 7-second hang / 3-second rest intervals in sets of 6 (each set about 1 minute), performing one set per grip for entry-level up to three sets per grip for advanced, focusing initially on half-crimp and open-crimp grips.**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)_
-  > "Each set is comprised of 6 hang-rest intervals consisting of a 7-second hang and 3-second rest. Therefore, each 6-hang set will take about 1 minute... You will perform one (entry-level) to three (advanced) sets of repeaters with each grip position... Initially focus on training the half-crimp and op…"
-
-
-### Power phase: limit bouldering & campus  (34)
+### Power phase: limit bouldering & campus  (19)
 
 - **Limit bouldering should target maximum effort on short sequences of no more than 3-5 moves (six or fewer hand moves); anything beyond that shifts the stimulus from pure strength/power into power-endurance.**  
   _search · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/limit-bouldering-for-building-max-climbing-strength-and-power/)_
@@ -569,68 +417,8 @@
   _reasoning · vote 3-0 · [trainingbeta.com](https://www.trainingbeta.com/4-keys-to-limit-bouldering/)_
   > "You should avoid the feeling of being totally wrecked when limit bouldering... Once your power levels drop off, it's better to call it quits, recover, and come back fresh for another session."
 
-- **The power phase is about neurological gains — recruiting muscle and teaching it to be more powerful — as distinct from the preceding strength phase, which strengthens/builds the muscle itself.**  
-  _reasoning · vote 3-0 · [saltpumpclimbing.com](https://www.saltpumpclimbing.com/five-phases-climbing-training/)_
-  > "The power phase is all about making neurological gains. While the strength phase focuses on strengthening your muscles, the power phase recruits those muscles and teaches them to be more powerful."
 
-- **Limit bouldering and campus board sessions are the two primary tools used to develop power during the power phase.**  
-  _reasoning · vote 3-0 · [saltpumpclimbing.com](https://www.saltpumpclimbing.com/five-phases-climbing-training/)_
-  > "The two most common ways to increase your power is through limit bouldering and campusing sessions."
-
-- **Limit boulder problems should be 2-3 move problems at the climber's absolute limit; the goal is NOT to send them — sending means they are too easy.**  
-  _reasoning · vote 3-0 · [saltpumpclimbing.com](https://www.saltpumpclimbing.com/five-phases-climbing-training/)_
-  > "Limit boulder problems are generally 2-3 move problems that are at your absolute limit. The idea here is not to send boulder problems—if you are sending the boulders, that means they are too easy."
-
-- **Campus board workouts should consist of 2-3 movements; max ladders, double dynos, and up-downs are cited as three of the best exercises to increase power.**  
-  _reasoning · vote 3-0 · [saltpumpclimbing.com](https://www.saltpumpclimbing.com/five-phases-climbing-training/)_
-  > "Campus board workouts should consist of 2-3 movements. Max ladders, double dynos, and up-downs are three of the best exercises to increase your power."
-
-- **Per problem, spend roughly 15-20 minutes putting in about 4-5 solid attempts, resting 3-5 minutes between attempts and 5-10 minutes between different problems (3-4 problems differing in angle/hold/style per session).**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/limit-bouldering-for-building-max-climbing-strength-and-power/)_
-  > "You can spend 15 to 20 minutes on each problem, putting in four to five solid attempts and resting 3 to 5 minutes between attempts, with 5 to 10 minutes rest between each problem."
-
-- **Use strict form and stop training as soon as form declines; never full-crimp to avoid injury during campus training. Adults only, and intermediates should seek trusted coaching first.**  
-  _reasoning · vote 3-0 · [climbing.com](https://www.climbing.com/skills/how-to-campus-board/)_
-  > "Stop training as soon as your form declines. Never full-crimp to avoid injury during campus training."
-
-- **Campusing is not about working to failure; the goal is high-quality, explosive sets that ingrain efficient motor patterns (recruitment), not volume to exhaustion.**  
-  _reasoning · vote 3-0 · [gripped.com](https://gripped.com/sections/training/a-beginners-guide-to-campus-board-training/)_
-  > "Not about working to failure; goal is high-quality, explosive sets that ingrain efficient motor patterns."
-
-- **In the alternating-rung exercise, one set = leading left hand to the top, resting 2 minutes, then repeating leading with the right hand; leading left plus leading right equals one set, performed for roughly 5 sets.**  
-  _reasoning · vote 3-0 · [gripped.com](https://gripped.com/sections/training/a-beginners-guide-to-campus-board-training/)_
-  > "Example alternating-rung set: lead left hand to top, rest 2 min, repeat leading right; left+right = one set, ~5 sets."
-
-- **Recommended prerequisites for campus board training include climbing roughly V5-V6 / 5.12 and possessing 15-20 solid controlled pull-ups, reflecting the minimum strength needed to survive the board's reactive forces.**  
-  _reasoning · vote 3-0 · [gripped.com](https://gripped.com/sections/training/a-beginners-guide-to-campus-board-training/)_
-  > "Grade proficiency requirements include V5-V6 or 5.12 climbing ability, pull-up capacity of 15-20 solid controlled pull-ups, and the ability to perform a 1-2-3-4-5 ladder without matching hands."
-
-- **Campusing is positioned as a power-phase tool: when appropriate it is always part of a power phase (though the campus board can also host other-phase exercises).**  
-  _reasoning · vote 3-0 · [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/2015/04/campusing-part-1-for-powerbig-rungs-big.html)_
-  > "Campusing, when appropriate, is always part of a power phase, though the campus board can be used for exercises during other phases."
-
-- **Readiness gate: campusing is not advocated until an athlete is climbing roughly mid-5.12 and V5/V6 and has a good grasp on climbing dynamically.**  
-  _reasoning · vote 3-0 · [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/2015/04/campusing-part-1-for-powerbig-rungs-big.html)_
-  > "Campusing is generally not advocated until an athlete is climbing mid-5.12 and V5/6, and has a good grasp on how to climb dynamically."
-
-- **The plyometric movement is broken into named phases: an Amortization (Transition) phase that begins on contact with the lower rung and ends when upward motion resumes, and a Concentric (Take-Off) phase that explodes upward out of the bottom using stored elastic energy; the catch should decelerate slowly without reaching fully straight arms before re-exploding.**  
-  _reasoning · vote 3-0 · [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/2015/04/campusing-part-1-for-powerbig-rungs-big.html)_
-  > "The Amortization (Transition) Phase begins when you contact the lower rung, continues through the absorption of force, and ends when you begin moving upward again ... The Concentric (Take-Off) Phase is all about exploding upward out of the bottom of the Transition phase, utilizing the stored elastic…"
-
-- **Power training is fundamentally about quality, not quantity; the goal of a limit session is pushing power limits rather than sending.**  
-  _reasoning · vote 3-0 · [trainingbeta.com](https://www.trainingbeta.com/4-keys-to-limit-bouldering/)_
-  > "Power training is all about quality, not quantity, and you simply can't effectively train power when you're tired and depleted."
-
-- **Power-phase sessions should be kept short and high-quality (intensity, not volume), because fatigue/long sessions build endurance rather than power; well-conditioned climbers can do up to two to three hard power sessions per week.**  
-  _reasoning · vote 3-0 · [saltpumpclimbing.com](https://www.saltpumpclimbing.com/five-phases-climbing-training/)_
-  > "By keeping these sessions short (fatigue creates endurance, not power), you can do more per week—if you're in shape, up to two or three hard power sessions."
-
-- **The power phase sits as phase 3 of a five-phase periodized macrocycle, after volume (1) and strength (2) and before power endurance (4) and performance (5), with the final performance phase devoted to redpointing routes and sending boulder projects outdoors.**  
-  _reasoning · vote 3-0 · [saltpumpclimbing.com](https://www.saltpumpclimbing.com/five-phases-climbing-training/)_
-  > "The performance phase is all about getting out and sending your projects—its time to put all of that training to use. Your efforts during this phase should be about getting outside and trying to red point routes or send boulders."
-
-
-### Power-endurance / anaerobic-capacity protocols  (35)
+### Power-endurance / anaerobic-capacity protocols  (21)
 
 - **Hörst's 60/60 intervals protocol prescribes 60 seconds of moderately hard climbing followed by 60 seconds of rest (a 1:1 climb-to-rest ratio), repeated for roughly 10 to 30 minutes of aggregate climbing-plus-rest time.**  
   _search · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/power-endurance-training-protocols-for-climbers/)_
@@ -716,64 +504,8 @@
   _reasoning · vote 3-0 · [treadwallfitness.com](https://treadwallfitness.com/athletes-community/training/brewers-ledge-treadwall-training-guide/)_
   > "On the Treadwall, power endurance is typically performed at angles ranging from 10 to 35 degrees with climbing times ranging from 30 seconds to upwards of 10 minutes, with rests between intervals being equal to time spent on the wall."
 
-- **Hörst's weekly energy-system template for sport climbers is one max-strength (anaerobic alactic) session, two power-endurance (anaerobic lactic) sessions, and one aerobic-capacity (oxidative) session per week.**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/power-endurance-training-protocols-for-climbers/)_
-  > "sport climbers should aim for one "max strength" session (anaerobic alactic focus), two "power endurance" sessions (anaerobic lactic focus), and one "aerobic capacity" session (oxidative focus) per week"
 
-- **Hörst frames the 60/60 protocol as building aerobic power and exhausting alactic power while deliberately avoiding deep lactic/acidy stress, to lower overtraining risk over multiple weeks of P-E training; a moderate pump is acceptable but a severe pump and breathlessness signals pushing too far into the anaerobic zone.**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/power-endurance-training-protocols-for-climbers/)_
-  > "If you stick to the protocol exactly it will exhaust alactic power and build aerobic power (to drive alactic recovery ability) without getting too lactic and acidy (thus, lowering the risk of overtraining syndrome over a few weeks of P-E training)."
-
-- **For interval-style power-endurance work the climber should not climb pre-set boulder problems but instead climb intuitively in an 'open-hold' style on a spray wall, home woodie, or system wall.**  
-  _reasoning · vote 3-0 · [climbing.com](https://www.climbing.com/skills/training/too-weak-for-your-sport-project-heres-what-to-do-about-that/)_
-  > "Do not climb set boulder problems; instead, climb intuitively in an "open-hold" style on a spray wall, home woodie, or system wall."
-
-- **In the 4x4, boulders should be challenging but doable without falling (the climber should be able to complete each lap).**  
-  _reasoning · vote 3-0 · [climbing.com](https://www.climbing.com/skills/training/too-weak-for-your-sport-project-heres-what-to-do-about-that/)_
-  > "Bouldering 4x4s: The boulders should be challenging but doable without falling."
-
-- **Power endurance should be trained as a focused block of about 8 weeks, performed twice per week, with a rest/deload week halfway through (around week 4).**  
-  _reasoning · vote 3-0 · [ukclimbing.com](https://www.ukclimbing.com/articles/skills/series/lattice_training_series_with_tom_randall/part_2_power_endurance-11352)_
-  > "Tom recommends focusing on power endurance for an eight-week period, performing this style of training twice per week, with a rest week halfway through."
-
-- **Training emphasis differs by discipline: boulderers should bias toward anaerobic-capacity training, while route climbers should bias toward aerobic-power training.**  
-  _reasoning · vote 3-0 · [ukclimbing.com](https://www.ukclimbing.com/articles/skills/series/lattice_training_series_with_tom_randall/part_2_power_endurance-11352)_
-  > "Boulderers should do more anaerobic capacity training and route climbers should focus on aerobic power."
-
-- **During deload/rest weeks within a power-endurance block, you should drop volume but hold intensity roughly constant rather than stripping out both.**  
-  _reasoning · vote 3-0 · [ukclimbing.com](https://www.ukclimbing.com/articles/skills/series/lattice_training_series_with_tom_randall/part_2_power_endurance-11352)_
-  > "In deload or rest weeks, don't strip out all volume AND all intensity. Most climbers will want to drop the volume element but keep very similar on the intensity element of their training."
-
-- **Power-endurance sessions should mimic the project's style, length, intensity and rests for transfer; if the project is longer than the home wall (e.g. 30 m project on a 15 m wall) you do double laps to match duration.**  
-  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/2023/05/02/5-tips-for-power-endurance-training-for-route-climbing/)_
-  > "Make sure your indoor training sessions mimic your project's style and length—if it's steep, train on steep terrain; if it's crimpy, get on crimps; if it's 30 metres long but your wall is only 15 metres, do double laps."
-
-- **Aerobic power adapts quickly but plateaus sooner than other capacities, so it need not be trained for longer than about 6 to 8 weeks; for route climbers maximizing aerobic energy production (not anaerobic capacity) is the real key to staving off pump.**  
-  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/2023/05/02/5-tips-for-power-endurance-training-for-route-climbing/)_
-  > "Aerobic power can build quickly but you'll hit a ceiling faster than other areas, so there's not much need to do it longer than around 6 to 8 weeks. ... The real key to power endurance is maximising your aerobic energy production to stave off that pump, and keep you climbing at your max for longer."
-
-- **Power-endurance workouts must approach or reach failure — you should be getting pumped and possibly powered out — because never reaching failure fails to maximize adaptations.**  
-  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/2023/05/02/5-tips-for-power-endurance-training-for-route-climbing/)_
-  > "Make sure you are approaching or getting extremely close to failure in these workouts—you should be getting pretty pumped and possibly powered out, because if you're never reaching failure you won't be maximizing adaptations."
-
-- **A specific anaerobic/aerobic interval protocol is the 30/30: 6 intervals of 30 seconds on the wall at all-out intensity alternated with 30 seconds off for recovery (a 1:1 work:rest ratio).**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/podcast-24-energy-system-training-part-3/)_
-  > "The specific 30/30 interval protocol consists of 6 intervals of 30 seconds on the wall at all-out intensity and 30 seconds off for recovery."
-
-- **Long power endurance work carries an overtraining caution: doing it too often or at too high a volume can diminish performance, especially in-season for route climbers who climb outside multiple days per week.**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/podcast-24-energy-system-training-part-3/)_
-  > "A caution about 'long power endurance' training is that doing it too often or at too high a volume can lead to diminished performance, especially in-season among route climbers climbing outside multiple days per week."
-
-- **Campus board ladder laps are cited as a complementary anaerobic-lactic power-endurance exercise, with campus sprints taking roughly 3 to 8 seconds to the top, followed by 30 seconds of rest, repeated for a total of five to ten sprints.**  
-  _reasoning · vote 3-0 · [treadwallfitness.com](https://treadwallfitness.com/athletes-community/training/brewers-ledge-treadwall-training-guide/)_
-  > "Campus sprints typically take between 3 and 8 seconds to the top, followed by 30 seconds of rest before the next sprint, continuing for a total of five to ten sprints."
-
-- **Each Treadwall workout should target a single energy system rather than training all systems in one session; power-endurance Treadwall sessions can be supplemented with anaerobic-lactic exercises such as campus board ladder laps.**  
-  _reasoning · vote 3-0 · [treadwallfitness.com](https://treadwallfitness.com/athletes-community/training/brewers-ledge-treadwall-training-guide/)_
-  > "It's recommended to target each workout on a single energy system, rather than trying to train them all in one session, and when Treadwall training with Power Endurance protocols, you can supplement with exercises targeting the anaerobic lactic energy system like campus board ladder laps."
-
-
-### Peaking & tapering for a goal  (26)
+### Peaking & tapering for a goal  (17)
 
 - **During a climbing peak phase, Lattice prescribes SHORT, INTENSE sessions so the climber stays well-recruited AND well-rested, maximizing performance when climbing outdoors.**  
   _search · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/training-tips-for-climbers-structuring-your-training-during-a-peak-phase/)_
@@ -843,44 +575,8 @@
   _reasoning · vote 3-0 · [youtube.com](https://www.youtube.com/watch?v=IZgNzx63M3g)_
   > "If an athlete's strength metrics are staying solid during training once every five days, the frequency can be pushed to every six days... Bechtel may recommend that people do a strength day only every ten days when they're trying to send something."
 
-- **Recommended taper reduces training load by 41-60% from pre-taper levels while intensity is maintained (consistent with deload weeks targeting a roughly 40-60% reduction in overall training load).**  
-  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/training-tips-for-climbers-structuring-your-training-during-a-peak-phase/)_
-  > "A training-load reduction of 41–60% from pre-taper to taper is recommended"
 
-- **Cutting training intensity by 30-60% decreased aerobic and anaerobic performance by 20-30%, demonstrating the cost of dropping intensity during a taper.**  
-  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/training-tips-for-climbers-structuring-your-training-during-a-peak-phase/)_
-  > "cutting intensity 30–60% decreased aerobic/anaerobic performance by 20–30%"
-
-- **A step taper applies a significant immediate volume reduction of greater than 50 percent and then holds that reduction without further fluctuation, while exponential tapers reduce volume nonlinearly (e.g., fast decay = halving volume every 2 days; slow decay = halving every 5 days), with exponential fast-decay producing the most beneficial outcomes.**  
-  _reasoning · vote 3-0 · [nsca.com](https://www.nsca.com/education/articles/kinetic-select/tapering-and-peaking/)_
-  > "a step taper employs a significant reduction (greater than 50 percent) in training volume immediately and then maintains this reduction without fluctuations... a fast decay rate for example meaning reducing training volume by half every 2 days, while a slow decay rate may mean reducing training volu…"
-
-- **Maximum strength and aerobic capacity are to be trained well ahead of the peaking phase; raising max strength/power season over season sets the ceiling for peak power output and anaerobic capacity, which the final taper then expresses.**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/tag/redpoint-tips/)_
-  > "Hörst emphasizes the importance of increasing maximum strength and power season over season, because this sets the ceiling for your peak power output and anaerobic capacity."
-
-- **Anaerobic-lactic (glycolytic) capacity work targets efforts dominated by the glycolytic system lasting roughly 20 seconds to 2 minutes, trained as intervals with a hard effort paired with equal or greater rest (~1:5 work-to-rest ratio).**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/tag/redpoint-tips/)_
-  > "it's the glycolytic (anaerobic lactic) energy system that dominates during rigorous powerful efforts lasting 20 seconds to 2 minutes... Eric Hörst recommends pairing a hard effort with equal or greater rest, which is referred to as 'Interval Training.' This aligns with the 1:5 work-to-rest ratio."
-
-- **The peak achieved by the periodized cycle is described as a temporary but significant boost in climbing fitness enabling never-before-seen performance, implying it must be exploited within a limited window before it fades.**  
-  _reasoning · vote 3-0 · [cragmama.com](https://www.cragmama.com/2015/05/rock-climbers-training-manual-performance-phase-aka-results/)_
-  > "a temporary, but significant boost in climbing fitness that will enable the climber to attain never-before-seen levels of performance."
-
-- **The Performance/Redpoint phase is governed by deliberate redpoint-campaign strategy: route selection, planning short-term vs long-term projects, memorizing beta, and controlling focus and intensity during attempts are explicit components of getting results from the peak.**  
-  _reasoning · vote 3-0 · [cragmama.com](https://www.cragmama.com/2015/05/rock-climbers-training-manual-performance-phase-aka-results/)_
-  > "Topics on redpoint climbing performance include tips for optimal route selection, planning for redpoint project campaigns, specific strategies for short-term and long-term projects ... techniques for controlling focus and intensity during redpoint attempts, how to analyze and learn from your perform…"
-
-- **A peak in climbing performance can typically be sustained for about a month, during which an athlete may get two or three really hard sends.**  
-  _reasoning · vote 3-0 · [youtube.com](https://www.youtube.com/watch?v=IZgNzx63M3g)_
-  > "Usually when I get someone up to a peak, we can hang out there for about a month and sometimes you'll get two or three really hard sends."
-
-- **During in-season performance phases, a full rest day should be placed before every outside climbing day, and sessions are lower-volume to keep power/strength topped out for bouldering or crux-based routes.**  
-  _reasoning · vote 2-1 · [youtube.com](https://www.youtube.com/watch?v=IZgNzx63M3g)_
-  > "Full rest days should be placed before every outside climbing day during in-season performance phases... His in-season performance programs feature lower-volume sessions and are specifically aimed at keeping power and strength topped out for bouldering or crux-based route climbing."
-
-
-### Hangboard protocol deep dive  (12)
+### Hangboard protocol deep dive  (7)
 
 - **Max hangs protocol: hang a fixed edge for 7-10 seconds with added weight to near-failure, rest 3-5 minutes, for 3-5 sets, training the nervous system to recruit more motor units (~10s work per set).**  
   _search · vote 3-0 · [thehangboard.com](https://thehangboard.com/blogs/news/max-hangs-vs-repeaters)_
@@ -910,28 +606,8 @@
   _reasoning · vote 3-0 · [strengthclimbing.com](https://strengthclimbing.com/eric-horst-7-53-hangboard-routine/)_
   > "The ideal size edge for weighted fingerboard hangs is between 14mm and 20mm (⅝ to ⅞-inch). ... Eric recommends setting the weight so that you can hang for 10-seconds. ... Intensity must be at your limit but it must not bring you to failure."
 
-- **Both max hangs and repeaters are typically performed on an 18-20mm edge.**  
-  _reasoning · vote 3-0 · [thehangboard.com](https://thehangboard.com/blogs/news/max-hangs-vs-repeaters)_
-  > "Edge 18-20mm typical."
 
-- **For max hangs the article recommends resting at least 3 minutes between hangs, with Eva Lopez's margin rule: choose a load where your absolute max would be about 3 seconds longer than the prescribed hang (e.g., a ~13s max for 10s hangs).**  
-  _reasoning · vote 3-0 · [thehangboard.com](https://thehangboard.com/blogs/news/max-hangs-vs-repeaters)_
-  > "I recommend climbers rest AT LEAST 3 minutes between hangs. ... If you are doing 10-second hangs, pick a weight or edge where your absolute max would be around 13 seconds."
-
-- **The 7s-on/53s-off timing is grounded in recovery physiology: full recovery between maximum hangs is about 3 minutes, with an initial ~50-second phase in which mitochondria resynthesize ATP to restore phosphocreatine (PCr) stores.**  
-  _reasoning · vote 3-0 · [strengthclimbing.com](https://strengthclimbing.com/eric-horst-7-53-hangboard-routine/)_
-  > "full recovery between two maximum hangs takes about 3 minutes and is divided into two phases. In phase one, which is 50 seconds long, the mitochondria resynthesize ATP to restore phosphocreatine (PCr) intercellular stores."
-
-- **Grip positions are open-hand/open-crimp and half-crimp (initially focusing on half crimp and open-hand pocket positions); the full-crimp grip with thumb lock should never be used.**  
-  _reasoning · vote 3-0 · [strengthclimbing.com](https://strengthclimbing.com/eric-horst-7-53-hangboard-routine/)_
-  > "Grip options: open crimp and half crimp. Never use full-crimp (with thumb lock) grip. ... Initially focus on training the half crimp and open hand pocket positions."
-
-- **The protocol is prescribed twice per week and is positioned as a high-intensity, low-volume approach, consistent with research that higher exercise volume does not necessarily yield greater strength gains.**  
-  _reasoning · vote 3-0 · [strengthclimbing.com](https://strengthclimbing.com/eric-horst-7-53-hangboard-routine/)_
-  > "Execute this program twice per week, and you will elevate your finger strength in a few short weeks. ... This high-intensity-low-volume approach is consistent with the results of recent research, where it was shown that increasing the exercise volume does not necessarily lead to higher strength gain…"
-
-
-### Deload, recovery, frequency & weekly volume  (21)
+### Deload, recovery, frequency & weekly volume  (8)
 
 - **A V4 climber training with Lattice logs an average of 3 training days per week, while a V12+ climber logs an average of 4 training days per week.**  
   _search · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/data-dive-training-days-weekly-exercise-v4-v12/)_
@@ -962,8 +638,468 @@
   > "the episode addresses how fatigue accumulates with training and why strategic deload weeks are essential for managing that fatigue and optimizing climbing fitness... diminishing returns after several weeks of hard training"
 
 - **Lattice recommends a deload pattern of 3 weeks on / 1 week off (a 3:1 ratio) as the most common deload cadence for climbers.**  
-  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/)_
+  _reasoning · vote 2-0 · [latticetraining.com](https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/)_
   > "A deload week involves reducing both volume and intensity to allow for supercompensation (adaptation leading to higher performance post-training), with the most common pattern being 3 weeks on 1 week off."
+
+
+## 2026-07-02 decision-round batch
+
+Adjudicated to settle the four open prescription decisions (KG-B2/B3/C5/A6/A5). Same 3-vote adversarial method as the original pass (kept at ≤1 refutation of 3). 29 claims run → **25 kept, 4 refuted** (the 4 are in the Refuted section below). Grouped by the decision they informed.
+
+### Deload cadence (KG-B3 → ADR-0004)
+
+- **Scheduling deload weeks more frequently keeps accumulated fatigue lower, and the prescription should stay flexible because each cycle differs.** (3-0) — [latticetraining.com](https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/)
+- **Connective tissue (tendons/pulleys) adapts more slowly than muscle, which is why deloads are needed to protect those structures.** (3-0) — [megabetaclimbing.com](https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases)
+- **A deload is personalized and variable in length — a few days to over a week depending on age, condition, and goals — and matters less for recreational climbers than for those training hard.** (3-0) — [trainingforclimbing.com](https://trainingforclimbing.com/training-cafe-43-the-important-of-deload-weeks-in-climbing-and-training/)
+- **Weekly session load rises only modestly with grade — 240 at V1–V4 to 375 at V12+, a 1.6× increase across the full spectrum.** (3-0) — [latticetraining.com](https://latticetraining.com/blog/data-dive-training-days-weekly-exercise-v4-v12/)
+- **Elite climbers separate training aspects across their ~4 days, giving each session a single tighter focus rather than adding overall volume.** (2-1) — [latticetraining.com](https://latticetraining.com/blog/data-dive-training-days-weekly-exercise-v4-v12/)
+- **During a deload you can drop volume but retain some high-intensity sessions (especially if strength is the focus); retained hard sessions should be cut roughly in half and kept short and fewer.** (3-0) — [latticetraining.com](https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/)
+
+### Base/Build hangboard (KG-B2 → ADR-0005)
+
+- **The low-volume max-hang protocol (Eva López-based) is an entry-level fingerboard program; a few multi-week cycles bring noticeable finger-strength gains for intermediates and prepare them for weighted hangs.** (3-0) — [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)
+- **For max-strength weighted hangs the ideal edge is 14–20mm — moderate depth that reduces skin pain and distal-joint strain while building max strength that carries over to other edge sizes.** (3-0) — [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)
+- **Repeaters use 7s hang / 3s rest in sets of 6 (~1 min/set), one set per grip entry-level up to three sets advanced, focusing on half-crimp and open-crimp.** (3-0) — [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)
+- **A max-hang session targets roughly 6–8 reps in total.** (3-0) — [climbing.com](https://www.climbing.com/skills/lattice-hangboarding-part-2/)
+- **Top sets on max hangs and pull-ups should be RPE 8–9, leaving ~a rep or 1–2s in reserve.** (3-0) — [hikingmanual.com](https://www.hikingmanual.com/posts/best-strength-program-for-climbers-ultimate-plans-schedules-guide)
+- **Load is margin-autoregulated: if margin exceeds ~3s, add 2–5 kg next set; if margin approaches zero, subtract 2–5 kg (scaled to bodyweight).** (3-0) — [strengthclimbing.com](https://strengthclimbing.com/eva-lopez-maxhangs/)
+- **Total weekly climbing + finger-training days should not exceed four, and the intense max-strength fingerboard protocol should be limited to two days per week.** (3-0) — [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)
+
+### Power-endurance taxonomy & dosing (KG-C5/A6 → ADR-0006)
+
+- **Hörst's weekly energy-system template for sport climbers: one max-strength (alactic) session, two power-endurance (anaerobic-lactic) sessions, one aerobic-capacity (oxidative) session per week.** (3-0) — [trainingforclimbing.com](https://trainingforclimbing.com/power-endurance-training-protocols-for-climbers/)
+- **Aerobic power adapts quickly but plateaus sooner than other capacities, so it need not be trained longer than ~6–8 weeks; maximizing aerobic energy production is the real anti-pump key for route climbers.** (3-0) — [latticetraining.com](https://latticetraining.com/2023/05/02/5-tips-for-power-endurance-training-for-route-climbing/)
+- **Discipline emphasis differs: boulderers should bias toward anaerobic-capacity training, route climbers toward aerobic-power training.** (3-0) — [ukclimbing.com](https://www.ukclimbing.com/articles/skills/series/lattice_training_series_with_tom_randall/part_2_power_endurance-11352)
+- **Long power-endurance work carries an overtraining caution — too often or too high a volume diminishes performance, especially in-season for route climbers climbing outside multiple days/week.** (3-0) — [trainingforclimbing.com](https://trainingforclimbing.com/podcast-24-energy-system-training-part-3/)
+- **Each workout should target a single energy system rather than all systems at once; PE sessions can be supplemented with anaerobic-lactic exercises (e.g. campus ladder laps).** (3-0) — [treadwallfitness.com](https://treadwallfitness.com/athletes-community/training/brewers-ledge-treadwall-training-guide/)
+- **Power-endurance workouts must approach or reach failure (getting pumped / powered out) — never reaching failure fails to maximize adaptations.** (3-0) — [latticetraining.com](https://latticetraining.com/2023/05/02/5-tips-for-power-endurance-training-for-route-climbing/)
+
+### Taper (KG-A5 → ADR-0007)
+
+- **A step taper applies a >50% immediate volume cut then holds it; exponential fast-decay (halve volume ~every 2 days) produces the most beneficial outcomes.** (3-0) — [nsca.com](https://www.nsca.com/education/articles/kinetic-select/tapering-and-peaking/)
+- **Recommended taper reduces training load 41–60% from pre-taper while intensity is maintained (consistent with a ~40–60% deload load cut).** (2-1) — [latticetraining.com](https://latticetraining.com/blog/training-tips-for-climbers-structuring-your-training-during-a-peak-phase/)
+- **Cutting training intensity 30–60% decreased aerobic and anaerobic performance by 20–30% — the cost of dropping intensity during a taper.** (3-0) — [latticetraining.com](https://latticetraining.com/blog/training-tips-for-climbers-structuring-your-training-during-a-peak-phase/)
+- **In-season performance phases place a full rest day before every outside climbing day, with lower-volume sessions to keep power/strength topped out.** (3-0) — [youtube.com](https://www.youtube.com/watch?v=IZgNzx63M3g)
+- **A climbing performance peak can be sustained ~1 month, during which an athlete may get two or three really hard sends.** (3-0) — [youtube.com](https://www.youtube.com/watch?v=IZgNzx63M3g)
+- **The Performance/Redpoint phase is governed by deliberate redpoint-campaign strategy (route selection, project planning, beta memorization, focus/intensity control).** (3-0) — [cragmama.com](https://www.cragmama.com/2015/05/rock-climbers-training-manual-performance-phase-aka-results/)
+
+## 2026-07-08 assessment-norms batch
+
+Adjudicated to close KG-C6 (benchmark-vs-grade norms provenance), feeding the limiter-diagnosis groundwork in KG-A1/KG-D2. Same 3-vote adversarial method as prior batches, but with three distinct reviewer lenses per claim (source fidelity, external corroboration, statistical/methodological scrutiny) rather than one generalist pass. 29 claims run → **25 kept (several with corrections), 4 refuted**. Synthesized into a grade-anchored norms table with confidence labels at [`../benchmark-norms.md`](../benchmark-norms.md) — that document also explains the critical total-load-vs-added-load unit distinction this batch uncovered.
+
+### Finger-strength assessment (Lattice Training, 901 participants)
+
+- **Lattice's core finger-strength benchmark is the 7-second two-arm max hang on an 18–22mm edge (participant's preferred half-crimp or open-hand grip), expressed as %BW — where %BW is TOTAL load (bodyweight + added weight), confirmed verbatim in Lattice's own testing-instructions PDF.** (3-0) — [latticetraining.com](https://latticetraining.com/blog/predictors-for-performance/), unit convention per [Lattice's testing-rung instructions PDF](https://latticetraining.com/app/uploads/2018/06/1528799872597_180503_Lattice-Testing-Training-Rung-Instructions.pdf)
+- **Across the combined dataset (901 participants), the 7-sec max hang (%BW) predicts best boulder grade worked: R = 0.704, R² = 0.496 (~49.6% of variance), F(1,899) = 885.74, p < 0.001.** (3-0) — [latticetraining.com](https://latticetraining.com/blog/predictors-for-performance/)
+- **Among Advanced climbers specifically (~V4–V8, this app's athlete's tier), finger strength's predictive power drops to R = 0.411, adjusted R² = 0.167 — only ~17% of grade variation is explained, versus ~50% in the combined sample; the drop is consistent with range restriction, not necessarily a real decline in importance.** (3-0) — [latticetraining.com](https://latticetraining.com/blog/predictors-for-performance/)
+- **Among Elite climbers, finger strength remains the strongest single predictor but falls further to R = 0.319, adjusted R² = 0.099 (~9.9% of variation).** (3-0) — [latticetraining.com](https://latticetraining.com/blog/predictors-for-performance/)
+- **Lattice analyzed predictors separately by ability tier (Combined, Advanced, Elite, Higher Elite) via simple (univariate) linear regression on 901 participants, each predictor entered independently against highest boulder grade worked.** (3-0) — [latticetraining.com](https://latticetraining.com/blog/predictors-for-performance/)
+- **For Advanced climbers, finger strength and pulling strength are the most influential predictors, while flexibility (adjusted R²=0.072) and 60% power-endurance (adjusted R²=0.058) are weak and non-significant.** (3-0) — [latticetraining.com](https://latticetraining.com/blog/predictors-for-performance/)
+- **Lattice frames the 7-second two-arm Max Hang (%BW) as the number-1 measure of sport-climbing performance in their pooled sample — though in their own Higher-Elite sport tier (~8c–9a), weighted pull-ups outperform it (R=0.521 vs 0.356).** (3-0) — [latticetraining.com](https://latticetraining.com/blog/what-is-the-number-1-measure-of-performance-for-sport-climbers/)
+- **The assessment protocol is progressive 7-second two-arm dead-hangs on an 18–22mm edge, participant's preferred grip held constant, load increased each attempt to reach max within 4–8 attempts (more than 8 requires 24h rest before retesting).** (2-1) — [latticetraining.com](https://latticetraining.com/blog/what-is-the-number-1-measure-of-performance-for-sport-climbers/)
+- **The 7-second Max Hang (%BW) correlates moderately-to-strongly with hardest route worked: R=0.660, 43.6% of variance, F(1,420)=324.32, p<0.001 (n≈422).** (3-0) — [latticetraining.com](https://latticetraining.com/blog/what-is-the-number-1-measure-of-performance-for-sport-climbers/)
+- **Finger strength rises about 6 percentage points of TOTAL-load %BW per V-grade across Lattice's video-derived benchmark table (V4=128% total → V5=134% → V6=140% → ... → V11=170%), i.e. roughly +6% of bodyweight added per grade.** (2-1) — [Lattice "Finger Strength Vs Climbing Ability" video, corroborated by wmgclimbing.wordpress.com's independent dataset approximation]
+- **A one-arm conversion of the same dataset (total load %BW achieved in a one-arm pull on a 20mm edge within 7–10 seconds) spans from V4 at 49% to V17 at 118%, stepping ~6%/grade V4–V11, ~5%/grade V11–V14, ~4%/grade V14–V17.** (2-1) — [wmgclimbing.wordpress.com third-party approximation of Lattice's dataset]
+
+### Finger-strength assessment (peer-reviewed, EJAP 2025)
+
+- **Climbing-specific finger strength (isometric hang from a 22mm edge, normalized to bodyweight, added-kg convention) correlated very strongly with bouldering performance (r=0.89, r²≈0.79) in 19 male climbers.** (3-0) — [pmc.ncbi.nlm.nih.gov](https://pmc.ncbi.nlm.nih.gov/articles/PMC12479556/)
+- **The same measure correlated more weakly with redpoint performance (r=0.67, r²≈0.45) than with bouldering in this single N=19 study — suggestive of, but (given overlapping confidence intervals at this sample size) not establishing, a general boulder-vs-route evidence gap.** (2-1) — [pmc.ncbi.nlm.nih.gov](https://pmc.ncbi.nlm.nih.gov/articles/PMC12479556/)
+- **Climbing-specific finger strength also correlated strongly with campus board score (r=0.82, r²≈0.67).** (3-0) — [pmc.ncbi.nlm.nih.gov](https://pmc.ncbi.nlm.nih.gov/articles/PMC12479556/)
+- **Generic handgrip (dynamometer) strength was only moderately associated with redpoint (r=0.54) and campus board (r=0.47), and showed no significant association with bouldering in this N=19 sample — consistent with, though not on its own confirming, climbing-specific edge testing being more relevant than generic handgrip.** (2-1) — [pmc.ncbi.nlm.nih.gov](https://pmc.ncbi.nlm.nih.gov/articles/PMC12479556/)
+- **The study sample was 19 males, 26±3y, redpoint 6b+ to 8c (French scale), published in the European Journal of Applied Physiology 2025 (Vol 125, pp. 2823–2830) — peer-reviewed, but a small all-male sample limits generalizability.** (3-0) — [pmc.ncbi.nlm.nih.gov](https://pmc.ncbi.nlm.nih.gov/articles/PMC12479556/)
+
+### Finger & endurance assessment (Hörst)
+
+- **Hörst's max finger-strength test: hang 5 seconds from a 10mm edge in half-crimp with added weight strapped on, ~3 minutes rest between attempts; elite climbers can often add roughly 1/3 of bodyweight (an informal observation in the source, not cited data).** (3-0) — [trainingforclimbing.com](https://trainingforclimbing.com/3-hangboard-tests-to-gauge-your-climbing-ability/)
+- **Hörst's continuous bodyweight endurance-hang benchmarks (single continuous half-crimp hang to failure on a 20mm edge) by ability: moderately-advanced climbers average ~45 seconds, advanced/5.13 climbers 60–90 seconds, elite climbers approach ~120 seconds.** (3-0) — [trainingforclimbing.com](https://trainingforclimbing.com/3-hangboard-tests-to-gauge-your-climbing-ability/)
+- **Separately, Hörst's 10mm-edge intermittent endurance test (5s on / 5s off to failure, scored by rounds completed) is intended to gauge forearm-flexor fatigue resistance and simulate climbing a continuously difficult route with little rest.** (2-1) — [trainingforclimbing.com](https://trainingforclimbing.com/3-hangboard-tests-to-gauge-your-climbing-ability/)
+- **The 7/3 repeater protocol (7s hang / 3s rest, 6 hangs per set, 2–3 min rest between grip positions, load at 60–80% of Maximum Voluntary Contraction for advanced climbers) is a standard Hörst-popularized protocol, though it is not described in the "3 hangboard tests" article — it is documented in his separate repeaters material.** (2-1) — [trainingforclimbing.com](https://trainingforclimbing.com/hangboard-finger-training-repeaters/)
+
+### Strength/endurance metrics (Power Company Climbing, 600+ assessments)
+
+- **Power Company Climbing derived its strength/endurance standards from over 600 client assessments (not necessarily 600 distinct climbers — repeat submissions are possible), with table values given as the range from (mean − 1 SD) to (mean + 1 SD) for each measurement at each max-outdoor-grade column; not peer-reviewed.** (2-1) — [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/metrics-for-climbers)
+- **The max hang test is standardized as a weighted 10-second hang on a 20mm edge; a climber whose max hang falls below the range for their project grade is advised (with a hedge — "maybe") to consider adding hangs roughly twice per week, alongside the caveat that repeating hard finger-y boulders may be a more sport-specific alternative.** (3-0) — [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/metrics-for-climbers)
+- **The metrics are framed explicitly as diagnostic guides rather than goals — "a very small piece of a much more complex puzzle" and no replacement for a complete understanding of the climber's needs.** (2-1) — [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/metrics-for-climbers)
+- **Power Company's standards tables report seven measurements (max hang, weighted pull-up 1RM, campus max reach, 7:3 bodyweight repeaters, continuous hang time, max pull-ups, max push-ups) across four tables split by gender and discipline — the "four primary measurements" framing (max hang, max weighted pull, max reps pull, 7:3 repeater) comes from a separate companion article about the same 600+-climber dataset.** (2-1) — [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/metrics-for-climbers)
+- **Repeating hard, finger-y boulder problems is offered as a more sport-specific (if less quantifiable) alternative to weighted 20mm hangs for building the finger-strength quality the test measures.** (3-0) — [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/metrics-for-climbers)
+
+## Refuted claims (for transparency)
+
+- ✗ (0-3) For lower-to-intermediate climbers specifically, the two-arm bent-arm hang test is NOT sufficiently reliable, implying that an intermediate (V4-V6 / 6c-7a) climber should prefer a fixed-edge maximal isometric pull (e.g., load-cell or weighted edge) over a bodyweight bent-arm hang for trustworthy benchmarking. — [ncbi.nlm.nih.gov](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12521219/)
+- ✗ (0-3) A full periodized macrocycle for climbing energy-system development uses an extended base phase of roughly 4 months followed by a ~2-month peak phase, allowing time for complete aerobic and anaerobic adaptation before performance. — [unlevel-edge.com](https://unlevel-edge.com/blogs/climbing-blog/climbing-endurance-training-methods-protocols-and-progressions)
+- ✗ (0-3) The taper produces a peaking effect by recalibrating the brain's central governor, unlocking higher power output, increased stamina, and a new performance extreme. — [trainingforclimbing.com](https://trainingforclimbing.com/tag/redpoint-tips/)
+
+### 2026-07-02 batch (refuted)
+
+- ✗ (1-2) For serious climbers, deload every 4–6 weeks; casual, every 6–8; serious + strength work, every 6–12 — the specific frequency-by-training-load buckets over-specify beyond what the source supports. — [megabetaclimbing.com](https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases) *(the general "every 4–6 weeks" guidance survives via other kept claims; only the tiered buckets were refuted)*
+- ✗ (0-3) Minimum-edge training primarily develops pain tolerance, DIP-joint connective-tissue integrity, and small-hold strength, and is unnecessary unless working crimps since sub-8mm edges mostly appear at V8+. — [stevenlow.org](https://stevenlow.org/repeaters-and-max-hang-analysis-for-strength-and-hypertrophy-ft-power-company-podcast-and-steve-maisch/) *(this was the pro-min-edge rationale; its refutation reinforces ADR-0005's deletion of min-edge)*
+- ✗ (0-3) Hörst frames the 60/60 protocol as exhausting alactic power while deliberately avoiding lactic/acidy stress to lower overtraining risk over multiple weeks — the specific mechanistic framing overreaches the source. — [trainingforclimbing.com](https://trainingforclimbing.com/power-endurance-training-protocols-for-climbers/) *(the two-band taxonomy in ADR-0006 rests on other kept claims, not this one)*
+- ✗ (1-2) Anaerobic-lactic capacity work targets 20s–2min efforts trained at a ~1:5 work-to-rest ratio — the specific ratio/duration numbers were not reliably supported as stated. — [trainingforclimbing.com](https://trainingforclimbing.com/tag/redpoint-tips/)
+
+### 2026-07-08 batch (refuted)
+
+- ✗ (1-2) Lattice provides a grade-anchored two-arm finger-strength benchmark table with values described as "added load as % bodyweight" (V4=128% … V11=170%) directly in its predictor-analysis or number-1-measure blog posts. — [latticetraining.com](https://latticetraining.com/blog/what-is-the-number-1-measure-of-performance-for-sport-climbers/) *(the table exists and the anchors are corroborated, but it comes from a Lattice video, not the cited posts, and the % is TOTAL load — bodyweight + added — not added load alone; a corrected version of this fact is kept above and in `benchmark-norms.md`)*
+- ✗ (0-3) In stepwise regression, maximal strength in the half-crimp plus the front-three drag together explained 66% of the variance in climbing performance, with half-crimp strength the single most important indicator. — [pmc.ncbi.nlm.nih.gov](https://pmc.ncbi.nlm.nih.gov/articles/PMC12479556/) *(the cited EJAP 2025 paper runs bivariate correlations only, never separates grip positions, and never names a "front three drag" — this finding belongs to a different study, Winkler et al., "Validity and Reliability of Finger-Strength Testing in 6 Common Grip Techniques," IJSPP 2024, and must not be attributed to the EJAP paper)*
+- ✗ (1-2) Hörst's endurance-hang test is a single half-crimp hang on a 10mm (or, per a muddled excerpt, ~20mm) edge with no added weight, measuring total continuous hang time of 20 seconds to 2 minutes depending on ability. — [trainingforclimbing.com](https://trainingforclimbing.com/3-hangboard-tests-to-gauge-your-climbing-ability/) *(the article actually describes two separate tests that this claim conflated: a 10mm-edge INTERMITTENT test, 5s on/5s off, scored by rounds; and a 20mm-edge SINGLE CONTINUOUS hang, which is where the 20s–2min range and the ability benchmarks belong — both are kept above as separate, correctly attributed claims)*
+- ✗ (1-2) Max Hang combined with Max Weighted Pull-Up are the two strongest predictors of climbing performance per Power Company Climbing's "Metrics for Climbers" article, holding for both sport and bouldering, more convincing for bouldering. — [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/metrics-for-climbers) *(the statement itself is accurate and verbatim — but it lives in Power Company's separate "heatmaps" article, "The Two Things You Need for Climbing Harder"; the cited metrics-for-climbers page contains no regression or predictor analysis at all)*
+
+## Full-corpus completion (2026-07-10)
+
+A separate verification pass ran the **entire remaining original corpus** (`data/gathered-claims.json`, the same shared corpus referenced above) to 100% completion — 273 non-tangential claims total, via the same 3-vote adversarial method described at the top of this document (predominantly reasoning-verified: no live search, judged for quote-fidelity and consistency with established climbing-training science). This closes the gap the summary above calls out ("~94 gathered claims remain un-adjudicated ... scoped to what pending decisions need rather than run to completion") — every remaining claim has now been checked.
+
+**Reconciliation against the decision-round batches above:** every claim ID cited by ADRs 0004–0007 was cross-checked against this pass's independent verdict. Of 19 cited claims, **18 agree exactly** (confirmed on both sides — see the ADRs and this appendix for corroboration); the remaining one (claim 291, the min-edge pain-tolerance rationale) is `importance: tangential` and was outside this pass's scope by design, so it is not contradicted, only unaddressed here.
+
+**Where this pass's reasoning-only check disagreed with the earlier search-verified batches, the search-verified verdict wins** — a live-search check can catch source misattribution and unit-convention errors that a reasoning-only check cannot. **11 claims were excluded from the additions below** for exactly this reason (full list, so nothing is silently dropped):
+
+- *Hörst frames the 60/60 protocol as building aerobic power and exhausting alactic power while deliberately avoiding deep lactic/acidy stress,…*
+- *Anaerobic-lactic (glycolytic) capacity work targets efforts dominated by the glycolytic system lasting roughly 20 seconds to 2 minutes, trai…*
+- *For climbers training seriously (4-5 structured days/week), deload every 4-6 weeks; for casual climbers (2-3 days/week), deload every 6-8 we…*
+- *The deload prescription follows Climb Strong-style guidance, tying cadence to training seriousness/frequency rather than a single fixed inte…*
+- *Lattice provides a grade-anchored two-arm finger-strength benchmark table (added load as % bodyweight, 7s hang, 20mm edge, half-crimp): V4=1…*
+- *In stepwise regression, maximal strength in the half-crimp plus the front-three drag together explained 66% of the variance in climbing perf…*
+- *Hörst's endurance-hang test: half-crimp on a 10mm (per excerpt ~20mm) edge with NO added weight, measuring total hang time. Climbers hang an…*
+- *Endurance-hang benchmarks by ability: moderately-advanced climbers average ~45 seconds, advanced/5.13 climbers 60-90 seconds, and elite clim…*
+- *Max Hang combined with Max Weighted Pull-Up are the two strongest predictors of climbing performance, holding for both sport and bouldering,…*
+- *Finger strength rises about 6 percentage points of bodyweight per V-grade across the benchmark table (each successive grade adds ~6% BW, e.g…*
+- *A one-arm conversion of the same dataset (max %BW achieved in a one-arm pull on a 20mm edge within 7-10 seconds) spans from V4 at 49% to V17…*
+
+**Net result: 132 additional claims confirmed** (beyond the 150 in the original pass and the 50 in the two decision-round batches above), plus 5 additional refutations, with **zero** unresolved disagreements. Grouped by topic below.
+
+### Periodization models & macrocycle architecture  (11)
+
+- **Undulating/non-linear periodization specifically suits in-season climbers (who must maintain multiple qualities at once) and beginners who need to develop a broad base across qualities rather than specializing in one block at a time.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/how-to-structure-your-training/)_
+  > "Undulating/non-linear ... suits in-season climbers and beginners needing a broad base."
+
+- **Lattice defines the standard periodization hierarchy as macrocycle (the overall long-term plan) divided into mesocycles (focus blocks) divided into microcycles, where a microcycle is the smallest unit of a periodized plan, usually one week of training.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/how-to-structure-your-training/)_
+  > "A microcycle refers to the smallest unit within a periodised training plan; usually a week of training."
+
+- **Lattice typically uses 4-week mesocycles, and for finger-strength training specifically recommends a 3-weeks-on, 1-week-off structure (a deload/recovery week built into each block), with 2 fingerboard sessions per on-week — one progressive-loaded and one constant-loaded.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/how-to-structure-your-training/)_
+  > "Lattice typically uses 4 week mesocycles ... for finger strength training, they recommend a mesocycle structure of 3 weeks on, 1 week off ... During the "on" weeks you will complete 2 fingerboard sessions, with one as progressive loaded and the other as constant loaded."
+
+- **The macrocycle is divided into periods beginning with a Base/preparation period whose aim is to build basic fitness and movement, in which general (non-specific, multilateral) preparation precedes climbing-specific training.**  
+  _reasoning · vote 3-0 · [climbing.com](https://www.climbing.com/gym-climbing/how-climbers-periodize-training)_
+  > "the macrocycle [is] divided into three periods: Base or preparation period, the aim of which is to build up basic fitness and movement. The general preparation period involves multilateral training (non-specific, varied, multicomponent) that takes precedence over specific training"
+
+- **The RCTM popularized the 7/3 repeaters hangboard protocol: 7 seconds of hanging followed by 3 seconds off, repeated for 6 cycles = one minute of work per set with 42 seconds of time under tension; the Andersons' 2015 research reported finger-strength gains up to 21.5% after a 4-week cycle and 32% after a full 8-week block.**  
+  _reasoning · vote 3-0 · [rockclimberstrainingmanual.com](https://rockclimberstrainingmanual.com/training-for-rock-climbing/rock-climbing-training-plan/)_
+  > "The classic 7/3 repeater format involves 7 seconds hanging followed by 3 seconds off, repeated for 6 cycles, adding up to one full minute of work per set with 42 seconds of actual time under tension. Mark and Mike Anderson popularized this protocol in The Rock Climber's Training Manual, with their 2…"
+
+- **The training activities unique to the Power phase are Limit Bouldering and Campus Board workouts (maximal-recruitment, low-volume work), distinguishing Power from the Strength phase's hangboarding.**  
+  _reasoning · vote 3-0 · [rockclimberstrainingmanual.com](https://rockclimberstrainingmanual.com/training-for-rock-climbing/rock-climbing-training-plan/)_
+  > "The training activities unique to the power phase are Limit Bouldering and Campus Board workouts"
+
+- **Training focus should be varied at least every one to four weeks to avoid plateaus (Principle of Variation), with the focus cycling from endurance, to maximum strength and power, to anaerobic endurance every few weeks.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/tag/periodization/)_
+  > "in terms of strength training, it's most effective to change focus every one to, at most, four weeks. The goal is to cycle the focus of your training from endurance, to maximum strength and power, to anaerobic endurance, every few weeks."
+
+- **Anaerobic-capacity (power-endurance) work is divided by effort duration into high-end/short power-endurance (peak power for 15-30 seconds), intermediate power-endurance (near-maximal output for 40-60 seconds), and transitional/long power-endurance (1-3 minutes of moderately-high power climbing).**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/tag/periodization/)_
+  > "three categories: 'high-end' or 'short' power endurance (peak power output for 15 to 30 seconds), 'intermediate power endurance' (sustained near-maximal power output for 40 to 60 seconds), and 'transitional' or 'long power endurance' (1 to 3 minutes of moderately-high power climbing/exercise)."
+
+- **Conjugate periodization aims to develop strength, power, and hypertrophy simultaneously by regularly rotating training stressors via exercise selection, and is structured for more advanced athletes around concentrated loading, transmutation, and recovery mesocycles.**  
+  _reasoning · vote 3-0 · [setforset.com](https://www.setforset.com/blogs/news/periodization-training-models)_
+  > "Conjugate training is a system designed to develop strength, power, and hypertrophy at the same time. This model is usually structured for more advanced athletes with its central principles including concentrated loading, transmutation, and recovery mesocycles."
+
+- **Mesocycles nest within the macrocycle and typically contain two to six microcycles, with preparatory-phase mesocycles commonly running 4-6 microcycles and competitive-phase mesocycles 2-4 microcycles.**  
+  _reasoning · vote 3-0 · [setforset.com](https://www.setforset.com/blogs/news/macrocycle-mesocycle-microcycle-explained)_
+  > "Mesocycles typically contain two to six microcycles. More specifically, during the preparatory phase, a mesocycle commonly consists of 4 – 6 micro-cycles, while during the competitive phase it will usually consist of 2 – 4 micro-cycles depending on the competition's calendar."
+
+- **The macrocycle is divided into three phases - preparation (preparatory), competitive, and transition - with the preparation phase occupying roughly two-thirds to three-quarters of the macrocycle and the transition phase lasting about one month for recovery.**  
+  _reasoning · vote 3-0 · [setforset.com](https://www.setforset.com/blogs/news/macrocycle-mesocycle-microcycle-explained)_
+  > "There are three phases in the macrocycle: preparation, competitive, and transition. ... The entire preparation phase should be around 2/3 to 3/4 of the macrocycle. Lasting around a month in duration, the transition phase is necessary to ensure an athlete can recover"
+
+
+### Base / aerobic-capacity phase programming  (12)
+
+- **ARC/Base training develops a foundation of muscular fitness, improves local forearm capillarity, improves grip control and pump-management skills, aids recovery from intense training, and is used to acquire/practice new movement skills.**  
+  _reasoning · vote 3-0 · [rockclimberstrainingmanual.com](https://rockclimberstrainingmanual.com/training-for-rock-climbing/base-fitness/)_
+  > "ARC training develops a foundation of muscular fitness, improves local forearm capillarity for improved aerobic energy metabolism, improves grip control and pump-management skills, aids recovery from intense training, and helps acquire and practice new movement skills and techniques."
+
+- **The Base phase is a transition between active rest and more intense training, accomplished via low-intensity, long-duration 'climbing mileage'; limited quantities of ARC training remain acceptable even during higher-intensity phases.**  
+  _reasoning · vote 3-0 · [rockclimberstrainingmanual.com](https://rockclimberstrainingmanual.com/training-for-rock-climbing/base-fitness/)_
+  > "The base-building phase provides a transition between the active rest period and more intense training activities... this is generally accomplished by climbing at low intensity and long duration, and is often described as 'climbing mileage'... Limited quantities of low intensity training like Base F…"
+
+- **For intermediate-level climbers, the recommended approach to developing aerobic capacity is to favor longer ARC sets (rather than higher intensity or shorter sets).**  
+  _reasoning · vote 3-0 · [en-eva-lopez.blogspot.com](http://en-eva-lopez.blogspot.com/2015/03/aerobic-endurance-training-in-sport.html)_
+  > "For intermediate level climbers, Eva López recommends going for longer sets when developing aerobic capacity."
+
+- **For high-level climbers, once set duration and total session volume are maxed out near tolerance limits, reducing the rest time between sets is the most appropriate lever for further load progression; adding more volume beyond that point is not productive and effort should shift to a different endurance objective.**  
+  _reasoning · vote 3-0 · [en-eva-lopez.blogspot.com](http://en-eva-lopez.blogspot.com/2015/03/aerobic-endurance-training-in-sport.html)_
+  > "For high-level climbers, reducing recovery time between sets is probably the most suitable tool for load progression when other variables like set duration and total session volume are maxed out. When a certain volume near the limit of tolerance is reached, it makes no sense to keep adding to it and…"
+
+- **ARC training is performed several sessions per week for several weeks (typically as a Base/aerobic-capacity phase block), accumulating high training volume.**  
+  _reasoning · vote 3-0 · [uphillathlete.com](https://uphillathlete.com/rock-climbing/rock-climbing-training-arcing/)_
+  > "many plans prescribe 90+ min per workout, several sessions/week for several weeks"
+
+- **Corroborating coaching sources operationalize the intensity anchor as climbing for roughly 20-40 minutes without surpassing the anaerobic threshold (the point of strong pump), on routes about 2-3 grades below max onsight.**  
+  _reasoning · vote 3-0 · [uphillathlete.com](https://uphillathlete.com/rock-climbing/rock-climbing-training-arcing/)_
+  > "The goal is to climb for 20 to 40 minutes without surpassing your "anaerobic threshold", the point where you start developing a strong "pump" ... Routes should be at least 2–3 grades below your max onsight level."
+
+- **On-off (interval) circuits for endurance use 30-90 second work intervals followed by short rest periods, as an alternative aerobic/anaerobic-capacity stimulus to continuous ARC climbing.**  
+  _reasoning · vote 3-0 · [unlevel-edge.com](https://unlevel-edge.com/blogs/climbing-blog/climbing-endurance-training-methods-protocols-and-progressions)_
+  > "on-off circuits with 30–90 second work intervals followed by short rests."
+
+- **Endurance-oriented hangboard repeaters use a 7-seconds-on / 3-seconds-off work:rest pattern for 6 to 7 repetitions per set, across 4 to 6 sets.**  
+  _reasoning · vote 3-0 · [unlevel-edge.com](https://unlevel-edge.com/blogs/climbing-blog/climbing-endurance-training-methods-protocols-and-progressions)_
+  > "For endurance, repeaters consist of 7 seconds hanging followed by 3 seconds resting for 6 to 7 repetitions across 4 to 6 sets."
+
+- **Periodization is implemented as block training over 4 to 8 week blocks, each block with one primary focus (aerobic capacity, strength-endurance, or power-endurance) while other qualities are lightly maintained via lower-intensity 'reminder' sessions to prevent detraining.**  
+  _reasoning · vote 3-0 · [unlevel-edge.com](https://unlevel-edge.com/blogs/climbing-blog/climbing-endurance-training-methods-protocols-and-progressions)_
+  > "Each training block should have one primary focus to maximize adaptations... it's important to lightly maintain other qualities during each phase through "reminder" sessions or lower-intensity work... over 4 to 8 week blocks."
+
+- **Hörst distinguishes the aerobic energy system (stamina — sustaining low-to-moderate intensity over long durations, e.g. a consistent long route) from the anaerobic system (muscular endurance), and argues most climbers need proficiency in both.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/aerobic-versus-anaerobic-training-for-climbing-beat-the-burn-and-climb-all-day/)_
+  > "The aerobic energy system builds stamina, while the anaerobic system builds muscular endurance. Most climbers will benefit from proficiency in both. Stamina refers to an athlete's ability to maintain a low to moderate level of intensity for an extended period of time, like when climbing a long route…"
+
+- **Per the source's framing/excerpt, ARC sessions are typically run 2–3 times per week during a base/capacity phase as continuous low-intensity volume.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/aerobic-versus-anaerobic-training-for-climbing-beat-the-burn-and-climb-all-day/)_
+  > "ARC sessions typically 20–45 min of continuous low-intensity movement, 2–3 sessions/week. Emphasizes building aerobic/capillary base ... before power phases."
+
+- **ARC sessions emphasize slow, controlled movement and a relaxed grip to promote climbing efficiency rather than power output.**  
+  _reasoning · vote 3-0 · [trainclimbsummit.com](https://trainclimbsummit.com/train-aerobic-capacity-for-climbing-with-arcing/)_
+  > "The focus should be on slow, controlled movements and relaxed grip to promote efficiency."
+
+
+### Strength phase programming (fingers + pulling)  (14)
+
+- **For max-strength weighted fingerboard hangs, the ideal edge size is 14-20mm (5/8 to 7/8 inch), a little less than one finger-pad depth, which reduces skin pain and distal-joint strain while still building max strength that carries over to other edge sizes.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)_
+  > "The ideal size edge for weighted fingerboard hangs is between 14mm and 20mm (5/8 to 7/8 inch), or a little less than one finger-pad depth—this moderate size lessens skin pain, reduces strain on the distal finger joint, and has been proven effective to develop maximum-strength gains that will carry o…"
+
+- **The 7-53 max-weight protocol uses enough added weight that a 10-second hang would be extremely difficult, but each hang is terminated at 7 seconds (just before failure) followed by exactly 53 seconds rest, at an RPE of 9-9.5/10.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)_
+  > "Use enough weight to make a 10-second hang extremely difficult, yet each training hang must terminate at 7 seconds (a few seconds before failure). Rest for exactly 53 seconds... Each hang should be near maximal (rating of perceived exertion of 9 to 9.5 out of 10), but not quite take you to failure."
+
+- **The 7-53 protocol is structured as 3 near-maximal hangs per set, with 3 to 5 minutes of rest between sets, performed twice per week.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)_
+  > "This totals 3 hangs per set. Rest 3 to 5 minutes before doing a second set of three hangs... Experienced climbers can employ one of these maximum-grip-strength protocols on a twice-a-week basis."
+
+- **The low-volume max-hang protocol (based on Eva López-Rivera's research) is recommended as an entry-level fingerboard program (not a beginner's program), and a few multi-week cycles bring noticeable finger-strength gains for intermediate climbers and prepare them for weighted hangs.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)_
+  > "a low-volume protocol is recommended as an entry-level fingerboard program, with a few multi-week cycles bringing noticeable gains in finger strength for intermediate climbers, as well as serving as preparation for delving into weighted fingerboard hangs."
+
+- **The protocol claims to increase pull-muscle and lock-off strength, lunging power, and pulling endurance by 20% or more by adapting the neuromuscular system to simulated added gravity.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/hypergravity-pull-up-training-for-increased-strength-power-and-endurance/)_
+  > "You can increase your pull-muscle and lock-off strength, lunging power, and pulling endurance by 20% or more."
+
+- **Rest between max hang reps is typically 2-3 minutes, and climbers are advised to extend rest if needed.**  
+  _reasoning · vote 3-0 · [climbing.com](https://www.climbing.com/skills/lattice-hangboarding-part-2/)_
+  > "Rest between reps is typically 2-3 minutes, but the article generally advises people to go longer if they feel they need it."
+
+- **Climbers should not hang to failure unless advanced; instead each hang should end 1-3 seconds before the point of failure (leave a little in the tank).**  
+  _reasoning · vote 3-0 · [climbing.com](https://www.climbing.com/skills/lattice-hangboarding-part-2/)_
+  > "Most climbers should not hang to failure unless advanced in their training. Stop with a little left in the tank. In other words: end each hang 1-3 seconds before you feel like you have to stop."
+
+- **Top sets on max hangs and pull-ups should be performed at RPE 8–9, leaving roughly a rep or 1–2 seconds in reserve.**  
+  _reasoning · vote 3-0 · [hikingmanual.com](https://www.hikingmanual.com/posts/best-strength-program-for-climbers-ultimate-plans-schedules-guide)_
+  > "RPE 8–9 for top sets on max hangs and pull-ups (a rep or 1–2 s "in reserve")."
+
+- **To avoid interference, heavy strength training should be placed before or far from high-volume endurance days.**  
+  _reasoning · vote 3-0 · [hikingmanual.com](https://www.hikingmanual.com/posts/best-strength-program-for-climbers-ultimate-plans-schedules-guide)_
+  > "Place heavy strength training before or far from high-volume endurance days to avoid interference."
+
+- **Rest length determines the adaptation pathway: long rests between hangs drive strength gains through neurological factors (recruitment, firing rate), while short rests drive strength gains through hypertrophy.**  
+  _reasoning · vote 3-0 · [stevenlow.org](https://stevenlow.org/repeaters-and-max-hang-analysis-for-strength-and-hypertrophy-ft-power-company-podcast-and-steve-maisch/)_
+  > "Long rests lead to strength gains through neurological factors, such as muscle recruitment and firing rate. Short rests lead to strength gains through hypertrophy (muscle growth)."
+
+- **The standard repeaters protocol is a 7-second hang followed by 3 seconds rest, repeated for 6 hangs per set, with 2–3 minutes rest before moving to the next grip position.**  
+  _reasoning · vote 3-0 · [stevenlow.org](https://stevenlow.org/repeaters-and-max-hang-analysis-for-strength-and-hypertrophy-ft-power-company-podcast-and-steve-maisch/)_
+  > "For repeaters, the standard protocol involves hanging for 7 seconds, resting for 3 seconds, completing a total of 6 hangs, and resting 2–3 minutes before switching to the next grip position."
+
+- **Load is auto-regulated by margin: if your margin exceeds ~3 s on a set, add 2-5 kg for the next set; if your margin approaches zero, subtract 2-5 kg, scaled to bodyweight.**  
+  _reasoning · vote 3-0 · [strengthclimbing.com](https://strengthclimbing.com/eva-lopez-maxhangs/)_
+  > "If you feel like your margin exceeds 3 seconds, add 2-5 kg for the next set, depending on bodyweight; if your margin approaches zero, subtract 2-5 kg for the next set, depending on bodyweight."
+
+- **Total weekly climbing plus finger-training days should not exceed four, and the intense max-strength fingerboard protocol should be limited to two days per week.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)_
+  > "with aggregate climbing and finger training days per week not exceeding four... The intense max-strength training protocol should be limited to just two days per week."
+
+- **The repeaters strength-endurance protocol uses 7-second hang / 3-second rest intervals in sets of 6 (each set about 1 minute), performing one set per grip for entry-level up to three sets per grip for advanced, focusing initially on half-crimp and open-crimp grips.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/4-fingerboard-strength-protocols-that-work/)_
+  > "Each set is comprised of 6 hang-rest intervals consisting of a 7-second hang and 3-second rest. Therefore, each 6-hang set will take about 1 minute... You will perform one (entry-level) to three (advanced) sets of repeaters with each grip position... Initially focus on training the half-crimp and op…"
+
+
+### Power phase: limit bouldering & campus  (15)
+
+- **The power phase is about neurological gains — recruiting muscle and teaching it to be more powerful — as distinct from the preceding strength phase, which strengthens/builds the muscle itself.**  
+  _reasoning · vote 3-0 · [saltpumpclimbing.com](https://www.saltpumpclimbing.com/five-phases-climbing-training/)_
+  > "The power phase is all about making neurological gains. While the strength phase focuses on strengthening your muscles, the power phase recruits those muscles and teaches them to be more powerful."
+
+- **Limit bouldering and campus board sessions are the two primary tools used to develop power during the power phase.**  
+  _reasoning · vote 3-0 · [saltpumpclimbing.com](https://www.saltpumpclimbing.com/five-phases-climbing-training/)_
+  > "The two most common ways to increase your power is through limit bouldering and campusing sessions."
+
+- **Limit boulder problems should be 2-3 move problems at the climber's absolute limit; the goal is NOT to send them — sending means they are too easy.**  
+  _reasoning · vote 3-0 · [saltpumpclimbing.com](https://www.saltpumpclimbing.com/five-phases-climbing-training/)_
+  > "Limit boulder problems are generally 2-3 move problems that are at your absolute limit. The idea here is not to send boulder problems—if you are sending the boulders, that means they are too easy."
+
+- **Campus board workouts should consist of 2-3 movements; max ladders, double dynos, and up-downs are cited as three of the best exercises to increase power.**  
+  _reasoning · vote 3-0 · [saltpumpclimbing.com](https://www.saltpumpclimbing.com/five-phases-climbing-training/)_
+  > "Campus board workouts should consist of 2-3 movements. Max ladders, double dynos, and up-downs are three of the best exercises to increase your power."
+
+- **Per problem, spend roughly 15-20 minutes putting in about 4-5 solid attempts, resting 3-5 minutes between attempts and 5-10 minutes between different problems (3-4 problems differing in angle/hold/style per session).**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/limit-bouldering-for-building-max-climbing-strength-and-power/)_
+  > "You can spend 15 to 20 minutes on each problem, putting in four to five solid attempts and resting 3 to 5 minutes between attempts, with 5 to 10 minutes rest between each problem."
+
+- **Use strict form and stop training as soon as form declines; never full-crimp to avoid injury during campus training. Adults only, and intermediates should seek trusted coaching first.**  
+  _reasoning · vote 3-0 · [climbing.com](https://www.climbing.com/skills/how-to-campus-board/)_
+  > "Stop training as soon as your form declines. Never full-crimp to avoid injury during campus training."
+
+- **Campusing is not about working to failure; the goal is high-quality, explosive sets that ingrain efficient motor patterns (recruitment), not volume to exhaustion.**  
+  _reasoning · vote 3-0 · [gripped.com](https://gripped.com/sections/training/a-beginners-guide-to-campus-board-training/)_
+  > "Not about working to failure; goal is high-quality, explosive sets that ingrain efficient motor patterns."
+
+- **In the alternating-rung exercise, one set = leading left hand to the top, resting 2 minutes, then repeating leading with the right hand; leading left plus leading right equals one set, performed for roughly 5 sets.**  
+  _reasoning · vote 3-0 · [gripped.com](https://gripped.com/sections/training/a-beginners-guide-to-campus-board-training/)_
+  > "Example alternating-rung set: lead left hand to top, rest 2 min, repeat leading right; left+right = one set, ~5 sets."
+
+- **Recommended prerequisites for campus board training include climbing roughly V5-V6 / 5.12 and possessing 15-20 solid controlled pull-ups, reflecting the minimum strength needed to survive the board's reactive forces.**  
+  _reasoning · vote 3-0 · [gripped.com](https://gripped.com/sections/training/a-beginners-guide-to-campus-board-training/)_
+  > "Grade proficiency requirements include V5-V6 or 5.12 climbing ability, pull-up capacity of 15-20 solid controlled pull-ups, and the ability to perform a 1-2-3-4-5 ladder without matching hands."
+
+- **Campusing is positioned as a power-phase tool: when appropriate it is always part of a power phase (though the campus board can also host other-phase exercises).**  
+  _reasoning · vote 3-0 · [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/2015/04/campusing-part-1-for-powerbig-rungs-big.html)_
+  > "Campusing, when appropriate, is always part of a power phase, though the campus board can be used for exercises during other phases."
+
+- **Readiness gate: campusing is not advocated until an athlete is climbing roughly mid-5.12 and V5/V6 and has a good grasp on climbing dynamically.**  
+  _reasoning · vote 3-0 · [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/2015/04/campusing-part-1-for-powerbig-rungs-big.html)_
+  > "Campusing is generally not advocated until an athlete is climbing mid-5.12 and V5/6, and has a good grasp on how to climb dynamically."
+
+- **The plyometric movement is broken into named phases: an Amortization (Transition) phase that begins on contact with the lower rung and ends when upward motion resumes, and a Concentric (Take-Off) phase that explodes upward out of the bottom using stored elastic energy; the catch should decelerate slowly without reaching fully straight arms before re-exploding.**  
+  _reasoning · vote 3-0 · [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/2015/04/campusing-part-1-for-powerbig-rungs-big.html)_
+  > "The Amortization (Transition) Phase begins when you contact the lower rung, continues through the absorption of force, and ends when you begin moving upward again ... The Concentric (Take-Off) Phase is all about exploding upward out of the bottom of the Transition phase, utilizing the stored elastic…"
+
+- **Power training is fundamentally about quality, not quantity; the goal of a limit session is pushing power limits rather than sending.**  
+  _reasoning · vote 3-0 · [trainingbeta.com](https://www.trainingbeta.com/4-keys-to-limit-bouldering/)_
+  > "Power training is all about quality, not quantity, and you simply can't effectively train power when you're tired and depleted."
+
+- **Power-phase sessions should be kept short and high-quality (intensity, not volume), because fatigue/long sessions build endurance rather than power; well-conditioned climbers can do up to two to three hard power sessions per week.**  
+  _reasoning · vote 3-0 · [saltpumpclimbing.com](https://www.saltpumpclimbing.com/five-phases-climbing-training/)_
+  > "By keeping these sessions short (fatigue creates endurance, not power), you can do more per week—if you're in shape, up to two or three hard power sessions."
+
+- **The power phase sits as phase 3 of a five-phase periodized macrocycle, after volume (1) and strength (2) and before power endurance (4) and performance (5), with the final performance phase devoted to redpointing routes and sending boulder projects outdoors.**  
+  _reasoning · vote 3-0 · [saltpumpclimbing.com](https://www.saltpumpclimbing.com/five-phases-climbing-training/)_
+  > "The performance phase is all about getting out and sending your projects—its time to put all of that training to use. Your efforts during this phase should be about getting outside and trying to red point routes or send boulders."
+
+
+### Power-endurance / anaerobic-capacity protocols  (13)
+
+- **Hörst's weekly energy-system template for sport climbers is one max-strength (anaerobic alactic) session, two power-endurance (anaerobic lactic) sessions, and one aerobic-capacity (oxidative) session per week.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/power-endurance-training-protocols-for-climbers/)_
+  > "sport climbers should aim for one "max strength" session (anaerobic alactic focus), two "power endurance" sessions (anaerobic lactic focus), and one "aerobic capacity" session (oxidative focus) per week"
+
+- **For interval-style power-endurance work the climber should not climb pre-set boulder problems but instead climb intuitively in an 'open-hold' style on a spray wall, home woodie, or system wall.**  
+  _reasoning · vote 3-0 · [climbing.com](https://www.climbing.com/skills/training/too-weak-for-your-sport-project-heres-what-to-do-about-that/)_
+  > "Do not climb set boulder problems; instead, climb intuitively in an "open-hold" style on a spray wall, home woodie, or system wall."
+
+- **In the 4x4, boulders should be challenging but doable without falling (the climber should be able to complete each lap).**  
+  _reasoning · vote 3-0 · [climbing.com](https://www.climbing.com/skills/training/too-weak-for-your-sport-project-heres-what-to-do-about-that/)_
+  > "Bouldering 4x4s: The boulders should be challenging but doable without falling."
+
+- **Power endurance should be trained as a focused block of about 8 weeks, performed twice per week, with a rest/deload week halfway through (around week 4).**  
+  _reasoning · vote 3-0 · [ukclimbing.com](https://www.ukclimbing.com/articles/skills/series/lattice_training_series_with_tom_randall/part_2_power_endurance-11352)_
+  > "Tom recommends focusing on power endurance for an eight-week period, performing this style of training twice per week, with a rest week halfway through."
+
+- **Training emphasis differs by discipline: boulderers should bias toward anaerobic-capacity training, while route climbers should bias toward aerobic-power training.**  
+  _reasoning · vote 3-0 · [ukclimbing.com](https://www.ukclimbing.com/articles/skills/series/lattice_training_series_with_tom_randall/part_2_power_endurance-11352)_
+  > "Boulderers should do more anaerobic capacity training and route climbers should focus on aerobic power."
+
+- **During deload/rest weeks within a power-endurance block, you should drop volume but hold intensity roughly constant rather than stripping out both.**  
+  _reasoning · vote 3-0 · [ukclimbing.com](https://www.ukclimbing.com/articles/skills/series/lattice_training_series_with_tom_randall/part_2_power_endurance-11352)_
+  > "In deload or rest weeks, don't strip out all volume AND all intensity. Most climbers will want to drop the volume element but keep very similar on the intensity element of their training."
+
+- **Power-endurance sessions should mimic the project's style, length, intensity and rests for transfer; if the project is longer than the home wall (e.g. 30 m project on a 15 m wall) you do double laps to match duration.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/2023/05/02/5-tips-for-power-endurance-training-for-route-climbing/)_
+  > "Make sure your indoor training sessions mimic your project's style and length—if it's steep, train on steep terrain; if it's crimpy, get on crimps; if it's 30 metres long but your wall is only 15 metres, do double laps."
+
+- **Aerobic power adapts quickly but plateaus sooner than other capacities, so it need not be trained for longer than about 6 to 8 weeks; for route climbers maximizing aerobic energy production (not anaerobic capacity) is the real key to staving off pump.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/2023/05/02/5-tips-for-power-endurance-training-for-route-climbing/)_
+  > "Aerobic power can build quickly but you'll hit a ceiling faster than other areas, so there's not much need to do it longer than around 6 to 8 weeks. ... The real key to power endurance is maximising your aerobic energy production to stave off that pump, and keep you climbing at your max for longer."
+
+- **Power-endurance workouts must approach or reach failure — you should be getting pumped and possibly powered out — because never reaching failure fails to maximize adaptations.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/2023/05/02/5-tips-for-power-endurance-training-for-route-climbing/)_
+  > "Make sure you are approaching or getting extremely close to failure in these workouts—you should be getting pretty pumped and possibly powered out, because if you're never reaching failure you won't be maximizing adaptations."
+
+- **A specific anaerobic/aerobic interval protocol is the 30/30: 6 intervals of 30 seconds on the wall at all-out intensity alternated with 30 seconds off for recovery (a 1:1 work:rest ratio).**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/podcast-24-energy-system-training-part-3/)_
+  > "The specific 30/30 interval protocol consists of 6 intervals of 30 seconds on the wall at all-out intensity and 30 seconds off for recovery."
+
+- **Long power endurance work carries an overtraining caution: doing it too often or at too high a volume can diminish performance, especially in-season for route climbers who climb outside multiple days per week.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/podcast-24-energy-system-training-part-3/)_
+  > "A caution about 'long power endurance' training is that doing it too often or at too high a volume can lead to diminished performance, especially in-season among route climbers climbing outside multiple days per week."
+
+- **Campus board ladder laps are cited as a complementary anaerobic-lactic power-endurance exercise, with campus sprints taking roughly 3 to 8 seconds to the top, followed by 30 seconds of rest, repeated for a total of five to ten sprints.**  
+  _reasoning · vote 3-0 · [treadwallfitness.com](https://treadwallfitness.com/athletes-community/training/brewers-ledge-treadwall-training-guide/)_
+  > "Campus sprints typically take between 3 and 8 seconds to the top, followed by 30 seconds of rest before the next sprint, continuing for a total of five to ten sprints."
+
+- **Each Treadwall workout should target a single energy system rather than training all systems in one session; power-endurance Treadwall sessions can be supplemented with anaerobic-lactic exercises such as campus board ladder laps.**  
+  _reasoning · vote 3-0 · [treadwallfitness.com](https://treadwallfitness.com/athletes-community/training/brewers-ledge-treadwall-training-guide/)_
+  > "It's recommended to target each workout on a single energy system, rather than trying to train them all in one session, and when Treadwall training with Power Endurance protocols, you can supplement with exercises targeting the anaerobic lactic energy system like campus board ladder laps."
+
+
+### Peaking & tapering for a goal  (8)
+
+- **Recommended taper reduces training load by 41-60% from pre-taper levels while intensity is maintained (consistent with deload weeks targeting a roughly 40-60% reduction in overall training load).**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/training-tips-for-climbers-structuring-your-training-during-a-peak-phase/)_
+  > "A training-load reduction of 41–60% from pre-taper to taper is recommended"
+
+- **Cutting training intensity by 30-60% decreased aerobic and anaerobic performance by 20-30%, demonstrating the cost of dropping intensity during a taper.**  
+  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/training-tips-for-climbers-structuring-your-training-during-a-peak-phase/)_
+  > "cutting intensity 30–60% decreased aerobic/anaerobic performance by 20–30%"
+
+- **A step taper applies a significant immediate volume reduction of greater than 50 percent and then holds that reduction without further fluctuation, while exponential tapers reduce volume nonlinearly (e.g., fast decay = halving volume every 2 days; slow decay = halving every 5 days), with exponential fast-decay producing the most beneficial outcomes.**  
+  _reasoning · vote 3-0 · [nsca.com](https://www.nsca.com/education/articles/kinetic-select/tapering-and-peaking/)_
+  > "a step taper employs a significant reduction (greater than 50 percent) in training volume immediately and then maintains this reduction without fluctuations... a fast decay rate for example meaning reducing training volume by half every 2 days, while a slow decay rate may mean reducing training volu…"
+
+- **Maximum strength and aerobic capacity are to be trained well ahead of the peaking phase; raising max strength/power season over season sets the ceiling for peak power output and anaerobic capacity, which the final taper then expresses.**  
+  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/tag/redpoint-tips/)_
+  > "Hörst emphasizes the importance of increasing maximum strength and power season over season, because this sets the ceiling for your peak power output and anaerobic capacity."
+
+- **The peak achieved by the periodized cycle is described as a temporary but significant boost in climbing fitness enabling never-before-seen performance, implying it must be exploited within a limited window before it fades.**  
+  _reasoning · vote 3-0 · [cragmama.com](https://www.cragmama.com/2015/05/rock-climbers-training-manual-performance-phase-aka-results/)_
+  > "a temporary, but significant boost in climbing fitness that will enable the climber to attain never-before-seen levels of performance."
+
+- **The Performance/Redpoint phase is governed by deliberate redpoint-campaign strategy: route selection, planning short-term vs long-term projects, memorizing beta, and controlling focus and intensity during attempts are explicit components of getting results from the peak.**  
+  _reasoning · vote 3-0 · [cragmama.com](https://www.cragmama.com/2015/05/rock-climbers-training-manual-performance-phase-aka-results/)_
+  > "Topics on redpoint climbing performance include tips for optimal route selection, planning for redpoint project campaigns, specific strategies for short-term and long-term projects ... techniques for controlling focus and intensity during redpoint attempts, how to analyze and learn from your perform…"
+
+- **A peak in climbing performance can typically be sustained for about a month, during which an athlete may get two or three really hard sends.**  
+  _reasoning · vote 3-0 · [youtube.com](https://www.youtube.com/watch?v=IZgNzx63M3g)_
+  > "Usually when I get someone up to a peak, we can hang out there for about a month and sometimes you'll get two or three really hard sends."
+
+- **During in-season performance phases, a full rest day should be placed before every outside climbing day, and sessions are lower-volume to keep power/strength topped out for bouldering or crux-based routes.**  
+  _reasoning · vote 2-1 · [youtube.com](https://www.youtube.com/watch?v=IZgNzx63M3g)_
+  > "Full rest days should be placed before every outside climbing day during in-season performance phases... His in-season performance programs feature lower-volume sessions and are specifically aimed at keeping power and strength topped out for bouldering or crux-based route climbing."
+
+
+### Hangboard protocol deep dive  (5)
+
+- **Both max hangs and repeaters are typically performed on an 18-20mm edge.**  
+  _reasoning · vote 3-0 · [thehangboard.com](https://thehangboard.com/blogs/news/max-hangs-vs-repeaters)_
+  > "Edge 18-20mm typical."
+
+- **For max hangs the article recommends resting at least 3 minutes between hangs, with Eva Lopez's margin rule: choose a load where your absolute max would be about 3 seconds longer than the prescribed hang (e.g., a ~13s max for 10s hangs).**  
+  _reasoning · vote 3-0 · [thehangboard.com](https://thehangboard.com/blogs/news/max-hangs-vs-repeaters)_
+  > "I recommend climbers rest AT LEAST 3 minutes between hangs. ... If you are doing 10-second hangs, pick a weight or edge where your absolute max would be around 13 seconds."
+
+- **The 7s-on/53s-off timing is grounded in recovery physiology: full recovery between maximum hangs is about 3 minutes, with an initial ~50-second phase in which mitochondria resynthesize ATP to restore phosphocreatine (PCr) stores.**  
+  _reasoning · vote 3-0 · [strengthclimbing.com](https://strengthclimbing.com/eric-horst-7-53-hangboard-routine/)_
+  > "full recovery between two maximum hangs takes about 3 minutes and is divided into two phases. In phase one, which is 50 seconds long, the mitochondria resynthesize ATP to restore phosphocreatine (PCr) intercellular stores."
+
+- **Grip positions are open-hand/open-crimp and half-crimp (initially focusing on half crimp and open-hand pocket positions); the full-crimp grip with thumb lock should never be used.**  
+  _reasoning · vote 3-0 · [strengthclimbing.com](https://strengthclimbing.com/eric-horst-7-53-hangboard-routine/)_
+  > "Grip options: open crimp and half crimp. Never use full-crimp (with thumb lock) grip. ... Initially focus on training the half crimp and open hand pocket positions."
+
+- **The protocol is prescribed twice per week and is positioned as a high-intensity, low-volume approach, consistent with research that higher exercise volume does not necessarily yield greater strength gains.**  
+  _reasoning · vote 3-0 · [strengthclimbing.com](https://strengthclimbing.com/eric-horst-7-53-hangboard-routine/)_
+  > "Execute this program twice per week, and you will elevate your finger strength in a few short weeks. ... This high-intensity-low-volume approach is consistent with the results of recent research, where it was shown that increasing the exercise volume does not necessarily lead to higher strength gain…"
+
+
+### Deload, recovery, frequency & weekly volume  (9)
 
 - **A deload week reduces volume and/or intensity (not complete rest) so the climber feels fully recovered and motivated to start the next training cycle, while still keeping selected sessions.**  
   _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/)_
@@ -977,17 +1113,9 @@
   _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/)_
   > "The timing for a deload week often falls during the late luteal or menstruation phase. It can be helpful to sync your deload week with your period, when you're potentially feeling your lowest energy, or simply rearrange your sessions for the week so you're resting or having gentle exercise whilst yo…"
 
-- **For climbers training seriously (4-5 structured days/week), deload every 4-6 weeks; for casual climbers (2-3 days/week), deload every 6-8 weeks; for serious climbers adding strength work, deload every 6-12 weeks.**  
-  _reasoning · vote 3-0 · [megabetaclimbing.com](https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases)_
-  > "deload every 4-6 weeks if training seriously (4-5 days/week structured), every 6-8 weeks if climbing casually (2-3 days/week), and 6-12 weeks for serious climbers adding strength work"
-
 - **During a deload you decrease volume but NOT intensity: keep the high-quality, high-intensity sessions (limit bouldering, fingerboarding, hardest moves) and cut the extra mileage.**  
   _reasoning · vote 3-0 · [megabetaclimbing.com](https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases)_
   > "During deloads decrease volume, NOT intensity: keep quality sessions (limit bouldering, fingerboarding, hardest moves), cut the extra mileage"
-
-- **Connective tissue (tendons/pulleys) adapts more slowly than muscle, which is why deloads are needed to protect those structures.**  
-  _reasoning · vote 3-0 · [megabetaclimbing.com](https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases)_
-  > "Connective tissue adapts slower than muscle, so deloads protect tendons/pulleys"
 
 - **Weekly session load increases only modestly with grade, climbing from 240 at V1-V4 to 375 at V12+, a 1.6x increase across the full grade spectrum.**  
   _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/data-dive-training-days-weekly-exercise-v4-v12/)_
@@ -1001,10 +1129,6 @@
   _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/training-cafe-43-the-important-of-deload-weeks-in-climbing-and-training/)_
   > "A deload week can range from a few days to over a week, depending on your age, condition, and climbing goals... it doesn't apply to recreational climbers as much."
 
-- **Scheduling deload weeks more frequently keeps accumulated fatigue lower, and the prescription should stay flexible because each cycle differs.**  
-  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/)_
-  > "By scheduling deload weeks more frequently, we build up less fatigue. The resources emphasize that flexibility is important, as not every cycle is the same."
-
 - **A concrete deload session example is maintaining one board session but dropping the grade and focusing on climbing pace or body tension if feeling sluggish.**  
   _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/2021/04/21/female-climber-series-tracking-for-a-deload-week/)_
   > "climbers can still keep harder sessions—for example, maintaining one board session but dropping the grade and focusing on climbing pace or body tension if feeling sluggish."
@@ -1012,10 +1136,6 @@
 - **Holding intensity while cutting volume during a deload lets the nervous system retain coordination/skill while the tissues recover.**  
   _reasoning · vote 3-0 · [megabetaclimbing.com](https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases)_
   > "cut the extra mileage so the nervous system holds coordination while tissues recover"
-
-- **The deload prescription follows Climb Strong-style guidance, tying cadence to training seriousness/frequency rather than a single fixed interval.**  
-  _reasoning · vote 3-0 · [megabetaclimbing.com](https://megabetaclimbing.com/blogs/articles/smarter-climbing-training-how-to-use-rest-phases)_
-  > "Climb Strong-style guidance: deload every 4-6 weeks if training seriously ... every 6-8 weeks if climbing casually ... and 6-12 weeks for serious climbers adding strength work"
 
 
 ### Finger/pulley injury prevention, load mgmt & antagonists  (26)
@@ -1125,7 +1245,7 @@
   > "Early tendinopathies should be addressed with rest, isometric exercise and stretching, but later tendinopathies should be addressed with eccentric exercise."
 
 
-### Assessment, benchmarks & finger-strength metrics  (27)
+### Assessment, benchmarks & finger-strength metrics  (19)
 
 - **Lattice's core finger-strength benchmark is the 7-second two-arm max hang on a 20mm edge, expressed as a percentage of bodyweight (%BW): the maximum weight an athlete can hold on two arms on a 20mm edge for 7 seconds.**  
   _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/predictors-for-performance/)_
@@ -1147,10 +1267,6 @@
   _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/what-is-the-number-1-measure-of-performance-for-sport-climbers/)_
   > "The assessment consists of 4 to 8 dead hang sets, with each set involving a 7-second hang on both arms while maintaining the same grip position. Each subsequent set becomes harder by increasing load on the fingers, aiming to reach max load within 4 to 8 sets to avoid fatigue."
 
-- **Lattice provides a grade-anchored two-arm finger-strength benchmark table (added load as % bodyweight, 7s hang, 20mm edge, half-crimp): V4=128%, V5=134%, V6=140%, V7=146%, V8=152%, V9=158%, V10=164%, V11=170%.**  
-  _reasoning · vote 2-1 · [latticetraining.com](https://latticetraining.com/blog/what-is-the-number-1-measure-of-performance-for-sport-climbers/)_
-  > "For two-arm hangs on a 20mm edge for 7 seconds at a half-crimp position, the grades are: V4 — 128% V5 — 134% V6 — 140% V7 — 146% V8 — 152% V9 — 158% V10 — 164% V11 — 170% ... These percentages represent the added load as a percentage of bodyweight. This data is from men performing 7 second two-arm h…"
-
 - **The 7-second Max Hang (%BW) correlates moderately-to-strongly with the hardest route worked: regression R=0.660, explaining 43.6% of variance in performance, F(1,420)=324.32, p<0.001.**  
   _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/what-is-the-number-1-measure-of-performance-for-sport-climbers/)_
   > "A regression analysis showed a correlation coefficient (R) of 0.660, indicating a moderate-to-strong relationship between 7-sec Max Hang (%BW) and best route worked. The model explained 43.6% of the variance in climbing performance, with a statistically significant effect (F(1, 420) = 324.32, p < 0.…"
@@ -1163,29 +1279,13 @@
   _reasoning · vote 2-1 · [pmc.ncbi.nlm.nih.gov](https://pmc.ncbi.nlm.nih.gov/articles/PMC12479556/)_
   > "climbing-specific finger strength showed very strong and strong associations with bouldering (r = 0.89) and redpoint (r = 0.67) climbing performance"
 
-- **In stepwise regression, maximal strength in the half-crimp plus the front-three drag together explained 66% of the variance in climbing performance, and half-crimp strength was the single most important performance indicator — supporting the half-crimp on a ~20–22 mm edge as the key benchmark test position.**  
-  _reasoning · vote 3-0 · [pmc.ncbi.nlm.nih.gov](https://pmc.ncbi.nlm.nih.gov/articles/PMC12479556/)_
-  > "in a stepwise regression analysis, maximal strength in the half crimp and the front 3 drag collectively explained 66% of the variance for performance ... strength in the half crimp proved the most important performance indicator"
-
 - **Hörst's max finger-strength test: hang for 5 seconds from a 10mm edge in a half-crimp grip with weight strapped on, determining the maximum added weight; rest ~3 minutes between attempts. Elite climbers can do this with about 1/3 of bodyweight added.**  
   _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/3-hangboard-tests-to-gauge-your-climbing-ability/)_
   > "you strap weight to your body and hang for five seconds from a 10 millimeter edge in a half-crimp grip, with the goal to determine the max weight you can add. Elite climbers can often successfully perform this test with 1/3 of their bodyweight added on. (max hang: ~5-7s hold, 3 min rest between atte…"
 
-- **Hörst's endurance-hang test: half-crimp on a 10mm (per excerpt ~20mm) edge with NO added weight, measuring total hang time. Climbers hang anywhere from 20 seconds to 2 minutes depending on ability.**  
-  _reasoning · vote 2-1 · [trainingforclimbing.com](https://trainingforclimbing.com/3-hangboard-tests-to-gauge-your-climbing-ability/)_
-  > "The second test measures endurance on a 10 millimeter edge throughout a series of five-second hangs, with no added weight... You can expect to hang in a half-crimp for anywhere between twenty seconds and two minutes"
-
-- **Endurance-hang benchmarks by ability: moderately-advanced climbers average ~45 seconds, advanced/5.13 climbers 60-90 seconds, and elite climbers approach ~120 seconds (2 minutes).**  
-  _reasoning · vote 3-0 · [trainingforclimbing.com](https://trainingforclimbing.com/3-hangboard-tests-to-gauge-your-climbing-ability/)_
-  > "moderately advanced climbers averaging 45 seconds per hang, advanced climbers at the 5.13 level ranging from 60 to 90 seconds, and elite climbers pushing toward the two minute mark"
-
 - **Power Company Climbing derived its strength/endurance standards from a dataset of more than 600 climbers, with table values given as a range from the mean minus one standard deviation to the mean plus one standard deviation for each measurement at each max-outdoor-grade column.**  
   _reasoning · vote 3-0 · [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/metrics-for-climbers)_
   > "Power Company Climbing compiled data from 600+ rock climbers... The grades listed across the top are the max outdoor grade. Within each cell of the table you'll find a range. This range is the mean minus one standard deviation (smaller number) to the mean plus one standard deviation (larger number) …"
-
-- **Max Hang combined with Max Weighted Pull-Up are the two strongest predictors of climbing performance, holding for both sport and bouldering, though the predictive model is more convincing for bouldering.**  
-  _reasoning · vote 3-0 · [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/metrics-for-climbers)_
-  > "Max Hang and Max Weighted Pull-Up, when looked at in combination, are the strongest predictors of climbing performance. This holds true for both sport climbing and bouldering, though the model for bouldering is much more convincing."
 
 - **The max hang test is standardized as a weighted 10-second hang on a 20mm edge, but a climber whose max hang falls below the range for their project grade is advised to add hangs roughly twice per week.**  
   _reasoning · vote 3-0 · [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/metrics-for-climbers)_
@@ -1207,14 +1307,6 @@
   _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/predictors-for-performance/)_
   > "Among Advanced climbers, Finger Strength and Pulling Strength are the most influential factors... Flexibility and 60% Power Endurance have low R² values (0.072 and 0.058, respectively), meaning they explain very little of the variation in the grade for advanced climbers."
 
-- **Finger strength rises about 6 percentage points of bodyweight per V-grade across the benchmark table (each successive grade adds ~6% BW, e.g. V4 128% to V5 134% to V6 140%).**  
-  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/what-is-the-number-1-measure-of-performance-for-sport-climbers/)_
-  > "V4 — 128% V5 — 134% V6 — 140% V7 — 146% V8 — 152% V9 — 158% V10 — 164% V11 — 170%"
-
-- **A one-arm conversion of the same dataset (max %BW achieved in a one-arm pull on a 20mm edge within 7-10 seconds) spans from V4 at 49% to V17 at 118%.**  
-  _reasoning · vote 3-0 · [latticetraining.com](https://latticetraining.com/blog/what-is-the-number-1-measure-of-performance-for-sport-climbers/)_
-  > "For one-arm pulls (which converts this data), the maximum value (percentage of body weight) achieved in a one-arm pull on a 20mm edge within 7-10 seconds spans from V4 at 49% to V17 at 118%."
-
 - **Climbing-specific finger strength also correlated strongly with campus board score, r = 0.82 (r² ≈ 0.67, ~67% of variance explained).**  
   _reasoning · vote 3-0 · [pmc.ncbi.nlm.nih.gov](https://pmc.ncbi.nlm.nih.gov/articles/PMC12479556/)_
   > "climbing-specific finger strength exhibited a strong correlation with campus boarding (r = 0.82)"
@@ -1231,16 +1323,9 @@
   _reasoning · vote 3-0 · [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/metrics-for-climbers)_
   > "Four of their primary measurements are max hang, max weighted pull, max reps pull, and 7:3 repeater, separated by both gender (male and female) and climbing discipline (bouldering and sport climbing)."
 
-- **Repeating hard, finger-y boulder problems is offered as a more sport-specific (if less quantifiable) alternative to weighted 20mm hangs for building the finger-strength quality the test measures.**  
-  _reasoning · vote 3-0 · [powercompanyclimbing.com](https://www.powercompanyclimbing.com/blog/metrics-for-climbers)_
-  > "repeating hard boulders that consist of 'finger-y' holds would be a more sport specific but less quantifiable way"
 
+### Additional refuted claims (full-corpus completion)
 
-## Refuted claims (for transparency)
-
-- ✗ (0-3) For lower-to-intermediate climbers specifically, the two-arm bent-arm hang test is NOT sufficiently reliable, implying that an intermediate (V4-V6 / 6c-7a) climber should prefer a fixed-edge maximal isometric pull (e.g., load-cell or weighted edge) over a bodyweight bent-arm hang for trustworthy benchmarking. — [ncbi.nlm.nih.gov](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12521219/)
-- ✗ (0-3) A full periodized macrocycle for climbing energy-system development uses an extended base phase of roughly 4 months followed by a ~2-month peak phase, allowing time for complete aerobic and anaerobic adaptation before performance. — [unlevel-edge.com](https://unlevel-edge.com/blogs/climbing-blog/climbing-endurance-training-methods-protocols-and-progressions)
-- ✗ (0-3) The taper produces a peaking effect by recalibrating the brain's central governor, unlocking higher power output, increased stamina, and a new performance extreme. — [trainingforclimbing.com](https://trainingforclimbing.com/tag/redpoint-tips/)
 - ✗ (1-2) Wrist extensor training (back of the forearm, the antagonist to the climbing-loaded wrist flexors) should be done at 20-30 reps for 3 sets to increase grip strength, stability, and reduce finger injury risk. — [climbing.com](https://www.climbing.com/skills/antagonist-workouts-for-climbers-improve-performance-and-prevent-injury/)
 - ✗ (1-2) Increasing wrist extensor strength increases grip strength and joint stability and reduces the risk of finger injury — the core evidence-based rationale for prehab extensor training in climbers. — [theclimbingdoctor.com](https://theclimbingdoctor.com/how-to-train-antagonist-muscle-strength-for-climbing/)
 - ✗ (0-3) The plan is meant to be fully prescriptive day-by-day from the first day of Base Fitness through the last day of the Rest phase, and after completing all four phases the climber can expect a multi-week 'peak' performance window (the Performance Phase, described as lasting about three weeks). — [rockclimberstrainingmanual.com](https://rockclimberstrainingmanual.com/training-for-rock-climbing/rock-climbing-training-plan/)

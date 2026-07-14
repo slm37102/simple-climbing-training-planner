@@ -24,9 +24,14 @@ export function daysBetween(isoA, isoB) {
   );
 }
 
+// Monday-based weekday index: Mon=0 … Sun=6. The app's week starts on Monday
+// (a core invariant — see CLAUDE.md "Day-of-week determines the session slot").
+export function mondayDow(d) {
+  return (d.getDay() + 6) % 7;
+}
+
 export function snapToMonday(iso) {
   const d = new Date(iso + 'T00:00:00');
-  const dow = d.getDay();
-  d.setDate(d.getDate() - (dow === 0 ? 6 : dow - 1));
+  d.setDate(d.getDate() - mondayDow(d));
   return localIso(d);
 }

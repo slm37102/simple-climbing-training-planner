@@ -10,7 +10,8 @@
       "**/.*",
       "**/node_modules/**",
       "public/**",
-      "deep-research-report.md",
+      "docs/**",
+      "*.md",
       "skills-lock.json"
     ]
   }

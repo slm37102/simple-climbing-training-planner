@@ -5,30 +5,32 @@ import { Loads } from './loads.js';
 import { Warmup } from './warmup.js';
 import { Sync } from './sync.js';
 import { renderToday } from './views/today.js';
-import { renderWeek } from './views/week.js';
 import { renderCalendar } from './views/calendar.js';
 import { renderLog } from './views/log.js';
-import { renderSettings } from './views/settings.js';
-import { renderPlans } from './views/plans.js';
+import { renderProfile } from './views/profile.js';
 
 const views = {
   today: renderToday,
-  week: renderWeek,
-  calendar: renderCalendar,
   cycle: renderCalendar,
+  calendar: renderCalendar, // legacy hash
   log: renderLog,
-  settings: renderSettings,
-  plans: renderPlans,
+  profile: renderProfile,
+  settings: renderProfile,  // legacy hash
+  plans: renderProfile,     // legacy hash
 };
+
+const TAB_FOR = { calendar: 'cycle', settings: 'profile', plans: 'profile' };
 
 const ctx = { Storage, Program, Loads, Warmup, Sync };
 
 function navigate(name) {
-  document.querySelectorAll('#tabs .tab').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+  const tab = TAB_FOR[name] || name;
+  document.querySelectorAll('#tabs .tab').forEach(b => b.classList.toggle('active', b.dataset.view === tab));
   const root = document.getElementById('view');
   root.innerHTML = '';
   (views[name] || renderToday)(root, ctx);
-  location.hash = '#' + name;
+  location.hash = '#' + (views[name] ? name : 'today');
+  window.scrollTo(0, 0);
 }
 
 function init() {
@@ -42,12 +44,14 @@ function init() {
   Sync.init({
     onStatus: s => {
       const el = document.getElementById('syncStatus');
-      if (el) el.textContent = s;
+      if (!el) return;
+      el.textContent = s;
+      el.classList.toggle('on', /synced|signed/i.test(s));
     },
     onRemoteUpdate: () => {
       const currentView = (location.hash || '#today').slice(1);
-      // Don't wipe the Plans form while user might be actively editing
-      if (currentView !== 'plans') navigate(currentView);
+      // Don't wipe the Profile forms while user might be actively editing
+      if (currentView !== 'profile' && currentView !== 'plans' && currentView !== 'settings') navigate(currentView);
     }
   }).then(({ needsAuthGate }) => {
     if (needsAuthGate) showAuthGate();
