@@ -35,6 +35,20 @@ export const Loads = {
     return 1.0;
   },
 
+  // ===== Targets-hit progression (ADR-0009, closes KG-B5) =====
+  // Previous same-session actual completed all prescribed sets (and reps, when
+  // both sides are known) → the session "hit targets". Combined with an
+  // in-range RPE this earns +2.5% instead of a flat mirror — the bottom of the
+  // verified "+2.5–10% once targets hit" band (research § Strength).
+  // Compared against TODAY's prescription, so a deload-week actual (cut sets)
+  // never qualifies the following full-volume week — it holds, then progresses.
+  targetsHit(exercise, prevSets, prevReps) {
+    if (typeof exercise?.prescribedSets !== 'number' || prevSets == null) return false;
+    if (prevSets < exercise.prescribedSets) return false;
+    if (typeof exercise.prescribedReps === 'number' && prevReps != null && prevReps < exercise.prescribedReps) return false;
+    return true;
+  },
+
   // ===== Compute kg range for an exercise =====
   // exercise has { kind, loadPctRange?, pctRange?, ...}
   // Uses benchmarks.maxHang20mm for hangboard, benchmarks.pullup1RM for pullup.
@@ -70,7 +84,7 @@ export const Loads = {
   // Resolve effective kg for today's session, applying:
   //   (1) prev-actual seed, (2) layoff decay, (3) auto-adjust, (4) readiness.
   // Deload weeks cut volume (handled in program.js), not intensity — kg is held constant.
-  resolveEffective({ exercise, previousActualKg, previousAvgRpe, daysSincePrevious = null, readinessMultiplier = 1.0, benchmarks = null }) {
+  resolveEffective({ exercise, previousActualKg, previousAvgRpe, previousActualSets = null, previousActualReps = null, daysSincePrevious = null, readinessMultiplier = 1.0, benchmarks = null }) {
     const base = this.prescribeLoadKg(exercise, benchmarks);
     if (!base) return null;
 
@@ -81,12 +95,21 @@ export const Loads = {
     if (readinessMultiplier <= 0) return { suggestedKg: null, restSuggested: true, range, reason };
 
     let kg;
+    let decay = 1.0;
 
     if (previousActualKg != null) {
-      const decay = this.layoffDecay(daysSincePrevious);
-      const adj = this.autoAdjust(previousAvgRpe, exercise.rpeRange);
+      decay = this.layoffDecay(daysSincePrevious);
+      let adj = this.autoAdjust(previousAvgRpe, exercise.rpeRange);
+      // ADR-0009: in-range RPE used to mean "mirror the load forever" — the
+      // thermostat could oscillate around a fixed kg with no overload. Now an
+      // in-range RPE *with all targets hit* earns a +2.5% progression step.
+      if (adj === 1.0 && previousAvgRpe != null && exercise.rpeRange
+          && this.targetsHit(exercise, previousActualSets, previousActualReps)) {
+        adj = TARGETS_HIT_PROGRESS;
+        reason.push('targets hit → +2.5%');
+      }
       kg = previousActualKg * decay * adj;
-      reason.push(`prev ${previousActualKg}kg × auto-adj ${adj.toFixed(2)} (RPE ${previousAvgRpe ?? '—'})`);
+      reason.push(`prev ${previousActualKg}kg × auto-adj ${adj.toFixed(3)} (RPE ${previousAvgRpe ?? '—'})`);
       if (decay < 1) reason.push(`layoff decay ×${decay.toFixed(2)} (${daysSincePrevious} days since this session type)`);
     } else {
       // start at midpoint of range
@@ -97,6 +120,18 @@ export const Loads = {
     if (readinessMultiplier !== 1.0) {
       kg *= readinessMultiplier;
       reason.push(`readiness ×${readinessMultiplier}`);
+    }
+
+    // ADR-0009 guardrail: cap the total upward move at +5% of the (decayed)
+    // previous actual per session — auto-adjust ×1.05 stacking with "Push"
+    // readiness ×1.05 used to allow +10.25% single-session jumps, above the
+    // verified +2.5–10% progression band. Downward moves are never capped.
+    if (previousActualKg != null) {
+      const cap = previousActualKg * decay * MAX_SESSION_PROGRESS;
+      if (kg > cap) {
+        kg = cap;
+        reason.push('capped at +5% per session');
+      }
     }
     return { suggestedKg: round(kg), range, reason };
   },
@@ -115,3 +150,9 @@ function round(x) { return Math.round(x * 2) / 2; } // 0.5 kg precision
 const LAYOFF_GRACE_DAYS = 10;
 const LAYOFF_DECAY_PER_WEEK = 0.03;
 const LAYOFF_FLOOR = 0.85;
+
+// ADR-0009 progression constants: +2.5% is the bottom of the verified
+// "+2.5–10% once targets hit" band (research § Strength) — conservative for
+// tendon-limited lifts; the cap keeps stacked multipliers inside that band.
+const TARGETS_HIT_PROGRESS = 1.025;
+const MAX_SESSION_PROGRESS = 1.05;

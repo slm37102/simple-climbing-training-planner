@@ -32,7 +32,7 @@
 
 <script type="module">
 import { Storage, newer } from '../js/storage.js';
-import { Program, buildPhasePattern, DEFAULT_CYCLE_WEEKS, MIN_CYCLE_WEEKS, MAX_CYCLE_WEEKS } from '../js/program.js';
+import { Program, buildPhasePattern, hardPhasePos, DEFAULT_CYCLE_WEEKS, MIN_CYCLE_WEEKS, MAX_CYCLE_WEEKS } from '../js/program.js';
 import { Loads } from '../js/loads.js';
 import { Warmup } from '../js/warmup.js';
 import { SKILL_DRILLS, DRILL_CATEGORIES, WARMUP_DRILLS } from '../js/drills.js';
@@ -1033,6 +1033,109 @@ test('[Gym-ready] exercise-inputs: climbing-kind exercises show one count input,
   assertEq(vis.sets, false, 'climbing-kind exercises must not show a separate Sets input');
   assertEq(vis.reps, true, 'the single count input reuses the reps slot');
   assertEq(repsLabel(ex), 'problems', 'repsLabel should surface prescribedTarget.unit');
+});
+
+// ─── ADR-0009: intra-phase progression (closes KG-A2, KG-B5, KG-D5) ──────
+// Same fixed anchor 2026-05-04 (Mon), 12-wk comp cycle: base wks1–6 with
+// deload wk4 + retest wk6 → hard base weeks are 1, 2, 3, 5 (positions 1–4).
+
+test('[ADR-0009] hardPhasePos: counts hard weeks per phase run, null on deload/retest', () => {
+  const pattern = buildPhasePattern(12, 'comp');
+  assertEq(hardPhasePos(pattern, 1), 1);
+  assertEq(hardPhasePos(pattern, 2), 2);
+  assertEq(hardPhasePos(pattern, 3), 3);
+  assertEq(hardPhasePos(pattern, 4), null, 'wk4 is a deload — no ramp position');
+  assertEq(hardPhasePos(pattern, 5), 4);
+  assertEq(hardPhasePos(pattern, 6), null, 'wk6 is the retest week');
+  assertEq(hardPhasePos(pattern, 7), 1, 'position restarts at the Build boundary');
+  assertEq(hardPhasePos(pattern, 9), 3);
+});
+
+test('[ADR-0009] Base aerobic ramp: wk2 pyramid 10 → 11 routes, ARC 30 → 35 min, rampNote set', () => {
+  const thu = Program.prescribeForContext(Program.resolveDate('2026-05-14', '2026-05-04', 12), 'hybrid');
+  assertEq(thu.sessionId, 'thu-route-pyramid');
+  const pyramid = thu.exercises.find(e => e.kind === 'route');
+  assertEq(pyramid.prescribedTarget, { value: 11, unit: 'routes' }, 'wk2 (hard week 2) ramps ×1.1');
+  assertEq(pyramid.rampedFrom, { value: 10, unit: 'routes' });
+  assert(thu.rampNote && /\+10%/.test(thu.rampNote), `rampNote should state +10%, got "${thu.rampNote}"`);
+
+  const sat = Program.prescribeForContext(Program.resolveDate('2026-05-16', '2026-05-04', 12), 'hybrid');
+  assertEq(sat.sessionId, 'sat-arc');
+  const arc = sat.exercises.find(e => e.kind === 'arc');
+  assertEq(arc.prescribedTarget, { value: 35, unit: 'min' }, 'round(30 × 1.1 / 5) × 5 = 35 min');
+});
+
+test('[ADR-0009] ramp caps at ×1.3 (hard week 4 = wk5) and is absent in hard week 1', () => {
+  const wk5 = Program.prescribeForContext(Program.resolveDate('2026-06-04', '2026-05-04', 12), 'sport');
+  assertEq(wk5.sessionId, 'thu-route-pyramid');
+  assertEq(wk5.exercises[0].prescribedTarget, { value: 13, unit: 'routes' }, 'round(10 × 1.3) = 13');
+
+  const wk1 = Program.prescribeForContext(Program.resolveDate('2026-05-07', '2026-05-04', 12), 'sport');
+  assertEq(wk1.exercises[0].prescribedTarget, { value: 10, unit: 'routes' }, 'hard week 1 = template volume');
+  assert(!wk1.rampNote, 'no rampNote in hard week 1');
+});
+
+test('[ADR-0009] deload weeks stay exempt: cut applies to the unramped template, no rampNote', () => {
+  const ctx = Program.resolveDate('2026-05-30', '2026-05-04', 12); // wk4 Sat, deload
+  assert(ctx.deload, 'fixture: wk4 must be a deload week');
+  const sess = Program.prescribeForContext(ctx, 'sport');
+  const arc = sess.exercises.find(e => e.kind === 'arc');
+  assertEq(arc.prescribedTarget, { value: 20, unit: 'min' }, 'deload cuts 30 → 20, never a ramped value');
+  assert(!sess.rampNote, 'deload week must not carry a rampNote');
+  assert(!arc.rampedFrom, 'deload week exercises must not be ramped');
+});
+
+test('[ADR-0009] ramp is aerobic-only and Base-only: triples, projecting, and Build sessions unchanged', () => {
+  // wk3 Sat, boulder flavor — anaerobic triples must not ramp despite being a hard base week
+  const triples = Program.prescribeForContext(Program.resolveDate('2026-05-23', '2026-05-04', 12), 'boulder');
+  assertEq(triples.sessionId, 'sat-boulder-triples');
+  assertEq(triples.exercises[0].prescribedTarget, { value: 4, unit: 'sets' });
+  assert(!triples.rampNote, 'anaerobic base session must not ramp (KG-B12 guard)');
+  // wk3 Thu projecting (Skill / Strength) must not ramp
+  const proj = Program.prescribeForContext(Program.resolveDate('2026-05-21', '2026-05-04', 12), 'boulder');
+  assertEq(proj.exercises[0].prescribedTarget, { value: 75, unit: 'min' });
+  // wk8 Thu Build 60/60 must not ramp (ramp is Base-only)
+  const build = Program.prescribeForContext(Program.resolveDate('2026-06-25', '2026-05-04', 12), 'hybrid');
+  assertEq(build.sessionId, 'thu-6060-threshold');
+  assertEq(build.exercises[0].prescribedTarget, { value: 20, unit: 'min' });
+  assert(!build.rampNote, 'Build sessions must not carry a rampNote');
+});
+
+test('[ADR-0009] targetsHit: sets and reps compared against today\'s prescription', () => {
+  const ex = { prescribedSets: 2, prescribedReps: 4 };
+  assert(Loads.targetsHit(ex, 2, 4), 'sets and reps met → hit');
+  assert(Loads.targetsHit(ex, 3, 5), 'exceeding targets → hit');
+  assert(!Loads.targetsHit(ex, 1, 4), 'missing a set → not hit');
+  assert(!Loads.targetsHit(ex, 2, 3), 'missing reps → not hit');
+  assert(Loads.targetsHit(ex, 2, null), 'unknown reps → judged on sets alone');
+  assert(!Loads.targetsHit(ex, null, 4), 'unknown sets → never hit');
+  assert(!Loads.targetsHit({}, 2, 4), 'no prescribedSets on the exercise → never hit');
+});
+
+test('[ADR-0009] in-range RPE + targets hit progresses +2.5% (was: mirror forever)', () => {
+  const exercise = { kind: 'hangboard', loadPctRange: [0.8, 0.9], rpeRange: [8, 9], prescribedSets: 2, prescribedReps: 4 };
+  const benchmarks = { maxHang20mm: 20, bodyweight: 70 };
+  const hit = Loads.resolveEffective({ exercise, previousActualKg: 20, previousAvgRpe: 8.5, previousActualSets: 2, previousActualReps: 4, daysSincePrevious: 5, benchmarks });
+  assertEq(hit.suggestedKg, 20.5, '20 × 1.025 = 20.5');
+  assert(hit.reason.some(r => /targets hit/i.test(r)), 'reason should state the progression');
+
+  const noSets = Loads.resolveEffective({ exercise, previousActualKg: 20, previousAvgRpe: 8.5, daysSincePrevious: 5, benchmarks });
+  assertEq(noSets.suggestedKg, 20, 'without set/rep data the old mirror behavior holds');
+
+  const overRpe = Loads.resolveEffective({ exercise, previousActualKg: 20, previousAvgRpe: 9.5, previousActualSets: 2, previousActualReps: 4, daysSincePrevious: 5, benchmarks });
+  assertEq(overRpe.suggestedKg, 19, 'RPE above range still backs off ×0.95 even with targets hit');
+});
+
+test('[ADR-0009] total upward move capped at +5%/session; downward moves never capped', () => {
+  const exercise = { kind: 'hangboard', loadPctRange: [0.8, 0.9], rpeRange: [8, 9], prescribedSets: 2, prescribedReps: 4 };
+  const benchmarks = { maxHang20mm: 20, bodyweight: 70 };
+  // RPE below range (×1.05) stacking with Push readiness (×1.05) → raw 22.05, capped to 21
+  const stacked = Loads.resolveEffective({ exercise, previousActualKg: 20, previousAvgRpe: 7, daysSincePrevious: 5, readinessMultiplier: 1.05, benchmarks });
+  assertEq(stacked.suggestedKg, 21, '20 × min(1.05×1.05, 1.05) = 21');
+  assert(stacked.reason.some(r => /capped/i.test(r)), 'reason should mention the cap');
+  // Lighter readiness is not capped
+  const lighter = Loads.resolveEffective({ exercise, previousActualKg: 20, previousAvgRpe: 8.5, daysSincePrevious: 5, readinessMultiplier: 0.85, benchmarks });
+  assertEq(lighter.suggestedKg, 17, '20 × 0.85 = 17, no cap on the way down');
 });
 
 test('[Gym-ready] hangboard and pull-up exercises carry a rest field + a well-formed rpeRange across all phases', () => {
