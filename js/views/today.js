@@ -510,6 +510,7 @@ function wireCycleComplete(root, activePlan) {
 
 // Build the structured stepper inputs for an exercise.
 function exerciseInputs(i, ex, actual, suggestion) {
+  if (ex.drills) return ''; // drillPickerHtml renders its own pill picker + focus panel
   const vis = inputVisibility(ex);
   if (vis.none) return '';
 
@@ -579,7 +580,11 @@ function stepper(id, value, label, step, isDefault = false) {
 // (hangboard/pullup) or "4 problems · RPE 8–9" (climbing-kind, from prescribedTarget)
 function accSub(ex, actual, suggestion) {
   const parts = [];
-  if (ex.prescribedTarget) {
+  if (ex.drills) {
+    const chosen = ex.drills.find(d => d.key === actual.drill);
+    parts.push(chosen ? `✓ ${chosen.name}` : 'pick a drill to focus on');
+    return parts.join(' · ');
+  } else if (ex.prescribedTarget) {
     const val = actual.reps ?? ex.prescribedTarget.value;
     parts.push(`${val} ${ex.prescribedTarget.unit}`);
   } else {
@@ -621,6 +626,21 @@ function howtoHtml(ex) {
   return `<div class="howto"><b>How</b>${text}</div>`;
 }
 
+// Tuesday skill-drill picker (closes KG-A9): a pill per drill option, plus a
+// "Focus" detail panel for whichever drill is selected (defaults to the first
+// so there's always something to read, even before a tap). Picking a drill
+// both records the choice and marks the exercise done — no separate checkbox.
+function drillPickerHtml(i, ex, actual) {
+  const drills = ex.drills;
+  const selectedKey = actual.drill || drills[0].key;
+  const selected = drills.find(d => d.key === selectedKey) || drills[0];
+  const pills = drills.map(d =>
+    `<button type="button" class="pill ${d.key === selectedKey ? 'active' : ''}" data-drill-pill="${d.key}" data-drill-ex="${i}" aria-pressed="${d.key === selectedKey}">${d.name}</button>`
+  ).join('');
+  return `<div class="pill-group" role="group" aria-label="Skill drill">${pills}</div>
+    <div class="howto" id="drill-focus-${i}"><b>Focus</b>${selected.focus}</div>`;
+}
+
 function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
   const stored = (dayLog.exercises || [])[i] || {};
   const actual = asActualObj(stored.actual);
@@ -660,6 +680,8 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
     const sets = ex.sets || ex.reps || '';
     const rpe  = ex.rpeRange ? `RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : '';
     prescribedStr = [ex.hang, sets, ex.rest, rangeStr, rpe].filter(Boolean).join(' · ');
+  } else if (ex.drills) {
+    prescribedStr = drillPickerHtml(i, ex, actual);
   } else if (ex.prescribedTarget) {
     const rpe = ex.rpeRange ? `RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : '';
     prescribedStr = targetCalloutHtml(ex) + howtoHtml(ex) +
@@ -669,10 +691,10 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
     prescribedStr = (ex.prescribed || '') + rpe;
   }
 
-  // Climbing-kind exercises build their own wrapping (target callout + how-to +
-  // a nested .exercise-prescribe secondary line); everything else still gets
-  // the single .exercise-prescribe wrapper it always had.
-  const prescribeBlock = ex.prescribedTarget
+  // Climbing-kind exercises and drill-choice exercises build their own
+  // wrapping (target callout / pill picker + how-to); everything else still
+  // gets the single .exercise-prescribe wrapper it always had.
+  const prescribeBlock = (ex.prescribedTarget || ex.drills)
     ? prescribedStr
     : `<div class="exercise-prescribe" style="margin-top:0">${prescribedStr}</div>`;
 
@@ -710,7 +732,14 @@ function wire(root, date, session, ctx, readinessMult) {
       status: cur.status || 'partial',
       readiness: cur.readiness || { sleep:3, soreness:3, fatigue:3 },
       sessionFeel: cur.sessionFeel ?? 3,
-      exercises: cur.exercises || session.exercises.map(ex => ({ name: ex.name, prescribed: '', actual:{}, notes:'' })),
+      // Carry kind/optional/drills/prescribedTarget onto the persisted exercise so
+      // js/views/log.js's edit form (which reads only the stored day, never the
+      // live Program session) can pick the right inputVisibility/repsLabel/drill
+      // picker for a past day instead of falling back to generic sets+reps+rpe.
+      exercises: cur.exercises || session.exercises.map(ex => ({
+        name: ex.name, kind: ex.kind, optional: ex.optional, drills: ex.drills,
+        prescribedTarget: ex.prescribedTarget, prescribed: '', actual:{}, notes:''
+      })),
       sessionNotes: cur.sessionNotes || '',
       warmup: cur.warmup || {},
       cooldown: cur.cooldown || {}
@@ -770,6 +799,33 @@ function wire(root, date, session, ctx, readinessMult) {
           btn.style.display = 'none';
         }
       });
+    });
+  });
+
+  // ===== Skill-drill pills (closes KG-A9) =====
+  // Picking a drill both selects it and marks the exercise done — no separate checkbox.
+  root.querySelectorAll('button[data-drill-pill]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = +btn.dataset.drillEx;
+      const key = btn.dataset.drillPill;
+      const ex = session.exercises[i];
+      const drill = ex.drills.find(d => d.key === key);
+      if (!drill) return;
+
+      root.querySelectorAll(`button[data-drill-ex="${i}"]`).forEach(b => {
+        b.classList.remove('active'); b.setAttribute('aria-pressed', 'false');
+      });
+      btn.classList.add('active'); btn.setAttribute('aria-pressed', 'true');
+
+      const focusEl = root.querySelector(`#drill-focus-${i}`);
+      if (focusEl) focusEl.innerHTML = `<b>Focus</b>${drill.focus}`;
+      const subEl = root.querySelector(`[data-ex="${i}"] .acc-sub`);
+      if (subEl) subEl.textContent = `✓ ${drill.name}`;
+
+      const d = getOrInitDay();
+      const cur = d.exercises[i] || { name: ex.name };
+      d.exercises[i] = { ...cur, actual: { ...asActualObj(cur.actual), drill: key, done: true } };
+      persist({ exercises: d.exercises });
     });
   });
 

@@ -474,6 +474,18 @@ function buildRetestSession() {
   };
 }
 
+// ============== Tuesday skill drills (closes KG-A9) ==============
+// A small, finger-neutral technique reference for the optional Tuesday light
+// day. The athlete picks one to focus on that session; picking a drill both
+// records the choice and marks the exercise done. "Falling practice" directly
+// serves the 7b lead goal (project-goals.md G1) that KG-A9 called out as unmet.
+const SKILL_DRILLS = [
+  { key: 'silent-feet', name: 'Silent feet', focus: 'Place each foot once, deliberately, with no readjusting or scraping. Look at the hold, commit, weight it fully before moving your hands.' },
+  { key: 'flagging', name: 'Flagging', focus: 'Use inside/outside flags on steep or off-balance moves instead of pulling in harder. Keep your hips close to the wall.' },
+  { key: 'quiet-hands', name: 'Quiet hands', focus: 'Rest on straight arms between moves. Minimize grip time — move your hands quickly and precisely instead of death-gripping while you look for the next hold.' },
+  { key: 'falling-practice', name: 'Falling practice (lead)', focus: 'With a spotter or top-rope backup, practice controlled falls a few bolts up on steep terrain. Builds fall confidence for lead climbing.' },
+];
+
 // Light / rest / optional templates
 const LIGHT_DAY = {
   sessionId: 'light',
@@ -481,7 +493,7 @@ const LIGHT_DAY = {
   energySystem: '—',
   exercises: [
     { kind:'mobility', name: '15–20 min mobility', prescribed: 'shoulders, hips, wrists' },
-    { kind:'skill', name: 'Optional skill drills (no fingers)', prescribed: 'footwork / silent feet / flagging', optional: true }
+    { kind:'skill', name: 'Skill drill (optional, no fingers)', prescribed: 'pick one drill to focus on today', drills: SKILL_DRILLS, optional: true }
   ]
 };
 
@@ -583,6 +595,7 @@ export const Program = {
   PHASE_PATTERN,
   HANGBOARD,
   ANTAGONIST_BLOCK,
+  SKILL_DRILLS,
   DEFAULT_CYCLE_WEEKS,
   MIN_CYCLE_WEEKS,
   MAX_CYCLE_WEEKS,

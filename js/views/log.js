@@ -119,6 +119,23 @@ export function renderLog(root) {
 
     const exRows = (entry.exercises || []).map((x, i) => {
       const a = (x.actual && typeof x.actual === 'object') ? x.actual : {};
+      if (Array.isArray(x.drills)) {
+        const options = x.drills.map(d =>
+          `<option value="${esc(d.key)}"${a.drill === d.key ? ' selected' : ''}>${esc(d.name)}</option>`
+        ).join('');
+        return `<div style="padding:6px 0;border-bottom:1px solid #ffffff0f">
+          <div style="font-size:.8rem;color:var(--text);margin-bottom:4px;font-weight:600">${esc(x.name || 'Exercise ' + (i + 1))}</div>
+          <div class="row" style="gap:8px;align-items:center;flex-wrap:wrap">
+            <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">Drill
+              <select data-edit-ex="${i}" data-edit-ex-field="drill" style="width:170px">
+                <option value="">—</option>
+                ${options}
+              </select>
+            </label>
+            <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted);flex:1;min-width:80px">Notes<input type="text" data-edit-ex="${i}" data-edit-ex-field="notes" value="${esc(x.notes || '')}" style="width:100%"></label>
+          </div>
+        </div>`;
+      }
       const vis = inputVisibility(x);
       if (vis.none) {
         return `<div style="padding:6px 0;border-bottom:1px solid #ffffff0f">
@@ -241,6 +258,7 @@ export function renderLog(root) {
           const reps  = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="reps"]`);
           const rpe   = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="rpe"]`);
           const done  = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="done"]`);
+          const drill = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="drill"]`);
           const nts   = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="notes"]`);
           const prev  = (x.actual && typeof x.actual === 'object') ? x.actual : {};
           const actual = { ...prev };
@@ -249,6 +267,7 @@ export function renderLog(root) {
           if (reps && reps.value !== '') actual.reps = parseInt(reps.value, 10);
           if (rpe  && rpe.value  !== '') actual.rpe  = parseFloat(rpe.value);
           if (done) actual.done = done.checked;
+          if (drill && drill.value !== '') { actual.drill = drill.value; actual.done = true; }
           return { ...x, actual, notes: nts?.value ?? x.notes ?? '' };
         });
 

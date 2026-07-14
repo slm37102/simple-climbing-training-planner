@@ -1093,6 +1093,93 @@ test('[Gym-ready] retest max-effort tests specify rest between attempts', () => 
   assert(pull && /rest between attempts/i.test(pull.prescribed), `pull-up test missing rest guidance: "${pull && pull.prescribed}"`);
 });
 
+test('[Gym-ready] KG-A9: Tuesday skill drill offers named options with focus details', () => {
+  const ctx = Program.resolveDate('2026-05-05', '2026-05-04', 12); // Tue wk1
+  assertEq(ctx.slot, 'tue-light');
+  const sess = Program.prescribeForContext(ctx, 'hybrid');
+  const skill = sess.exercises.find(e => e.kind === 'skill');
+  assert(skill, 'Tuesday session should have a skill exercise');
+  assert(Array.isArray(skill.drills) && skill.drills.length >= 3, `expected several drill options, got ${skill.drills && skill.drills.length}`);
+  for (const d of skill.drills) {
+    assert(d.key && d.name && d.focus, `drill missing key/name/focus: ${JSON.stringify(d)}`);
+  }
+  assert(skill.drills.some(d => /falling/i.test(d.name)), 'expected a falling-practice drill (KG-A9 names this explicitly for the 7b lead goal)');
+});
+
+test('[Gym-ready] REGRESSION: picking a skill drill on the Today tab persists the choice and marks it done', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-05'); // Tue wk1
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const pills = root.querySelectorAll('button[data-drill-pill]');
+    assert(pills.length >= 3, `expected several drill pills, got ${pills.length}`);
+
+    const flagging = [...pills].find(p => /flagging/i.test(p.textContent));
+    assert(flagging, 'expected a Flagging pill');
+    flagging.click();
+
+    const back = Storage.getDay('2026-05-05');
+    assertEq(back.exercises[1].actual.drill, 'flagging'); // LIGHT_DAY exercises are [mobility, skill]
+    assertEq(back.exercises[1].actual.done, true);
+
+    const focusText = root.querySelector('[id^="drill-focus-"]')?.textContent || '';
+    assert(/flag/i.test(focusText), `focus panel should update to the Flagging drill's text, got "${focusText}"`);
+    const subText = root.querySelector('[data-ex="1"] .acc-sub')?.textContent || '';
+    assert(/flagging/i.test(subText), `closed accordion line should show the chosen drill, got "${subText}"`);
+  } finally { root.remove(); }
+});
+
+test('[Gym-ready] REGRESSION: a freshly-initialized day persists kind/drills so log.js can edit it correctly', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-04'); // Mon wk1, base
+  const root = document.createElement('div');
+  renderToday(root); // touches nothing yet, but mounts the day's default exercise shape via a stepper change below
+  document.body.appendChild(root);
+  const rpeEl = root.querySelector('#ex-0-rpe');
+  rpeEl.value = '8';
+  rpeEl.dispatchEvent(new Event('change', { bubbles: true }));
+  const day = Storage.getDay('2026-05-04');
+  assertEq(day.exercises[0].kind, 'hangboard', 'persisted exercise 0 should carry kind (was previously dropped, breaking log.js editing)');
+  root.remove();
+});
+
+test('[Gym-ready] log.js edit form: skill drill shows as a <select> and can be changed', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
+  Storage.setDay('2026-05-05', {
+    sessionId: 'light',
+    exercises: [
+      { name: 'Skill drill (optional, no fingers)', kind: 'skill', drills: Program.SKILL_DRILLS, actual: { drill: 'silent-feet', done: true } },
+      { name: '15–20 min mobility', kind: 'mobility', actual: {} }
+    ]
+  });
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderLog(root);
+    root.querySelector('[data-log-toggle]').click();
+    root.querySelector('button[data-edit-log]').click();
+    const sel = root.querySelector('[data-edit-ex="0"][data-edit-ex-field="drill"]');
+    assert(sel, 'expected a drill <select> for the skill exercise');
+    assertEq(sel.value, 'silent-feet', 'select should show the previously-persisted drill');
+
+    sel.value = 'falling-practice';
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+    root.querySelector('button[data-edit-save]').click();
+
+    const back = Storage.getDay('2026-05-05');
+    assertEq(back.exercises[0].actual.drill, 'falling-practice');
+    assertEq(back.exercises[0].actual.done, true);
+  } finally { root.remove(); }
+});
+
 test('[Gym-ready] howto(): per-kind default, per-exercise override', () => {
   assert(howto({ kind: 'limit-boulder' }).length > 0, 'limit-boulder should have a per-kind default how-to');
   assert(howto({ kind: 'arc' }).length > 0, 'arc should have a per-kind default how-to');
