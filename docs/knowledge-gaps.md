@@ -29,6 +29,7 @@ What making a good climbing plan requires that neither the docs nor the code cur
 | KG-A10 | Style individualization unused | P3 | G1 | Open |
 | KG-A11 | No outdoor conversion | P3 | G2 | Won't-fix (in code) |
 | KG-A12 | No cross-session fatigue model | P3 | G3 | Won't-fix (fold into A4) |
+| KG-A13 | Comp peak type has no comp-format specificity | P3 | G2 | Open |
 
 ### KG-A1 — No limiter diagnosis (P1, G1)
 
@@ -110,6 +111,13 @@ The plan assumes a gym; peaking for a *trip* needs outdoor mileage in Peak/Taper
 
 Mostly mitigated by the fixed Mon/Thu/Sat layout with built-in rest days. Residual risk ("Push"-readiness days stacking onto deep fatigue) is cheapest to handle as one guard-rail signal inside KG-A4, not an ACWR model.
 
+### KG-A13 — Comp peak type has no comp-format specificity (P3, G2)
+
+**`settings.peakType: 'comp'` changes only the taper length (1 wk vs 2).** Peak/Taper sessions are identical to a trip/project peak — project attempts and redpoint goes on known climbs — while a comp day demands the opposite profile: unseen problems, ~4-minute rounds, limited attempts, no beta rehearsal. Physically peaked but tactically unprepared. Surfaced by the 2026-07-14 external coaching review ([`coach-review.md`](coach-review.md), W8).
+
+- *Pointers:* `js/program.js` — `taperWeeksFor` is the only `peakType` consumer; `buildThuMain`/`buildSatMain` peak/taper branches are peak-type-blind.
+- *Verdict:* close cheaply if comps are ever a real goal — swap Peak Saturdays to a comp-simulation template (rounds of unseen flash-only problems) when `peakType === 'comp'`; otherwise leave open at P3.
+
 ---
 
 ## Lens B — Research-vs-app gaps
@@ -127,6 +135,10 @@ The app was built before the research; these are the places where its decisions 
 | KG-B7 | 4×4 boulder-triples grade too hard | P2 | G1 G3 | Closed (ADR-0006 addendum, implemented 2026-07-10) |
 | KG-B8 | ARC "60–70% effort" contradicts its own RPE | P2 | G1 | Closed (implemented 2026-07-10) |
 | KG-B9 | Base sport-Thursday pyramid runs too hot | P2 | G1 | Closed (implemented 2026-07-10) |
+| KG-B10 | Retest week is a deload in name only | P2 | G2 G3 | Open |
+| KG-B11 | %-of-added-load convention distorts true intensity | P2 | G1 G3 | Open |
+| KG-B12 | Base boulder-Saturday triples run Build-intensity (KG-B9's unfixed twin) | P2 | G1 G3 | Open |
+| KG-B13 | Taper volume is cut twice | P3 | G2 | Open |
 
 ### KG-B1 — Peak prescription conflict: ADR-0001 was accepted but never implemented (P1 — CRITICAL, G3)
 
@@ -196,6 +208,36 @@ The base Saturday ARC line (`js/program.js`, `buildSatMain` sport base) reads "2
 The sport-flavor **base** Thursday route pyramid (`js/program.js`, `buildThuMain` sport base) is "4-3-2-1 routes back-to-back, 1 grade below redpoint" at **RPE 7.5–9**, energy-labelled "Aerobic power / Anaerobic capacity" — a build/PE intensity sitting in the base phase (whose target is capacity/aerobic base). If base Thursday already runs at RPE 9 near redpoint, there's no intensity headroom left for Build's 60/60 threshold work to be a step *up*, flattening the base→build progression. Lower-confidence than B7/B8 (rests on reading `CONTEXT.md`'s loose "capacity"; the "4-3-2-1 in base" framing was flagged as author synthesis with no published basis). Never ADR'd (unlike the two-band Build/Peak work).
 
 - **DECIDED 2026-07-10 (map #8/#11); IMPLEMENTED 2026-07-10.** Capped base sport-Thursday intensity at **RPE 7–8** ("comfortably hard", aerobic-capacity), keeping the pyramid *structure*. Preserves a clean base→build intensity ramp and pulls the session back inside base's actual adaptation target. Shipped in `js/program.js`'s `thu-route-pyramid` prescription (RPE range + `energySystem` label corrected to "Aerobic capacity") alongside the [gym-ready prescription format spec](../specs/gym-ready-prescription-format-spec.md).
+
+*KG-B10–B13 were surfaced by the 2026-07-14 external coaching review ([`coach-review.md`](coach-review.md)) and the generated-schedule export appended to [`training-plan.md`](training-plan.md), which made the app's actual per-week output inspectable for the first time.*
+
+### KG-B10 — Retest week is a deload in name only (P2, G2+G3)
+
+**The retest exemption from the deload volume cut applies to the whole week, not just Monday.** `prescribeForContext` gates on the week-level flags (`if (deload && !retest)`), so in retest weeks Thursday and Saturday run at *full* volume while Monday adds three maximal tests (max hang, 1RM pull-up, 60-min max bouldering). Two consequences: benchmarks are tested on accumulated fatigue (systematically underestimating gains — and those numbers drive all Build/Peak percentages), and the ADR-0004 3:1 cadence silently breaks around the Base→Build boundary (no genuine unload between week 4 and the Build deload — or ever, at the default length, since Build is only 3 weeks). CLAUDE.md documents "retest weeks are exempt from the volume cut" as an invariant, but the *intent* was plausibly Monday-only (only Monday "has its own structure"). See coach-review W2/W3.
+
+- *Pointers:* `js/program.js` — `prescribeForContext` (`deload && !retest`), `buildRetestSession`; `training-plan.md` week-6 rows in the generated schedule (no deload note on Thu/Sat).
+- *Verdict:* adjudicate intent, then likely scope the exemption to `mon-main` only (one-line change) — better test data *and* real recovery entering Build.
+
+### KG-B11 — %-of-added-load convention distorts true intensity (P2, G1+G3)
+
+**All hangboard/pull-up percentages scale the *added* benchmark load, but physiological intensity tracks *total system* load (bodyweight + added).** For a 70 kg athlete with a +20 kg max hang, Base's "intro 55–70%" hangs are +11–14 kg ≈ **90–93% of true max**; the advertised Base→Peak ramp of 55→95% added is really ~90→99% total, and it compresses further the weaker the fingers. Worse, for a **negative** benchmark (assisted hangs — `js/loads.js` explicitly allows `maxHang20mm` to be negative), the math inverts: 55–70% of −10 kg prescribes −5.5 to −7 kg, i.e. *less assistance than the athlete's tested max* — a supra-max load labelled "intro, low-end". The RPE ranges partially rescue execution, but the phase tables and ADR-0001's 90%-cap rationale reason about these numbers as if they were %1RM. See coach-review W12.
+
+- *Pointers:* `js/loads.js` — `prescribeLoadKg` (`baseMax * pctRange[i]`, comment "may be negative"); `js/program.js` — `BASE_MAX_INTRO`/`HANGBOARD`/`pullupPrescription` percentage tables.
+- *Verdict:* adjudicate the convention (total-load math vs. re-derived added-load percentages), and independently **guard the negative-benchmark branch now** (clamp to "never less assistance than benchmark") — that half is a safety bug, not a philosophy question.
+
+### KG-B12 — Base boulder-Saturday triples run Build-intensity (P2, G1+G3)
+
+**`buildSatMain` serves the identical anaerobic-capacity 4×4 (RPE 8.5–9.5) for both Base and Build boulder weeks** — the exact phase-mismatch KG-B9 diagnosed and fixed for sport Thursdays was never audited on the boulder side. In hybrid Base, boulder-flavored weeks therefore contain *no* sub-threshold capacity session at all (Thu projecting runs RPE 7.5–9 too): the aerobic base the phase is named for exists only on sport weeks, and Build's Saturday is not a progression because it is literally the same session. Compounds KG-B4's ARC under-dosing. See coach-review W15.
+
+- *Pointers:* `js/program.js` — `buildSatMain` boulder branch (base/build share `sat-boulder-triples`); KG-B9 above for the adjudicated precedent.
+- *Verdict:* give Base boulder Saturdays their own session (boulder ARC / easy circuits / high-volume flash pyramids at RPE ≤7.5), keep triples as the Build session where the density progression already lives — same shape as the KG-B9 fix.
+
+### KG-B13 — Taper volume is cut twice (P3, G2)
+
+**Taper session templates already encode reduced volume, and `applyTaperVolume` then scales them again.** Taper pull-ups are authored as 2×2 but ship as 1×2 (`prescribedSets` 2 → floor(2×0.6) = 1); taper Thursday project goes are authored "2–3 quality goes" (`prescribedTarget` 2) but ship as target 1 — below what the template's own text argues for. Probably an unintended interaction from ADR-0007 reusing the deload machinery on top of already-tapered templates. Low stakes (direction is safe — taper errors toward less volume) but it misstates the plan and single-go redpoint Thursdays under-serve a trip/project peak. Visible in the generated week-12 schedule in `training-plan.md` ("sets today: 1 × 2", "target today: 1 goes (cut from 2)").
+
+- *Pointers:* `js/program.js` — `applyTaperVolume` vs. the pre-reduced `HANGBOARD.taper` / taper `pullupPrescription` / `thu-projects` templates.
+- *Verdict:* pick one layer — either author taper templates at full volume and let `applyTaperVolume` do the cut, or mark pre-tapered templates exempt. Also fix the "1 goes" pluralization while in there.
 
 ---
 
@@ -300,4 +342,5 @@ Multi-user / product features · AI-coach chat · wearables/HRV integration · n
 - **2026-07-10** — **KG-B7, KG-B8, KG-B9 closed** — [wayfinder map #8](https://github.com/slm37102/simple-climbing-training-planner/issues/8) (research → phase-placement validation → adjudication → [gym-ready prescription format spec](../specs/gym-ready-prescription-format-spec.md)) implemented in `js/program.js`: every climbing-kind exercise (`boulder`/`route`/`circuit`/`arc`/`open-climb`/`limit-boulder`/`campus`) now carries a structured `prescribedTarget: {value, unit}` alongside its existing free text, rendered as a concrete Today-tab target + per-kind how-to (`js/exercise-inputs.js`'s `howto()`); deload/taper scale the target to a real integer (count: floor×0.6 min 1; duration: round-to-5) instead of the old "drop ~40% volume" text suffix — closing the app's original vagueness complaint. The three adjudicated corrections shipped alongside: 4×4 grade → "2–3 below max" (KG-B7, ADR-0006 addendum), ARC "% effort" figure dropped (KG-B8), base route-pyramid RPE capped 7–8 + energySystem relabelled (KG-B9). `[Gym-ready]` regression tests added to `tests/index.html`; `sw.js` `CACHE` bumped.
 - **2026-07-10** — **KG-C1 closed.** A separate verification pass ran every one of the ~94 remaining un-adjudicated claims in `research/data/gathered-claims.json` to 100% completion, including both previously-unverified subtopics (finger/pulley injury prevention; assessment & benchmark metrics) — the "Full-corpus completion" batch in `research/verified-findings.md`. Cross-checked against the ADR-0004–0007-cited claims first: 18/19 non-tangential citations agreed exactly, zero conflicts. Net +132 confirmed, +5 refuted. Running total: 332 confirmed, 16 refuted, 0 remaining un-adjudicated (`research/README.md`). KG-A1/KG-A7 remain open as feature-side gaps but are no longer blocked on missing verification.
 - **2026-07-14** — Follow-up bug sweep on the gym-ready work (rest-time audit across every exercise; hangboard/pull-up `rest` field was captured but never rendered; pull-up's RPE target used the field name `rpe` instead of `rpeRange`, silently breaking both its display and `Loads.autoAdjust`; antagonist-block accessories and the retest max-effort tests had no rest guidance at all) plus a `.howto` spacing fix and **KG-A9 closed** (Tuesday skill-drill picker — see above). Discovered and fixed along the way: `js/views/today.js`'s `getOrInitDay()` never persisted `kind`/`optional`/`drills`/`prescribedTarget` onto a day's stored exercises, so `js/views/log.js`'s edit form (which reads only the stored day, never a live `Program` session) always fell back to the generic sets+reps+rpe inputs regardless of the real exercise kind — e.g. hangboard/pull-up entries lost their `kg` field entirely when edited via the Log tab. Fixed for all exercises going forward (existing already-logged days are not retroactively migrated). 101/101 tests passing.
+- **2026-07-14** — **KG-A13, KG-B10–B13 opened** from the external coaching review ([`coach-review.md`](coach-review.md)) + the generated 12-week schedule export appended to [`training-plan.md`](training-plan.md) (built by running `Program.build` for every day of a default hybrid cycle — the retest-week exemption scope, taper double-cut, and Base-Saturday intensity were all invisible until the app's real output sat next to the hand-written tables). Review cross-checked against this doc first: its Critical/High items confirm the priority of the already-open KG-A2/B5, KG-B4, KG-A1/D2, KG-A4, and KG-A7 rather than duplicating them; only the five genuinely untracked findings got new IDs. The KG-B11 negative-benchmark guard is flagged as a fix-now safety bug independent of the convention adjudication.
 - **2026-07-14** — **KG-A9 addendum spec locked** — wayfinder [map #14](https://github.com/slm37102/simple-climbing-training-planner/issues/14) (research → drill-list grilling → schema/data-model grilling → UI prototype → this Log-tab-parity + spec-assembly ticket) produced [`docs/specs/technique-drill-library-spec.md`](specs/technique-drill-library-spec.md): grows `SKILL_DRILLS` from 4 to 19 drills across 5 categories (new `js/drills.js` catalog), adds a category-chip-filtered Tuesday picker, and a second surface — an 8-drill footwork+positioning picker at the end of the Thu/Sat warm-up checklist (new `dayLog.warmupDrill` field, no schema bump). Spec only — not yet implemented.
