@@ -75,8 +75,8 @@ html{scroll-padding-bottom:calc(78px + env(safe-area-inset-bottom,0px))}
 .callout.deload-target .v{color:var(--deload)}
 .callout .v s{color:var(--muted);font-weight:600;font-size:14px;margin-right:6px;text-decoration:line-through}
 /* Gym-ready spec §2/§4: glanceable execution cues under the target callout */
-.howto{font:400 12px 'Archivo';color:var(--text2);margin:0 0 6px;padding-left:10px;border-left:2px solid rgba(95,212,232,.35)}
-.howto b{color:var(--muted);font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:1px}
+.howto{font:400 12px 'Archivo';line-height:1.45;color:var(--text2);margin:12px 0;padding-left:10px;border-left:2px solid rgba(95,212,232,.35)}
+.howto b{color:var(--muted);font-weight:700;font-size:10px;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:3px}
 
 /* ── Badges ────────────────────────────────────────────── */
 .badge{display:inline-block;padding:3px 9px;border-radius:999px;font:700 10px 'Archivo';letter-spacing:.06em;text-transform:uppercase;background:var(--panel2);color:var(--muted)}
