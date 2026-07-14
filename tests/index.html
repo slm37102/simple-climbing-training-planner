@@ -1071,6 +1071,28 @@ test('[Gym-ready] REGRESSION: pull-up rest time and RPE target render in the Tod
   } finally { root.remove(); }
 });
 
+test('[Gym-ready] antagonist-block items each specify rest between sets', () => {
+  const ctx = Program.resolveDate('2026-05-04', '2026-05-04', 12); // wk1 Mon, base, non-deload
+  const sess = Program.prescribeForContext(ctx, 'hybrid');
+  const block = sess.exercises.find(e => e.kind === 'antagonist-block');
+  assert(block, 'Monday session should have an antagonist-block');
+  assert(block.items.length >= 5, `expected 5 antagonist items, got ${block.items.length}`);
+  for (const item of block.items) {
+    assert(/rest/i.test(item.prescribed), `antagonist item "${item.name}" missing rest info: "${item.prescribed}"`);
+  }
+});
+
+test('[Gym-ready] retest max-effort tests specify rest between attempts', () => {
+  const ctx = Program.resolveDate('2026-06-08', '2026-05-04', 12); // wk6 Mon, retest
+  assert(ctx.deload && ctx.retest, 'fixture must be the retest Monday');
+  const sess = Program.prescribeForContext(ctx, 'hybrid');
+  assert(sess.isRetest, 'expected the retest session');
+  const hang = sess.exercises.find(e => /max 10s hang/i.test(e.name));
+  const pull = sess.exercises.find(e => /1rm weighted pull-up/i.test(e.name));
+  assert(hang && /rest between attempts/i.test(hang.prescribed), `hang test missing rest guidance: "${hang && hang.prescribed}"`);
+  assert(pull && /rest between attempts/i.test(pull.prescribed), `pull-up test missing rest guidance: "${pull && pull.prescribed}"`);
+});
+
 test('[Gym-ready] howto(): per-kind default, per-exercise override', () => {
   assert(howto({ kind: 'limit-boulder' }).length > 0, 'limit-boulder should have a per-kind default how-to');
   assert(howto({ kind: 'arc' }).length > 0, 'arc should have a per-kind default how-to');

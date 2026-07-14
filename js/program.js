@@ -192,11 +192,11 @@ const HANGBOARD = {
 
 // ============== Antagonist / accessory block ==============
 const ANTAGONIST_BLOCK = [
-  { name: 'Push-ups', prescribed: '3 × 15–25' },
-  { name: 'Inverted rows / band cactus', prescribed: '3 × 10–15' },
-  { name: 'Wrist extensor curls', prescribed: '3 × 20' },
-  { name: "Farmer's carry", prescribed: '3 × 20–30 steps' },
-  { name: 'Core (plank or hanging knee raise or L-sit)', prescribed: 'choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit' }
+  { name: 'Push-ups', prescribed: '3 × 15–25 · 60–90s rest between sets' },
+  { name: 'Inverted rows / band cactus', prescribed: '3 × 10–15 · 60–90s rest between sets' },
+  { name: 'Wrist extensor curls', prescribed: '3 × 20 · 60s rest between sets' },
+  { name: "Farmer's carry", prescribed: '3 × 20–30 steps · 60–90s rest between sets' },
+  { name: 'Core (plank or hanging knee raise or L-sit)', prescribed: 'choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets' }
 ];
 
 // ============== Session generators (per slot per phase per flavor) ==============
@@ -466,8 +466,8 @@ function buildRetestSession() {
     energySystem: 'Test',
     isRetest: true,
     exercises: [
-      { kind:'test', name: 'Max 10s hang on 20mm edge', prescribed: 'find heaviest 10s hold (RPE 9.5 cap)' },
-      { kind:'test', name: '1RM weighted pull-up', prescribed: 'work up to 1 hard rep' },
+      { kind:'test', name: 'Max 10s hang on 20mm edge', prescribed: 'find heaviest 10s hold (RPE 9.5 cap) · 3–5 min rest between attempts' },
+      { kind:'test', name: '1RM weighted pull-up', prescribed: 'work up to 1 hard rep · 3–5 min rest between attempts' },
       { kind:'test', name: 'Max boulder grade today', prescribed: 'flash/send the hardest you can in 60 min' },
       { kind:'test', name: '(optional) Forearm repeater test', prescribed: '7/3 to failure on 20mm @ BW', optional: true }
     ]
