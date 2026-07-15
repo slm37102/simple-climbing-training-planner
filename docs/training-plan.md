@@ -165,8 +165,11 @@ Replaces the normal Mon hangboard session. Record results → tap **"Save as Ben
 
 1. **Benchmark %** — load range set from `maxHang20mm` or `pullup1RM`
 2. **Seed** — previous actual kg if logged; else range midpoint
-3. **Auto-adjust** ±5% based on previous session's avg RPE vs target RPE
+3. **Auto-adjust** ±5% based on previous session's avg RPE vs target RPE; when RPE was **in range and all prescribed sets/reps were completed**, the load progresses **+2.5%** instead of holding (targets-hit rule, `adr/0009-intra-phase-progression.md`)
 4. **Readiness multiplier** — from daily readiness check-in: ×0.85 / ×1.0 / ×1.05 (or a rest suggestion instead of a load)
+5. **Upward cap** — the total upward move is capped at **+5% per session** (stacked multipliers can't exceed the evidence band; downward moves are never capped — `adr/0009`)
+
+Base-phase aerobic climbing sessions (route pyramid, ARC) additionally **ramp their volume target ×1.1 per hard Base week (cap ×1.3)**, with deload weeks cutting the unramped template — the verified ramp-then-halve shape (`adr/0009`).
 
 Deload weeks do **not** scale kg — they cut prescribed volume instead (handled in `js/program.js`, see the Deload Rules above).
 
@@ -189,9 +192,9 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 ## Generated 12-Week Schedule (hybrid focus, comp peak)
 
 > **Auto-generated from `js/program.js`** (`Program.build`, default 12-week cycle, `focus: hybrid`, `peakType: comp`).
-> Regenerate after changing `js/program.js` — do not hand-edit this section.
-> Loads show the prescribed **% of benchmark added load**; the app converts these to kg from your benchmarks and applies auto-adjust / readiness / layoff-decay on the day.
-> Deload and taper weeks are shown with their volume cuts already applied. Every session gets the standard two-stage warm-up and cool-down from `js/warmup.js`.
+> Regenerate with `node --experimental-default-type=module tools/generate-schedule.mjs` after changing `js/program.js` — do not hand-edit this section.
+> Loads show the prescribed **% of benchmark added load**; the app converts these to kg from your benchmarks and applies targets-hit progression / auto-adjust / readiness / layoff-decay on the day (ADR-0009).
+> Deload/taper volume cuts and the Base aerobic volume ramp are shown already applied. Every session gets the standard two-stage warm-up and cool-down from `js/warmup.js`.
 
 ### Week 1 — Base · boulder-flavor week
 
@@ -224,11 +227,11 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
   - **15–20 min mobility** — shoulders, hips, wrists
   - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
 - **Wed** — Rest day
-- **Thu** — Route pyramid (Base) *(Aerobic capacity)*
-  - **Route pyramid** — pyramid 4-3-2-1 routes · walking rest between routes; 1 grade below redpoint · RPE 7–8 · target: 10 routes
+- **Thu** — Route pyramid (Base) *(Aerobic capacity)* — _Base hard week 2 — aerobic volume +10% (ADR-0009)_
+  - **Route pyramid** — pyramid 4-3-2-1 routes · walking rest between routes; 1 grade below redpoint · RPE 7–8 · target today: 11 routes (ramped up from 10)
 - **Fri** — Rest day
-- **Sat** — ARC — aerobic base *(Aerobic base)*
-  - **ARC (continuous easy climbing)** — 2 × 30 min, just below pump · 10 min rest between sets · OR 90 min easy laps · RPE 4–6 · target: 30 min
+- **Sat** — ARC — aerobic base *(Aerobic base)* — _Base hard week 2 — aerobic volume +10% (ADR-0009)_
+  - **ARC (continuous easy climbing)** — 2 × 30 min, just below pump · 10 min rest between sets · OR 90 min easy laps · RPE 4–6 · target today: 35 min (ramped up from 30)
 - **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
   - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
 
@@ -420,4 +423,3 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 - **Sun** — 🏁 **Goal / comp day** *(app renders this day as “Optional: easy open climb or rest”)*
 
 _Final cycle day (Week 12 Sunday) is the goal/comp day; the day before is always full rest (ADR-0007)._
-

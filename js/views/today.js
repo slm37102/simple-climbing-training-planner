@@ -208,7 +208,13 @@ function headerHtml(date, ctx, session) {
     </div>
     <div class="display-title">${displayTitle(session)}</div>
     <div class="row" style="margin-top:9px">${flavor}${deloadBadge}${retestBadge}${energyTip}</div>
-    ${session?.deloadNote ? `<div class="deload-note" style="margin-top:10px">⚙ ${session.deloadNote}</div>` : ''}
+    ${(() => {
+      // One shared slot for phase-mechanics notes: deload cut, taper cut
+      // (previously built by ADR-0007 but never rendered here), or the
+      // ADR-0009 Base aerobic ramp.
+      const note = session?.deloadNote || session?.taperNote || session?.rampNote;
+      return note ? `<div class="deload-note" style="margin-top:10px">⚙ ${note}</div>` : '';
+    })()}
   </div>`;
 }
 
@@ -618,6 +624,11 @@ function targetCalloutHtml(ex) {
     const { value: ov, unit: ou } = ex.originalTarget;
     return `<div class="callout deload-target"><span class="k">Deload target</span><span class="v"><s>${ov} ${ou}</s>${value} ${unit}</span></div>`;
   }
+  // ADR-0009 Base aerobic ramp — volume stepped up from the phase template.
+  if (ex.rampedFrom) {
+    const { value: rv, unit: ru } = ex.rampedFrom;
+    return `<div class="callout"><span class="k">Ramped target</span><span class="v">${value} ${unit} <span style="opacity:.6">↑ from ${rv} ${ru}</span></span></div>`;
+  }
   return `<div class="callout"><span class="k">Today's target</span><span class="v">${value} ${unit}</span></div>`;
 }
 
@@ -699,6 +710,8 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
       exercise: ex,
       previousActualKg: prevActual?.kg ?? null,
       previousAvgRpe: prevActual?.rpe ?? null,
+      previousActualSets: prevActual?.sets ?? null,
+      previousActualReps: prevActual?.reps ?? null,
       daysSincePrevious: prev ? daysBetween(prev._prevDate, date) : null,
       readinessMultiplier: readinessMult,
     });
@@ -816,6 +829,8 @@ function wire(root, date, session, ctx, readinessMult) {
           exercise: ex,
           previousActualKg: prevActual?.kg ?? null,
           previousAvgRpe: prevActual?.rpe ?? null,
+          previousActualSets: prevActual?.sets ?? null,
+          previousActualReps: prevActual?.reps ?? null,
           daysSincePrevious: prev ? daysBetween(prev._prevDate, date) : null,
           readinessMultiplier: multiplier,
         });

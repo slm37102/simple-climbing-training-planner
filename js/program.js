@@ -560,6 +560,60 @@ function appendDeloadNote(text) {
   return text + ' · Deload: drop ~40% volume';
 }
 
+// ============== Base aerobic volume ramp (ADR-0009) ==============
+// Verified base-phase shape (research § Base): ramp volume across the hard
+// weeks of an aerobic mesocycle, then a recovery microcycle halves it. The
+// existing deload cut IS that recovery step, so the ramp applies only to hard
+// (non-deload, non-retest) Base weeks and always scales the unramped template.
+const BASE_RAMP_PER_WEEK = 0.10;
+const BASE_RAMP_CAP = 1.30;
+
+// 1-based position of weekIdx among the *hard* weeks of its phase run
+// (restarts per Base run in double-block cycles); null when the week is
+// itself a deload/retest week or out of range.
+export function hardPhasePos(pattern, weekIdx) {
+  const i = weekIdx - 1;
+  const cur = pattern[i];
+  if (!cur || cur.deload || cur.retest) return null;
+  let pos = 0;
+  for (let j = i; j >= 0 && pattern[j].phase === cur.phase; j--) {
+    if (!pattern[j].deload && !pattern[j].retest) pos++;
+  }
+  return pos;
+}
+
+// Upward counterpart of scaleTarget: counts round to nearest whole (min 1),
+// 'min' durations round to the nearest 5.
+function scaleTargetUp(target, mult) {
+  if (!target) return target;
+  if (target.unit === 'min') {
+    return { value: Math.max(5, Math.round((target.value * mult) / 5) * 5), unit: target.unit };
+  }
+  return { value: Math.max(1, Math.round(target.value * mult)), unit: target.unit };
+}
+
+function applyBaseVolumeRamp(session, pos) {
+  if (!session?.exercises || pos == null || pos <= 1) return session;
+  // Aerobic sessions only (route pyramid, ARC). Anaerobic Base sessions are
+  // deliberately excluded — ramping the mis-phased Base triples would compound
+  // open KG-B12; when that closes, the energySystem gate picks up its
+  // replacement automatically.
+  if (!/^aerobic/i.test(session.energySystem || '')) return session;
+  const mult = Math.min(BASE_RAMP_CAP, 1 + BASE_RAMP_PER_WEEK * (pos - 1));
+  if (mult <= 1) return session;
+  const out = {
+    ...session,
+    exercises: session.exercises.map(ex => {
+      if (!ex || ex.optional || !ex.prescribedTarget) return ex;
+      // rampedFrom, not originalTarget — the views render originalTarget as a
+      // struck-through "Deload target"; a ramp is the opposite direction.
+      return { ...ex, rampedFrom: ex.prescribedTarget, prescribedTarget: scaleTargetUp(ex.prescribedTarget, mult) };
+    })
+  };
+  out.rampNote = `Base hard week ${pos} — aerobic volume +${Math.round((mult - 1) * 100)}%.`;
+  return out;
+}
+
 // ADR-0007: the taper is a step volume cut with intensity held — the same
 // mechanics as a deload week, but labelled as the taper so the athlete knows
 // this is sharpening, not recovery. Loads stay near peak (see HANGBOARD.taper).
@@ -666,6 +720,9 @@ export const Program = {
       isMain: slot === 'mon-main' || slot === 'thu-main' || slot === 'sat-main',
       isRest: slot === 'rest',
       cycleWeeks: clampCycleWeeks(cycleWeeks),
+      // Carried so prescribeForContext can rebuild the same phase pattern the
+      // resolver used (taper length shifts the Base/Build split — ADR-0009).
+      peakType: (peakType === 'trip' || peakType === 'project') ? peakType : 'comp',
       totalDays
     };
   },
@@ -716,6 +773,14 @@ export const Program = {
       session = buildSatMain(phase, resolvedFlavor, deload, weeksLeft);
     } else {
       session = LIGHT_DAY;
+    }
+
+    // ADR-0009: Base aerobic volume ramp across the hard weeks of the phase.
+    // Mutually exclusive with the deload cut below (hardPhasePos returns null
+    // on deload/retest weeks), so the deload always cuts the unramped template.
+    if (phase === 'base' && !deload && !retest) {
+      const pattern = buildPhasePattern(weeks, ctx.peakType);
+      session = applyBaseVolumeRamp(session, hardPhasePos(pattern, ctx.weekIdx));
     }
 
     // Apply Lattice-style volume cut on deload weeks (not for retest — that has its own structure).
