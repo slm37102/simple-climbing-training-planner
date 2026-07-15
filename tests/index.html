@@ -725,8 +725,8 @@ test('[ADR-0006] Sat 4×4 rest tightens only inside the final 4 weeks', () => {
 });
 
 test('[ADR-0006] Sat boulder triples: open-climb mileage is optional (single-system)', () => {
-  // wk1 Sat = 2026-05-09, boulder flavor
-  const sess = Program.prescribeForContext(Program.resolveDate('2026-05-09', '2026-05-04', 12), 'boulder');
+  // wk7 Sat = 2026-06-20, build phase, boulder flavor (KG-B12: triples are Build-only)
+  const sess = Program.prescribeForContext(Program.resolveDate('2026-06-20', '2026-05-04', 12), 'boulder');
   assertEq(sess.sessionId, 'sat-boulder-triples');
   const open = sess.exercises.find(e => e.kind === 'open-climb');
   assert(open && open.optional === true, 'open-climb cool-down must be optional');
@@ -971,7 +971,26 @@ test('[Gym-ready] deload week scales a count-unit prescribedTarget: floor(×0.6)
   const deloadCtx = Program.resolveDate(iso, '2026-05-04', 12);
   assertEq(deloadCtx.phase, 'base');
   assert(deloadCtx.deload && !deloadCtx.retest, `wk4 should be a natural (non-retest) deload, got deload=${deloadCtx.deload} retest=${deloadCtx.retest}`);
+  // KG-B12: Base boulder-Saturday is the flash pyramid (kind 'boulder'), not the triples.
   const sess = Program.prescribeForContext(deloadCtx, 'boulder');
+  assertEq(sess.sessionId, 'sat-flash-pyramid');
+  const pyramid = sess.exercises.find(e => e.kind === 'boulder');
+  assert(pyramid.originalTarget, 'deload boulder exercise missing originalTarget');
+  assertEq(pyramid.originalTarget, { value: 18, unit: 'problems' });
+  assertEq(pyramid.prescribedTarget, { value: 10, unit: 'problems' }, 'floor(18 × 0.6) = 10 problems');
+});
+
+test('[Gym-ready] deload week scales the Build boulder-triples count-unit target too: floor(×0.6), min 1', () => {
+  // wk7 Sat build fixture has no deload week in a 12-wk cycle; use a longer
+  // cycle so Build actually carries a deload week for the triples session.
+  const pattern = buildPhasePattern(24, 'comp');
+  const buildDeloadIdx = pattern.findIndex(w => w.phase === 'build' && w.deload);
+  assert(buildDeloadIdx >= 0, 'fixture: 24-wk cycle must have a Build deload week');
+  const iso = addIsoDays('2026-05-04', buildDeloadIdx * 7 + 5); // Sat of that week
+  const ctx = Program.resolveDate(iso, '2026-05-04', 24);
+  assertEq(ctx.phase, 'build');
+  assert(ctx.deload, 'fixture week must be a Build deload week');
+  const sess = Program.prescribeForContext(ctx, 'boulder');
   assertEq(sess.sessionId, 'sat-boulder-triples');
   const triples = sess.exercises.find(e => e.kind === 'circuit');
   assert(triples.originalTarget, 'deload circuit exercise missing originalTarget');
@@ -1002,7 +1021,7 @@ test('[Gym-ready] taper week also scales prescribedTarget (same mechanics as del
 });
 
 test('[Gym-ready] KG-B7: boulder-triples 4×4 grade corrected to "2–3 grades below max"', () => {
-  const ctx = Program.resolveDate('2026-05-09', '2026-05-04', 12); // wk1 Sat, base, non-deload
+  const ctx = Program.resolveDate('2026-06-20', '2026-05-04', 12); // wk7 Sat, build, non-deload (KG-B12: triples are Build-only)
   const sess = Program.prescribeForContext(ctx, 'boulder');
   const triples = sess.exercises.find(e => e.kind === 'circuit');
   assert(/2–3 grades below max/.test(triples.prescribed), `expected "2–3 grades below max", got "${triples.prescribed}"`);
@@ -1085,20 +1104,71 @@ test('[ADR-0009] deload weeks stay exempt: cut applies to the unramped template,
   assert(!arc.rampedFrom, 'deload week exercises must not be ramped');
 });
 
-test('[ADR-0009] ramp is aerobic-only and Base-only: triples, projecting, and Build sessions unchanged', () => {
-  // wk3 Sat, boulder flavor — anaerobic triples must not ramp despite being a hard base week
-  const triples = Program.prescribeForContext(Program.resolveDate('2026-05-23', '2026-05-04', 12), 'boulder');
-  assertEq(triples.sessionId, 'sat-boulder-triples');
-  assertEq(triples.exercises[0].prescribedTarget, { value: 4, unit: 'sets' });
-  assert(!triples.rampNote, 'anaerobic base session must not ramp (KG-B12 guard)');
+test('[ADR-0009] ramp is aerobic-only and Base-only: hangboard, projecting, and Build sessions unchanged', () => {
+  // wk3 Mon, boulder flavor — strength/alactic hangboard must not ramp despite being a hard base week
+  const hangboard = Program.prescribeForContext(Program.resolveDate('2026-05-18', '2026-05-04', 12), 'boulder');
+  assertEq(hangboard.sessionId, 'mon-hangboard-base');
+  assert(!hangboard.rampNote, 'non-aerobic base session must not ramp');
+  // wk3 Sat, boulder flavor — Build's anaerobic triples must not ramp when it recurs there (KG-B12: Base is now the aerobic flash pyramid, tested separately)
+  const satBuild = Program.prescribeForContext(Program.resolveDate('2026-06-20', '2026-05-04', 12), 'boulder');
+  assertEq(satBuild.sessionId, 'sat-boulder-triples');
+  assertEq(satBuild.exercises[0].prescribedTarget, { value: 4, unit: 'sets' });
+  assert(!satBuild.rampNote, 'Build sessions must not ramp (ramp is Base-only)');
   // wk3 Thu projecting (Skill / Strength) must not ramp
   const proj = Program.prescribeForContext(Program.resolveDate('2026-05-21', '2026-05-04', 12), 'boulder');
   assertEq(proj.exercises[0].prescribedTarget, { value: 75, unit: 'min' });
   // wk8 Thu Build 60/60 must not ramp (ramp is Base-only)
-  const build = Program.prescribeForContext(Program.resolveDate('2026-06-25', '2026-05-04', 12), 'hybrid');
-  assertEq(build.sessionId, 'thu-6060-threshold');
-  assertEq(build.exercises[0].prescribedTarget, { value: 20, unit: 'min' });
-  assert(!build.rampNote, 'Build sessions must not carry a rampNote');
+  const thuBuild = Program.prescribeForContext(Program.resolveDate('2026-06-25', '2026-05-04', 12), 'hybrid');
+  assertEq(thuBuild.sessionId, 'thu-6060-threshold');
+  assertEq(thuBuild.exercises[0].prescribedTarget, { value: 20, unit: 'min' });
+  assert(!thuBuild.rampNote, 'Build sessions must not carry a rampNote');
+});
+
+// ─── KG-B12: Base boulder-Saturday flash pyramid (closes KG-B12) ──────────
+// Same fixed anchor 2026-05-04 (Mon), 12-wk comp cycle: base wks1–6 with
+// deload wk4 + retest wk6; build wks7–9. Sat main slot per week: wk1
+// 2026-05-09, wk2 2026-05-16, wk4 2026-05-30 (deload), wk7 2026-06-20 (build).
+
+test('[KG-B12] Base boulder-Saturday is the flash pyramid; Build boulder-Saturday is still the 4×4 triples', () => {
+  const base = Program.prescribeForContext(Program.resolveDate('2026-05-09', '2026-05-04', 12), 'boulder');
+  assertEq(base.sessionId, 'sat-flash-pyramid');
+  assertEq(base.energySystem, 'Aerobic capacity');
+  const pyramid = base.exercises.find(e => e.kind === 'boulder');
+  assert(pyramid, 'flash pyramid exercise (kind boulder) missing');
+  assertEq(pyramid.prescribedTarget, { value: 18, unit: 'problems' });
+  assert(pyramid.rpeRange[0] >= 6 && pyramid.rpeRange[1] <= 7.5, `expected RPE within [6, 7.5], got ${pyramid.rpeRange}`);
+  assert(typeof pyramid.howto === 'string' && pyramid.howto.length > 0, 'flash pyramid must carry a how-to');
+
+  const build = Program.prescribeForContext(Program.resolveDate('2026-06-20', '2026-05-04', 12), 'boulder');
+  assertEq(build.sessionId, 'sat-boulder-triples', 'Build boulder-Saturday must still be the unchanged 4×4 triples');
+  assertEq(build.energySystem, 'Anaerobic capacity');
+  const triples = build.exercises.find(e => e.kind === 'circuit');
+  assertEq(triples.prescribedTarget, { value: 4, unit: 'sets' });
+});
+
+test('[KG-B12] flash pyramid ramps across hard Base weeks (ADR-0009): wk2 hard week 2 → 18 → 20 problems', () => {
+  const wk1 = Program.prescribeForContext(Program.resolveDate('2026-05-09', '2026-05-04', 12), 'boulder');
+  assertEq(wk1.sessionId, 'sat-flash-pyramid');
+  assertEq(wk1.exercises[0].prescribedTarget, { value: 18, unit: 'problems' }, 'hard week 1 = template volume, no ramp');
+  assert(!wk1.rampNote, 'no rampNote in hard week 1');
+
+  const wk2 = Program.prescribeForContext(Program.resolveDate('2026-05-16', '2026-05-04', 12), 'boulder');
+  assertEq(wk2.sessionId, 'sat-flash-pyramid');
+  assertEq(wk2.exercises[0].prescribedTarget, { value: 20, unit: 'problems' }, 'round(18 × 1.1) = 19.8 → 20');
+  assertEq(wk2.exercises[0].rampedFrom, { value: 18, unit: 'problems' });
+  assert(wk2.rampNote && /\+10%/.test(wk2.rampNote), `rampNote should state +10%, got "${wk2.rampNote}"`);
+});
+
+test('[KG-B12] flash pyramid cuts correctly on deload weeks: floor(18 × 0.6) = 10 problems, from the unramped template', () => {
+  const ctx = Program.resolveDate('2026-05-30', '2026-05-04', 12); // wk4 Sat, natural (non-retest) deload
+  assert(ctx.deload && !ctx.retest, `fixture must be a natural deload week, got deload=${ctx.deload} retest=${ctx.retest}`);
+  const sess = Program.prescribeForContext(ctx, 'boulder');
+  assertEq(sess.sessionId, 'sat-flash-pyramid');
+  const pyramid = sess.exercises.find(e => e.kind === 'boulder');
+  assertEq(pyramid.originalTarget, { value: 18, unit: 'problems' }, 'deload must cut the unramped template, not a ramped value');
+  assertEq(pyramid.prescribedTarget, { value: 10, unit: 'problems' }, 'floor(18 × 0.6) = 10');
+  assert(!pyramid.rampedFrom, 'deload week exercise must not carry a rampedFrom');
+  assert(!sess.rampNote, 'deload week must not carry a rampNote');
 });
 
 test('[ADR-0009] targetsHit: sets and reps compared against today\'s prescription', () => {

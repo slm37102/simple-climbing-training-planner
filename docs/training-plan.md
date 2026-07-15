@@ -210,9 +210,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 - **Thu** — Projecting / technique boulders *(Skill / Strength)*
   - **Projecting (mid-grade)** — 60–90 min of 4×4-style projecting on submaximal problems · RPE 7.5–9 · target: 75 min
 - **Fri** — Rest day
-- **Sat** — Boulder triples + open climb *(Anaerobic capacity)*
-  - **Boulder triples (4×4)** — 4 boulders · climbed back-to-back · 4 min rest · 3–4 sets · 2–3 grades below max · RPE 8.5–9.5 · target: 4 sets
-  - **Open climbing (technique)** — 30–45 min mileage on submax problems · RPE 6–7.5 · target: 40 min · *(optional)*
+- **Sat** — Flash pyramid (Base) *(Aerobic capacity)*
+  - **Flash pyramid** — 15–20 problems well below max · pyramid up and down through 2–3 grades · brief rest between problems · RPE 6–7.5 · target: 18 problems
 - **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
   - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
 
@@ -249,9 +248,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 - **Thu** — Projecting / technique boulders *(Skill / Strength)*
   - **Projecting (mid-grade)** — 60–90 min of 4×4-style projecting on submaximal problems · RPE 7.5–9 · target: 75 min
 - **Fri** — Rest day
-- **Sat** — Boulder triples + open climb *(Anaerobic capacity)*
-  - **Boulder triples (4×4)** — 4 boulders · climbed back-to-back · 4 min rest · 3–4 sets · 2–3 grades below max · RPE 8.5–9.5 · target: 4 sets
-  - **Open climbing (technique)** — 30–45 min mileage on submax problems · RPE 6–7.5 · target: 40 min · *(optional)*
+- **Sat** — Flash pyramid (Base) *(Aerobic capacity)* — _Base hard week 3 — aerobic volume +20% (ADR-0009)_
+  - **Flash pyramid** — 15–20 problems well below max · pyramid up and down through 2–3 grades · brief rest between problems · RPE 6–7.5 · target today: 22 problems (ramped up from 18)
 - **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
   - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
 
@@ -287,9 +285,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 - **Thu** — Projecting / technique boulders *(Skill / Strength)*
   - **Projecting (mid-grade)** — 60–90 min of 4×4-style projecting on submaximal problems · RPE 7.5–9 · target: 75 min
 - **Fri** — Rest day
-- **Sat** — Boulder triples + open climb *(Anaerobic capacity)*
-  - **Boulder triples (4×4)** — 4 boulders · climbed back-to-back · 4 min rest · 3–4 sets · 2–3 grades below max · RPE 8.5–9.5 · target: 4 sets
-  - **Open climbing (technique)** — 30–45 min mileage on submax problems · RPE 6–7.5 · target: 40 min · *(optional)*
+- **Sat** — Flash pyramid (Base) *(Aerobic capacity)* — _Base hard week 4 — aerobic volume +30% (ADR-0009)_
+  - **Flash pyramid** — 15–20 problems well below max · pyramid up and down through 2–3 grades · brief rest between problems · RPE 6–7.5 · target today: 23 problems (ramped up from 18)
 - **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
   - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
 

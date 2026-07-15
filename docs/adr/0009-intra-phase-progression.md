@@ -31,13 +31,13 @@ The total upward move from all multiplicative sources (auto-adjust/targets-hit �
 
 In **Base**, sessions whose `energySystem` is aerobic (`Aerobic capacity` route pyramid, `Aerobic base` ARC) scale their non-optional exercises' `prescribedTarget` by **×(1 + 0.10 × (hardWeekPos − 1))**, capped **×1.30**, where `hardWeekPos` is the week's 1-based position among the *hard* (non-deload, non-retest) weeks of its Base run. Deload weeks are exempt from the ramp and keep their existing −40% cut of the *unramped* template — that cut **is** the evidence's "recovery microcycle, sets halved" step, so ramp and deload compose into exactly the published ramp-then-halve shape. Retest weeks stay unramped (test fresh). The ramp restarts per Base run in double-block cycles. A `rampNote` on the session surfaces it in the UI (rendered in the same header slot as `deloadNote`; `taperNote`, which was silently never rendered there, now shares it).
 
-Default 12-week shape (sport-flavor weeks): ARC 30 → wk2 35 → deload 20 → retest 30 min; pyramid 10 → 11 → 6 → 10 routes; boulder-flavor hard weeks land at positions 1/3/4 → projecting unchanged (Skill/Strength, not aerobic), triples unchanged (see below).
+Default 12-week shape (sport-flavor weeks): ARC 30 → wk2 35 → deload 20 → retest 30 min; pyramid 10 → 11 → 6 → 10 routes. Boulder-flavor hard weeks land at positions 1/3/4 → projecting unchanged (Skill/Strength, not aerobic); Saturday's flash pyramid (KG-B12, closed 2026-07-15) ramps the same way as the sport-side sessions: 18 → 22 → 23 problems.
 
 ## Considered and rejected
 
 - **Extending PE density rest-cuts across all of Build** — rejected: contradicts ADR-0006's verified band-1 design ("little density change" in the engine block; the 5 s/week cut is *goal-anchored*, confined to the final 4 weeks, and is the band-1→band-2 shift mechanism). KG-D5's "PE rest-cuts" item is considered already satisfied by ADR-0006.
 - **Limit-boulder volume progression** — rejected: adding attempts/sets to max-intensity bouldering is the highest injury-cost progression available (ADR-0001 posture). Limit work progresses by grade/quality, which is athlete-led and already implied by "stop when power drops".
-- **Ramping Base boulder-flavor sessions** — deliberately excluded: the Base Saturday triples session is itself mis-phased (open KG-B12); ramping its volume would compound that error. When KG-B12 closes with a genuinely aerobic Base boulder session, the ramp picks it up automatically via the `energySystem` gate.
+- **Ramping Base boulder-flavor sessions** — deliberately excluded while the Base Saturday triples session was itself mis-phased (KG-B12). **Update 2026-07-15:** KG-B12 closed — Base boulder-Saturdays now run the aerobic flash pyramid (`sat-flash-pyramid`, `js/program.js`), which the `energySystem` gate picks up automatically; the exclusion above only ever applied to the (now Build-only) anaerobic triples.
 - **+5% targets-hit step** — deferred: revisit from the athlete's own logs (KG-A4 monitoring) if +2.5% proves too slow across a full cycle.
 
 ## Consequences

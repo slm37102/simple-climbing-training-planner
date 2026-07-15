@@ -395,7 +395,24 @@ function buildSatMain(phase, flavor, isDeload, weeksLeft = null) {
         ]
       };
     }
-    // base / build — single-system session (ADR-0006): the capacity circuit is
+    if (phase === 'base') {
+      // KG-B12: high-volume flash pyramid replaces the anaerobic-capacity 4×4
+      // triples in Base — the triples' RPE 8.5–9.5 density work matches Build
+      // intensity (ADR-0006 band boundaries), not a Base aerobic mesocycle.
+      // energySystem 'Aerobic capacity' lets ADR-0009's Base volume ramp pick
+      // this session up automatically; the triples remain Build-only below,
+      // where the density-rest progression already lives.
+      return {
+        sessionId: 'sat-flash-pyramid',
+        label: 'Flash pyramid (Base)',
+        energySystem: 'Aerobic capacity',
+        exercises: [
+          { kind:'boulder', name: 'Flash pyramid', prescribed: '15–20 problems well below max · pyramid up and down through 2–3 grades · brief rest between problems', rpeRange: [6, 7.5], prescribedTarget: { value: 18, unit: 'problems' },
+            howto: 'Climb a high volume of problems 2–3 grades below your flash level, pyramiding up and down through that grade band. Rest just enough to reset between problems — this is mileage and movement quality, not projecting. Stay comfortably hard throughout.' }
+        ]
+      };
+    }
+    // build — single-system session (ADR-0006): the capacity circuit is
     // the work; open-climb mileage is explicitly optional cool-down volume.
     const triplesRest = densityRest(weeksLeft, 240) || '4 min';
     return {
@@ -594,10 +611,10 @@ function scaleTargetUp(target, mult) {
 
 function applyBaseVolumeRamp(session, pos) {
   if (!session?.exercises || pos == null || pos <= 1) return session;
-  // Aerobic sessions only (route pyramid, ARC). Anaerobic Base sessions are
-  // deliberately excluded — ramping the mis-phased Base triples would compound
-  // open KG-B12; when that closes, the energySystem gate picks up its
-  // replacement automatically.
+  // Aerobic sessions only (route pyramid, ARC, and — since KG-B12 closed —
+  // the Base boulder-Saturday flash pyramid). Anaerobic Base sessions are
+  // deliberately excluded; the energySystem gate picks up KG-B12's flash
+  // pyramid automatically since it's labelled 'Aerobic capacity'.
   if (!/^aerobic/i.test(session.energySystem || '')) return session;
   const mult = Math.min(BASE_RAMP_CAP, 1 + BASE_RAMP_PER_WEEK * (pos - 1));
   if (mult <= 1) return session;
