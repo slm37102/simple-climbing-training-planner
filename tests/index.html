@@ -1761,6 +1761,107 @@ test('[Phase2 S5] mergeRemote: activePlanId syncs from remote', () => {
   assertEq(Storage.get().activePlanId, 'r-active', 'activePlanId should sync from remote');
 });
 
+// ─── Coach-review §8: Sunday pre-heavy-Monday warning hint ───────────────
+// start Mon 2026-05-04, 12-wk cycle (base wk1-6, build wk7-9, peak wk10-11,
+// taper wk12) unless noted otherwise. The hint is a Sunday-only lookahead:
+// present only when tomorrow (Monday) is a hard (non-deload, non-retest)
+// Build or Peak main session; absent for Base/deload/retest/taper Mondays
+// and on every non-Sunday day.
+
+test('[Coach-§8] Sunday before a hard Build Monday: preHeavyMonday + sunHint present', () => {
+  // wk7 Mon (build, non-deload) = 2026-06-15 → Sunday before = 2026-06-14
+  const mon = Program.resolveDate('2026-06-15', '2026-05-04', 12);
+  assertEq(mon.phase, 'build');
+  assert(!mon.deload && !mon.retest, 'sanity: wk7 build Monday must be a hard week');
+  const sunCtx = Program.resolveDate('2026-06-14', '2026-05-04', 12);
+  assertEq(sunCtx.slot, 'sun-optional');
+  assert(sunCtx.preHeavyMonday, 'ctx.preHeavyMonday should be true before a hard Build Monday');
+  const sess = Program.prescribeForContext(sunCtx, 'hybrid');
+  assert(sess.sunHint && /heavy fingers tomorrow/i.test(sess.sunHint), `expected sunHint, got ${sess.sunHint}`);
+  assertEq(sess.exercises[0].optional, true, 'Sunday session must stay optional');
+  assertEq(sess.exercises[0].prescribedTarget, { value: 60, unit: 'min' }, 'Sunday prescribed target must be unchanged');
+});
+
+test('[Coach-§8] Sunday before a hard Peak Monday: preHeavyMonday + sunHint present', () => {
+  // wk10 Mon (peak) = 2026-07-06 → Sunday before = 2026-07-05
+  const mon = Program.resolveDate('2026-07-06', '2026-05-04', 12);
+  assertEq(mon.phase, 'peak');
+  assert(!mon.deload && !mon.retest, 'sanity: peak weeks are never deload/retest');
+  const sunCtx = Program.resolveDate('2026-07-05', '2026-05-04', 12);
+  assertEq(sunCtx.slot, 'sun-optional');
+  assert(sunCtx.preHeavyMonday, 'ctx.preHeavyMonday should be true before a hard Peak Monday');
+  const sess = Program.prescribeForContext(sunCtx, 'hybrid');
+  assert(sess.sunHint, 'sunHint should be set before a hard Peak Monday');
+});
+
+test('[Coach-§8] Sunday before a Base Monday: absent', () => {
+  // wk2 Mon (base, non-deload) = 2026-05-11 → Sunday before = 2026-05-10
+  const mon = Program.resolveDate('2026-05-11', '2026-05-04', 12);
+  assertEq(mon.phase, 'base');
+  const sunCtx = Program.resolveDate('2026-05-10', '2026-05-04', 12);
+  assert(!sunCtx.preHeavyMonday, 'preHeavyMonday must be false before a Base Monday');
+  const sess = Program.prescribeForContext(sunCtx, 'hybrid');
+  assert(!sess.sunHint, 'sunHint must be absent before a Base Monday');
+});
+
+test('[Coach-§8] Sunday before a retest Monday: absent', () => {
+  // wk6 Mon (base, retest+deload) = 2026-06-08 → Sunday before = 2026-06-07
+  const mon = Program.resolveDate('2026-06-08', '2026-05-04', 12);
+  assert(mon.retest, 'sanity: wk6 Monday must be the retest week');
+  const sunCtx = Program.resolveDate('2026-06-07', '2026-05-04', 12);
+  assert(!sunCtx.preHeavyMonday, 'preHeavyMonday must be false before a retest Monday');
+  const sess = Program.prescribeForContext(sunCtx, 'hybrid');
+  assert(!sess.sunHint, 'sunHint must be absent before a retest Monday');
+});
+
+test('[Coach-§8] Sunday before a taper Monday: absent', () => {
+  // wk12 Mon (taper) = 2026-07-20 → Sunday before = 2026-07-19
+  const mon = Program.resolveDate('2026-07-20', '2026-05-04', 12);
+  assertEq(mon.phase, 'taper');
+  const sunCtx = Program.resolveDate('2026-07-19', '2026-05-04', 12);
+  assert(!sunCtx.preHeavyMonday, 'preHeavyMonday must be false before a taper Monday');
+  const sess = Program.prescribeForContext(sunCtx, 'hybrid');
+  assert(!sess.sunHint, 'sunHint must be absent before a taper Monday');
+});
+
+test('[Coach-§8] Sunday before a deload Monday inside Build phase: absent (deload beats phase)', () => {
+  // 20-wk cycle (still single-block, threshold is ">20") → base=11wk, build=6wk,
+  // peak=2wk, taper=1wk. Build's 4th hard week (i+1===4) is a natural deload —
+  // absolute weekIdx = 11 (base) + 4 = 15.
+  const monIso = addIsoDays('2026-05-04', (15 - 1) * 7);
+  const mon = Program.resolveDate(monIso, '2026-05-04', 20);
+  assertEq(mon.weekIdx, 15);
+  assertEq(mon.phase, 'build');
+  assert(mon.deload, 'sanity: wk15 of the 20-wk cycle must be the build deload week');
+  const sunIso = addIsoDays(monIso, -1);
+  const sunCtx = Program.resolveDate(sunIso, '2026-05-04', 20);
+  assertEq(sunCtx.slot, 'sun-optional');
+  assert(!sunCtx.preHeavyMonday, 'preHeavyMonday must be false before a deload Monday even in Build phase');
+  const sess = Program.prescribeForContext(sunCtx, 'hybrid');
+  assert(!sess.sunHint, 'sunHint must be absent before a deload Build Monday');
+});
+
+test('[Coach-§8] preHeavyMonday/sunHint never appear on non-Sunday days', () => {
+  // Same week as the hard-Build case above, but check every other day of the week.
+  for (const iso of ['2026-06-09', '2026-06-10', '2026-06-11', '2026-06-12', '2026-06-13']) {
+    const ctx = Program.resolveDate(iso, '2026-05-04', 12);
+    assert(!ctx.preHeavyMonday, `${iso}: preHeavyMonday must only ever be set on a Sunday`);
+    const sess = Program.prescribeForContext(ctx, 'hybrid');
+    assert(!sess.sunHint, `${iso}: sunHint must only ever appear on a Sunday`);
+  }
+  // The hard-Build Monday itself must not carry the Sunday-only hint either.
+  const monSess = Program.prescribeForContext(Program.resolveDate('2026-06-15', '2026-05-04', 12), 'hybrid');
+  assert(!monSess.sunHint, 'Monday session itself must never carry sunHint');
+});
+
+test('[Coach-§8] end-to-end via Program.build with a plan object', () => {
+  const plan = { settings: { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' }, focus: 'hybrid' };
+  const hintSess = Program.build(plan, '2026-06-14'); // Sunday before hard Build Monday
+  assert(hintSess.sunHint, 'Program.build should surface sunHint end-to-end');
+  const noHintSess = Program.build(plan, '2026-05-10'); // Sunday before Base Monday
+  assert(!noHintSess.sunHint, 'Program.build must not surface sunHint before a Base Monday');
+});
+
 // ─── Runner ───────────────────────────────────────────────────────────────
 
 async function runAll() {

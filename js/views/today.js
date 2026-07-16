@@ -210,9 +210,11 @@ function headerHtml(date, ctx, session) {
     <div class="row" style="margin-top:9px">${flavor}${deloadBadge}${retestBadge}${energyTip}</div>
     ${(() => {
       // One shared slot for phase-mechanics notes: deload cut, taper cut
-      // (previously built by ADR-0007 but never rendered here), or the
-      // ADR-0009 Base aerobic ramp.
-      const note = session?.deloadNote || session?.taperNote || session?.rampNote;
+      // (previously built by ADR-0007 but never rendered here), the
+      // ADR-0009 Base aerobic ramp, or the coach-review §8 Sunday
+      // pre-heavy-Monday hint (sun-optional's own session never sets the
+      // other three, so this list is always mutually exclusive).
+      const note = session?.deloadNote || session?.taperNote || session?.rampNote || session?.sunHint;
       return note ? `<div class="deload-note" style="margin-top:10px">⚙ ${note}</div>` : '';
     })()}
   </div>`;

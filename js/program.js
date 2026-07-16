@@ -707,6 +707,16 @@ export const Program = {
     const dow = d.getDay();
     const slot = DOW_TO_SLOT[dow];
     const ph = pattern[weekIdx - 1];
+    // Coach-review §8: on a Sunday, look ahead to tomorrow's (Monday's) phase
+    // slot so the sun-optional session can carry a "heavy fingers tomorrow"
+    // hint. Weeks are always Monday-anchored (effectiveStart is snapped to
+    // Monday — C1), so tomorrow always falls in the very next pattern entry —
+    // no second date resolve needed.
+    let preHeavyMonday = false;
+    if (dow === 0) {
+      const tomorrowPh = pattern[weekIdx]; // weekIdx is 1-based; pattern[weekIdx] = next week's entry
+      preHeavyMonday = !!tomorrowPh && (tomorrowPh.phase === 'build' || tomorrowPh.phase === 'peak') && !tomorrowPh.deload && !tomorrowPh.retest;
+    }
     return {
       weekIdx,
       dayInWeek,
@@ -723,7 +733,10 @@ export const Program = {
       // Carried so prescribeForContext can rebuild the same phase pattern the
       // resolver used (taper length shifts the Base/Build split — ADR-0009).
       peakType: (peakType === 'trip' || peakType === 'project') ? peakType : 'comp',
-      totalDays
+      totalDays,
+      // Coach-review §8: true only for a Sunday whose following Monday is a
+      // non-deload, non-retest Build or Peak main session.
+      preHeavyMonday
     };
   },
 
@@ -753,7 +766,7 @@ export const Program = {
     if (slot === 'rest') return REST_DAY;
     if (slot === 'tue-light') return LIGHT_DAY;
     if (slot === 'sun-optional') {
-      return {
+      const session = {
         sessionId: 'sun-optional',
         label: 'Optional: easy open climb or rest',
         energySystem: 'Aerobic base / —',
@@ -761,6 +774,13 @@ export const Program = {
           { kind:'open-climb', name: 'Easy open climbing (optional)', prescribed: '45–90 min mileage well below max', rpeRange: [4, 6], optional: true, prescribedTarget: { value: 60, unit: 'min' } }
         ]
       };
+      // Coach-review §8: athlete agency is preserved — the prescription and
+      // optional status are untouched; this is a hint only, surfaced when
+      // tomorrow is a hard (non-deload/retest) Build or Peak Monday.
+      if (ctx.preHeavyMonday) {
+        session.sunHint = 'Heavy fingers tomorrow — consider keeping this under ~60 minutes of easy mileage.';
+      }
+      return session;
     }
 
     let session;
