@@ -13,6 +13,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { Program } from '../js/program.js';
 import { addDays } from '../js/dates.js';
+import { unitLabel } from '../js/exercise-inputs.js';
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DOC_PATH = join(REPO_ROOT, 'docs', 'training-plan.md');
@@ -32,13 +33,14 @@ function pct(range) {
 function targetBit(ex) {
   const t = ex.prescribedTarget;
   if (!t) return null;
+  const label = unitLabel(t.value, t.unit);
   if (ex.originalTarget && ex.originalTarget.value !== t.value) {
-    return `target today: ${t.value} ${t.unit} (cut from ${ex.originalTarget.value})`;
+    return `target today: ${t.value} ${label} (cut from ${ex.originalTarget.value})`;
   }
   if (ex.rampedFrom && ex.rampedFrom.value !== t.value) {
-    return `target today: ${t.value} ${t.unit} (ramped up from ${ex.rampedFrom.value})`;
+    return `target today: ${t.value} ${label} (ramped up from ${ex.rampedFrom.value})`;
   }
-  return `target: ${t.value} ${t.unit}`;
+  return `target: ${t.value} ${label}`;
 }
 
 function exLine(ex) {

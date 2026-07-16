@@ -37,7 +37,7 @@ import { Loads } from '../js/loads.js';
 import { Warmup } from '../js/warmup.js';
 import { SKILL_DRILLS, DRILL_CATEGORIES, WARMUP_DRILLS } from '../js/drills.js';
 import { Replan, MAJOR_GAP_DAYS } from '../js/replan.js';
-import { inputVisibility, repsLabel, actualHasResult, howto } from '../js/exercise-inputs.js';
+import { inputVisibility, repsLabel, actualHasResult, howto, unitLabel } from '../js/exercise-inputs.js';
 import { today as datesToday, addDays as datesAddDays, daysBetween, snapToMonday as datesSnapToMonday } from '../js/dates.js';
 import { renderToday } from '../js/views/today.js';
 import { renderLog }   from '../js/views/log.js';
@@ -757,7 +757,10 @@ test('[ADR-0007] taper week gets a step volume cut with taperNote, intensity hel
   const sess = Program.prescribeForContext(ctx, 'hybrid');
   assert(sess.taperNote && /volume cut/i.test(sess.taperNote), 'taperNote missing');
   const pull = sess.exercises.find(e => e.kind === 'pullup');
-  assertEq(pull.prescribedSets, 1, 'taper pull-up 2 sets → cut to 1');
+  // KG-B13: template now authors full pre-cut volume (4), so the single
+  // taper cut lands at 2 — the "2 × 2" the reps text already states — not
+  // the pre-fix double-cut result of 1.
+  assertEq(pull.prescribedSets, 2, 'taper pull-up 4 (pre-cut) sets → cut to 2');
   assert(pull.pctRange[0] >= 0.75, 'intensity must be held through the taper cut');
 });
 
@@ -1016,8 +1019,11 @@ test('[Gym-ready] taper week also scales prescribedTarget (same mechanics as del
   const sess = Program.prescribeForContext(ctx, 'boulder');
   assertEq(sess.sessionId, 'thu-flash');
   const flash = sess.exercises.find(e => e.kind === 'boulder');
-  assertEq(flash.originalTarget, { value: 8, unit: 'problems' });
-  assertEq(flash.prescribedTarget, { value: 4, unit: 'problems' }, 'floor(8 × 0.6) = 4 problems');
+  // KG-B13: template now authors full pre-cut volume (14), so the single
+  // taper cut lands at 8 — within the "6–10 problems" the text already
+  // states — not the pre-fix double-cut result of 4.
+  assertEq(flash.originalTarget, { value: 14, unit: 'problems' });
+  assertEq(flash.prescribedTarget, { value: 8, unit: 'problems' }, 'floor(14 × 0.6) = 8 problems');
 });
 
 test('[Gym-ready] KG-B7: boulder-triples 4×4 grade corrected to "2–3 grades below max"', () => {
@@ -2008,6 +2014,88 @@ test('[KG-B11a] positive benchmarks are completely unaffected by the clamp, incl
   });
   assertEq(pr.suggestedKg, 25, 'a PR exceeding a stale positive benchmark must progress untouched');
   assert(!pr.reason.some(r => /clamped to benchmark/i.test(r)), 'positive-benchmark path must never mention the clamp');
+});
+
+// ─── KG-B13: single-layer taper volume cut + pluralization ───────────────
+// Taper templates now author full pre-cut volume; applyTaperVolume's ×0.6 is
+// the ONLY reduction, landing at what each template's own text argues for.
+// Fixture: 12-wk comp cycle anchored 2026-05-04 (Mon); base wks1–6, build
+// wks7–9, peak wks10–11, taper wk12 (verified above under Coach-review §8).
+
+test('[KG-B13] Monday taper pull-ups land at 2×2 after one cut (was shipping as 1×2)', () => {
+  const plan = { settings: { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' }, focus: 'hybrid' };
+  const ctx = Program.resolveDate('2026-07-20', '2026-05-04', 12);
+  assertEq(ctx.phase, 'taper', 'fixture: wk12 Mon must be the taper week');
+  const mon = Program.build(plan, '2026-07-20');
+  const pullup = mon.exercises.find(e => e.kind === 'pullup');
+  assertEq(pullup.prescribedSets, 2, 'floor(4 × 0.6) = 2, matching the "2 × 2" text — not double-cut to 1');
+  assertEq(pullup.prescribedReps, 2);
+});
+
+test('[KG-B13] Thursday taper project goes land at 2+ (was shipping as 1)', () => {
+  const plan = { settings: { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' }, focus: 'sport' };
+  const ctx = Program.resolveDate('2026-07-23', '2026-05-04', 12);
+  assertEq(ctx.phase, 'taper');
+  const thu = Program.build(plan, '2026-07-23');
+  assertEq(thu.sessionId, 'thu-projects');
+  assertEq(thu.exercises[0].prescribedTarget, { value: 2, unit: 'goes' }, 'floor(4 × 0.6) = 2 goes, matching "2–3 quality goes"');
+  assertEq(thu.exercises[0].originalTarget, { value: 4, unit: 'goes' });
+});
+
+test('[KG-B13] Thursday taper flash-grade boulders land at 8 problems (within the stated 6–10)', () => {
+  const plan = { settings: { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' }, focus: 'boulder' };
+  const thu = Program.build(plan, '2026-07-23');
+  assertEq(thu.sessionId, 'thu-flash');
+  assertEq(thu.exercises[0].prescribedTarget, { value: 8, unit: 'problems' }, 'floor(14 × 0.6) = 8, within "6–10 problems"');
+});
+
+test('[KG-B13] Saturday taper sessions (2-week trip/project taper) land within their own stated ranges', () => {
+  const base = { settings: { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'trip' } };
+  const satCtx = Program.resolveDate('2026-07-18', '2026-05-04', 12, 'trip');
+  assertEq(satCtx.phase, 'taper', 'fixture: wk11 Sat is the first (non-final) taper week under a 2-wk trip taper');
+
+  const boulderSat = Program.build({ ...base, focus: 'boulder' }, '2026-07-18');
+  assertEq(boulderSat.sessionId, 'sat-volume-down');
+  assertEq(boulderSat.exercises[0].prescribedTarget, { value: 50, unit: 'min' }, 'round(80 × 0.6 / 5) × 5 = 50, within "45–60 min"');
+
+  const sportSat = Program.build({ ...base, focus: 'sport' }, '2026-07-18');
+  assertEq(sportSat.sessionId, 'sat-route-mileage');
+  assertEq(sportSat.exercises[0].prescribedTarget, { value: 8, unit: 'routes' }, 'floor(14 × 0.6) = 8, within "6–10 routes"');
+});
+
+test('[KG-B13] non-taper phases are unaffected by the template volume changes', () => {
+  const plan = { settings: { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' }, focus: 'hybrid' };
+  const buildMon = Program.build(plan, '2026-06-15'); // Build Mon
+  assertEq(buildMon.phase, 'build');
+  const buildPullup = buildMon.exercises.find(e => e.kind === 'pullup');
+  assertEq(buildPullup.prescribedSets, 5, 'Build pull-ups still 5 sets, untouched by the taper fix');
+});
+
+test('[KG-B13] pluralization: a singular target renders "1 go", not "1 goes"', () => {
+  assertEq(unitLabel(1, 'goes'), 'go');
+  assertEq(unitLabel(2, 'goes'), 'goes');
+  assertEq(unitLabel(1, 'problems'), 'problem');
+  assertEq(unitLabel(3, 'problems'), 'problems');
+  assertEq(unitLabel(1, 'min'), 'min');
+  assertEq(unitLabel(5, 'min'), 'min');
+});
+
+test('[KG-B13] REGRESSION: Today tab renders a singular cut target grammatically ("1 ladder", not "1 ladders")', () => {
+  // A 24-wk comp cycle double-blocks, giving Build a deload week (wk21) — its
+  // Monday campus-ladders exercise (boulder focus, prescribedTarget 3 ladders)
+  // cuts to floor(3 × 0.6) = 1, a naturally-occurring singular target.
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 24, peakType: 'comp' });
+  Storage.updatePlan(plan.id, { focus: 'boulder' });
+  sessionStorage.setItem('todaySelectedDate', '2026-09-21'); // wk21 Mon, Build deload
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    assert(!/\b1 ladders\b/.test(root.textContent), `must not render "1 ladders", got page text: "${root.textContent.slice(0, 500)}"`);
+    assert(/\b1 ladder\b/.test(root.textContent), `expected "1 ladder" (singular) on the page, got: "${root.textContent.slice(0, 500)}"`);
+  } finally { root.remove(); }
 });
 
 // ─── Coach-review §8: Sunday pre-heavy-Monday warning hint ───────────────

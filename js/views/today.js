@@ -6,7 +6,7 @@ import { Loads } from '../loads.js';
 import { Warmup } from '../warmup.js';
 import { Replan } from '../replan.js';
 import { daysBetween } from '../dates.js';
-import { inputVisibility, repsLabel, actualHasResult, howto } from '../exercise-inputs.js';
+import { inputVisibility, repsLabel, actualHasResult, howto, unitLabel } from '../exercise-inputs.js';
 import { DRILL_CATEGORIES, WARMUP_DRILLS } from '../drills.js';
 
 const SELECTED_DATE_KEY = 'todaySelectedDate';
@@ -597,7 +597,7 @@ function accSub(ex, actual, suggestion) {
     return parts.join(' · ');
   } else if (ex.prescribedTarget) {
     const val = actual.reps ?? ex.prescribedTarget.value;
-    parts.push(`${val} ${ex.prescribedTarget.unit}`);
+    parts.push(`${val} ${unitLabel(val, ex.prescribedTarget.unit)}`);
   } else {
     const sets = actual.sets ?? ex.prescribedSets;
     const reps = actual.reps ?? ex.prescribedReps;
@@ -623,16 +623,17 @@ function accSub(ex, actual, suggestion) {
 function targetCalloutHtml(ex) {
   if (!ex.prescribedTarget) return '';
   const { value, unit } = ex.prescribedTarget;
+  const label = unitLabel(value, unit);
   if (ex.originalTarget) {
     const { value: ov, unit: ou } = ex.originalTarget;
-    return `<div class="callout deload-target"><span class="k">Deload target</span><span class="v"><s>${ov} ${ou}</s>${value} ${unit}</span></div>`;
+    return `<div class="callout deload-target"><span class="k">Deload target</span><span class="v"><s>${ov} ${unitLabel(ov, ou)}</s>${value} ${label}</span></div>`;
   }
   // ADR-0009 Base aerobic ramp — volume stepped up from the phase template.
   if (ex.rampedFrom) {
     const { value: rv, unit: ru } = ex.rampedFrom;
-    return `<div class="callout"><span class="k">Ramped target</span><span class="v">${value} ${unit} <span style="opacity:.6">↑ from ${rv} ${ru}</span></span></div>`;
+    return `<div class="callout"><span class="k">Ramped target</span><span class="v">${value} ${label} <span style="opacity:.6">↑ from ${rv} ${unitLabel(rv, ru)}</span></span></div>`;
   }
-  return `<div class="callout"><span class="k">Today's target</span><span class="v">${value} ${unit}</span></div>`;
+  return `<div class="callout"><span class="k">Today's target</span><span class="v">${value} ${label}</span></div>`;
 }
 
 // Glanceable execution cues (gym-ready spec §4 — hybrid how-to).

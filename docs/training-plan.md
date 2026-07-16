@@ -419,7 +419,7 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 
 - **Mon** — Hangboard (taper) + S&C *(Strength / alactic)* — _taper: volume cut, intensity held_
   - **Near-max hangs (taper touch)** — 10s weighted, 2–3 hangs × 1 set — short & crisp, stop fresh · rest 3 min · 80–85% of max-hang added load · RPE 8.5–9
-  - **Weighted pull-ups** — 2 × 2 · (sets today: 1 × 2) · 3 min between sets · 80–90% of 1RM added load · RPE 9–9.5
+  - **Weighted pull-ups** — 2 × 2 · 3 min between sets · 80–90% of 1RM added load · RPE 9–9.5
   - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
@@ -427,7 +427,7 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
   - **Tuesday antagonist/shoulder block** — Wrist extensor curls: 3 × 20 · 60s rest between sets; Band cactus (external rotation): 2 × 12–15 · 45–60s rest between sets
 - **Wed** — Rest day
 - **Thu** — Project routes (Taper) *(Sport-specific)* — _taper: volume cut, intensity held_
-  - **Project / redpoint attempts** — 2–3 quality goes on a project · 20+ min rest between goes · RPE 9–9.5 · target today: 1 goes (cut from 2)
+  - **Project / redpoint attempts** — 2–3 quality goes on a project · 20+ min rest between goes · RPE 9–9.5 · target today: 2 goes (cut from 4)
 - **Fri** — Rest day
 - **Sat** — **Full rest — goal day tomorrow**
 - **Sun** — 🏁 **Goal / comp day** *(app renders this day as “Optional: easy open climb or rest”)*

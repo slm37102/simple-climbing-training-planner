@@ -39,6 +39,18 @@ export function repsLabel(ex) {
   return (ex?.kind === 'arc' || ex?.kind === 'open-climb') ? 'min' : 'reps';
 }
 
+// KG-B13: prescribedTarget.unit is always stored plural ('goes', 'problems', …);
+// singularize for display when the value is exactly 1 so a cut-down taper
+// target reads "1 go" instead of "1 goes". Regular units just drop the
+// trailing 's'; 'goes' is the one irregular case in the catalog.
+const IRREGULAR_SINGULAR_UNITS = { goes: 'go' };
+
+export function unitLabel(value, unit) {
+  if (!unit) return unit;
+  if (value !== 1) return unit;
+  return IRREGULAR_SINGULAR_UNITS[unit] || (unit.endsWith('s') ? unit.slice(0, -1) : unit);
+}
+
 // Per-kind default execution cues (gym-ready spec: docs/specs/gym-ready-prescription-format-spec.md
 // §4 — hybrid how-to). A session can override with its own `ex.howto` string for
 // phase-specific nuance; this map covers what's true of the kind in any phase.

@@ -270,7 +270,11 @@ function pullupPrescription(phase) {
   // Peak capped at 90% 1RM (not 95) for this athlete's shoulder/tendon recovery — ADR-0001.
   if (phase === 'peak')  return { pctRange: [0.85, 0.90], reps: '5 × 2', rest: '3 min between sets', prescribedSets: 5, prescribedReps: 2, rpeRange: [9, 9.5] };
   // Taper: intensity held near peak, volume cut to a single low-set touch (ADR-0007).
-  return { pctRange: [0.80, 0.90], reps: '2 × 2', rest: '3 min between sets', prescribedSets: 2, prescribedReps: 2, rpeRange: [9, 9.5] }; // taper
+  // KG-B13: authored at full (pre-cut) volume — prescribedSets: 4 here, so
+  // applyTaperVolume's ×0.6 cut (the single layer of reduction) lands on the
+  // intended final 2 × 2 the `reps` text already states, instead of cutting an
+  // already-reduced 2 down to 1.
+  return { pctRange: [0.80, 0.90], reps: '2 × 2', rest: '3 min between sets', prescribedSets: 4, prescribedReps: 2, rpeRange: [9, 9.5] }; // taper
 }
 
 function hangboardExercise(proto) {
@@ -355,12 +359,15 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null) {
       };
     }
     if (phase === 'taper') {
+      // KG-B13: prescribedTarget authored at full pre-cut volume (14) so
+      // applyTaperVolume's single ×0.6 cut lands the target at the intended
+      // 8 problems the "6–10" text already argues for.
       return {
         sessionId: 'thu-flash',
         label: 'Flash-grade boulders (Taper)',
         energySystem: 'Power',
         exercises: [
-          { kind:'boulder', name: 'Flash-grade boulders', prescribed: '6–10 problems below max · long rest', rpeRange: [7, 8.5], prescribedTarget: { value: 8, unit: 'problems' },
+          { kind:'boulder', name: 'Flash-grade boulders', prescribed: '6–10 problems below max · long rest', rpeRange: [7, 8.5], prescribedTarget: { value: 14, unit: 'problems' },
             howto: 'Flash or send quickly on problems below your max. Long rest between goes — stay fresh, don’t chase pump.' }
         ]
       };
@@ -420,13 +427,15 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null) {
       ]
     };
   }
-  // taper
+  // taper — KG-B13: prescribedTarget authored at full pre-cut volume (4) so
+  // applyTaperVolume's single ×0.6 cut lands at the intended 2 goes the
+  // "2–3 quality goes" text already argues for (was shipping as 1).
   return {
     sessionId: 'thu-projects',
     label: 'Project routes (Taper)',
     energySystem: 'Sport-specific',
     exercises: [
-      { kind:'route', name: 'Project / redpoint attempts', prescribed: '2–3 quality goes on a project · 20+ min rest between goes', rpeRange: [9, 9.5], prescribedTarget: { value: 2, unit: 'goes' },
+      { kind:'route', name: 'Project / redpoint attempts', prescribed: '2–3 quality goes on a project · 20+ min rest between goes', rpeRange: [9, 9.5], prescribedTarget: { value: 4, unit: 'goes' },
         howto: 'A few quality, well-rested goes on your project. Stop while still fresh — don’t grind out fatigued attempts.' }
     ]
   };
@@ -446,12 +455,15 @@ function buildSatMain(phase, flavor, isDeload, weeksLeft = null) {
       };
     }
     if (phase === 'taper') {
+      // KG-B13: prescribedTarget authored at full pre-cut volume (80) so
+      // applyTaperVolume's single ×0.6 cut lands at the intended 50 min the
+      // "45–60 min" text already argues for.
       return {
         sessionId: 'sat-volume-down',
         label: 'Low volume bouldering (Taper)',
         energySystem: 'Maintenance',
         exercises: [
-          { kind: 'boulder', name: 'Fun submaximal bouldering', prescribed: '45–60 min at 2–3 grades below max · no projecting', rpeRange: [6, 7.5], prescribedTarget: { value: 50, unit: 'min' },
+          { kind: 'boulder', name: 'Fun submaximal bouldering', prescribed: '45–60 min at 2–3 grades below max · no projecting', rpeRange: [6, 7.5], prescribedTarget: { value: 80, unit: 'min' },
             howto: 'Easy, fun mileage well below max. No projecting — this is about staying sharp and fresh, not building fitness.' }
         ]
       };
@@ -526,13 +538,15 @@ function buildSatMain(phase, flavor, isDeload, weeksLeft = null) {
       ]
     };
   }
-  // taper (and any other phase)
+  // taper (and any other phase) — KG-B13: prescribedTarget authored at full
+  // pre-cut volume (14) so applyTaperVolume's single ×0.6 cut lands at the
+  // intended 8 routes the "6–10" text already argues for.
   return {
     sessionId: 'sat-route-mileage',
     label: 'Sport route mileage',
     energySystem: 'Aerobic power',
     exercises: [
-      { kind:'route', name: 'Route mileage', prescribed: '6–10 routes 1–2 grades below redpoint, walking rest', rpeRange: [7, 8.5], prescribedTarget: { value: 8, unit: 'routes' } }
+      { kind:'route', name: 'Route mileage', prescribed: '6–10 routes 1–2 grades below redpoint, walking rest', rpeRange: [7, 8.5], prescribedTarget: { value: 14, unit: 'routes' } }
     ]
   };
 }
