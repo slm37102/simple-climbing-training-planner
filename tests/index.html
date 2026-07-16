@@ -1919,6 +1919,7 @@ test('[Phase2 S5] mergeRemote: activePlanId syncs from remote', () => {
   assertEq(Storage.get().activePlanId, 'r-active', 'activePlanId should sync from remote');
 });
 
+<<<<<<< HEAD
 // ─── KG-B11a: clamp negative-benchmark load prescriptions (closes #36) ────
 // Negative benchmarks (assisted hangs/pull-ups) are inverted: more-negative =
 // more assisted = easier; less-negative (closer to zero) = less assisted =
@@ -2109,6 +2110,118 @@ test('[Coach-§8] end-to-end via Program.build with a plan object', () => {
   assert(hintSess.sunHint, 'Program.build should surface sunHint end-to-end');
   const noHintSess = Program.build(plan, '2026-05-10'); // Sunday before Base Monday
   assert(!noHintSess.sunHint, 'Program.build must not surface sunHint before a Base Monday');
+=======
+// ─── KG-A10: anti-style prescription text from dominantStyle/dominantAngle ─
+// Fixed anchor 2026-05-04 (Mon), 12-wk comp cycle (base wks1-6, build wks7-9,
+// peak wks10-11, taper wk12 — same fixture geometry as the ADR-0009 block
+// above). Base boulder Thu = 2026-05-21 (wk3, thu-projecting-base); Base
+// boulder Sat = 2026-05-09 (wk1, currently sat-boulder-triples — not pinned
+// below since a parallel change may split Base Saturday onto its own
+// sessionId; the cue is gated on phase/flavor/slot in prescribeForContext,
+// not on sessionId, so it must survive that regardless); Build boulder Thu =
+// 2026-06-18 (wk7, thu-limit); Build boulder Sat = 2026-06-20 (wk7,
+// sat-boulder-triples).
+
+test('[KG-A10] default profile (crimp/slight-overhang) gets the anti-style cue on Base boulder Thu + Sat', () => {
+  const benchmarks = { dominantStyle: 'crimp', dominantAngle: 'slight-overhang' };
+  const expected = 'include 2 anti-style problems — slopers/pinches, slab or vertical';
+
+  const thu = Program.prescribeForContext(Program.resolveDate('2026-05-21', '2026-05-04', 12), 'boulder', benchmarks);
+  assertEq(thu.sessionId, 'thu-projecting-base');
+  assertEq(thu.styleNote, expected);
+
+  const sat = Program.prescribeForContext(Program.resolveDate('2026-05-09', '2026-05-04', 12), 'boulder', benchmarks);
+  assertEq(sat.phase, 'base');
+  assertEq(sat.flavor, 'boulder');
+  assertEq(sat.styleNote, expected);
+});
+
+test('[KG-A10] a different explicit profile (pinch/vert) gets the opposite cue on Build boulder Thu + Sat', () => {
+  const benchmarks = { dominantStyle: 'pinch', dominantAngle: 'vert' };
+  const expected = 'include 2 anti-style problems — crimps/pockets, steep overhang or roof';
+
+  const thu = Program.prescribeForContext(Program.resolveDate('2026-06-18', '2026-05-04', 12), 'boulder', benchmarks);
+  assertEq(thu.sessionId, 'thu-limit');
+  assertEq(thu.styleNote, expected);
+
+  const sat = Program.prescribeForContext(Program.resolveDate('2026-06-20', '2026-05-04', 12), 'boulder', benchmarks);
+  assertEq(sat.sessionId, 'sat-boulder-triples');
+  assertEq(sat.styleNote, expected);
+});
+
+test('[KG-A10] no cue when benchmarks are omitted, or when style/angle fields are empty/unset', () => {
+  const ctx = Program.resolveDate('2026-05-21', '2026-05-04', 12);
+
+  const noArg = Program.prescribeForContext(ctx, 'boulder');
+  assert(!noArg.styleNote, 'omitting benchmarks entirely must not add a styleNote (back-compat with existing callers)');
+
+  const emptyStrings = Program.prescribeForContext(ctx, 'boulder', { dominantStyle: '', dominantAngle: '' });
+  assert(!emptyStrings.styleNote, 'empty-string style/angle must not add a styleNote');
+
+  const nullFields = Program.prescribeForContext(ctx, 'boulder', { dominantStyle: null, dominantAngle: null });
+  assert(!nullFields.styleNote, 'null style/angle must not add a styleNote');
+
+  const unknown = Program.prescribeForContext(ctx, 'boulder', { dominantStyle: 'nope', dominantAngle: 'nope' });
+  assert(!unknown.styleNote, 'unrecognised style/angle values must not add a styleNote');
+});
+
+test('[KG-A10] Peak and Taper boulder sessions never carry the cue, even with a full profile set', () => {
+  const benchmarks = { dominantStyle: 'crimp', dominantAngle: 'slight-overhang' };
+  const start = '2026-05-04';
+
+  // wk11 (odd → naturally boulder-flavor too, but focus is forced explicitly below)
+  const peakThuIso = datesAddDays(start, (11 - 1) * 7 + 3);
+  const peakSatIso = datesAddDays(start, (11 - 1) * 7 + 5);
+  const peakThu = Program.prescribeForContext(Program.resolveDate(peakThuIso, start, 12), 'boulder', benchmarks);
+  const peakSat = Program.prescribeForContext(Program.resolveDate(peakSatIso, start, 12), 'boulder', benchmarks);
+  assertEq(peakThu.phase, 'peak');
+  assertEq(peakSat.phase, 'peak');
+  assert(!peakThu.styleNote, 'Peak Thursday must never carry the anti-style cue');
+  assert(!peakSat.styleNote, 'Peak Saturday must never carry the anti-style cue');
+
+  // wk12 is the (single-week, comp) taper; force boulder flavor explicitly.
+  const taperThuIso = datesAddDays(start, (12 - 1) * 7 + 3);
+  const taperSatIso = datesAddDays(start, (12 - 1) * 7 + 5);
+  const taperThu = Program.prescribeForContext(Program.resolveDate(taperThuIso, start, 12), 'boulder', benchmarks);
+  const taperSat = Program.prescribeForContext(Program.resolveDate(taperSatIso, start, 12), 'boulder', benchmarks);
+  assertEq(taperThu.phase, 'taper');
+  assertEq(taperSat.phase, 'taper');
+  assert(!taperThu.styleNote, 'Taper Thursday must never carry the anti-style cue');
+  assert(!taperSat.styleNote, 'Taper Saturday must never carry the anti-style cue');
+});
+
+test('[KG-A10] sport-flavor sessions never carry the cue, even in Base/Build with a full profile set', () => {
+  const benchmarks = { dominantStyle: 'crimp', dominantAngle: 'slight-overhang' };
+
+  const baseThuSport = Program.prescribeForContext(Program.resolveDate('2026-05-21', '2026-05-04', 12), 'sport', benchmarks);
+  assertEq(baseThuSport.sessionId, 'thu-route-pyramid');
+  assert(!baseThuSport.styleNote, 'sport-flavor Base Thursday must never carry the anti-style cue');
+
+  const baseSatSport = Program.prescribeForContext(Program.resolveDate('2026-05-09', '2026-05-04', 12), 'sport', benchmarks);
+  assertEq(baseSatSport.sessionId, 'sat-arc');
+  assert(!baseSatSport.styleNote, 'sport-flavor Base Saturday must never carry the anti-style cue');
+
+  const buildThuSport = Program.prescribeForContext(Program.resolveDate('2026-06-18', '2026-05-04', 12), 'sport', benchmarks);
+  assertEq(buildThuSport.sessionId, 'thu-6060-threshold');
+  assert(!buildThuSport.styleNote, 'sport-flavor Build Thursday must never carry the anti-style cue');
+
+  const buildSatSport = Program.prescribeForContext(Program.resolveDate('2026-06-20', '2026-05-04', 12), 'sport', benchmarks);
+  assertEq(buildSatSport.sessionId, 'sat-4x4-build');
+  assert(!buildSatSport.styleNote, 'sport-flavor Build Saturday must never carry the anti-style cue');
+});
+
+test('[KG-A10] threads end-to-end through Program.build(plan, dateISO, benchmarks)', () => {
+  const plan = { settings: { startDate: '2026-05-04', anchorMode: 'startDate', cycleWeeks: 12, peakType: 'comp' }, focus: 'boulder' };
+  const benchmarks = { dominantStyle: 'crimp', dominantAngle: 'slight-overhang' };
+
+  const withBenchmarks = Program.build(plan, '2026-05-21', benchmarks);
+  assertEq(withBenchmarks.sessionId, 'thu-projecting-base');
+  assertEq(withBenchmarks.styleNote, 'include 2 anti-style problems — slopers/pinches, slab or vertical');
+
+  // Back-compat: existing callers that don't pass a 3rd arg get no cue.
+  const noBenchmarks = Program.build(plan, '2026-05-21');
+  assert(!noBenchmarks.styleNote, 'Program.build without a benchmarks arg must not add a styleNote');
+>>>>>>> feat/anti-style-prescription-KG-A10
 });
 
 // ─── Runner ───────────────────────────────────────────────────────────────

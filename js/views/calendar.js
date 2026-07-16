@@ -180,7 +180,7 @@ export function renderCalendar(root) {
       return `<div class="card detail-card"><p class="muted">${pretty(iso)} — outside the cycle window.</p></div>`;
     }
     let session = null;
-    try { session = Program.build(activePlan, iso); } catch (_) { /* ignore */ }
+    try { session = Program.build(activePlan, iso, Storage.get().benchmarks); } catch (_) { /* ignore */ }
     const log = Storage.getDay(activePlan.id, iso);
     const isComp = activePlan.settings?.compDate === iso;
 

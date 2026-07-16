@@ -211,6 +211,54 @@ const TUE_ANTAGONIST_BLOCK = [
   { name: 'Band cactus (external rotation)', prescribed: '2 × 12–15 · 45–60s rest between sets' }
 ];
 
+// ============== Anti-style prescription cue (KG-A10) ==============
+// dominantStyle/dominantAngle are global benchmark fields (js/storage.js,
+// defaults 'crimp'/'slight-overhang') collected but read by no prescription
+// path. Base/Build boulder-flavor Thu/Sat sessions bias their prescription
+// text toward the OPPOSITE profile — text only, the athlete still picks
+// their own boulders (docs/knowledge-gaps.md KG-A10, ticket #41).
+//
+// Grip styles pair by grip mechanics: crimp/pocket are closed-chain, discrete
+// -edge/hole grips; sloper/pinch are open-hand or thumb-opposition grips —
+// so each pair is the other's anti-style.
+const STYLE_OPPOSITES = {
+  crimp:  ['sloper', 'pinch'],
+  pocket: ['sloper', 'pinch'],
+  sloper: ['crimp', 'pocket'],
+  pinch:  ['crimp', 'pocket'],
+};
+const STYLE_LABEL_PLURAL = { crimp: 'crimps', sloper: 'slopers', pinch: 'pinches', pocket: 'pockets' };
+
+// Angles split by steepness into a low-angle half (slab/vert) and an
+// overhung half (slight-overhang/steep/roof); each half's anti-style is the
+// other half's low-angle or overhung pair respectively.
+const ANGLE_OPPOSITES = {
+  slab:              ['steep', 'roof'],
+  vert:              ['steep', 'roof'],
+  'slight-overhang': ['slab', 'vert'],
+  steep:             ['slab', 'vert'],
+  roof:              ['slab', 'vert'],
+};
+const ANGLE_LABEL = { slab: 'slab', vert: 'vertical', 'slight-overhang': 'slight overhang', steep: 'steep overhang', roof: 'roof' };
+
+// Builds the anti-style prescription cue, or null when the stored style/angle
+// are unset/unrecognised — never guess a cue from incomplete data.
+export function buildAntiStyleCue(dominantStyle, dominantAngle) {
+  const styleOpp = STYLE_OPPOSITES[dominantStyle];
+  const angleOpp = ANGLE_OPPOSITES[dominantAngle];
+  if (!styleOpp || !angleOpp) return null;
+  const styleText = styleOpp.map(s => STYLE_LABEL_PLURAL[s]).join('/');
+  const angleText = angleOpp.map(a => ANGLE_LABEL[a]).join(' or ');
+  return `include 2 anti-style problems — ${styleText}, ${angleText}`;
+}
+
+// Attaches a session-level styleNote (mirrors the deloadNote/rampNote/
+// taperNote precedent) when benchmarks carry a recognised style+angle pair.
+function attachStyleNote(session, benchmarks) {
+  const cue = buildAntiStyleCue(benchmarks?.dominantStyle, benchmarks?.dominantAngle);
+  return cue ? { ...session, styleNote: cue } : session;
+}
+
 // ============== Session generators (per slot per phase per flavor) ==============
 
 function pullupPrescription(phase) {
@@ -774,7 +822,10 @@ export const Program = {
   },
 
   // Builds the prescribed session for a given resolved date context (no load resolution yet).
-  prescribeForContext(ctx, focus = 'hybrid') {
+  // benchmarks (KG-A10, optional): { dominantStyle, dominantAngle } — when supplied with a
+  // recognised pair, Base/Build boulder-flavor Thu/Sat sessions get a session-level
+  // `styleNote` anti-style cue. Omitted/unrecognised → no cue (back-compat default).
+  prescribeForContext(ctx, focus = 'hybrid', benchmarks = null) {
     const weeks = ctx?.cycleWeeks ?? DEFAULT_CYCLE_WEEKS;
     if (!ctx || ctx.outOfCycle) {
       return { sessionId: 'out-of-cycle', label: `Outside ${weeks}-week cycle`, exercises: [] };
@@ -828,6 +879,12 @@ export const Program = {
       session = LIGHT_DAY;
     }
 
+    // KG-A10: anti-style cue, gated on phase/flavor/slot (not sessionId) so it
+    // keeps applying if a phase's Thu/Sat template is ever split or renamed.
+    if ((slot === 'thu-main' || slot === 'sat-main') && resolvedFlavor === 'boulder' && (phase === 'base' || phase === 'build')) {
+      session = attachStyleNote(session, benchmarks);
+    }
+
     // ADR-0009: Base aerobic volume ramp across the hard weeks of the phase.
     // Mutually exclusive with the deload cut below (hardPhasePos returns null
     // on deload/retest weeks), so the deload always cuts the unramped template.
@@ -854,9 +911,12 @@ export const Program = {
   },
 
   // Primary entry point: builds a session from a plan object and an ISO date string.
-  build(plan, dateISO) {
+  // benchmarks (KG-A10, optional) — see prescribeForContext.
+  build(plan, dateISO, benchmarks = null) {
     const start = this.effectiveStart(plan?.settings);
     const ctx = this.resolveDate(dateISO, start, this.cycleWeeksOf(plan?.settings), plan?.settings?.peakType);
-    return this.prescribeForContext(ctx, plan?.focus || 'hybrid');
-  }
+    return this.prescribeForContext(ctx, plan?.focus || 'hybrid', benchmarks);
+  },
+
+  buildAntiStyleCue
 };

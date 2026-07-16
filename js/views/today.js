@@ -217,6 +217,7 @@ function headerHtml(date, ctx, session) {
       const note = session?.deloadNote || session?.taperNote || session?.rampNote || session?.sunHint;
       return note ? `<div class="deload-note" style="margin-top:10px">⚙ ${note}</div>` : '';
     })()}
+    ${session?.styleNote ? `<div class="deload-note" style="margin-top:10px">↔ ${session.styleNote}</div>` : ''}
   </div>`;
 }
 
@@ -326,7 +327,7 @@ export function renderToday(root) {
     return;
   }
 
-  const session = Program.build(activePlan, date);
+  const session = Program.build(activePlan, date, Storage.get().benchmarks);
   const dayLog = Storage.getDay(date) || {};
   const readiness = dayLog.readiness || { sleep:3, soreness:3, fatigue:3 };
   const { multiplier, label: rdLabel, avg: rdAvg } = Loads.computeReadinessMultiplier(readiness);

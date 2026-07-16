@@ -43,7 +43,7 @@ function planProgressPct(plan) {
 function suggestedPullupKg() {
   try {
     const plan = Storage.getActivePlan();
-    const session = Program.build(plan, toLocalISO(new Date()));
+    const session = Program.build(plan, toLocalISO(new Date()), Storage.get().benchmarks);
     const pull = (session?.exercises || []).find(e => e.kind === 'pullup');
     if (!pull) return null;
     const base = Loads.prescribeLoadKg({ kind: 'pullup', loadPctRange: pull.pctRange }, Storage.get().benchmarks);
