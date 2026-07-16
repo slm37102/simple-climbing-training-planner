@@ -389,8 +389,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 - **Thu** — 30/30 lactic sharpening (Peak) *(Anaerobic lactic)*
   - **30/30 intervals** — 30s all-out / 30s rest × 6 = 1 set · 3:50 between sets · 2–3 sets · deep pump expected, stop when movement degrades · RPE 9.5–10 · target: 2 sets
 - **Fri** — Rest day
-- **Sat** — Redpoint session (Peak) *(Sport-specific)*
-  - **Redpoint attempts** — 2–4 quality redpoint attempts · 20+ min rest between goes · RPE 9–9.5 · target: 3 attempts
+- **Sat** — Lead comp simulation (Peak) *(Sport-specific)*
+  - **Unseen routes — single-attempt simulation** — 2–3 unseen (or long-unseen) routes · brief preview only, no beta rehearsal · one redpoint-style attempt each · full rest between routes · RPE 9–9.5 · target: 2 routes
 - **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
   - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
 
@@ -409,9 +409,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
   - **Limit boulders** — 1–3 limit move-sequences (3–5 moves) · 4–8 attempts each · 3–5 min rest · stop when power drops (~20–30 min) · RPE 9–9.5 · target: 2 sequences
   - **Campus board: basic ladders (1-3-5, matched feet)** — 2–3 attempts × 2 sets · 3–5 min rest · gate: 15–20 strict pull-ups + 1-2-3-4-5 ladder without matching · skip on any finger tweak · RPE 8.5–9 · target: 2 sets
 - **Fri** — Rest day
-- **Sat** — Project boulder session *(Strength / Power)*
-  - **Project attempts** — 1–3 hard problems · max 5 quality attempts each · 5+ min rest · stop when power drops · RPE 9–9.5 · target: 2 problems
-  - **Flash/onsight attempts** — 3–5 problems at 1 grade below max · full rest between attempts · RPE 8–9 · target: 4 problems
+- **Sat** — Boulder comp simulation (Peak) *(Strength / Power)*
+  - **Unseen problems — comp rounds** — 4–5 unseen (or long-unseen) problems · one round each, ~4 min limit · max 4–5 attempts per problem, no beta rehearsal · full rest between rounds · RPE 8.5–9.5 · target: 4 problems
 - **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
   - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
 
@@ -426,8 +425,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
   - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
   - **Tuesday antagonist/shoulder block** — Wrist extensor curls: 3 × 20 · 60s rest between sets; Band cactus (external rotation): 2 × 12–15 · 45–60s rest between sets
 - **Wed** — Rest day
-- **Thu** — Project routes (Taper) *(Sport-specific)* — _taper: volume cut, intensity held_
-  - **Project / redpoint attempts** — 2–3 quality goes on a project · 20+ min rest between goes · RPE 9–9.5 · target today: 2 goes (cut from 4)
+- **Thu** — Comp-format touch — sport (Taper) *(Sport-specific)* — _taper: volume cut, intensity held_
+  - **Unseen-route touches — comp touch** — 2–3 routes, ideally unfamiliar · brief preview only (no beta rehearsal), one attempt each · full rest between · RPE 8–9 · target today: 2 routes (cut from 4)
 - **Fri** — Rest day
 - **Sat** — **Full rest — goal day tomorrow**
 - **Sun** — 🏁 **Goal / comp day** *(app renders this day as “Optional: easy open climb or rest”)*
