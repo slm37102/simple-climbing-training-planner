@@ -1260,6 +1260,44 @@ test('[Gym-ready] antagonist-block items each specify rest between sets', () => 
   }
 });
 
+test('[KG-A7] Tuesday light day carries a short antagonist/shoulder block (2x/week dosing)', () => {
+  const ctx = Program.resolveDate('2026-05-05', '2026-05-04', 12); // Tue wk1, base
+  assertEq(ctx.slot, 'tue-light');
+  const sess = Program.prescribeForContext(ctx, 'hybrid');
+  const block = sess.exercises.find(e => e.kind === 'antagonist-block');
+  assert(block, 'Tuesday light-day session should carry an antagonist-block exercise');
+  assert(block.name && block.name !== 'S&C antagonist block', `Tuesday block should be named distinctly from Monday's, got "${block.name}"`);
+  const monCtx = Program.resolveDate('2026-05-04', '2026-05-04', 12); // wk1 Mon, base, hard week
+  const monBlock = Program.prescribeForContext(monCtx, 'hybrid').exercises.find(e => e.kind === 'antagonist-block');
+  assert(Array.isArray(block.items) && block.items.length >= 1 && block.items.length < monBlock.items.length,
+    `Tuesday block should be a shorter ~10-min block than Monday's ${monBlock.items.length}-exercise block, got ${block.items && block.items.length}`);
+});
+
+test('[KG-A7] Monday antagonist block is present (not dropped) on a deload week, with a deload note on its items', () => {
+  const ctx = Program.resolveDate('2026-05-25', '2026-05-04', 12); // wk4 Mon, base, natural deload (non-retest)
+  assert(ctx.deload && !ctx.retest, 'fixture must be a natural (non-retest) deload Monday');
+  const sess = Program.prescribeForContext(ctx, 'hybrid');
+  const block = sess.exercises.find(e => e.kind === 'antagonist-block');
+  assert(block, 'Monday antagonist block must still be present on a deload week (KG-A7 — never fully dropped)');
+  assert(block.items.length >= 1, 'deload-week antagonist block should still have items');
+  for (const item of block.items) {
+    assert(/deload/i.test(item.prescribed), `deload-week antagonist item "${item.name}" should carry a deload note, got "${item.prescribed}"`);
+  }
+});
+
+test('[KG-A7] Monday antagonist block is unchanged (full volume, no deload note) on a hard week', () => {
+  const ctx = Program.resolveDate('2026-05-04', '2026-05-04', 12); // wk1 Mon, base, hard (non-deload) week
+  assert(!ctx.deload, 'fixture must be a hard (non-deload) Monday');
+  const sess = Program.prescribeForContext(ctx, 'hybrid');
+  const block = sess.exercises.find(e => e.kind === 'antagonist-block');
+  assert(block, 'Monday session should have an antagonist-block on a hard week');
+  assertEq(block.name, 'S&C antagonist block', 'Monday block name should be unchanged on a hard week');
+  assert(block.items.length >= 5, `Monday block should keep its full item count on a hard week, got ${block.items.length}`);
+  for (const item of block.items) {
+    assert(!/deload/i.test(item.prescribed), `hard-week antagonist item "${item.name}" should NOT carry a deload note, got "${item.prescribed}"`);
+  }
+});
+
 test('[Gym-ready] retest max-effort tests specify rest between attempts', () => {
   const ctx = Program.resolveDate('2026-06-08', '2026-05-04', 12); // wk6 Mon, retest
   assert(ctx.deload && ctx.retest, 'fixture must be the retest Monday');
