@@ -1271,6 +1271,56 @@ test('[Gym-ready] retest max-effort tests specify rest between attempts', () => 
   assert(pull && /rest between attempts/i.test(pull.prescribed), `pull-up test missing rest guidance: "${pull && pull.prescribed}"`);
 });
 
+// ─── KG-B10: retest-week deload exemption scoped to Monday only ───────────
+// Same fixed anchor 2026-05-04 (Mon), 12-wk comp cycle: base wks1–6 with
+// natural deload wk4 + forced retest-deload wk6. wk6 Mon 2026-06-08 (retest),
+// Thu 2026-06-11, Sat 2026-06-13. Only Monday runs the non-cuttable retest
+// protocol — Thu/Sat must still take the same ~40% volume cut as any other
+// deload week.
+
+test('[KG-B10] retest-week Thursday session still gets the deload volume cut', () => {
+  const ctx = Program.resolveDate('2026-06-11', '2026-05-04', 12); // wk6 Thu, retest week
+  assert(ctx.deload && ctx.retest, `fixture must be the retest week, got deload=${ctx.deload} retest=${ctx.retest}`);
+  assertEq(ctx.slot, 'thu-main');
+  const sess = Program.prescribeForContext(ctx, 'boulder');
+  assertEq(sess.sessionId, 'thu-projecting-base');
+  const ex = sess.exercises[0];
+  assertEq(ex.originalTarget, { value: 75, unit: 'min' }, 'deload must record the pre-cut template value');
+  assertEq(ex.prescribedTarget, { value: 45, unit: 'min' }, 'round(75 × 0.6 / 5) × 5 = 45');
+  assert(sess.deloadNote, 'retest-week Thursday must carry the deload note like any other deload week');
+});
+
+test('[KG-B10] retest-week Saturday session still gets the deload volume cut', () => {
+  const ctx = Program.resolveDate('2026-06-13', '2026-05-04', 12); // wk6 Sat, retest week
+  assert(ctx.deload && ctx.retest, `fixture must be the retest week, got deload=${ctx.deload} retest=${ctx.retest}`);
+  assertEq(ctx.slot, 'sat-main');
+  const sess = Program.prescribeForContext(ctx, 'boulder');
+  assertEq(sess.sessionId, 'sat-flash-pyramid');
+  const pyramid = sess.exercises.find(e => e.kind === 'boulder');
+  assertEq(pyramid.originalTarget, { value: 18, unit: 'problems' }, 'deload must record the pre-cut template value');
+  assertEq(pyramid.prescribedTarget, { value: 10, unit: 'problems' }, 'floor(18 × 0.6) = 10');
+  assert(sess.deloadNote, 'retest-week Saturday must carry the deload note like any other deload week');
+});
+
+test('[KG-B10] retest-week Monday session remains the unmodified retest template', () => {
+  const ctx = Program.resolveDate('2026-06-08', '2026-05-04', 12); // wk6 Mon, retest week
+  assert(ctx.deload && ctx.retest, 'fixture must be the retest Monday');
+  const sess = Program.prescribeForContext(ctx, 'hybrid');
+  assert(sess.isRetest, 'Monday of a retest week must return the retest session');
+  assert(!sess.deloadNote, 'retest Monday is not volume-cuttable — it must not carry a deload note');
+});
+
+test('[KG-B10] normal (non-retest) deload-week Thursday is unaffected by the Monday-only scoping', () => {
+  const ctx = Program.resolveDate('2026-05-28', '2026-05-04', 12); // wk4 Thu, natural (non-retest) deload
+  assert(ctx.deload && !ctx.retest, `fixture must be a natural deload week, got deload=${ctx.deload} retest=${ctx.retest}`);
+  const sess = Program.prescribeForContext(ctx, 'boulder');
+  assertEq(sess.sessionId, 'thu-projecting-base');
+  const ex = sess.exercises[0];
+  assertEq(ex.originalTarget, { value: 75, unit: 'min' });
+  assertEq(ex.prescribedTarget, { value: 45, unit: 'min' });
+  assert(sess.deloadNote, 'natural deload Thursday must still carry the deload note (regression guard)');
+});
+
 test('[Gym-ready] KG-A9: Tuesday skill drill offers named options with focus details', () => {
   const ctx = Program.resolveDate('2026-05-05', '2026-05-04', 12); // Tue wk1
   assertEq(ctx.slot, 'tue-light');

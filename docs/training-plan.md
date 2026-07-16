@@ -301,11 +301,11 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
   - **15–20 min mobility** — shoulders, hips, wrists
   - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
 - **Wed** — Rest day
-- **Thu** — Route pyramid (Base) *(Aerobic capacity)*
-  - **Route pyramid** — pyramid 4-3-2-1 routes · walking rest between routes; 1 grade below redpoint · RPE 7–8 · target: 10 routes
+- **Thu** — Route pyramid (Base) *(Aerobic capacity)* — _deload: volume −40%, intensity held_
+  - **Route pyramid** — pyramid 4-3-2-1 routes · walking rest between routes; 1 grade below redpoint · RPE 7–8 · target today: 6 routes (cut from 10)
 - **Fri** — Rest day
-- **Sat** — ARC — aerobic base *(Aerobic base)*
-  - **ARC (continuous easy climbing)** — 2 × 30 min, just below pump · 10 min rest between sets · OR 90 min easy laps · RPE 4–6 · target: 30 min
+- **Sat** — ARC — aerobic base *(Aerobic base)* — _deload: volume −40%, intensity held_
+  - **ARC (continuous easy climbing)** — 2 × 30 min, just below pump · 10 min rest between sets · OR 90 min easy laps · RPE 4–6 · target today: 20 min (cut from 30)
 - **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
   - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
 

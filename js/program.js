@@ -800,8 +800,12 @@ export const Program = {
       session = applyBaseVolumeRamp(session, hardPhasePos(pattern, ctx.weekIdx));
     }
 
-    // Apply Lattice-style volume cut on deload weeks (not for retest — that has its own structure).
-    if (deload && !retest && !session.isRest) {
+    // Apply Lattice-style volume cut on deload weeks. Retest weeks are only
+    // exempt on Monday (KG-B10) — that's the non-cuttable retest protocol;
+    // Thu/Sat retest-week sessions are ordinary templates and must still take
+    // the same cut as any other deload week, or the athlete tests benchmarks
+    // on accumulated fatigue and enters Build unrecovered.
+    if (deload && !(retest && slot === 'mon-main') && !session.isRest) {
       session = applyDeloadVolume(session);
     }
     // ADR-0007: the taper is a step volume cut with intensity held — same
