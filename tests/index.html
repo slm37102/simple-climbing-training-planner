@@ -630,7 +630,10 @@ test('[ADR-0001] Peak limit-boulder volume reduced (quality over fatigue)', () =
   assert(limit, 'Thu peak should have limit boulders');
   assert(/1–3/.test(limit.prescribed) && /power drops/i.test(limit.prescribed),
     `expected reduced-volume prescription, got "${limit.prescribed}"`);
-  const sat = Program.prescribeForContext(Program.resolveDate('2026-07-11', '2026-05-04', 12), 'boulder');
+  // KG-A13: comp peakType's Peak Saturday is now the comp simulation
+  // (sat-comp-sim-boulder) — use 'trip' explicitly to keep exercising the
+  // original project-boulder session this test targets.
+  const sat = Program.prescribeForContext(Program.resolveDate('2026-07-11', '2026-05-04', 12, 'trip'), 'boulder');
   const proj = sat.exercises.find(e => e.kind === 'limit-boulder');
   assert(proj && /1–3/.test(proj.prescribed) && /power drops/i.test(proj.prescribed),
     `expected reduced Sat project volume, got "${proj && proj.prescribed}"`);
@@ -1010,8 +1013,11 @@ test('[Gym-ready] deload week rounds a duration-unit ("min") prescribedTarget to
 });
 
 test('[Gym-ready] taper week also scales prescribedTarget (same mechanics as deload — ADR-0007)', () => {
-  const iso = addIsoDays('2026-05-04', (12 - 1) * 7 + 3); // wk12 Thu (comp taper)
-  const ctx = Program.resolveDate(iso, '2026-05-04', 12);
+  // KG-A13: comp peakType's taper Thursday is now the comp-format touch
+  // (thu-comp-touch-boulder), not thu-flash — use 'trip' explicitly so this
+  // test keeps exercising the original template's scaling mechanics.
+  const iso = addIsoDays('2026-05-04', (12 - 1) * 7 + 3); // wk12 Thu, trip taper wk1 of 2
+  const ctx = Program.resolveDate(iso, '2026-05-04', 12, 'trip');
   assertEq(ctx.phase, 'taper');
   const sess = Program.prescribeForContext(ctx, 'boulder');
   assertEq(sess.sessionId, 'thu-flash');
@@ -1169,6 +1175,78 @@ test('[KG-B12] flash pyramid cuts correctly on deload weeks: floor(18 × 0.6) = 
   assertEq(pyramid.prescribedTarget, { value: 10, unit: 'problems' }, 'floor(18 × 0.6) = 10');
   assert(!pyramid.rampedFrom, 'deload week exercise must not carry a rampedFrom');
   assert(!sess.rampNote, 'deload week must not carry a rampNote');
+});
+
+// ─── KG-A13: comp-format Peak Saturday + taper Thursday templates ─────────
+// Fixed anchor 2026-05-04 (Mon), 12-wk cycle. Comp peak Sat = wk11
+// (2026-07-11), comp taper Thu = wk12 (2026-07-23) — same fixture dates
+// used by the [Gym-ready] fixtures test above. Trip/project dates are
+// derived from buildPhasePattern(12, 'trip') since taper=2wk shifts Peak
+// a week earlier on the calendar than comp's taper=1wk.
+
+test('[KG-A13] comp peakType: Peak Saturday becomes a comp simulation (unseen problems/routes, no beta rehearsal)', () => {
+  const ctxBoulder = Program.resolveDate('2026-07-11', '2026-05-04', 12, 'comp');
+  assertEq(ctxBoulder.phase, 'peak');
+  const boulderSess = Program.prescribeForContext(ctxBoulder, 'boulder');
+  assertEq(boulderSess.sessionId, 'sat-comp-sim-boulder');
+  const boulderEx = boulderSess.exercises.find(e => e.kind === 'limit-boulder');
+  assert(boulderEx, 'comp Peak Saturday must carry a limit-boulder exercise');
+  assert(/unseen/i.test(boulderEx.prescribed), 'boulder comp-sim text should mention unseen problems');
+  assert(/no beta rehearsal/i.test(boulderEx.prescribed), 'boulder comp-sim text should rule out beta rehearsal');
+  assert(boulderEx.prescribedTarget && boulderEx.prescribedTarget.value > 0, 'must carry a concrete prescribedTarget');
+
+  const ctxSport = Program.resolveDate('2026-07-11', '2026-05-04', 12, 'comp');
+  const sportSess = Program.prescribeForContext(ctxSport, 'sport');
+  assertEq(sportSess.sessionId, 'sat-comp-sim-sport');
+  const sportEx = sportSess.exercises.find(e => e.kind === 'route');
+  assert(sportEx, 'comp Peak Saturday (sport) must carry a route exercise');
+  assert(/unseen/i.test(sportEx.prescribed), 'sport comp-sim text should mention unseen routes');
+  assert(/no beta rehearsal/i.test(sportEx.prescribed), 'sport comp-sim text should rule out beta rehearsal');
+  assert(sportEx.prescribedTarget && sportEx.prescribedTarget.value > 0, 'must carry a concrete prescribedTarget');
+});
+
+test('[KG-A13] comp peakType: taper Thursday becomes a comp-format touch, authored full-volume per the KG-B13 single-cut convention', () => {
+  const ctxBoulder = Program.resolveDate('2026-07-23', '2026-05-04', 12, 'comp');
+  assertEq(ctxBoulder.phase, 'taper');
+  const boulderSess = Program.prescribeForContext(ctxBoulder, 'boulder');
+  assertEq(boulderSess.sessionId, 'thu-comp-touch-boulder');
+  const boulderEx = boulderSess.exercises.find(e => e.kind === 'boulder');
+  assertEq(boulderEx.originalTarget, { value: 6, unit: 'problems' }, 'authored full pre-cut volume');
+  assertEq(boulderEx.prescribedTarget, { value: 3, unit: 'problems' }, 'applyTaperVolume single cut: floor(6 × 0.6) = 3');
+  assert(boulderSess.taperNote, 'taper session must still carry the taperNote from applyTaperVolume');
+
+  const ctxSport = Program.resolveDate('2026-07-23', '2026-05-04', 12, 'comp');
+  const sportSess = Program.prescribeForContext(ctxSport, 'sport');
+  assertEq(sportSess.sessionId, 'thu-comp-touch-sport');
+  const sportEx = sportSess.exercises.find(e => e.kind === 'route');
+  assertEq(sportEx.originalTarget, { value: 4, unit: 'routes' }, 'authored full pre-cut volume');
+  assertEq(sportEx.prescribedTarget, { value: 2, unit: 'routes' }, 'applyTaperVolume single cut: floor(4 × 0.6) = 2');
+  assert(sportSess.taperNote, 'taper session must still carry the taperNote from applyTaperVolume');
+});
+
+test('[KG-A13] trip/project peakType: Peak Saturday and taper Thursday stay byte-for-byte unchanged', () => {
+  for (const peakType of ['trip', 'project']) {
+    const pattern = buildPhasePattern(12, peakType);
+    const peakIdx = pattern.findIndex(w => w.phase === 'peak');
+    const taperIdx = pattern.findIndex(w => w.phase === 'taper');
+    assert(peakIdx >= 0 && taperIdx >= 0, `fixture: ${peakType} 12-wk cycle must have both a peak and a taper week`);
+
+    const satIso = addIsoDays('2026-05-04', peakIdx * 7 + 5); // Saturday of the first peak week
+    const satCtx = Program.resolveDate(satIso, '2026-05-04', 12, peakType);
+    assertEq(satCtx.phase, 'peak', `${peakType}: fixture date must resolve to phase peak`);
+    const satBoulder = Program.prescribeForContext(satCtx, 'boulder');
+    assertEq(satBoulder.sessionId, 'sat-proj-boulder', `${peakType}: boulder Peak Saturday must be unchanged`);
+    const satSport = Program.prescribeForContext(satCtx, 'sport');
+    assertEq(satSport.sessionId, 'sat-redpoint-peak', `${peakType}: sport Peak Saturday must be unchanged`);
+
+    const thuIso = addIsoDays('2026-05-04', taperIdx * 7 + 3); // Thursday of the first taper week
+    const thuCtx = Program.resolveDate(thuIso, '2026-05-04', 12, peakType);
+    assertEq(thuCtx.phase, 'taper', `${peakType}: fixture date must resolve to phase taper`);
+    const thuBoulder = Program.prescribeForContext(thuCtx, 'boulder');
+    assertEq(thuBoulder.sessionId, 'thu-flash', `${peakType}: boulder taper Thursday must be unchanged`);
+    const thuSport = Program.prescribeForContext(thuCtx, 'sport');
+    assertEq(thuSport.sessionId, 'thu-projects', `${peakType}: sport taper Thursday must be unchanged`);
+  }
 });
 
 test('[ADR-0009] targetsHit: sets and reps compared against today\'s prescription', () => {
