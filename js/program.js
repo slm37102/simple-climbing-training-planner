@@ -192,12 +192,23 @@ const HANGBOARD = {
 };
 
 // ============== Antagonist / accessory block ==============
+// KG-A7: consensus dosing is 2–3x/week (Gilmore 2024) — the block used to ride
+// only Monday and get dropped entirely on deloads. It now also runs a short
+// ~10-min version on Tuesday's light day, and Monday's is volume-cut (not
+// dropped) on deload weeks like every other exercise.
 const ANTAGONIST_BLOCK = [
   { name: 'Push-ups', prescribed: '3 × 15–25 · 60–90s rest between sets' },
   { name: 'Inverted rows / band cactus', prescribed: '3 × 10–15 · 60–90s rest between sets' },
   { name: 'Wrist extensor curls', prescribed: '3 × 20 · 60s rest between sets' },
   { name: "Farmer's carry", prescribed: '3 × 20–30 steps · 60–90s rest between sets' },
   { name: 'Core (plank or hanging knee raise or L-sit)', prescribed: 'choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets' }
+];
+
+// ~10-minute Tuesday version — a subset sized for the light day, distinct from
+// Monday's full block so a skipped/short session is visible in the logs.
+const TUE_ANTAGONIST_BLOCK = [
+  { name: 'Wrist extensor curls', prescribed: '3 × 20 · 60s rest between sets' },
+  { name: 'Band cactus (external rotation)', prescribed: '2 × 12–15 · 45–60s rest between sets' }
 ];
 
 // ============== Session generators (per slot per phase per flavor) ==============
@@ -247,9 +258,11 @@ function buildMonHangboard(phase, isDeload, focus = 'hybrid') {
   // No campus on Peak Mondays: 7-53 hangs + max pull-ups + campus in one session
   // stacks max stimuli beyond this athlete's connective-tissue recovery — ADR-0001.
   // Peak campus work (basic ladders only) lives in Thursday's session.
-  if (!isDeload) {
-    exercises.push({ kind: 'antagonist-block', name: 'S&C antagonist block', items: ANTAGONIST_BLOCK });
-  }
+  // KG-A7: always push the block, even on deload weeks — applyDeloadVolume's
+  // existing antagonist-block branch (below) volume-cuts it via a per-item
+  // deload note instead of dropping it entirely (isDeload param kept for
+  // call-site clarity even though it's no longer read here).
+  exercises.push({ kind: 'antagonist-block', name: 'S&C antagonist block', items: ANTAGONIST_BLOCK });
   return {
     sessionId: `mon-hangboard-${phase}`,
     label: `Hangboard (${phase}) + S&C`,
@@ -487,7 +500,10 @@ const LIGHT_DAY = {
   energySystem: '—',
   exercises: [
     { kind:'mobility', name: '15–20 min mobility', prescribed: 'shoulders, hips, wrists' },
-    { kind:'skill', name: 'Skill drill (optional, no fingers)', prescribed: 'pick one drill to focus on today', drills: SKILL_DRILLS, optional: true }
+    { kind:'skill', name: 'Skill drill (optional, no fingers)', prescribed: 'pick one drill to focus on today', drills: SKILL_DRILLS, optional: true },
+    // KG-A7: 2x/week antagonist/shoulder dosing — a short ~10-min version here,
+    // distinct from Monday's full block, so the block never disappears entirely.
+    { kind: 'antagonist-block', name: 'Tuesday antagonist/shoulder block', items: TUE_ANTAGONIST_BLOCK }
   ]
 };
 
