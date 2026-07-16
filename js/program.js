@@ -333,7 +333,7 @@ function densityRest(weeksLeft, baseSec = 240) {
   return `${m}:${s}`;
 }
 
-function buildThuMain(phase, flavor, isDeload, weeksLeft = null) {
+function buildThuMain(phase, flavor, isDeload, weeksLeft = null, peakType = 'comp') {
   if (flavor === 'boulder') {
     if (phase === 'peak') {
       // Softened per ADR-0001: reduced limit volume (quality over fatigue), basic
@@ -359,6 +359,25 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null) {
       };
     }
     if (phase === 'taper') {
+      // KG-A13: comp peakType gets a comp-specificity touch instead of more
+      // flash-grade mileage — unseen-style problems, single-attempt comp
+      // rhythm, no beta rehearsal. Gated on peakType so trip/project tapers
+      // (still just sharpening on known grades) are byte-for-byte unchanged.
+      if (peakType === 'comp') {
+        // Single-cut convention (KG-B13): prescribedTarget authored at the
+        // FULL pre-cut volume (6) — applyTaperVolume's single 0.6× cut
+        // (floor(6 × 0.6) = 3) lands on the "3–4 problems" the text argues
+        // for; don't pre-reduce this number too.
+        return {
+          sessionId: 'thu-comp-touch-boulder',
+          label: 'Comp-format touch — boulder (Taper)',
+          energySystem: 'Power',
+          exercises: [
+            { kind:'boulder', name: 'Unseen-style problems — comp touch', prescribed: '3–4 problems below max · comp round format (~4 min limit, single-attempt rhythm, no beta rehearsal) · full rest between', rpeRange: [7.5, 9], prescribedTarget: { value: 6, unit: 'problems' },
+              howto: 'Treat each problem like a single competition go — read, commit, one clean attempt, move on. Short and sharp, not a volume session; stay fresh for comp day.' }
+          ]
+        };
+      }
       // KG-B13: prescribedTarget authored at full pre-cut volume (14) so
       // applyTaperVolume's single ×0.6 cut lands the target at the intended
       // 8 problems the "6–10" text already argues for.
@@ -427,7 +446,27 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null) {
       ]
     };
   }
-  // taper — KG-B13: prescribedTarget authored at full pre-cut volume (4) so
+  // taper
+  // KG-A13: comp peakType gets a comp-specificity touch instead of more
+  // project/redpoint goes on a known route — brief onsight-style attempts
+  // on unfamiliar routes, no beta rehearsal. Gated on peakType so trip/project
+  // tapers (still projecting a known line) are byte-for-byte unchanged.
+  if (peakType === 'comp') {
+    // Single-cut convention (KG-B13): prescribedTarget authored at the FULL
+    // pre-cut volume (4) — applyTaperVolume's single 0.6× cut
+    // (floor(4 × 0.6) = 2) lands on the "2–3 routes" the text argues for;
+    // don't pre-reduce this number too.
+    return {
+      sessionId: 'thu-comp-touch-sport',
+      label: 'Comp-format touch — sport (Taper)',
+      energySystem: 'Sport-specific',
+      exercises: [
+        { kind:'route', name: 'Unseen-route touches — comp touch', prescribed: '2–3 routes, ideally unfamiliar · brief preview only (no beta rehearsal), one attempt each · full rest between', rpeRange: [8, 9], prescribedTarget: { value: 4, unit: 'routes' },
+          howto: 'Simulate the comp read-and-go rhythm on routes you haven\'t worked — one committed attempt, no rehearsing moves. Stay sharp, not fatigued.' }
+      ]
+    };
+  }
+  // KG-B13: prescribedTarget authored at full pre-cut volume (4) so
   // applyTaperVolume's single ×0.6 cut lands at the intended 2 goes the
   // "2–3 quality goes" text already argues for (was shipping as 1).
   return {
@@ -441,9 +480,26 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null) {
   };
 }
 
-function buildSatMain(phase, flavor, isDeload, weeksLeft = null) {
+function buildSatMain(phase, flavor, isDeload, weeksLeft = null, peakType = 'comp') {
   if (flavor === 'boulder') {
     if (phase === 'peak') {
+      // KG-A13: comp peakType swaps the Peak Saturday project session for a
+      // comp-format simulation — unseen problems, timed rounds, limited
+      // attempts, no beta rehearsal — instead of repeated project attempts
+      // on a known line. Gated on peakType so trip/project peaks (still
+      // projecting known problems toward a send) are byte-for-byte unchanged.
+      // Peak phase is never a deload week (buildPhasePattern always sets
+      // deload:false for 'peak'), so no volume-cut interaction to worry about.
+      if (peakType === 'comp') {
+        return {
+          sessionId: 'sat-comp-sim-boulder',
+          label: 'Boulder comp simulation (Peak)',
+          energySystem: 'Strength / Power',
+          exercises: [
+            { kind: 'limit-boulder', name: 'Unseen problems — comp rounds', prescribed: '4–5 unseen (or long-unseen) problems · one round each, ~4 min limit · max 4–5 attempts per problem, no beta rehearsal · full rest between rounds', rpeRange: [8.5, 9.5], prescribedTarget: { value: 4, unit: 'problems' } }
+          ]
+        };
+      }
       return {
         sessionId: 'sat-proj-boulder',
         label: 'Project boulder session',
@@ -529,6 +585,21 @@ function buildSatMain(phase, flavor, isDeload, weeksLeft = null) {
     };
   }
   if (phase === 'peak') {
+    // KG-A13: comp peakType swaps the Peak Saturday redpoint session for a
+    // lead-comp simulation — unseen route, brief preview only, single
+    // attempt — instead of repeated redpoint goes on a known project. Gated
+    // on peakType so trip/project peaks are byte-for-byte unchanged. Peak
+    // phase is never a deload week, so no volume-cut interaction here.
+    if (peakType === 'comp') {
+      return {
+        sessionId: 'sat-comp-sim-sport',
+        label: 'Lead comp simulation (Peak)',
+        energySystem: 'Sport-specific',
+        exercises: [
+          { kind: 'route', name: 'Unseen routes — single-attempt simulation', prescribed: '2–3 unseen (or long-unseen) routes · brief preview only, no beta rehearsal · one redpoint-style attempt each · full rest between routes', rpeRange: [9, 9.5], prescribedTarget: { value: 2, unit: 'routes' } }
+        ]
+      };
+    }
     return {
       sessionId: 'sat-redpoint-peak',
       label: 'Redpoint session (Peak)',
@@ -886,9 +957,9 @@ export const Program = {
       if (deload && retest) session = buildRetestSession();
       else session = buildMonHangboard(phase, deload, focus);
     } else if (slot === 'thu-main') {
-      session = buildThuMain(phase, resolvedFlavor, deload, weeksLeft);
+      session = buildThuMain(phase, resolvedFlavor, deload, weeksLeft, ctx.peakType);
     } else if (slot === 'sat-main') {
-      session = buildSatMain(phase, resolvedFlavor, deload, weeksLeft);
+      session = buildSatMain(phase, resolvedFlavor, deload, weeksLeft, ctx.peakType);
     } else {
       session = LIGHT_DAY;
     }
