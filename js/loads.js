@@ -71,12 +71,19 @@ export const Loads = {
     const pctRange = exercise.loadPctRange || exercise.pctRange;
     if (!pctRange || baseMax == null) return null;
 
-    const lo = baseMax * pctRange[0];
-    const hi = baseMax * pctRange[1];
+    // KG-B11a: for a negative (assisted) benchmark, more-negative = more assisted
+    // = easier; less-negative = less assisted = harder. Naive %-of-benchmark math
+    // shrinks the magnitude toward zero, which for a negative baseMax computes a
+    // HARDER value than the athlete's own tested max — a supra-max load mislabelled
+    // as an "intro" percentage. Clamp each bound so it never exceeds baseMax in the
+    // harder (algebraically greater) direction. No-op for positive benchmarks.
+    const lo = clampToBenchmark(baseMax * pctRange[0], baseMax);
+    const hi = clampToBenchmark(baseMax * pctRange[1], baseMax);
     return {
       isAddedWeight,
+      baseMax,
       addedKgRange: [round(Math.min(lo, hi)), round(Math.max(lo, hi))],
-      // Total system weight (info only)
+      // Total system weight (info only) — derived from the same clamped bounds.
       totalKgRange: bw != null ? [round(bw + lo), round(bw + hi)] : null
     };
   },
@@ -133,6 +140,18 @@ export const Loads = {
         reason.push('capped at +5% per session');
       }
     }
+
+    // KG-B11a: the same negative-benchmark safety cap applies to the final kg,
+    // not just the initial range — progression/readiness multipliers can walk a
+    // negative-benchmark suggestion past the tested max in the harder direction
+    // even when the initial range was clamped correctly (e.g. layoff decay or a
+    // "too hard" auto-adjust shrinking a negative previousActualKg toward zero).
+    const clampedKg = clampToBenchmark(kg, base.baseMax);
+    if (clampedKg !== kg) {
+      kg = clampedKg;
+      reason.push(`clamped to benchmark ${base.baseMax}kg (negative-benchmark safety cap)`);
+    }
+
     return { suggestedKg: round(kg), range, reason };
   },
 
@@ -144,6 +163,15 @@ export const Loads = {
 };
 
 function round(x) { return Math.round(x * 2) / 2; } // 0.5 kg precision
+
+// KG-B11a: negative benchmarks (assisted hangs/pull-ups) are inverted — more
+// negative = more assisted = easier; less-negative = less assisted = harder.
+// No computed value may ever be harder (algebraically greater) than the
+// benchmark itself. No-op for positive benchmarks (added-weight PRs must still
+// be allowed to progress upward past a stale positive benchmark).
+function clampToBenchmark(value, baseMax) {
+  return baseMax < 0 ? Math.min(value, baseMax) : value;
+}
 
 // ADR-0008 layoff-decay constants. App convention (like the readiness multipliers,
 // see docs/knowledge-gaps.md KG-C7) — direction is evidence-backed, exact numbers are not.

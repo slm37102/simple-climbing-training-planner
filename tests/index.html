@@ -1881,6 +1881,97 @@ test('[Phase2 S5] mergeRemote: activePlanId syncs from remote', () => {
   assertEq(Storage.get().activePlanId, 'r-active', 'activePlanId should sync from remote');
 });
 
+// ─── KG-B11a: clamp negative-benchmark load prescriptions (closes #36) ────
+// Negative benchmarks (assisted hangs/pull-ups) are inverted: more-negative =
+// more assisted = easier; less-negative (closer to zero) = less assisted =
+// harder. %-of-benchmark math shrinks magnitude toward zero, which for a
+// negative baseMax computes a HARDER value than the athlete's own tested max.
+// No computed bound (initial range or final suggestedKg) may ever exceed the
+// benchmark in the harder direction. Positive benchmarks must see zero change.
+
+test('[KG-B11a] prescribeLoadKg clamps both bounds when a negative-benchmark % range is entirely harder than the benchmark', () => {
+  // 55–70% of a -10kg benchmark computes -5.5/-7kg — both less negative (harder)
+  // than the athlete's tested -10kg max. Both bounds must clamp down to -10kg.
+  const exercise = { kind: 'hangboard', loadPctRange: [0.55, 0.70] };
+  const benchmarks = { maxHang20mm: -10, bodyweight: 70 };
+  const result = Loads.prescribeLoadKg(exercise, benchmarks);
+  assertEq(result.baseMax, -10, 'prescribeLoadKg must return baseMax so callers can thread it through');
+  assertEq(result.addedKgRange, [-10, -10], 'both bounds are harder than -10kg and must clamp to it');
+  assertEq(result.totalKgRange, [60, 60], 'total system weight must be derived from the same clamped bounds (70 + -10)');
+});
+
+test('[KG-B11a] prescribeLoadKg clamps only the bound that is harder than benchmark, leaves the easier bound untouched', () => {
+  // 90–110% of a -10kg benchmark: lo=-9 (harder, must clamp to -10), hi=-11
+  // (easier than -10kg already, must be left alone).
+  const exercise = { kind: 'hangboard', loadPctRange: [0.9, 1.1] };
+  const benchmarks = { maxHang20mm: -10 };
+  const result = Loads.prescribeLoadKg(exercise, benchmarks);
+  assertEq(result.addedKgRange, [-11, -10], 'harder bound (-9) clamps to -10; easier bound (-11) is unaffected');
+});
+
+test('[KG-B11a] resolveEffective clamps a previousActualKg-progression path that would otherwise land harder than the negative benchmark', () => {
+  // previousActualKg is already at the tested max (-10kg). A stale (60-day)
+  // layoff decay of ×0.85 shrinks the magnitude toward zero (-8.5kg — harder!,
+  // the opposite of what layoff decay is supposed to do for an assisted lift).
+  // Even after the existing +5% session cap (which also shrinks magnitude in
+  // this direction, landing at -9kg), the result is still harder than the
+  // -10kg benchmark and must be clamped back to it.
+  const exercise = { kind: 'hangboard', loadPctRange: [0.55, 0.70], rpeRange: [8, 9] };
+  const benchmarks = { maxHang20mm: -10 };
+  const res = Loads.resolveEffective({
+    exercise, previousActualKg: -10, previousAvgRpe: 8.5, daysSincePrevious: 60, benchmarks
+  });
+  assertEq(res.suggestedKg, -10, 'progression math must never suggest a load harder than the tested -10kg max');
+  assert(res.reason.some(r => /clamped to benchmark/i.test(r) && /negative-benchmark safety cap/i.test(r)),
+    `reason trail must record the clamp engaging, got: ${JSON.stringify(res.reason)}`);
+});
+
+test('[KG-B11a] clamp holds across real program.js phase tables (Base intro, Build, Peak, taper) for a negative benchmark', () => {
+  // Every HANGBOARD/BASE_MAX_INTRO loadPctRange in program.js is entirely < 1
+  // (e.g. Build's [0.80, 0.90]), so against a negative baseMax every one of
+  // these real, program-built sessions must fully clamp to the benchmark.
+  const benchmarks = { maxHang20mm: -10, bodyweight: 70 };
+  const fixtures = [
+    ['2026-05-04', 'hybrid'],          // wk1 Mon, base intro hangboard
+    ['2026-06-15', 'boulder'],         // wk7 Mon, build max-weight 10s hangboard
+    ['2026-07-06', 'boulder'],         // wk10 Mon, peak 7-53 protocol hangboard
+    ['2026-07-20', 'boulder', 'comp'], // wk12 Mon (comp taper), near-max taper hangboard
+  ];
+  let checked = 0;
+  for (const [iso, focus, peakType] of fixtures) {
+    const ctx = Program.resolveDate(iso, '2026-05-04', 12, peakType);
+    const sess = Program.prescribeForContext(ctx, focus);
+    for (const ex of (sess.exercises || [])) {
+      if (ex.kind !== 'hangboard' || !ex.loadPctRange) continue;
+      const base = Loads.prescribeLoadKg(ex, benchmarks);
+      assert(base, `${iso}/${focus}: expected prescribeLoadKg to resolve for "${ex.name}"`);
+      assert(base.addedKgRange[0] <= -10 + 1e-9 && base.addedKgRange[1] <= -10 + 1e-9,
+        `${iso}/${focus}: "${ex.name}" range ${JSON.stringify(base.addedKgRange)} must never exceed -10kg benchmark`);
+      const resolved = Loads.resolveEffective({ exercise: ex, previousActualKg: null, benchmarks });
+      assert(resolved.suggestedKg <= -10 + 1e-9,
+        `${iso}/${focus}: "${ex.name}" suggestedKg ${resolved.suggestedKg} must never exceed -10kg benchmark`);
+      checked++;
+    }
+  }
+  assert(checked >= 3, `expected to check at least 3 real hangboard sessions across phases, got ${checked}`);
+});
+
+test('[KG-B11a] positive benchmarks are completely unaffected by the clamp, including a previousActualKg that exceeds a stale benchmark (PR)', () => {
+  const exercise = { kind: 'hangboard', loadPctRange: [0.5, 0.7], rpeRange: [8, 9] };
+  const benchmarks = { maxHang20mm: 20, bodyweight: 70 };
+
+  const range = Loads.prescribeLoadKg(exercise, benchmarks);
+  assertEq(range.addedKgRange, [10, 14], 'positive-benchmark range must be untouched by the clamp');
+
+  // PR case: previousActualKg (25) exceeds the stale positive benchmark (20).
+  // This is a legitimate upward progression, not a bug — must not be clamped.
+  const pr = Loads.resolveEffective({
+    exercise, previousActualKg: 25, previousAvgRpe: 8.5, daysSincePrevious: 5, benchmarks
+  });
+  assertEq(pr.suggestedKg, 25, 'a PR exceeding a stale positive benchmark must progress untouched');
+  assert(!pr.reason.some(r => /clamped to benchmark/i.test(r)), 'positive-benchmark path must never mention the clamp');
+});
+
 // ─── Runner ───────────────────────────────────────────────────────────────
 
 async function runAll() {
