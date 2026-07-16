@@ -192,7 +192,7 @@ const HANGBOARD = {
 };
 
 // ============== Antagonist / accessory block ==============
-// KG-A7: consensus dosing is 2–3x/week (Gilmore 2024) — the block used to ride
+// KG-A7: consensus dosing is 2–3x/week (coaching consensus) — the block used to ride
 // only Monday and get dropped entirely on deloads. It now also runs a short
 // ~10-min version on Tuesday's light day, and Monday's is volume-cut (not
 // dropped) on deload weeks like every other exercise.

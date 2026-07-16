@@ -12,7 +12,7 @@
 
 ## Evidence-tier headline (read this before the table)
 
-For these **climbing-kind** exercises, **Tier 1 (controlled trials) is essentially empty.** The peer-reviewed climbing trials in our corpus — López-Rivera & González-Badillo 2019 (PMID 30988852), Mundry 2021 (PMID 34188125), Gilmore 2024 (PMID 39560837) — study **hangboard / finger strength and antagonist work**, *not* 4×4s, limit bouldering, ARC volume, route intervals, or campusing. They must **not** be cited to prop up the exercises on this page. The only peer-reviewed touch-points are *correlational* (e.g. campus-board score correlates with finger strength, r=0.82, EJAP 2025) — associations, not training trials.
+For these **climbing-kind** exercises, **Tier 1 (controlled trials) is essentially empty.** The peer-reviewed climbing trials in our corpus — López-Rivera & González-Badillo 2019 (PMID 30988852), Mundry 2021 (PMID 34188125), Gilmore 2024 (PMID 39560837) — study **hangboard / finger strength**, *not* 4×4s, limit bouldering, ARC volume, route intervals, or campusing. They must **not** be cited to prop up the exercises on this page. The only peer-reviewed touch-points are *correlational* (e.g. campus-board score correlates with finger strength, r=0.82, EJAP 2025) — associations, not training trials.
 
 Consequently **almost every prescription below is Tier 2 (coaching consensus: Lattice / Hörst / Anderson and allied coaching sources)**, with a handful of genuine **Tier 3 (open questions)** — chiefly the exact boulder-volume counts, the route "pyramid 4-3-2-1" framing, and the ARC "%effort" figure. Saying so is a finding, not a gap.
 
@@ -196,7 +196,7 @@ The **interval protocols (60/60, 30/30), limit bouldering, and the campus readin
 
 **Peer-reviewed (context only — none tests these climbing-kind exercises as training interventions):**
 13. Finger-strength ↔ climbing correlation, incl. campus-board score r=0.82: *Eur J Appl Physiol.* 2025;125:2823–2830. PMC12479556.
-14. Hangboard/finger-strength trials (relevant to fingerboarding, **not** to the exercises on this page): López-Rivera & González-Badillo, *J Hum Kinet.* 2019;66:183–195, PMID 30988852; Mundry et al., *Front Sports Act Living.* 2021, PMID 34188125; Gilmore et al. (antagonist/injury), *Sports Health.* 2024, PMID 39560837.
+14. Hangboard/finger-strength trials (relevant to fingerboarding, **not** to the exercises on this page): López-Rivera & González-Badillo, *J Hum Kinet.* 2019;66:183–195, PMID 30988852; Mundry et al., *Front Sports Act Living.* 2021, PMID 34188125; Gilmore et al. (finger strength), *Sports Medicine – Open.* 2024, PMID 39560837.
 
 ---
 

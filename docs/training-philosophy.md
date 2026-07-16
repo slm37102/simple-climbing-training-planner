@@ -46,12 +46,13 @@ Base-phase hangboard work emphasises half-crimp (or half-crimp + open-crimp mixe
 **Supported by controlled trials:**
 - Short-cycle (4–10 week) max-hang and repeater protocols produce measurable strength gains in trained climbers. López-Rivera & González-Badillo 2019 (PMID 30988852, n=26, 8 weeks) — significant max-hang and force gains under structured fingerboard protocols.
 - Strength-endurance specifically targeted in advanced climbers responds to short structured blocks. Mundry et al. 2021 (PMID 34188125, review).
-- Antagonist / posterior-shoulder work reduces overuse incidence. Gilmore et al. 2024 (PMID 39560837, review).
+- Low-intensity finger loading builds finger strength comparably to maximal-load hangs, and combining the two is additive. Gilmore NK et al. 2024 (PMID 39560837, controlled study in healthy climbers).
 
 **Coaching-consensus but no controlled trial:**
 - Optimal macrocycle *length* — no head-to-head RCT compares 12 vs 18 vs 24 week cycles in climbers. Our choice of 12-week default and the switch to double-block at >20 weeks reflects coaching convention, not data.
 - Optimal deload cadence (3:1 vs 2:1 vs 4:1). Lattice/Hörst/Anderson all use 3:1; no climber-specific RCT.
 - Half-crimp dominance over full-crimp in training is a Lattice-internal data finding, not yet replicated externally in peer review.
+- Antagonist / posterior-shoulder work reduces overuse incidence. Coaching consensus; no controlled trial in climbers.
 
 **Open question:**
 - For this athlete (V5–V6 / 7a, 3 yr) the planner currently uses an intermediate template. As the athlete progresses past V7 / 7b+ the Peak prescriptions may need to ratchet back up toward the published Lattice/Anderson defaults — the planner does not currently auto-detect this and would need a manual phase-aggressiveness setting.
@@ -63,7 +64,7 @@ Base-phase hangboard work emphasises half-crimp (or half-crimp + open-crimp mixe
 - Anderson M & M. *The Rock Climber's Training Manual* (2014).
 - López-Rivera E, González-Badillo JJ. *J Hum Kinet.* 2019;66:183–195. PMID 30988852.
 - Mundry S et al. *Front Sports Act Living.* 2021;3:651651. PMID 34188125.
-- Gilmore K et al. *Sports Health.* 2024 (review). PMID 39560837.
+- Gilmore NK et al. *Sports Medicine – Open.* 2024. PMID 39560837. (Loading programs & finger strength in climbers.)
 - Schweizer A. *J Biomech.* 2001;34(2):217–223. (A2 pulley loading in crimp grips.)
 - Vigouroux L et al. *J Biomech.* 2006;39(14):2583–2592. (Finger pulley forces under crimp.)
 - Sjöman AE et al. *Wilderness Environ Med.* 2023;34(4):435–441. PMID 37550103. (Injury association in intermediate climbers — basis for ADR 0001.)
