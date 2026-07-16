@@ -47,3 +47,4 @@ When trade-offs bite, the priority order is: **safety (G3) > prescription correc
 | [`adr/`](adr/) | Decisions and their trade-offs |
 | [`improvement-audit.md`](improvement-audit.md) | Engineering findings (sync, correctness, UX, PWA) — not training content |
 | [`training-plan.md`](training-plan.md) | Human-readable prescription tables (mirror of `js/program.js`) |
+| [`trip-conversion-note.md`](trip-conversion-note.md) | Converting Peak/Taper weeks for an outdoor trip instead of a comp/gym goal (KG-A11 mitigation) |
