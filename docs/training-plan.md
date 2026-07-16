@@ -206,6 +206,7 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
   - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+  - **Tuesday antagonist/shoulder block** — Wrist extensor curls: 3 × 20 · 60s rest between sets; Band cactus (external rotation): 2 × 12–15 · 45–60s rest between sets
 - **Wed** — Rest day
 - **Thu** — Projecting / technique boulders *(Skill / Strength)*
   - **Projecting (mid-grade)** — 60–90 min of 4×4-style projecting on submaximal problems · RPE 7.5–9 · target: 75 min
@@ -225,6 +226,7 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
   - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+  - **Tuesday antagonist/shoulder block** — Wrist extensor curls: 3 × 20 · 60s rest between sets; Band cactus (external rotation): 2 × 12–15 · 45–60s rest between sets
 - **Wed** — Rest day
 - **Thu** — Route pyramid (Base) *(Aerobic capacity)* — _Base hard week 2 — aerobic volume +10% (ADR-0009)_
   - **Route pyramid** — pyramid 4-3-2-1 routes · walking rest between routes; 1 grade below redpoint · RPE 7–8 · target today: 11 routes (ramped up from 10)
@@ -244,6 +246,7 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
   - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+  - **Tuesday antagonist/shoulder block** — Wrist extensor curls: 3 × 20 · 60s rest between sets; Band cactus (external rotation): 2 × 12–15 · 45–60s rest between sets
 - **Wed** — Rest day
 - **Thu** — Projecting / technique boulders *(Skill / Strength)*
   - **Projecting (mid-grade)** — 60–90 min of 4×4-style projecting on submaximal problems · RPE 7.5–9 · target: 75 min
@@ -259,9 +262,11 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
   - **7/3 Repeaters** — 7s × 6 reps, 2 sets per grip (half-crimp + open-crimp) · Deload: drop ~40% volume · rest 3s within / 3 min between sets · bodyweight · RPE 7.5–8.5
   - **Max hangs (intro)** — 10s weighted, 3 hangs × 2 sets — low-end load, crisp form · Deload: drop ~40% volume · rest 3 min · 55–70% of max-hang added load · RPE 8–9
   - **Weighted pull-ups** — 5 × 5 · (sets today: 3 × 5) · 2 min between sets · 55–70% of 1RM added load · RPE 7–8.5
+  - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets · Deload: drop ~40% volume; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets · Deload: drop ~40% volume; Wrist extensor curls: 3 × 20 · 60s rest between sets · Deload: drop ~40% volume; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets · Deload: drop ~40% volume; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets · Deload: drop ~40% volume
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
   - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+  - **Tuesday antagonist/shoulder block** — Wrist extensor curls: 3 × 20 · 60s rest between sets; Band cactus (external rotation): 2 × 12–15 · 45–60s rest between sets
 - **Wed** — Rest day
 - **Thu** — Route pyramid (Base) *(Aerobic capacity)* — _deload: volume −40%, intensity held_
   - **Route pyramid** — pyramid 4-3-2-1 routes · walking rest between routes; 1 grade below redpoint · RPE 7–8 · target today: 6 routes (cut from 10)
@@ -281,6 +286,7 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
   - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+  - **Tuesday antagonist/shoulder block** — Wrist extensor curls: 3 × 20 · 60s rest between sets; Band cactus (external rotation): 2 × 12–15 · 45–60s rest between sets
 - **Wed** — Rest day
 - **Thu** — Projecting / technique boulders *(Skill / Strength)*
   - **Projecting (mid-grade)** — 60–90 min of 4×4-style projecting on submaximal problems · RPE 7.5–9 · target: 75 min
@@ -300,6 +306,7 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
   - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+  - **Tuesday antagonist/shoulder block** — Wrist extensor curls: 3 × 20 · 60s rest between sets; Band cactus (external rotation): 2 × 12–15 · 45–60s rest between sets
 - **Wed** — Rest day
 - **Thu** — Route pyramid (Base) *(Aerobic capacity)* — _deload: volume −40%, intensity held_
   - **Route pyramid** — pyramid 4-3-2-1 routes · walking rest between routes; 1 grade below redpoint · RPE 7–8 · target today: 6 routes (cut from 10)
@@ -318,6 +325,7 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
   - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+  - **Tuesday antagonist/shoulder block** — Wrist extensor curls: 3 × 20 · 60s rest between sets; Band cactus (external rotation): 2 × 12–15 · 45–60s rest between sets
 - **Wed** — Rest day
 - **Thu** — Limit Bouldering (Build) *(Strength)*
   - **Limit boulders** — 3–5 problems · 3–5 attempts · 3–5 min rest · 2–3 sets · RPE 8.5–9.5 · target: 4 problems
@@ -337,6 +345,7 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
   - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+  - **Tuesday antagonist/shoulder block** — Wrist extensor curls: 3 × 20 · 60s rest between sets; Band cactus (external rotation): 2 × 12–15 · 45–60s rest between sets
 - **Wed** — Rest day
 - **Thu** — 60/60 threshold intervals (Build) *(Aerobic power)*
   - **60/60 intervals** — 60s moderately hard climbing / 60s rest · 10–30 min total · stop before the deep pump (never above 8.5) · RPE 7–8.5 · target: 20 min
@@ -355,6 +364,7 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
   - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+  - **Tuesday antagonist/shoulder block** — Wrist extensor curls: 3 × 20 · 60s rest between sets; Band cactus (external rotation): 2 × 12–15 · 45–60s rest between sets
 - **Wed** — Rest day
 - **Thu** — Limit Bouldering (Build) *(Strength)*
   - **Limit boulders** — 3–5 problems · 3–5 attempts · 3–5 min rest · 2–3 sets · RPE 8.5–9.5 · target: 4 problems
@@ -374,6 +384,7 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
   - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+  - **Tuesday antagonist/shoulder block** — Wrist extensor curls: 3 × 20 · 60s rest between sets; Band cactus (external rotation): 2 × 12–15 · 45–60s rest between sets
 - **Wed** — Rest day
 - **Thu** — 30/30 lactic sharpening (Peak) *(Anaerobic lactic)*
   - **30/30 intervals** — 30s all-out / 30s rest × 6 = 1 set · 3:50 between sets · 2–3 sets · deep pump expected, stop when movement degrades · RPE 9.5–10 · target: 2 sets
@@ -392,6 +403,7 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
   - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+  - **Tuesday antagonist/shoulder block** — Wrist extensor curls: 3 × 20 · 60s rest between sets; Band cactus (external rotation): 2 × 12–15 · 45–60s rest between sets
 - **Wed** — Rest day
 - **Thu** — Limit Bouldering + Campus (Peak) *(Strength → Power)*
   - **Limit boulders** — 1–3 limit move-sequences (3–5 moves) · 4–8 attempts each · 3–5 min rest · stop when power drops (~20–30 min) · RPE 9–9.5 · target: 2 sequences
@@ -412,6 +424,7 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
   - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
+  - **Tuesday antagonist/shoulder block** — Wrist extensor curls: 3 × 20 · 60s rest between sets; Band cactus (external rotation): 2 × 12–15 · 45–60s rest between sets
 - **Wed** — Rest day
 - **Thu** — Project routes (Taper) *(Sport-specific)* — _taper: volume cut, intensity held_
   - **Project / redpoint attempts** — 2–3 quality goes on a project · 20+ min rest between goes · RPE 9–9.5 · target today: 1 goes (cut from 2)
