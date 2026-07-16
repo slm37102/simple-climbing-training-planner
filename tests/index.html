@@ -2111,8 +2111,10 @@ test('[KG-B13] Monday taper pull-ups land at 2×2 after one cut (was shipping as
 });
 
 test('[KG-B13] Thursday taper project goes land at 2+ (was shipping as 1)', () => {
-  const plan = { settings: { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' }, focus: 'sport' };
-  const ctx = Program.resolveDate('2026-07-23', '2026-05-04', 12);
+  // peakType: 'trip' — KG-A13 forks comp taper-Thursdays onto a different
+  // (comp-format) template; 'trip'/'project' keep this original template.
+  const plan = { settings: { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'trip' }, focus: 'sport' };
+  const ctx = Program.resolveDate('2026-07-23', '2026-05-04', 12, 'trip');
   assertEq(ctx.phase, 'taper');
   const thu = Program.build(plan, '2026-07-23');
   assertEq(thu.sessionId, 'thu-projects');
@@ -2121,7 +2123,8 @@ test('[KG-B13] Thursday taper project goes land at 2+ (was shipping as 1)', () =
 });
 
 test('[KG-B13] Thursday taper flash-grade boulders land at 8 problems (within the stated 6–10)', () => {
-  const plan = { settings: { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' }, focus: 'boulder' };
+  // peakType: 'trip' — see note above; comp peaks get KG-A13's comp-format touch instead.
+  const plan = { settings: { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'trip' }, focus: 'boulder' };
   const thu = Program.build(plan, '2026-07-23');
   assertEq(thu.sessionId, 'thu-flash');
   assertEq(thu.exercises[0].prescribedTarget, { value: 8, unit: 'problems' }, 'floor(14 × 0.6) = 8, within "6–10 problems"');
