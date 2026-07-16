@@ -47,3 +47,4 @@ When trade-offs bite, the priority order is: **safety (G3) > prescription correc
 | [`adr/`](adr/) | Decisions and their trade-offs |
 | [`improvement-audit.md`](improvement-audit.md) | Engineering findings (sync, correctness, UX, PWA) — not training content |
 | [`training-plan.md`](training-plan.md) | Human-readable prescription tables (mirror of `js/program.js`) |
+| [`end-of-cycle-review.md`](end-of-cycle-review.md) | End-of-cycle review checklist — the manual walkthrough after each macrocycle completes (closes the checklist half of KG-A8/KG-D7) |
