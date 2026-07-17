@@ -1,6 +1,6 @@
 # Monitoring model: four exception-catcher signals, advisory + one-tap responses
 
-**Status:** Accepted — decided 2026-07-16 ([wayfinder ticket #26](https://github.com/slm37102/simple-climbing-training-planner/issues/26), grounded in the [monitoring-signals evidence sweep](../research/monitoring-signals-evidence.md), ticket #25); implementation pending (KG-D6 ticket cut at the map's assembly step). Adjudicates KG-A4.
+**Status:** Implemented — decided 2026-07-16 ([wayfinder ticket #26](https://github.com/slm37102/simple-climbing-training-planner/issues/26), grounded in the [monitoring-signals evidence sweep](../research/monitoring-signals-evidence.md), ticket #25); shipped 2026-07-17 via [issue #52](https://github.com/slm37102/simple-climbing-training-planner/issues/52). Adjudicates KG-A4.
 
 ## Context
 

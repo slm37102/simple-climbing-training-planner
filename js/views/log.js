@@ -1,5 +1,7 @@
 import { Storage } from '../storage.js';
 import { Program } from '../program.js';
+import { Monitoring } from '../monitoring.js';
+import { today } from '../dates.js';
 import { inputVisibility, repsLabel } from '../exercise-inputs.js';
 import { escHtml as esc } from '../ui.js';
 import { SKILL_DRILLS, WARMUP_DRILLS } from '../drills.js';
@@ -97,7 +99,50 @@ export function renderLog(root) {
 <div class="log-tabs">
   ${tab('feed')}${tab('charts')}${tab('phases')}
 </div>
+<div id="logSignalsPanel"></div>
 <div id="logContent" style="display:flex;flex-direction:column;gap:14px"></div>`;
+  }
+
+  // ── Signals panel (ADR-0014, closes KG-A4/KG-D6) ──────────────────────
+  // Cross-tab, kept alive independent of feed/charts/phases — evaluated
+  // against the active plan's history, same as the Today-tab banner.
+  function dismissLogSignal(planId, date, key) {
+    const day = Storage.getDay(planId, date) || {};
+    Storage.setDay(planId, date, { ...day, dismissedSignals: { ...(day.dismissedSignals || {}), [key]: true } });
+  }
+
+  function renderSignalsPanel() {
+    const el = document.getElementById('logSignalsPanel');
+    if (!el) return;
+    const activePlan = Storage.getActivePlan();
+    if (!activePlan) { el.innerHTML = ''; return; }
+    const asOfIso = today();
+    const dayLog = Storage.getDay(activePlan.id, asOfIso) || {};
+    const dismissed = dayLog.dismissedSignals || {};
+    const raw = Monitoring.computeSignals({
+      days: Storage.listDays(activePlan.id),
+      benchmarkHistory: Storage.get().benchmarks?.history,
+      todayPain: dayLog.readiness?.pain || null,
+      asOfIso
+    });
+    const active = Object.entries(raw).filter(([key, sig]) => sig && !dismissed[key]);
+    if (!active.length) { el.innerHTML = ''; return; }
+    el.innerHTML = `<div class="card" data-signals-panel style="margin-bottom:14px">
+      <h2 style="margin:0 0 10px">Signals</h2>
+      <div class="bench-rows">
+        ${active.map(([key, sig]) => `
+          <div class="bench-row" data-log-signal="${key}">
+            <div class="b-name" style="max-width:75%">⚠ ${esc(sig.message)}</div>
+            <button class="mini-btn ghost-mini" type="button" data-log-signal-dismiss="${key}">Dismiss</button>
+          </div>`).join('')}
+      </div>
+    </div>`;
+    el.querySelectorAll('[data-log-signal-dismiss]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        dismissLogSignal(activePlan.id, asOfIso, btn.dataset.logSignalDismiss);
+        renderSignalsPanel();
+      });
+    });
   }
 
   // ── Log entry edit form ───────────────────────────────────────────────
@@ -660,6 +705,7 @@ export function renderLog(root) {
   // ── Bootstrap ────────────────────────────────────────────────────────
 
   root.innerHTML = buildHeaderHtml();
+  renderSignalsPanel();
 
   document.getElementById('logPlanFilter')?.addEventListener('change', e => {
     planFilter = e.target.value;

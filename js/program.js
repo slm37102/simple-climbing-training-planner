@@ -977,7 +977,9 @@ export const Program = {
   // benchmarks (KG-A10, optional): { dominantStyle, dominantAngle } — when supplied with a
   // recognised pair, Base/Build boulder-flavor Thu/Sat sessions get a session-level
   // `styleNote` anti-style cue. Omitted/unrecognised → no cue (back-compat default).
-  prescribeForContext(ctx, focus = 'hybrid', benchmarks = null) {
+  // overrides (ADR-0014, optional): { forceVolumeCut } — the readiness-trend
+  // signal's one-tap accept action.
+  prescribeForContext(ctx, focus = 'hybrid', benchmarks = null, overrides = null) {
     const weeks = ctx?.cycleWeeks ?? DEFAULT_CYCLE_WEEKS;
     if (!ctx || ctx.outOfCycle) {
       // ADR-0012: the post-goal retest window — goal day +1 through +7 — is
@@ -1086,15 +1088,31 @@ export const Program = {
       session = applyTaperVolume(session);
     }
 
+    // ADR-0014: the readiness-trend monitoring signal's one-tap "accept"
+    // action — an athlete-triggered early volume cut for the current week,
+    // reusing the existing deload volume-cut mechanism as a post-processing
+    // step rather than touching the phase-pattern's deload/retest flags
+    // (which many other computations above key off). Never double-cuts a
+    // week that's already a natural deload/taper/retest/rest.
+    if (overrides?.forceVolumeCut && !deload && phase !== 'taper' && !session.isRest && !session.isRetest) {
+      session = applyDeloadVolume(session);
+      session.deloadNote = 'Early volume cut — accepted from the readiness-trend signal (ADR-0014).';
+    }
+
     return { ...session, phase, flavor: resolvedFlavor, focus, deload, retest, weekIdx: ctx.weekIdx, cycleWeeks: weeks };
   },
 
   // Primary entry point: builds a session from a plan object and an ISO date string.
-  // benchmarks (KG-A10, optional) — see prescribeForContext.
+  // benchmarks (KG-A10, optional) — see prescribeForContext. ADR-0014: reads
+  // settings.earlyVolumeCutWeekIndices (an athlete-accepted readiness-trend
+  // signal, by weekIdx) to force the volume cut for that week's sessions.
   build(plan, dateISO, benchmarks = null) {
     const start = this.effectiveStart(plan?.settings);
     const ctx = this.resolveDate(dateISO, start, this.cycleWeeksOf(plan?.settings), plan?.settings?.peakType);
-    return this.prescribeForContext(ctx, plan?.focus || 'hybrid', benchmarks);
+    const forceVolumeCut = !!(ctx && !ctx.outOfCycle
+      && Array.isArray(plan?.settings?.earlyVolumeCutWeekIndices)
+      && plan.settings.earlyVolumeCutWeekIndices.includes(ctx.weekIdx));
+    return this.prescribeForContext(ctx, plan?.focus || 'hybrid', benchmarks, { forceVolumeCut });
   },
 
   buildAntiStyleCue,

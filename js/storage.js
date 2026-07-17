@@ -2,7 +2,7 @@
 import { today } from './dates.js';
 
 const KEY = 'climb-planner:state';
-const SCHEMA_VERSION = 5;
+const SCHEMA_VERSION = 6;
 
 const listeners = new Set();
 let suppressEmit = 0;
@@ -26,6 +26,7 @@ function defaultSettings() {
     peakType: 'comp', // 'comp' | 'trip' | 'project' — drives taper length (ADR-0007)
     scheduleShiftDays: 0, // days added to effectiveStart to absorb a missed-session gap (ADR-0008); ignored in compDate mode
     gapAcknowledgedThrough: null, // ISO date up to which a detected gap was handled/acknowledged (ADR-0008)
+    earlyVolumeCutWeekIndices: [], // weekIdx values with an accepted readiness-trend early volume cut (ADR-0014)
     units: 'kg',
     syncEnabled: true,
     localOnly: false,
@@ -79,6 +80,10 @@ function defaultState() {
       boulderGrade: '',
       dominantStyle: 'crimp',
       dominantAngle: 'slight-overhang',
+      // ADR-0014 (v6): retest history — each entry a dated snapshot, appended
+      // (never overwritten) by Storage.saveRetestBenchmarks, feeding the
+      // retest-trajectory monitoring signal.
+      history: [],
     },
   };
 }
@@ -182,12 +187,24 @@ function migrate(s) {
     s.version = 5;
   }
 
+  // v5 → v6 (ADR-0014): globalBenchmarks.history array for the retest-
+  // trajectory monitoring signal — the retest save previously overwrote,
+  // discarding the app's only climbing-validated longitudinal signal.
+  if (s.version < 6) {
+    if (s.globalBenchmarks && !Array.isArray(s.globalBenchmarks.history)) {
+      s.globalBenchmarks.history = [];
+    }
+    s.version = 6;
+  }
+
   // Normalise all plans — fills in missing fields on freshly-loaded or newly-added plans
   s.globalSettings = s.globalSettings || {};
   s.globalBenchmarks = s.globalBenchmarks || {
     bodyweight: null, maxHang20mm: null, pullup1RM: null,
     sportGrade: '', boulderGrade: '', dominantStyle: 'crimp', dominantAngle: 'slight-overhang',
+    history: [],
   };
+  if (!Array.isArray(s.globalBenchmarks.history)) s.globalBenchmarks.history = [];
   for (const plan of Object.values(s.plans || {})) {
     plan.settings   = { ...defaultSettings(),   ...(plan.settings   || {}) };
     plan.benchmarks = { ...defaultBenchmarks(), ...(plan.benchmarks || {}) };
@@ -407,6 +424,23 @@ export const Storage = {
   setGlobalBenchmarks(patch) {
     const s = state || this.init();
     if (!s.globalBenchmarks) s.globalBenchmarks = {};
+    Object.assign(s.globalBenchmarks, patch, { updatedAt: new Date().toISOString() });
+    this._save(); emit();
+  },
+
+  // ADR-0014: the retest-save path (as opposed to an ad-hoc Profile edit) —
+  // appends a dated snapshot to globalBenchmarks.history before applying the
+  // patch, feeding the retest-trajectory monitoring signal. date defaults to
+  // "now" but callers logging a past day's retest can pass that day's ISO.
+  saveRetestBenchmarks(patch, date = today()) {
+    const s = state || this.init();
+    if (!s.globalBenchmarks) s.globalBenchmarks = {};
+    if (!Array.isArray(s.globalBenchmarks.history)) s.globalBenchmarks.history = [];
+    s.globalBenchmarks.history.push({
+      date,
+      maxHang20mm: patch.maxHang20mm ?? null,
+      pullup1RM: patch.pullup1RM ?? null
+    });
     Object.assign(s.globalBenchmarks, patch, { updatedAt: new Date().toISOString() });
     this._save(); emit();
   },

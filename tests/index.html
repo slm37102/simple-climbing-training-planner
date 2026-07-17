@@ -38,6 +38,7 @@ import { Warmup } from '../js/warmup.js';
 import { SKILL_DRILLS, DRILL_CATEGORIES, WARMUP_DRILLS } from '../js/drills.js';
 import { Replan, MAJOR_GAP_DAYS } from '../js/replan.js';
 import { limiterReadout } from '../js/limiter.js';
+import { Monitoring } from '../js/monitoring.js';
 import { inputVisibility, repsLabel, actualHasResult, howto, unitLabel } from '../js/exercise-inputs.js';
 import { today as datesToday, addDays as datesAddDays, daysBetween, snapToMonday as datesSnapToMonday } from '../js/dates.js';
 import { renderToday } from '../js/views/today.js';
@@ -2851,6 +2852,222 @@ test('[ADR-0012] REGRESSION: post-goal retest card renders and saves with just m
     const { benchmarks } = Storage.get();
     assertEq(benchmarks.maxHang20mm, 24);
     assertEq(benchmarks.pullup1RM, 25, 'skipped optional pull-up must not overwrite the existing benchmark');
+  } finally { root.remove(); }
+});
+
+// ─── ADR-0014: monitoring signals (closes KG-A4/KG-D6) ────────────────────
+
+test('[ADR-0014] readinessTrendSignal fires on a genuine 7-day-vs-28-day drop, not on a flat trend', () => {
+  const asOf = '2026-07-01';
+  const days = [];
+  for (let offset = 0; offset <= 27; offset++) {
+    const iso = addIsoDays(asOf, -offset);
+    const score = offset <= 6 ? 2 : 4; // last 7 days low, prior 21 days high
+    days.push([iso, { readiness: { sleep: score, soreness: score, fatigue: score } }]);
+  }
+  const dropping = Monitoring.readinessTrendSignal(days, asOf);
+  assert(dropping, 'expected a readiness-trend flag on a genuine drop');
+  assertEq(dropping.key, 'readiness-trend');
+
+  const flatDays = days.map(([iso]) => [iso, { readiness: { sleep: 4, soreness: 4, fatigue: 4 } }]);
+  assertEq(Monitoring.readinessTrendSignal(flatDays, asOf), null, 'a flat trend must not fire');
+});
+
+test('[ADR-0014] readinessTrendSignal returns null with too little history', () => {
+  const asOf = '2026-07-01';
+  const days = [[asOf, { readiness: { sleep: 1, soreness: 1, fatigue: 1 } }]];
+  assertEq(Monitoring.readinessTrendSignal(days, asOf), null);
+});
+
+test('[ADR-0014] rpeDriftSignal fires on 2 consecutive load-matched over-RPE hangboard sessions, not when kg increased', () => {
+  const asOf = '2026-07-01';
+  const days = [
+    ['2026-06-20', { exercises: [{ kind: 'hangboard', rpeRange: [8, 9], actual: { kg: 20, rpe: 9.5 } }] }],
+    ['2026-06-27', { exercises: [{ kind: 'hangboard', rpeRange: [8, 9], actual: { kg: 20, rpe: 9.5 } }] }],
+  ];
+  const drift = Monitoring.rpeDriftSignal(days, asOf);
+  assert(drift, 'expected an rpe-drift flag');
+  assertEq(drift.key, 'rpe-drift');
+
+  const increasedKg = [
+    ['2026-06-20', { exercises: [{ kind: 'hangboard', rpeRange: [8, 9], actual: { kg: 20, rpe: 9.5 } }] }],
+    ['2026-06-27', { exercises: [{ kind: 'hangboard', rpeRange: [8, 9], actual: { kg: 22, rpe: 9.5 } }] }],
+  ];
+  assertEq(Monitoring.rpeDriftSignal(increasedKg, asOf), null, 'an increased kg must not read as drift');
+
+  const inRange = [
+    ['2026-06-20', { exercises: [{ kind: 'hangboard', rpeRange: [8, 9], actual: { kg: 20, rpe: 8.5 } }] }],
+    ['2026-06-27', { exercises: [{ kind: 'hangboard', rpeRange: [8, 9], actual: { kg: 20, rpe: 8.5 } }] }],
+  ];
+  assertEq(Monitoring.rpeDriftSignal(inRange, asOf), null, 'in-range RPE must not fire');
+});
+
+test('[ADR-0014] retestTrajectorySignal fires on 2 flat-or-down retests, not on a mixed or improving result', () => {
+  const flat = [
+    { date: '2026-05-01', maxHang20mm: 20, pullup1RM: 30 },
+    { date: '2026-06-08', maxHang20mm: 20, pullup1RM: 30 },
+  ];
+  const plateau = Monitoring.retestTrajectorySignal(flat);
+  assert(plateau, 'expected a retest-plateau flag on two flat retests');
+  assertEq(plateau.key, 'retest-plateau');
+
+  const improved = [
+    { date: '2026-05-01', maxHang20mm: 20, pullup1RM: 30 },
+    { date: '2026-06-08', maxHang20mm: 22, pullup1RM: 30 },
+  ];
+  assertEq(Monitoring.retestTrajectorySignal(improved), null, 'improvement on either benchmark must not read as a plateau');
+
+  assertEq(Monitoring.retestTrajectorySignal([flat[0]]), null, 'a single retest is not a trajectory');
+  assertEq(Monitoring.retestTrajectorySignal([]), null);
+});
+
+test('[ADR-0014] painCheckInSignal: green/amber/red per the Silbernagel gate, including the worse-next-morning red trigger', () => {
+  assertEq(Monitoring.painCheckInSignal(null), null);
+  assertEq(Monitoring.painCheckInSignal({ value: 2 }), null, 'green (<3) must not flag');
+  const amber = Monitoring.painCheckInSignal({ value: 4 });
+  assertEq(amber.key, 'pain-amber');
+  const red = Monitoring.painCheckInSignal({ value: 6 });
+  assertEq(red.key, 'pain-red');
+  const worseMorning = Monitoring.painCheckInSignal({ value: 2, settledByMorning: false });
+  assertEq(worseMorning.key, 'pain-red', 'worse-next-morning must trigger red even at green-level pain');
+});
+
+test('[ADR-0014] computeSignals aggregates all four independently', () => {
+  const result = Monitoring.computeSignals({ days: [], benchmarkHistory: [], todayPain: { value: 6 }, asOfIso: '2026-07-01' });
+  assertEq(result.readinessTrend, null);
+  assertEq(result.rpeDrift, null);
+  assertEq(result.retestPlateau, null);
+  assert(result.painCheckIn && result.painCheckIn.key === 'pain-red');
+});
+
+test('[ADR-0014] schema v6 migration: globalBenchmarks.history is backfilled and idempotent', () => {
+  resetStorage();
+  Storage.importJson(JSON.stringify({
+    version: 5, activePlanId: 'p1',
+    plans: { p1: { id: 'p1', name: 'Plan 1', focus: 'hybrid', color: '#4f8cff', archived: false, createdAt: '2026-01-01', settings: {}, benchmarks: { history: [] }, days: {}, updatedAt: '2026-01-01T00:00:00.000Z' } },
+    globalSettings: {},
+    globalBenchmarks: { bodyweight: 70, maxHang20mm: 20, pullup1RM: 30 }
+  }));
+  assert(Array.isArray(Storage.get().benchmarks.history), 'v5→v6 migration must backfill globalBenchmarks.history as an array');
+  assertEq(Storage.raw().version, 6);
+
+  // Re-importing an already-v6 state must not throw or duplicate anything.
+  const exported = Storage.exportJson();
+  Storage.importJson(exported);
+  assertEq(Storage.raw().version, 6);
+  assert(Array.isArray(Storage.get().benchmarks.history));
+});
+
+test('[ADR-0014] Storage.saveRetestBenchmarks appends to history instead of overwriting', () => {
+  resetStorage();
+  Storage.saveRetestBenchmarks({ bodyweight: 70, maxHang20mm: 18, pullup1RM: 28 }, '2026-05-01');
+  Storage.saveRetestBenchmarks({ bodyweight: 70, maxHang20mm: 20, pullup1RM: 30 }, '2026-06-08');
+  const { benchmarks } = Storage.get();
+  assertEq(benchmarks.maxHang20mm, 20, 'current values reflect the latest save');
+  assertEq(benchmarks.history.length, 2, 'both retests must be recorded, not overwritten');
+  assertEq(benchmarks.history[0], { date: '2026-05-01', maxHang20mm: 18, pullup1RM: 28 });
+  assertEq(benchmarks.history[1], { date: '2026-06-08', maxHang20mm: 20, pullup1RM: 30 });
+});
+
+test('[ADR-0014] mergeRemote round-trips globalBenchmarks.history (LWW on the whole object)', () => {
+  resetStorage();
+  Storage.saveRetestBenchmarks({ bodyweight: 70, maxHang20mm: 18, pullup1RM: 28 }, '2026-05-01');
+  const remoteTs = new Date(Date.now() + 60000).toISOString();
+  const remote = {
+    version: 6, activePlanId: Storage.activeId(),
+    plans: {},
+    globalSettings: {},
+    globalBenchmarks: {
+      bodyweight: 70, maxHang20mm: 22, pullup1RM: 32,
+      history: [{ date: '2026-05-01', maxHang20mm: 18, pullup1RM: 28 }, { date: '2026-06-15', maxHang20mm: 22, pullup1RM: 32 }],
+      updatedAt: remoteTs
+    }
+  };
+  Storage.mergeRemote(remote);
+  const { benchmarks } = Storage.get();
+  assertEq(benchmarks.history.length, 2, 'remote history (newer) should win and round-trip intact');
+  assertEq(benchmarks.history[1], { date: '2026-06-15', maxHang20mm: 22, pullup1RM: 32 });
+});
+
+test('[ADR-0014] REGRESSION: pain check-in persists value + worse-this-morning flag on the Today tab', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-04');
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const painPill = root.querySelector('button[data-pain-pill][data-val="6"]');
+    assert(painPill, 'pain pill (value 6) missing');
+    painPill.click();
+    const worseCb = root.querySelector('[data-pain-worse]');
+    assert(worseCb, 'worse-this-morning checkbox missing');
+    worseCb.checked = true;
+    worseCb.dispatchEvent(new Event('change', { bubbles: true }));
+
+    const day = Storage.getDay('2026-05-04');
+    assertEq(day.readiness.pain.value, 6);
+    assertEq(day.readiness.pain.settledByMorning, false);
+  } finally { root.remove(); }
+});
+
+test('[ADR-0014] REGRESSION: readiness-trend banner appears on Today and its accept action cuts the current week\'s volume', () => {
+  // The Today-tab signal banner (like the gap banner) only ever evaluates
+  // against the REAL current date, not the browsed/selected one — so this
+  // fixture must anchor on the actual wall-clock today, not a fixed
+  // fictional date, or the date===realToday gate never opens.
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  // wk1 (startDate = today) is never a deload/retest week, whatever today's
+  // weekday is, so this can't collide with a natural volume cut.
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: datesToday(), cycleWeeks: 12, peakType: 'comp' });
+  for (let offset = 0; offset <= 27; offset++) {
+    const iso = datesAddDays(datesToday(), -offset);
+    const score = offset <= 6 ? 2 : 4;
+    Storage.setDay(iso, { readiness: { sleep: score, soreness: score, fatigue: score } });
+  }
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const banner = root.querySelector('[data-signal-banner="readinessTrend"]');
+    assert(banner, 'expected the readiness-trend banner to render');
+    const acceptBtn = root.querySelector('[data-signal-accept="readinessTrend"]');
+    assert(acceptBtn, 'expected the accept button');
+    acceptBtn.click();
+
+    // Re-render and confirm the week now carries an early volume cut. Check
+    // that week's Monday specifically (not "today" itself) since the accept
+    // action targets the whole week by weekIdx, and today's own slot could
+    // be a non-main day (tue-light/rest/sun-optional) depending on what the
+    // real current weekday happens to be when this test runs.
+    renderToday(root);
+    const weekMonday = datesSnapToMonday(datesToday());
+    const session = Program.build(Storage.getActivePlan(), weekMonday);
+    assert(session.deloadNote && /early volume cut/i.test(session.deloadNote), `expected an early-cut deloadNote, got "${session.deloadNote}"`);
+  } finally { root.remove(); }
+});
+
+test('[ADR-0014] REGRESSION: signals panel renders on the Log tab and dismiss removes it', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: datesToday() });
+  for (let offset = 0; offset <= 27; offset++) {
+    const iso = datesAddDays(datesToday(), -offset);
+    const score = offset <= 6 ? 2 : 4;
+    Storage.setDay(iso, { readiness: { sleep: score, soreness: score, fatigue: score } });
+  }
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderLog(root);
+    const panel = document.getElementById('logSignalsPanel');
+    assert(panel && panel.querySelector('[data-log-signal="readinessTrend"]'), 'expected the readiness-trend row in the Log signals panel');
+    const dismissBtn = panel.querySelector('[data-log-signal-dismiss="readinessTrend"]');
+    assert(dismissBtn, 'dismiss button missing');
+    dismissBtn.click();
+    assert(!document.getElementById('logSignalsPanel').querySelector('[data-log-signal="readinessTrend"]'), 'dismissed signal should disappear from the panel');
   } finally { root.remove(); }
 });
 

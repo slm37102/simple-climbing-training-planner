@@ -5,6 +5,7 @@ import { Program } from '../program.js';
 import { Loads } from '../loads.js';
 import { Warmup } from '../warmup.js';
 import { Replan } from '../replan.js';
+import { Monitoring } from '../monitoring.js';
 import { daysBetween } from '../dates.js';
 import { inputVisibility, repsLabel, actualHasResult, howto, unitLabel } from '../exercise-inputs.js';
 import { DRILL_CATEGORIES, WARMUP_DRILLS } from '../drills.js';
@@ -270,6 +271,58 @@ function gapBannerHtml(gap) {
   </div>`;
 }
 
+// ADR-0014: monitoring signals — advisory banners, nothing mutates without a
+// tap (same idiom as the gap banner above). Only readinessTrend has a real
+// accept mutation (the early volume cut); the others are informational
+// pointers, so their "accept" is just a dismissal.
+const SIGNAL_ORDER = ['painCheckIn', 'readinessTrend', 'rpeDrift', 'retestPlateau'];
+
+function signalsBannerHtml(signals) {
+  if (!signals) return '';
+  return SIGNAL_ORDER.map(key => {
+    const sig = signals[key];
+    if (!sig) return '';
+    const major = sig.severity === 'red' ? ' major' : '';
+    const acceptBtn = key === 'readinessTrend'
+      ? `<button type="button" class="primary" data-signal-accept="${key}">${sig.action}</button>`
+      : '';
+    return `<div class="gap-note${major}" data-signal-banner="${key}">
+      <p>⚠ ${sig.message}</p>
+      <div class="row" style="gap:8px;margin-top:8px">
+        ${acceptBtn}
+        <button type="button" class="ghost" data-signal-dismiss="${key}">${acceptBtn ? 'Not now' : 'Got it'}</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function dismissSignalForDay(date, key) {
+  const day = Storage.getDay(date) || {};
+  Storage.setDay(date, { ...day, dismissedSignals: { ...(day.dismissedSignals || {}), [key]: true } });
+}
+
+function wireSignalsBanner(root, activePlan, ctx, date) {
+  root.querySelectorAll('[data-signal-accept]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.signalAccept;
+      if (key === 'readinessTrend') {
+        const cur = Array.isArray(activePlan.settings.earlyVolumeCutWeekIndices) ? activePlan.settings.earlyVolumeCutWeekIndices : [];
+        if (ctx?.weekIdx != null && !cur.includes(ctx.weekIdx)) {
+          Storage.setPlanSettings(activePlan.id, { earlyVolumeCutWeekIndices: [...cur, ctx.weekIdx] });
+        }
+      }
+      dismissSignalForDay(date, key);
+      renderToday(root);
+    });
+  });
+  root.querySelectorAll('[data-signal-dismiss]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      dismissSignalForDay(date, btn.dataset.signalDismiss);
+      renderToday(root);
+    });
+  });
+}
+
 function wireGapBanner(root, activePlan, gap) {
   if (!gap) return;
   root.querySelectorAll('[data-gap-extend]').forEach(btn => {
@@ -368,6 +421,19 @@ export function renderToday(root) {
   // Only surface a gap on the real current date — not while browsing history (ADR-0008).
   const gap = date === realToday ? Replan.detectGap(activePlan, realToday) : null;
 
+  // ADR-0014: monitoring signals — same real-current-date restriction as the
+  // gap banner; dismissed-today signals stay hidden until they re-fire.
+  const dismissedSignals = dayLog.dismissedSignals || {};
+  const rawSignals = date === realToday
+    ? Monitoring.computeSignals({
+        days: Storage.listDays(activePlan.id),
+        benchmarkHistory: Storage.get().benchmarks?.history,
+        todayPain: readiness.pain || null,
+        asOfIso: date
+      })
+    : null;
+  const signals = rawSignals && Object.fromEntries(Object.entries(rawSignals).map(([k, v]) => [k, dismissedSignals[k] ? null : v]));
+
   // ADR-0012: Build-Monday micro-retest gate — first Build Monday of the
   // cycle, only when the stored max-hang benchmark is >4 weeks old.
   const microRetest = ctx.slot === 'mon-main' && ctx.phase === 'build'
@@ -379,7 +445,7 @@ export function renderToday(root) {
     })();
   const { warmup, cooldown, skillDrills } = Warmup.forSession(session, { microRetest });
 
-  let body = dateNavHtml + planSwitcherHtml + completionHtml + headerHtml(date, ctx, session) + gapBannerHtml(gap);
+  let body = dateNavHtml + planSwitcherHtml + completionHtml + headerHtml(date, ctx, session) + gapBannerHtml(gap) + signalsBannerHtml(signals);
 
   if (session.isRest) {
     body += `<div class="card"><h2>Recovery checklist</h2>
@@ -397,6 +463,7 @@ export function renderToday(root) {
     wireDateNav(root);
     wireCycleComplete(root, activePlan);
     wireGapBanner(root, activePlan, gap);
+    wireSignalsBanner(root, activePlan, ctx, date);
     wirePlanSwitcher(root, root);
     return;
   }
@@ -412,6 +479,22 @@ export function renderToday(root) {
       </div>
     </div>`;
 
+  // ADR-0014: pain check-in — distinct from generic soreness (0-10 finger/
+  // elbow pain + a "worse this morning?" flag), the Silbernagel-model input.
+  const pain = readiness.pain || null;
+  const painRow = `
+    <div class="field">
+      <label id="pill-lbl-pain">Finger/elbow pain (0–10)</label>
+      <div class="pill-group" role="group" aria-labelledby="pill-lbl-pain" data-pill-group="pain" style="flex-wrap:wrap">
+        ${Array.from({ length: 11 }, (_, v) => v).map(v =>
+          `<button type="button" class="pill ${pain?.value === v ? 'active' : ''}" data-pain-pill data-val="${v}" aria-pressed="${pain?.value === v}">${v}</button>`
+        ).join('')}
+      </div>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:8px;cursor:pointer;text-transform:none;letter-spacing:0;font:400 13px 'Archivo';color:var(--text2)">
+        <input type="checkbox" data-pain-worse ${pain?.settledByMorning === false ? 'checked' : ''}> Worse this morning than after yesterday's session
+      </label>
+    </div>`;
+
   body += `<div>
     <div class="section-label" style="margin-bottom:9px">Readiness</div>
     <div class="card">
@@ -419,6 +502,9 @@ export function renderToday(root) {
       ${readinessRow('soreness')}
       ${readinessRow('fatigue')}
       <p class="muted" data-readiness-summary style="margin:4px 0 0">Avg ${rdAvg ? rdAvg.toFixed(1) : '—'} → <b>${rdLabel}</b> ${multiplier ? `(×${multiplier})` : ''}</p>
+    </div>
+    <div class="card" style="margin-top:10px">
+      ${painRow}
     </div>
   </div>`;
 
@@ -471,6 +557,7 @@ export function renderToday(root) {
   wireDateNav(root);
   wireCycleComplete(root, activePlan);
   wireGapBanner(root, activePlan, gap);
+  wireSignalsBanner(root, activePlan, ctx, date);
   wire(root, date, session, ctx, multiplier);
   wirePlanSwitcher(root, root);
 }
@@ -831,10 +918,13 @@ function wire(root, date, session, ctx, readinessMult) {
       // picker for a past day instead of falling back to generic sets+reps+rpe.
       // Drill options are NOT persisted here (KG-A9 addendum) — log.js resolves
       // them from the js/drills.js catalog instead, so a later drill-list edit
-      // doesn't get frozen into every already-logged day.
+      // doesn't get frozen into every already-logged day. rpeRange (ADR-0014)
+      // is carried too — the RPE-drift monitoring signal compares a logged
+      // RPE against the target range that applied *that day*, which isn't
+      // otherwise reconstructible once the phase has moved on.
       exercises: cur.exercises || session.exercises.map(ex => ({
         name: ex.name, kind: ex.kind, optional: ex.optional,
-        prescribedTarget: ex.prescribedTarget, prescribed: '', actual:{}, notes:''
+        prescribedTarget: ex.prescribedTarget, rpeRange: ex.rpeRange, prescribed: '', actual:{}, notes:''
       })),
       sessionNotes: cur.sessionNotes || '',
       warmup: cur.warmup || {},
@@ -899,6 +989,24 @@ function wire(root, date, session, ctx, readinessMult) {
         }
       });
     });
+  });
+
+  // ===== Pain check-in (ADR-0014, distinct from generic soreness) =====
+  function persistPain(patch) {
+    const d = getOrInitDay();
+    const r = { ...d.readiness, pain: { ...(d.readiness?.pain || {}), ...patch } };
+    persist({ readiness: r });
+  }
+  root.querySelectorAll('button[data-pain-pill]').forEach(p => {
+    p.addEventListener('click', () => {
+      const group = root.querySelector('[data-pill-group="pain"]');
+      group.querySelectorAll('.pill').forEach(s => { s.classList.remove('active'); s.setAttribute('aria-pressed', 'false'); });
+      p.classList.add('active'); p.setAttribute('aria-pressed', 'true');
+      persistPain({ value: parseInt(p.dataset.val, 10) });
+    });
+  });
+  root.querySelector('[data-pain-worse]')?.addEventListener('change', (e) => {
+    persistPain({ settledByMorning: !e.target.checked });
   });
 
   // ===== Technique-drill category chips (KG-A9 + addendum) =====
@@ -1115,13 +1223,16 @@ function wire(root, date, session, ctx, readinessMult) {
     const values = retestBenchmarkValues(session, getSelectedDate());
     if (!values) return;
     const { benchmarks } = Storage.get();
-    Storage.setGlobalBenchmarks({
+    // ADR-0014: the retest-save path appends a dated history snapshot
+    // (feeding the retest-trajectory monitoring signal) rather than the
+    // plain overwrite setGlobalBenchmarks does for ad-hoc Profile edits.
+    Storage.saveRetestBenchmarks({
       bodyweight: benchmarks.bodyweight ?? null,
       maxHang20mm: values.maxHang20mm,
       // ADR-0012: a skipped optional pull-up (post-goal retest) must not
       // erase the last known pull-up benchmark with null.
       pullup1RM: values.pullup1RM != null ? values.pullup1RM : (benchmarks.pullup1RM ?? null)
-    });
+    }, getSelectedDate());
     refreshRetestBenchmarkBox(true);
   });
 }
