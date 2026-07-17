@@ -49,3 +49,4 @@ When trade-offs bite, the priority order is: **safety (G3) > prescription correc
 | [`training-plan.md`](training-plan.md) | Human-readable prescription tables (mirror of `js/program.js`) |
 | [`trip-conversion-note.md`](trip-conversion-note.md) | Converting Peak/Taper weeks for an outdoor trip instead of a comp/gym goal (KG-A11 mitigation) |
 | [`end-of-cycle-review.md`](end-of-cycle-review.md) | End-of-cycle review checklist — the manual walkthrough after each macrocycle completes (closes the checklist half of KG-A8/KG-D7) |
+| [`return-from-tweak.md`](return-from-tweak.md) | Return-from-finger-tweak guide — pain gate, de-escalation ladder, reload ramp, red-flag handoff list (closes KG-A7's return-from-tweak half) |
