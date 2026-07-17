@@ -37,11 +37,13 @@ import { Loads } from '../js/loads.js';
 import { Warmup } from '../js/warmup.js';
 import { SKILL_DRILLS, DRILL_CATEGORIES, WARMUP_DRILLS } from '../js/drills.js';
 import { Replan, MAJOR_GAP_DAYS } from '../js/replan.js';
+import { limiterReadout } from '../js/limiter.js';
 import { inputVisibility, repsLabel, actualHasResult, howto, unitLabel } from '../js/exercise-inputs.js';
 import { today as datesToday, addDays as datesAddDays, daysBetween, snapToMonday as datesSnapToMonday } from '../js/dates.js';
 import { renderToday } from '../js/views/today.js';
 import { renderLog }   from '../js/views/log.js';
 import { renderCalendar } from '../js/views/calendar.js';
+import { renderProfile } from '../js/views/profile.js';
 
 const results = document.getElementById('results');
 const summaryEl = document.getElementById('summary');
@@ -2640,6 +2642,82 @@ test('[ADR-0013] REGRESSION: Today tab shows a "set bodyweight" hint when bodywe
   try {
     renderToday(root);
     assert(/set your bodyweight/i.test(root.textContent), 'expected a "set bodyweight" hint somewhere in the rendered Today tab');
+  } finally { root.remove(); }
+});
+
+// ─── ADR-0011: limiter readout (closes KG-A1/KG-D2) ───────────────────────
+// Norm table per docs/benchmark-norms.md: V5 finger norm 34% added, V6 40%,
+// V7 46% (added %BW); pull-up diminishing-returns ceiling 65% added.
+
+test('[ADR-0011] fingers at-or-above the target-grade norm band', () => {
+  const readout = limiterReadout({ bodyweight: 70, maxHang20mm: 23.8, boulderGrade: 'V5' }); // 23.8/70 = 0.34 = V5 norm exactly
+  assert(readout, 'expected a readout');
+  const fingers = readout.lines.find(l => l.key === 'fingers');
+  assertEq(fingers.verdict, 'at-or-above');
+  assert(/aren't your main limiter/i.test(fingers.text));
+});
+
+test('[ADR-0011] fingers meaningfully (≥1 grade-step) below the target-grade norm band', () => {
+  const readout = limiterReadout({ bodyweight: 70, maxHang20mm: 10, boulderGrade: 'V7' }); // 10/70=0.143, V7 norm 0.46, step 0.06 → 0.143 <= 0.40
+  const fingers = readout.lines.find(l => l.key === 'fingers');
+  assertEq(fingers.verdict, 'below');
+  assert(/limiter candidate/i.test(fingers.text));
+});
+
+test('[ADR-0011] fingers a little below but not a full grade-step — the ambiguous middle band', () => {
+  const readout = limiterReadout({ bodyweight: 70, maxHang20mm: 26, boulderGrade: 'V6' }); // 26/70=0.371, V6 norm 0.40, step floor 0.34 → between
+  const fingers = readout.lines.find(l => l.key === 'fingers');
+  assertEq(fingers.verdict, 'near');
+});
+
+test('[ADR-0011] pull-ups at vs below the diminishing-returns ceiling (no grade table, ceiling only)', () => {
+  const at = limiterReadout({ bodyweight: 70, pullup1RM: 46 }); // 46/70 = 0.657 >= 0.65
+  assertEq(at.lines.find(l => l.key === 'pullups').verdict, 'at-ceiling');
+  const below = limiterReadout({ bodyweight: 70, pullup1RM: 20 }); // 20/70 = 0.286
+  assertEq(below.lines.find(l => l.key === 'pullups').verdict, 'below-ceiling');
+});
+
+test('[ADR-0011] elsewhere-inference line appears only when BOTH strength lines are at/above norm', () => {
+  const both = limiterReadout({ bodyweight: 70, maxHang20mm: 23.8, boulderGrade: 'V5', pullup1RM: 46 });
+  assert(both.lines.some(l => l.key === 'elsewhere'), 'expected the elsewhere-inference line when both are at/above');
+
+  const onlyFingers = limiterReadout({ bodyweight: 70, maxHang20mm: 23.8, boulderGrade: 'V5', pullup1RM: 20 });
+  assert(!onlyFingers.lines.some(l => l.key === 'elsewhere'), 'must not appear when only one strength line is at/above');
+});
+
+test('[ADR-0011] missing fields → graceful no-verdict, never a guess', () => {
+  assertEq(limiterReadout(null), null, 'null benchmarks → null');
+  assertEq(limiterReadout({}), null, 'empty benchmarks → null');
+  assertEq(limiterReadout({ maxHang20mm: 20, pullup1RM: 30, boulderGrade: 'V6' }), null, 'no bodyweight → null (can\'t compute %BW at all)');
+  assertEq(limiterReadout({ bodyweight: 70 }), null, 'bodyweight alone, no strength benchmarks → null');
+});
+
+test('[ADR-0011] partial data: only pull-up resolves (no grade, no finger benchmark) → single line, no elsewhere', () => {
+  const readout = limiterReadout({ bodyweight: 70, pullup1RM: 46 });
+  assertEq(readout.lines.length, 1);
+  assertEq(readout.lines[0].key, 'pullups');
+});
+
+test('[ADR-0011] caveat states the R² honesty requirement', () => {
+  const readout = limiterReadout({ bodyweight: 70, pullup1RM: 46 });
+  assert(/17%/.test(readout.caveat) && /8.{1,2}12%/.test(readout.caveat), `caveat missing R² figures, got "${readout.caveat}"`);
+});
+
+test('[ADR-0011] REGRESSION: card renders on the Profile tab and recomputes on a benchmark change', () => {
+  resetStorage();
+  Storage.setGlobalBenchmarks({ bodyweight: 70, maxHang20mm: 10, boulderGrade: 'V7' });
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderProfile(root);
+    let card = root.querySelector('[data-limiter-card]');
+    assert(card, 'limiter card should render when benchmarks resolve a verdict');
+    assert(/limiter candidate/i.test(card.textContent), 'expected the below-norm fingers verdict text');
+
+    Storage.setGlobalBenchmarks({ maxHang20mm: 40 }); // now well above the V7 norm
+    renderProfile(root);
+    card = root.querySelector('[data-limiter-card]');
+    assert(/aren't your main limiter/i.test(card.textContent), 'card should recompute after a benchmark change');
   } finally { root.remove(); }
 });
 

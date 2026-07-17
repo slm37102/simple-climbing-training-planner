@@ -7,6 +7,7 @@ import { Sync } from '../sync.js';
 import { flash, escHtml } from '../ui.js';
 import { mondayDow } from '../dates.js';
 import { openOnboarding } from './onboarding.js';
+import { limiterReadout } from '../limiter.js';
 
 const COLORS = ['#5FD4E8', '#F0607A', '#3FB6A8', '#E0A53C', '#6E8BF0', '#F07850'];
 
@@ -99,6 +100,21 @@ export function renderProfile(root) {
         ${benchRow('bodyweight', 'Bodyweight', 'kg', 0.5, 30)}
       </div>
       ${sugg != null ? `<div class="callout"><span class="k">→ Suggested pull-up work load</span><span class="v">+${sugg} kg</span></div>` : ''}
+    </div>`;
+  }
+
+  // ── Limiter readout card (ADR-0011, closes KG-A1/KG-D2) ────────────────
+  // Static, informational, target-grade-anchored — recomputes on any
+  // benchmark change (including a retest save, since it just re-reads
+  // Storage.get().benchmarks on every render). Changes no prescription.
+  function limiterCardHtml() {
+    const readout = limiterReadout(Storage.get().benchmarks);
+    if (!readout) return '';
+    const lineHtml = readout.lines.map(l => `<div class="bench-row" data-limiter-line="${l.key}"><div class="b-name" style="max-width:100%">${escHtml(l.text)}</div></div>`).join('');
+    return `<div class="card" data-limiter-card>
+      <h2 style="margin:0 0 3px">Likely limiter</h2>
+      <p class="muted" style="margin:0 0 14px;font-size:.75rem">${escHtml(readout.caveat)}</p>
+      <div class="bench-rows">${lineHtml}</div>
     </div>`;
   }
 
@@ -616,7 +632,7 @@ export function renderProfile(root) {
       const bm = Storage.get().benchmarks;
       benchDraft = { bodyweight: bm.bodyweight, maxHang20mm: bm.maxHang20mm, pullup1RM: bm.pullup1RM };
     }
-    let html = headHtml() + benchmarksCardHtml() + plansCardHtml() + settingsCardHtml();
+    let html = headHtml() + benchmarksCardHtml() + limiterCardHtml() + plansCardHtml() + settingsCardHtml();
     root.innerHTML = html;
     if (formState.mode === 'edit' && formState.editId) {
       const ep = Storage.getPlan(formState.editId);

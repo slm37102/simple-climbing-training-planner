@@ -1,6 +1,6 @@
 # Limiter readout: static norm comparison, target-grade anchored, informational-only
 
-**Status:** Accepted — decided 2026-07-15 ([wayfinder ticket #29](https://github.com/slm37102/simple-climbing-training-planner/issues/29)); implementation pending (ticket cut at the map's assembly step). Adjudicates KG-A1's feature half; KG-D2 is the implementation.
+**Status:** Implemented — decided 2026-07-15 ([wayfinder ticket #29](https://github.com/slm37102/simple-climbing-training-planner/issues/29)); shipped 2026-07-17 via [issue #50](https://github.com/slm37102/simple-climbing-training-planner/issues/50). Adjudicates KG-A1's feature half; KG-D2 is the implementation.
 
 ## Context
 
