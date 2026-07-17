@@ -1,6 +1,6 @@
 # Hangboard/pull-up intensity: total-system-load convention, evidence-anchored bands, immediate effect
 
-**Status:** Accepted — decided 2026-07-15 ([wayfinder ticket #32](https://github.com/slm37102/simple-climbing-training-planner/issues/32)); implementation pending (band-derivation spec → tickets via the map's assembly step). Adjudicates KG-B11's convention half (the negative-benchmark clamp, KG-B11a, ships independently — ticket #36).
+**Status:** Implemented — decided 2026-07-15 ([wayfinder ticket #32](https://github.com/slm37102/simple-climbing-training-planner/issues/32)); shipped 2026-07-17 via [the band-derivation spec](../specs/total-load-bands-spec.md) and [issue #49](https://github.com/slm37102/simple-climbing-training-planner/issues/49). Adjudicates KG-B11's convention half (the negative-benchmark clamp, KG-B11a, shipped independently — ticket #36).
 
 ## Context
 

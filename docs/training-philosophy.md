@@ -25,6 +25,8 @@ The three converge more than they diverge. Where they differ — e.g. Anderson f
 
 The Base/Build hangboard protocols above are the decided **and implemented** design ([ADR-0005](adr/0005-base-build-hangboard-protocols.md), implemented 2026-07-04): repeaters build capacity in Base, weighted max hangs build recruitment in Build, and the old min-edge-to-failure Base protocol is deleted. The Taper row matches [ADR-0007](adr/0007-taper-hold-intensity-peaktype.md) (hold intensity, cut volume), also in code.
 
+**Intensity percentages are of total system load** (bodyweight + the added benchmark), not the added weight alone — [ADR-0013](adr/0013-total-load-intensity-convention.md), implemented 2026-07-17 (band derivation: [`specs/total-load-bands-spec.md`](specs/total-load-bands-spec.md)). Lattice's published max-hang intensity is explicitly stated in total-load terms ("80–95% of maximum total load, lower end for climbers first trying max hangs" — `research/verified-findings.md` ~L281); the planner's bands sit inside that: Base intro 80–85%, Build 87–92%, Peak (7-53) 92–96%, Taper 90–94% — a real, monotone ramp, versus the ~90→99% the old added-only math actually produced. Weighted pull-up bands (Base 75–82%, Build 84–89%, Peak 88–90%, Taper 87–90%) follow general strength-training rep-max relationships (5-rep ≈75–85%, 3-rep ≈84–89%, 2-rep ≈88–93% of 1RM) — coaching convention, not climbing-specific, labelled as such.
+
 The Peak protocol was softened from the published Lattice/Anderson defaults for this athlete — see ADR 0001 (re-adjudicated against the verified research and implemented 2026-07-02; see the ADR's addendum).
 
 ## Year-level shape (80/20)

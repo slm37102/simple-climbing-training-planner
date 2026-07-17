@@ -36,6 +36,8 @@ ADDED %BW = TOTAL %BW − 100
 added kg  = bodyweight_kg × (ADDED %BW ÷ 100)
 ```
 
+**Update 2026-07-17 ([ADR-0013](adr/0013-total-load-intensity-convention.md)):** `js/loads.js` now computes *prescription* percentages (the phase bands — Base intro 80–85%, Build 87–92%, etc.) on **total system load** too — `added = pct × (bodyweight + benchmark) − bodyweight` — matching the TOTAL %BW convention this doc already uses for the norm tables above. Stored benchmarks (`maxHang20mm`, `pullup1RM`) themselves are still ADDED kg — that hasn't changed, and the conversion formulas above remain correct for reading the norm tables. What's changed is only how the app turns "today's benchmark" into "today's prescribed load"; this doc's dual-unit discipline is the reason that switch didn't require re-deriving anything here.
+
 ## Finger strength — two-arm, 20mm edge, 7-second hang, half-crimp or open (Lattice, 901 participants)
 
 This is the same measurement this app's `maxHang20mm` benchmark tracks (two-arm, added kg). Confidence:

@@ -655,7 +655,10 @@ test('[ADR-0005] Base Monday = 7/3 repeaters + intro max-hangs, no min-edge', ()
   assert(intro, 'intro max-hangs missing');
   assert(!sess.exercises.some(e => /min.?edge/i.test(e.name || '')), 'min-edge protocol must be gone');
   assertEq(rep.loadPctRange, null, 'repeaters are bodyweight — no load %');
-  assert(intro.loadPctRange[1] <= 0.70, `intro max-hangs stay low-end (≤70%), got ${intro.loadPctRange}`);
+  // ADR-0013: total-system-load convention — Base intro is the Lattice band's
+  // low end (80–85% of total), not "≤70% added" (which was ~90–93% true
+  // intensity under the old added-only math this replaced).
+  assert(intro.loadPctRange[0] >= 0.80 && intro.loadPctRange[1] <= 0.85, `intro max-hangs stay at the Lattice band's low end (80–85% of total), got ${intro.loadPctRange}`);
 });
 
 test('[ADR-0005] exactly one repeater block in Base (bonus sport repeaters gone)', () => {
@@ -2017,10 +2020,13 @@ test('[Phase2 S5] mergeRemote: activePlanId syncs from remote', () => {
 // No computed bound (initial range or final suggestedKg) may ever exceed the
 // benchmark in the harder direction. Positive benchmarks must see zero change.
 
-test('[KG-B11a] prescribeLoadKg clamps both bounds when a negative-benchmark % range is entirely harder than the benchmark', () => {
-  // 55–70% of a -10kg benchmark computes -5.5/-7kg — both less negative (harder)
-  // than the athlete's tested -10kg max. Both bounds must clamp down to -10kg.
-  const exercise = { kind: 'hangboard', loadPctRange: [0.55, 0.70] };
+test('[KG-B11a] prescribeLoadKg clamps both bounds when a total-load % range is entirely harder than the benchmark', () => {
+  // ADR-0013: under total-load math the clamp is belt-and-braces (any
+  // realistic <1.0 band is naturally safe for an assisted athlete — see the
+  // next test) — it still must guard a band ≥1.0 or a data edge. 105–115% of
+  // a bw70/-10kg athlete's 60kg total = 63–69kg total = -1/-7kg added, both
+  // less negative (harder) than the tested -10kg max. Both bounds must clamp.
+  const exercise = { kind: 'hangboard', loadPctRange: [1.05, 1.15] };
   const benchmarks = { maxHang20mm: -10, bodyweight: 70 };
   const result = Loads.prescribeLoadKg(exercise, benchmarks);
   assertEq(result.baseMax, -10, 'prescribeLoadKg must return baseMax so callers can thread it through');
@@ -2029,12 +2035,13 @@ test('[KG-B11a] prescribeLoadKg clamps both bounds when a negative-benchmark % r
 });
 
 test('[KG-B11a] prescribeLoadKg clamps only the bound that is harder than benchmark, leaves the easier bound untouched', () => {
-  // 90–110% of a -10kg benchmark: lo=-9 (harder, must clamp to -10), hi=-11
-  // (easier than -10kg already, must be left alone).
+  // 90–110% of a bw70/-10kg athlete's 60kg total: lo = 0.9×60−70 = -16kg
+  // (easier than -10kg already, left alone); hi = 1.1×60−70 = -4kg (harder,
+  // must clamp to -10kg).
   const exercise = { kind: 'hangboard', loadPctRange: [0.9, 1.1] };
-  const benchmarks = { maxHang20mm: -10 };
+  const benchmarks = { maxHang20mm: -10, bodyweight: 70 };
   const result = Loads.prescribeLoadKg(exercise, benchmarks);
-  assertEq(result.addedKgRange, [-11, -10], 'harder bound (-9) clamps to -10; easier bound (-11) is unaffected');
+  assertEq(result.addedKgRange, [-16, -10], 'harder bound (-4) clamps to -10; easier bound (-16) is unaffected');
 });
 
 test('[KG-B11a] resolveEffective clamps a previousActualKg-progression path that would otherwise land harder than the negative benchmark', () => {
@@ -2043,9 +2050,12 @@ test('[KG-B11a] resolveEffective clamps a previousActualKg-progression path that
   // the opposite of what layoff decay is supposed to do for an assisted lift).
   // Even after the existing +5% session cap (which also shrinks magnitude in
   // this direction, landing at -9kg), the result is still harder than the
-  // -10kg benchmark and must be clamped back to it.
+  // -10kg benchmark and must be clamped back to it. (This path is driven
+  // entirely by previousActualKg, not the range, so it's unaffected by which
+  // loadPctRange/convention is in effect — bodyweight is still required for
+  // prescribeLoadKg to resolve at all under ADR-0013.)
   const exercise = { kind: 'hangboard', loadPctRange: [0.55, 0.70], rpeRange: [8, 9] };
-  const benchmarks = { maxHang20mm: -10 };
+  const benchmarks = { maxHang20mm: -10, bodyweight: 70 };
   const res = Loads.resolveEffective({
     exercise, previousActualKg: -10, previousAvgRpe: 8.5, daysSincePrevious: 60, benchmarks
   });
@@ -2085,11 +2095,13 @@ test('[KG-B11a] clamp holds across real program.js phase tables (Base intro, Bui
 });
 
 test('[KG-B11a] positive benchmarks are completely unaffected by the clamp, including a previousActualKg that exceeds a stale benchmark (PR)', () => {
-  const exercise = { kind: 'hangboard', loadPctRange: [0.5, 0.7], rpeRange: [8, 9] };
+  // ADR-0013: total-load math — bw70/+20kg athlete, totalMax=90. A realistic
+  // Build-like band [0.8, 0.9] → 72–81kg total → +2…+11kg added.
+  const exercise = { kind: 'hangboard', loadPctRange: [0.8, 0.9], rpeRange: [8, 9] };
   const benchmarks = { maxHang20mm: 20, bodyweight: 70 };
 
   const range = Loads.prescribeLoadKg(exercise, benchmarks);
-  assertEq(range.addedKgRange, [10, 14], 'positive-benchmark range must be untouched by the clamp');
+  assertEq(range.addedKgRange, [2, 11], 'positive-benchmark range must be untouched by the clamp');
 
   // PR case: previousActualKg (25) exceeds the stale positive benchmark (20).
   // This is a legitimate upward progression, not a bug — must not be clamped.
@@ -2528,6 +2540,107 @@ test('[ADR-0010] deload week in hybrid Build: the even-week (sat-6060-threshold)
   const iv = sess.exercises.find(e => e.kind === 'circuit');
   assertEq(iv.originalTarget, { value: 20, unit: 'min' });
   assertEq(iv.prescribedTarget, { value: 10, unit: 'min' }, 'round(20 × 0.6 / 5) × 5 = 10 min');
+});
+
+// ─── ADR-0013: total-load intensity bands (closes KG-B11's convention half) ──
+// Canonical athlete (docs/specs/total-load-bands-spec.md worked examples):
+// bodyweight 70kg, maxHang20mm +20kg (10s-max total 90kg), pullup1RM +30kg
+// (1RM total 100kg). Fixed anchor 2026-05-04 (Mon), 12-wk comp cycle: base
+// Mon wk1 = 2026-05-04, build Mon wk7 = 2026-06-15, peak Mon wk10 =
+// 2026-07-06, taper Mon wk12 = 2026-07-20 (same Mondays as the [Gym-ready]
+// rest-field fixture above).
+
+test('[ADR-0013] canonical-athlete exact hangboard ranges per phase (added = pct × (bw+benchmark) − bw)', () => {
+  const benchmarks = { maxHang20mm: 20, bodyweight: 70 };
+  const mondays = { base: '2026-05-04', build: '2026-06-15', peak: '2026-07-06', taper: '2026-07-20' };
+  const expected = {
+    base:  [2, 6.5],    // 80–85% of 90 = 72–76.5 total → +2…+6.5
+    build: [8.5, 13],   // 87–92% of 90 = 78.3–82.8 total → +8.3…+12.8 → round(±0.5) → +8.5…+13
+    peak:  [13, 16.5],  // 92–96% of 90 = 82.8–86.4 total → +12.8…+16.4 → +13…+16.5
+    taper: [11, 14.5],  // 90–94% of 90 = 81–84.6 total → +11…+14.6 → +11…+14.5
+  };
+  for (const [phase, iso] of Object.entries(mondays)) {
+    const ctx = Program.resolveDate(iso, '2026-05-04', 12);
+    assertEq(ctx.phase, phase, `fixture date ${iso} should be ${phase}`);
+    const sess = Program.prescribeForContext(ctx, 'boulder');
+    const hang = phase === 'base' ? sess.exercises.find(e => /intro/i.test(e.name)) : sess.exercises.find(e => e.kind === 'hangboard');
+    assert(hang, `${phase}: hangboard exercise missing`);
+    const range = Loads.prescribeLoadKg(hang, benchmarks);
+    assertEq(range.addedKgRange, expected[phase], `${phase}: expected ${JSON.stringify(expected[phase])}, got ${JSON.stringify(range.addedKgRange)}`);
+  }
+});
+
+test('[ADR-0013] canonical-athlete exact pull-up ranges per phase', () => {
+  const benchmarks = { pullup1RM: 30, bodyweight: 70 };
+  const mondays = { base: '2026-05-04', build: '2026-06-15', peak: '2026-07-06', taper: '2026-07-20' };
+  const expected = { base: [5, 12], build: [14, 19], peak: [18, 20], taper: [17, 20] };
+  for (const [phase, iso] of Object.entries(mondays)) {
+    const ctx = Program.resolveDate(iso, '2026-05-04', 12);
+    const sess = Program.prescribeForContext(ctx, 'boulder');
+    const pull = sess.exercises.find(e => e.kind === 'pullup');
+    assert(pull, `${phase}: pullup exercise missing`);
+    const range = Loads.prescribeLoadKg(pull, benchmarks);
+    assertEq(range.addedKgRange, expected[phase], `${phase}: expected ${JSON.stringify(expected[phase])}, got ${JSON.stringify(range.addedKgRange)}`);
+  }
+});
+
+test('[ADR-0013] bodyweight unset → no range, no throw (never a silent added-only fallback)', () => {
+  const exercise = { kind: 'hangboard', loadPctRange: [0.80, 0.85] };
+  const noBw = Loads.prescribeLoadKg(exercise, { maxHang20mm: 20 });
+  assertEq(noBw, null, 'missing bodyweight must return null, not a silently-computed added-only range');
+  const resolved = Loads.resolveEffective({ exercise, previousActualKg: null, benchmarks: { maxHang20mm: 20 } });
+  assertEq(resolved, null, 'resolveEffective must also return null when bodyweight is unset');
+});
+
+test('[ADR-0013] assisted athlete: Base intro range lands at -22…-19kg added (more assistance than a -10kg tested max) — naturally safe', () => {
+  const benchmarks = { maxHang20mm: -10, bodyweight: 70 };
+  const ctx = Program.resolveDate('2026-05-04', '2026-05-04', 12);
+  const sess = Program.prescribeForContext(ctx, 'boulder');
+  const intro = sess.exercises.find(e => /intro/i.test(e.name));
+  const range = Loads.prescribeLoadKg(intro, benchmarks);
+  assertEq(range.addedKgRange, [-22, -19], 'Base intro (80–85% of a 60kg total) = 48–51kg total = -22…-19kg added');
+  assert(range.addedKgRange[0] <= -10 + 1e-9 && range.addedKgRange[1] <= -10 + 1e-9,
+    'must never be harder (less assistance) than the -10kg tested max — the B11a clamp is a no-op here by construction');
+});
+
+test('[ADR-0013] previous-actual seeding is not clamped to the (now lower) range; migration note appears in the trail', () => {
+  const benchmarks = { maxHang20mm: 20, bodyweight: 70 };
+  const ctx = Program.resolveDate('2026-06-15', '2026-05-04', 12); // wk7 Mon, build
+  const sess = Program.prescribeForContext(ctx, 'boulder');
+  const hang = sess.exercises.find(e => e.kind === 'hangboard');
+  // previousActualKg (16) sits above the new Build range top (13, per the
+  // canonical-athlete table above) — simulating a stale benchmark relative
+  // to what the athlete is actually lifting.
+  const res = Loads.resolveEffective({ exercise: hang, previousActualKg: 16, previousAvgRpe: 8.5, daysSincePrevious: 5, benchmarks });
+  assertEq(res.suggestedKg, 16, 'suggestion must seed from the previous actual, not get clamped down to the displayed range');
+  assert(res.reason.some(r => /ADR-0013/.test(r)), 'migration note must appear in the reason trail when a previous actual carries over');
+  assert(res.reason.some(r => /total max/.test(r)), 'convention statement must appear in the reason trail');
+});
+
+test('[ADR-0013] the Base→Peak ramp is monotone in TOTAL-load terms (mid-band %)', () => {
+  const baseSess  = Program.prescribeForContext(Program.resolveDate('2026-05-04', '2026-05-04', 12), 'boulder');
+  const buildSess = Program.prescribeForContext(Program.resolveDate('2026-06-15', '2026-05-04', 12), 'boulder');
+  const peakSess  = Program.prescribeForContext(Program.resolveDate('2026-07-06', '2026-05-04', 12), 'boulder');
+  const baseIntro = baseSess.exercises.find(e => /intro/i.test(e.name));
+  const buildHang = buildSess.exercises.find(e => e.kind === 'hangboard');
+  const peakHang  = peakSess.exercises.find(e => e.kind === 'hangboard');
+  const mid = r => (r[0] + r[1]) / 2;
+  const baseMid = mid(baseIntro.loadPctRange), buildMid = mid(buildHang.loadPctRange), peakMid = mid(peakHang.loadPctRange);
+  assert(baseMid < buildMid && buildMid < peakMid, `ramp must be monotone in total-load terms: ${baseMid} < ${buildMid} < ${peakMid}`);
+});
+
+test('[ADR-0013] REGRESSION: Today tab shows a "set bodyweight" hint when bodyweight is unset', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
+  Storage.setGlobalBenchmarks({ bodyweight: null, maxHang20mm: 20, pullup1RM: 30 });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-04'); // Mon wk1, base — hangboard exercises present
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    assert(/set your bodyweight/i.test(root.textContent), 'expected a "set bodyweight" hint somewhere in the rendered Today tab');
+  } finally { root.remove(); }
 });
 
 // ─── Runner ───────────────────────────────────────────────────────────────

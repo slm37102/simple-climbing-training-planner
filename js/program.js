@@ -152,7 +152,10 @@ const BASE_MAX_INTRO = {
   prescribedSets: 2, prescribedReps: 3,
   rpeRange: [8, 9],
   edge: '20mm',
-  loadPctRange: [0.55, 0.70]
+  // ADR-0013: total-system-load convention — this is the Lattice band's
+  // lower end ("first trying max hangs"), a real intro at last (true
+  // intensity was ~90–93% under the old added-only math).
+  loadPctRange: [0.80, 0.85]
 };
 
 const HANGBOARD = {
@@ -164,7 +167,9 @@ const HANGBOARD = {
     prescribedSets: 2, prescribedReps: 4,
     rpeRange: [8, 9],
     edge: '20mm',
-    loadPctRange: [0.80, 0.90]
+    // ADR-0013: total-system-load convention — Lattice band mid, consistent
+    // with the existing RPE 8–9 / "1–2s in reserve" cue.
+    loadPctRange: [0.87, 0.92]
   },
   peak: {
     name: '7-53 protocol',
@@ -174,7 +179,10 @@ const HANGBOARD = {
     prescribedSets: 3, prescribedReps: 3,
     rpeRange: [9, 9.5],
     edge: '20mm',
-    loadPctRange: [0.85, 0.95]
+    // ADR-0013: total-system-load convention — published 7-53 load is
+    // near-limit (~97–100% of the 10s max), softened one notch per
+    // ADR-0001's standing Peak posture.
+    loadPctRange: [0.92, 0.96]
   },
   // Taper holds intensity and cuts volume (ADR-0007): a short near-max touch keeps
   // the nervous system sharp; the old 50–60% "light repeaters" shed fitness
@@ -187,7 +195,9 @@ const HANGBOARD = {
     prescribedSets: 1, prescribedReps: 3,
     rpeRange: [8.5, 9],
     edge: '20mm',
-    loadPctRange: [0.80, 0.85]
+    // ADR-0013: total-system-load convention — one notch under Peak, matching
+    // "near-peak intensity held" (ADR-0007).
+    loadPctRange: [0.90, 0.94]
   }
 };
 
@@ -265,16 +275,21 @@ function pullupPrescription(phase) {
   // NOTE: this field must be named rpeRange, not rpe — Loads.autoAdjust and every
   // rendering path (today.js/log.js) read exercise.rpeRange; a differently-named
   // field is silently ignored (no RPE target shown, autoAdjust always no-ops).
-  if (phase === 'base')  return { pctRange: [0.55, 0.70], reps: '5 × 5', rest: '2 min between sets', prescribedSets: 5, prescribedReps: 5, rpeRange: [7, 8.5] };
-  if (phase === 'build') return { pctRange: [0.80, 0.90], reps: '5 × 3', rest: '3 min between sets', prescribedSets: 5, prescribedReps: 3, rpeRange: [8.5, 9.5] };
+  // ADR-0013: pctRange is now of TOTAL system load (bodyweight + added
+  // benchmark) — rep-max relationships (general strength-training convention,
+  // not climbing-specific): 5-rep work ≈75–85%, 3-rep ≈84–89%, 2-rep ≈88–93%.
+  if (phase === 'base')  return { pctRange: [0.75, 0.82], reps: '5 × 5', rest: '2 min between sets', prescribedSets: 5, prescribedReps: 5, rpeRange: [7, 8.5] };
+  if (phase === 'build') return { pctRange: [0.84, 0.89], reps: '5 × 3', rest: '3 min between sets', prescribedSets: 5, prescribedReps: 3, rpeRange: [8.5, 9.5] };
   // Peak capped at 90% 1RM (not 95) for this athlete's shoulder/tendon recovery — ADR-0001.
-  if (phase === 'peak')  return { pctRange: [0.85, 0.90], reps: '5 × 2', rest: '3 min between sets', prescribedSets: 5, prescribedReps: 2, rpeRange: [9, 9.5] };
+  // Under total-load math this cap is now literally true (it capped ~97% real
+  // intensity under the old added-only math).
+  if (phase === 'peak')  return { pctRange: [0.88, 0.90], reps: '5 × 2', rest: '3 min between sets', prescribedSets: 5, prescribedReps: 2, rpeRange: [9, 9.5] };
   // Taper: intensity held near peak, volume cut to a single low-set touch (ADR-0007).
   // KG-B13: authored at full (pre-cut) volume — prescribedSets: 4 here, so
   // applyTaperVolume's ×0.6 cut (the single layer of reduction) lands on the
   // intended final 2 × 2 the `reps` text already states, instead of cutting an
   // already-reduced 2 down to 1.
-  return { pctRange: [0.80, 0.90], reps: '2 × 2', rest: '3 min between sets', prescribedSets: 4, prescribedReps: 2, rpeRange: [9, 9.5] }; // taper
+  return { pctRange: [0.87, 0.90], reps: '2 × 2', rest: '3 min between sets', prescribedSets: 4, prescribedReps: 2, rpeRange: [9, 9.5] }; // taper
 }
 
 function hangboardExercise(proto) {

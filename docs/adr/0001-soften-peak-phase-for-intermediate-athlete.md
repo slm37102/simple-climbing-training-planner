@@ -30,3 +30,7 @@ This ADR was accepted as a docs-only change and **was never implemented** — `j
 - **No max-stimulus stacking — confirmed.** Lattice peak-phase guidance: short, intense sessions so the athlete stays recruited *and* rested. Campus is removed from Peak Mondays entirely (7-53 + max pull-ups remain); Thursday keeps the only Peak campus exposure, as gated basic ladders at RPE ≤9.
 
 Implemented in `js/program.js` (`pullupPrescription`, `buildMonHangboard`, `buildThuMain` peak-boulder, `buildSatMain` peak-boulder) with regression tests in `tests/index.html` (`[ADR-0001]` cases). Closes **KG-B1** / **KG-D1**.
+
+## Addendum (2026-07-17) — the 90% pull-up cap is now literally true
+
+[ADR-0013](0013-total-load-intensity-convention.md) switched percentage prescriptions from %-of-added-weight to %-of-total-system-load. Under the old added-only math, this ADR's "cap weighted pull-ups at 85–90% 1RM" actually landed at ~94–97% of true 1RM — the cap was real in the code's own units but not in the units this ADR reasons in. Peak's pull-up band is now `[0.88, 0.90]` of total load (see `pullupPrescription('peak')` in `js/program.js`), so the 90% ceiling this addendum discusses is now the actual percentage applied, not a mislabelled added-weight fraction.

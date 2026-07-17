@@ -193,15 +193,15 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 
 > **Auto-generated from `js/program.js`** (`Program.build`, default 12-week cycle, `focus: hybrid`, `peakType: comp`).
 > Regenerate with `node --experimental-default-type=module tools/generate-schedule.mjs` after changing `js/program.js` — do not hand-edit this section.
-> Loads show the prescribed **% of benchmark added load**; the app converts these to kg from your benchmarks and applies targets-hit progression / auto-adjust / readiness / layoff-decay on the day (ADR-0009).
+> Loads show the prescribed **% of total system load** (bodyweight + benchmark — ADR-0013); the app converts these to added kg from your benchmarks and applies targets-hit progression / auto-adjust / readiness / layoff-decay on the day (ADR-0009).
 > Deload/taper volume cuts and the Base aerobic volume ramp are shown already applied. Every session gets the standard two-stage warm-up and cool-down from `js/warmup.js`.
 
 ### Week 1 — Base · boulder-flavor week
 
 - **Mon** — Hangboard (base) + S&C *(Strength / alactic)*
   - **7/3 Repeaters** — 7s × 6 reps, 2 sets per grip (half-crimp + open-crimp) · rest 3s within / 3 min between sets · bodyweight · RPE 7.5–8.5
-  - **Max hangs (intro)** — 10s weighted, 3 hangs × 2 sets — low-end load, crisp form · rest 3 min · 55–70% of max-hang added load · RPE 8–9
-  - **Weighted pull-ups** — 5 × 5 · 2 min between sets · 55–70% of 1RM added load · RPE 7–8.5
+  - **Max hangs (intro)** — 10s weighted, 3 hangs × 2 sets — low-end load, crisp form · rest 3 min · 80–85% of max-hang total load · RPE 8–9
+  - **Weighted pull-ups** — 5 × 5 · 2 min between sets · 75–82% of 1RM total load · RPE 7–8.5
   - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
@@ -220,8 +220,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 
 - **Mon** — Hangboard (base) + S&C *(Strength / alactic)*
   - **7/3 Repeaters** — 7s × 6 reps, 2 sets per grip (half-crimp + open-crimp) · rest 3s within / 3 min between sets · bodyweight · RPE 7.5–8.5
-  - **Max hangs (intro)** — 10s weighted, 3 hangs × 2 sets — low-end load, crisp form · rest 3 min · 55–70% of max-hang added load · RPE 8–9
-  - **Weighted pull-ups** — 5 × 5 · 2 min between sets · 55–70% of 1RM added load · RPE 7–8.5
+  - **Max hangs (intro)** — 10s weighted, 3 hangs × 2 sets — low-end load, crisp form · rest 3 min · 80–85% of max-hang total load · RPE 8–9
+  - **Weighted pull-ups** — 5 × 5 · 2 min between sets · 75–82% of 1RM total load · RPE 7–8.5
   - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
@@ -240,8 +240,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 
 - **Mon** — Hangboard (base) + S&C *(Strength / alactic)*
   - **7/3 Repeaters** — 7s × 6 reps, 2 sets per grip (half-crimp + open-crimp) · rest 3s within / 3 min between sets · bodyweight · RPE 7.5–8.5
-  - **Max hangs (intro)** — 10s weighted, 3 hangs × 2 sets — low-end load, crisp form · rest 3 min · 55–70% of max-hang added load · RPE 8–9
-  - **Weighted pull-ups** — 5 × 5 · 2 min between sets · 55–70% of 1RM added load · RPE 7–8.5
+  - **Max hangs (intro)** — 10s weighted, 3 hangs × 2 sets — low-end load, crisp form · rest 3 min · 80–85% of max-hang total load · RPE 8–9
+  - **Weighted pull-ups** — 5 × 5 · 2 min between sets · 75–82% of 1RM total load · RPE 7–8.5
   - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
@@ -260,8 +260,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 
 - **Mon** — Hangboard (base) + S&C *(Strength / alactic)* — _deload: volume −40%, intensity held_
   - **7/3 Repeaters** — 7s × 6 reps, 2 sets per grip (half-crimp + open-crimp) · Deload: drop ~40% volume · rest 3s within / 3 min between sets · bodyweight · RPE 7.5–8.5
-  - **Max hangs (intro)** — 10s weighted, 3 hangs × 2 sets — low-end load, crisp form · Deload: drop ~40% volume · rest 3 min · 55–70% of max-hang added load · RPE 8–9
-  - **Weighted pull-ups** — 5 × 5 · (sets today: 3 × 5) · 2 min between sets · 55–70% of 1RM added load · RPE 7–8.5
+  - **Max hangs (intro)** — 10s weighted, 3 hangs × 2 sets — low-end load, crisp form · Deload: drop ~40% volume · rest 3 min · 80–85% of max-hang total load · RPE 8–9
+  - **Weighted pull-ups** — 5 × 5 · (sets today: 3 × 5) · 2 min between sets · 75–82% of 1RM total load · RPE 7–8.5
   - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets · Deload: drop ~40% volume; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets · Deload: drop ~40% volume; Wrist extensor curls: 3 × 20 · 60s rest between sets · Deload: drop ~40% volume; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets · Deload: drop ~40% volume; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets · Deload: drop ~40% volume
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
@@ -280,8 +280,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 
 - **Mon** — Hangboard (base) + S&C *(Strength / alactic)*
   - **7/3 Repeaters** — 7s × 6 reps, 2 sets per grip (half-crimp + open-crimp) · rest 3s within / 3 min between sets · bodyweight · RPE 7.5–8.5
-  - **Max hangs (intro)** — 10s weighted, 3 hangs × 2 sets — low-end load, crisp form · rest 3 min · 55–70% of max-hang added load · RPE 8–9
-  - **Weighted pull-ups** — 5 × 5 · 2 min between sets · 55–70% of 1RM added load · RPE 7–8.5
+  - **Max hangs (intro)** — 10s weighted, 3 hangs × 2 sets — low-end load, crisp form · rest 3 min · 80–85% of max-hang total load · RPE 8–9
+  - **Weighted pull-ups** — 5 × 5 · 2 min between sets · 75–82% of 1RM total load · RPE 7–8.5
   - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
@@ -319,8 +319,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 ### Week 7 — Build · boulder-flavor week
 
 - **Mon** — Hangboard (build) + S&C *(Strength / alactic)*
-  - **Max-Weight 10s** — 10s weighted, 4 hangs × 2 sets — leave 1–2s in reserve; ±2–5 kg between sets by margin · rest 3 min · 80–90% of max-hang added load · RPE 8–9
-  - **Weighted pull-ups** — 5 × 3 · 3 min between sets · 80–90% of 1RM added load · RPE 8.5–9.5
+  - **Max-Weight 10s** — 10s weighted, 4 hangs × 2 sets — leave 1–2s in reserve; ±2–5 kg between sets by margin · rest 3 min · 87–92% of max-hang total load · RPE 8–9
+  - **Weighted pull-ups** — 5 × 3 · 3 min between sets · 84–89% of 1RM total load · RPE 8.5–9.5
   - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
@@ -339,8 +339,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 ### Week 8 — Build · sport-flavor week
 
 - **Mon** — Hangboard (build) + S&C *(Strength / alactic)*
-  - **Max-Weight 10s** — 10s weighted, 4 hangs × 2 sets — leave 1–2s in reserve; ±2–5 kg between sets by margin · rest 3 min · 80–90% of max-hang added load · RPE 8–9
-  - **Weighted pull-ups** — 5 × 3 · 3 min between sets · 80–90% of 1RM added load · RPE 8.5–9.5
+  - **Max-Weight 10s** — 10s weighted, 4 hangs × 2 sets — leave 1–2s in reserve; ±2–5 kg between sets by margin · rest 3 min · 87–92% of max-hang total load · RPE 8–9
+  - **Weighted pull-ups** — 5 × 3 · 3 min between sets · 84–89% of 1RM total load · RPE 8.5–9.5
   - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
@@ -358,8 +358,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 ### Week 9 — Build · boulder-flavor week
 
 - **Mon** — Hangboard (build) + S&C *(Strength / alactic)*
-  - **Max-Weight 10s** — 10s weighted, 4 hangs × 2 sets — leave 1–2s in reserve; ±2–5 kg between sets by margin · rest 3 min · 80–90% of max-hang added load · RPE 8–9
-  - **Weighted pull-ups** — 5 × 3 · 3 min between sets · 80–90% of 1RM added load · RPE 8.5–9.5
+  - **Max-Weight 10s** — 10s weighted, 4 hangs × 2 sets — leave 1–2s in reserve; ±2–5 kg between sets by margin · rest 3 min · 87–92% of max-hang total load · RPE 8–9
+  - **Weighted pull-ups** — 5 × 3 · 3 min between sets · 84–89% of 1RM total load · RPE 8.5–9.5
   - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
@@ -378,8 +378,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 ### Week 10 — Peak · sport-flavor week
 
 - **Mon** — Hangboard (peak) + S&C *(Strength / alactic)*
-  - **7-53 protocol** — 7s weighted, 3 hangs × 3–4 sets · rest 53s within set, 3 min between sets · 85–95% of max-hang added load · RPE 9–9.5
-  - **Weighted pull-ups** — 5 × 2 · 3 min between sets · 85–90% of 1RM added load · RPE 9–9.5
+  - **7-53 protocol** — 7s weighted, 3 hangs × 3–4 sets · rest 53s within set, 3 min between sets · 92–96% of max-hang total load · RPE 9–9.5
+  - **Weighted pull-ups** — 5 × 2 · 3 min between sets · 88–90% of 1RM total load · RPE 9–9.5
   - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
@@ -397,8 +397,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 ### Week 11 — Peak · boulder-flavor week
 
 - **Mon** — Hangboard (peak) + S&C *(Strength / alactic)*
-  - **7-53 protocol** — 7s weighted, 3 hangs × 3–4 sets · rest 53s within set, 3 min between sets · 85–95% of max-hang added load · RPE 9–9.5
-  - **Weighted pull-ups** — 5 × 2 · 3 min between sets · 85–90% of 1RM added load · RPE 9–9.5
+  - **7-53 protocol** — 7s weighted, 3 hangs × 3–4 sets · rest 53s within set, 3 min between sets · 92–96% of max-hang total load · RPE 9–9.5
+  - **Weighted pull-ups** — 5 × 2 · 3 min between sets · 88–90% of 1RM total load · RPE 9–9.5
   - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists
@@ -417,8 +417,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 ### Week 12 — Taper · sport-flavor week
 
 - **Mon** — Hangboard (taper) + S&C *(Strength / alactic)* — _taper: volume cut, intensity held_
-  - **Near-max hangs (taper touch)** — 10s weighted, 2–3 hangs × 1 set — short & crisp, stop fresh · rest 3 min · 80–85% of max-hang added load · RPE 8.5–9
-  - **Weighted pull-ups** — 2 × 2 · 3 min between sets · 80–90% of 1RM added load · RPE 9–9.5
+  - **Near-max hangs (taper touch)** — 10s weighted, 2–3 hangs × 1 set — short & crisp, stop fresh · rest 3 min · 90–94% of max-hang total load · RPE 8.5–9
+  - **Weighted pull-ups** — 2 × 2 · 3 min between sets · 87–90% of 1RM total load · RPE 9–9.5
   - **S&C antagonist block** — Push-ups: 3 × 15–25 · 60–90s rest between sets; Inverted rows / band cactus: 3 × 10–15 · 60–90s rest between sets; Wrist extensor curls: 3 × 20 · 60s rest between sets; Farmer's carry: 3 × 20–30 steps · 60–90s rest between sets; Core (plank or hanging knee raise or L-sit): choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets
 - **Tue** — Light: mobility or skill drills
   - **15–20 min mobility** — shoulders, hips, wrists

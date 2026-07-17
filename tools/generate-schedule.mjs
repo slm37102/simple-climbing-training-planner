@@ -48,7 +48,7 @@ function exLine(ex) {
   if (ex.kind === 'hangboard') {
     bits.push(`${ex.hang}, ${ex.sets}`.replace(/\s+/g, ' '));
     if (ex.rest) bits.push(`rest ${ex.rest}`);
-    if (ex.loadPctRange) bits.push(`${pct(ex.loadPctRange)} of max-hang added load`);
+    if (ex.loadPctRange) bits.push(`${pct(ex.loadPctRange)} of max-hang total load`);
     else bits.push('bodyweight');
   } else if (ex.kind === 'pullup') {
     bits.push(`${ex.reps}`);
@@ -56,7 +56,7 @@ function exLine(ex) {
       bits.push(`(sets today: ${ex.prescribedSets} × ${ex.prescribedReps})`);
     }
     if (ex.rest) bits.push(ex.rest);
-    if (ex.pctRange) bits.push(`${pct(ex.pctRange)} of 1RM added load`);
+    if (ex.pctRange) bits.push(`${pct(ex.pctRange)} of 1RM total load`);
   } else if (ex.kind === 'antagonist-block') {
     bits.push(ex.items.map(i => `${i.name}: ${i.prescribed}`).join('; '));
   } else if (ex.prescribed) {
@@ -88,7 +88,7 @@ out.push(MARKER + ' (hybrid focus, comp peak)');
 out.push('');
 out.push('> **Auto-generated from `js/program.js`** (`Program.build`, default 12-week cycle, `focus: hybrid`, `peakType: comp`).');
 out.push('> Regenerate with `node --experimental-default-type=module tools/generate-schedule.mjs` after changing `js/program.js` — do not hand-edit this section.');
-out.push('> Loads show the prescribed **% of benchmark added load**; the app converts these to kg from your benchmarks and applies targets-hit progression / auto-adjust / readiness / layoff-decay on the day (ADR-0009).');
+out.push('> Loads show the prescribed **% of total system load** (bodyweight + benchmark — ADR-0013); the app converts these to added kg from your benchmarks and applies targets-hit progression / auto-adjust / readiness / layoff-decay on the day (ADR-0009).');
 out.push('> Deload/taper volume cuts and the Base aerobic volume ramp are shown already applied. Every session gets the standard two-stage warm-up and cool-down from `js/warmup.js`.');
 out.push('');
 

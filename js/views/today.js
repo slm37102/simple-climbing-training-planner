@@ -720,9 +720,16 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
       readinessMultiplier: readinessMult,
     });
     const rangeStr = suggestion?.range ? `${suggestion.range[0]}–${suggestion.range[1]} kg` : '';
+    // ADR-0013: percentages are now of total system load, so a kg range needs
+    // bodyweight — resolveEffective returns null entirely (not a silent
+    // added-only fallback) when it's unset. Surface that distinctly from the
+    // generic "no benchmark set" silence so the athlete knows exactly what to fix.
+    const bwHint = (!suggestion && Storage.get().benchmarks?.bodyweight == null)
+      ? '<div class="muted" style="margin:4px 0">Set your bodyweight in Settings to see a suggested load range.</div>'
+      : '';
     const sets = ex.sets || ex.reps || '';
     const rpe  = ex.rpeRange ? `RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : '';
-    prescribedStr = [ex.hang, sets, ex.rest, rangeStr, rpe].filter(Boolean).join(' · ');
+    prescribedStr = [ex.hang, sets, ex.rest, rangeStr, rpe].filter(Boolean).join(' · ') + bwHint;
   } else if (ex.drills) {
     prescribedStr = drillPickerHtml(i, ex, actual);
   } else if (ex.prescribedTarget) {

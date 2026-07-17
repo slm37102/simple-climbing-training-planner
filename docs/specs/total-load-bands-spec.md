@@ -1,6 +1,6 @@
 # Spec: total-load percentage bands (ADR-0013 implementation)
 
-**Status:** Spec locked 2026-07-17 via wayfinder [map #22](https://github.com/slm37102/simple-climbing-training-planner/issues/22), ticket [#46](https://github.com/slm37102/simple-climbing-training-planner/issues/46). **Not yet implemented** — implementation ticket cut at the map's assembly step ([#33](https://github.com/slm37102/simple-climbing-training-planner/issues/33)).
+**Status:** Spec locked 2026-07-17 via wayfinder [map #22](https://github.com/slm37102/simple-climbing-training-planner/issues/22), ticket [#46](https://github.com/slm37102/simple-climbing-training-planner/issues/46). **Implemented 2026-07-17** via [issue #49](https://github.com/slm37102/simple-climbing-training-planner/issues/49).
 
 > [ADR-0013](../adr/0013-total-load-intensity-convention.md) locked the convention (total-load math, evidence-anchored bands, immediate effect); this spec derives the actual digits with the KG-C6 unit-audit discipline: every published "% of max" below is classified **added vs total** before adoption, with its citation.
 

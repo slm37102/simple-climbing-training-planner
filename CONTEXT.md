@@ -31,6 +31,10 @@ A scheduled recovery week interleaved every fourth week (3 hard : 1 deload — s
 
 A **deload Monday session at the end of the Base phase** that replaces the normal hangboard session with re-measuring benchmarks (max 10s hang on 20mm, 1RM weighted pull-up, max boulder grade). Saving the results updates the benchmarks used to prescribe future loads.
 
+## Load percentage (hangboard / pull-up)
+
+Every `loadPctRange`/`pctRange` in the session library is a percentage of **total system load** — bodyweight plus the stored added-kg benchmark — not the added weight alone (`docs/adr/0013-total-load-intensity-convention.md`). `added = pct × (bodyweight + benchmark) − bodyweight`. Bodyweight is therefore required to compute a kg range at all; the app never falls back to the older added-only math.
+
 ## Session slot
 
 One of the seven weekly slots, determined by day-of-week (not cycle day index):

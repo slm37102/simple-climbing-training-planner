@@ -70,21 +70,36 @@ export const Loads = {
 
     const pctRange = exercise.loadPctRange || exercise.pctRange;
     if (!pctRange || baseMax == null) return null;
+    // ADR-0013: percentages are of TOTAL system load (bodyweight + the added
+    // benchmark), not added-kg alone — physiological intensity tracks total
+    // load, and the old added-only math ran e.g. Base ~35pp hotter than its
+    // "intro" label claimed. Bodyweight is therefore required for a range:
+    // no silent fallback to the old added-only convention when it's unset —
+    // callers/views must show a "set bodyweight" hint instead.
+    if (bw == null) return null;
+    const totalMax = bw + baseMax;
 
     // KG-B11a: for a negative (assisted) benchmark, more-negative = more assisted
-    // = easier; less-negative = less assisted = harder. Naive %-of-benchmark math
-    // shrinks the magnitude toward zero, which for a negative baseMax computes a
-    // HARDER value than the athlete's own tested max — a supra-max load mislabelled
-    // as an "intro" percentage. Clamp each bound so it never exceeds baseMax in the
-    // harder (algebraically greater) direction. No-op for positive benchmarks.
-    const lo = clampToBenchmark(baseMax * pctRange[0], baseMax);
-    const hi = clampToBenchmark(baseMax * pctRange[1], baseMax);
+    // = easier; less-negative = less assisted = harder. Clamp each bound's
+    // added-kg equivalent so it never exceeds baseMax in the harder
+    // (algebraically greater) direction. Under total-load math this is
+    // naturally satisfied for any realistic (<1.0) percentage — a lower % of
+    // a smaller total yields MORE assistance, not less — so this clamp is now
+    // belt-and-braces (guards a future band ≥1.0 or a data edge case) rather
+    // than load-bearing the way it was under the old added-only math.
+    // No-op for positive benchmarks.
+    const loAdded = clampToBenchmark(totalMax * pctRange[0] - bw, baseMax);
+    const hiAdded = clampToBenchmark(totalMax * pctRange[1] - bw, baseMax);
+    const lo = round(Math.min(loAdded, hiAdded));
+    const hi = round(Math.max(loAdded, hiAdded));
     return {
       isAddedWeight,
       baseMax,
-      addedKgRange: [round(Math.min(lo, hi)), round(Math.max(lo, hi))],
+      addedKgRange: [lo, hi],
       // Total system weight (info only) — derived from the same clamped bounds.
-      totalKgRange: bw != null ? [round(bw + lo), round(bw + hi)] : null
+      totalKgRange: [round(bw + lo), round(bw + hi)],
+      // ADR-0013: convention statement for the UI range tooltip.
+      conventionNote: `range = ${Math.round(pctRange[0] * 100)}–${Math.round(pctRange[1] * 100)}% of total max (bodyweight + benchmark)`
     };
   },
 
@@ -95,7 +110,15 @@ export const Loads = {
     const base = this.prescribeLoadKg(exercise, benchmarks);
     if (!base) return null;
 
-    const reason = [];
+    // ADR-0013: state the total-load convention in the trail every time (the
+    // UI range tooltip reads it), plus a migration note wherever a previous
+    // actual carries over from before the switch — a persistent in-range RPE
+    // at a load above the new range top is evidence the stored benchmark is
+    // stale, and the ADR-0012 micro-retest is the built-in corrective.
+    const reason = [base.conventionNote];
+    if (previousActualKg != null) {
+      reason.push('ADR-0013: ranges re-based to total-load convention — if RPE stays in-range at loads above the new range top, your benchmark may be due for a refresh (ADR-0012 micro-retest).');
+    }
     const range = base.addedKgRange;
 
     // C3: when readiness score says "rest", signal that to the UI rather than suggesting 0 kg.
