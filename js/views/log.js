@@ -132,7 +132,10 @@ export function renderLog(root) {
       <div class="bench-rows">
         ${active.map(([key, sig]) => `
           <div class="bench-row" data-log-signal="${key}">
-            <div class="b-name" style="max-width:75%">⚠ ${esc(sig.message)}</div>
+            <div class="b-name" style="max-width:75%">⚠ ${esc(sig.message)}${
+              sig.href ? ` <a href="${esc(sig.href)}" target="_blank" rel="noopener">${esc(sig.action)} →</a>`
+                : sig.action ? ` <span class="muted">→ ${esc(sig.action)}</span>` : ''
+            }</div>
             <button class="mini-btn ghost-mini" type="button" data-log-signal-dismiss="${key}">Dismiss</button>
           </div>`).join('')}
       </div>

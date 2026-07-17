@@ -783,13 +783,15 @@ function appendDeloadNote(text) {
   return text + ' · Deload: drop ~40% volume';
 }
 
-// ADR-0012: identifies the very first Build week of the whole cycle (not
-// per sub-block — a double-block cycle has two Build runs, but the
-// Build-Monday micro-retest slot fires only once, at the genuine Base→Build
-// transition). Used to gate the staleness-gated micro-retest warm-up step.
-export function isFirstBuildWeek(pattern, weekIdx) {
-  const idx = pattern.findIndex(w => w.phase === 'build');
-  return idx >= 0 && idx === weekIdx - 1;
+// ADR-0012: identifies the first week of ANY Build run — both blocks of a
+// double-block cycle qualify ("fires on … the second block of double-block
+// cycles" per the ADR); the >4-week staleness gate is what keeps the slot
+// silent when a recent retest already refreshed the benchmark. Used to gate
+// the staleness-gated micro-retest warm-up step.
+export function isBuildRunStart(pattern, weekIdx) {
+  const cur = pattern[weekIdx - 1];
+  if (!cur || cur.phase !== 'build') return false;
+  return weekIdx === 1 || pattern[weekIdx - 2].phase !== 'build';
 }
 
 // ============== Base aerobic volume ramp (ADR-0009) ==============
@@ -1181,16 +1183,18 @@ export const Program = {
 
   // Primary entry point: builds a session from a plan object and an ISO date string.
   // benchmarks (KG-A10, optional) — see prescribeForContext. ADR-0014: reads
-  // settings.earlyVolumeCutWeekIndices (an athlete-accepted readiness-trend
-  // signal, by weekIdx) to force the volume cut for that week's sessions.
+  // settings.earlyVolumeCuts — [{from, to} ISO date ranges, to exclusive] —
+  // an accepted readiness-trend signal cuts "the coming week's sessions"
+  // (the ADR's words): the 7 days from acceptance, whatever the week
+  // boundary, not the already-in-progress calendar week's index.
   // readinessCtx (ADR-0015, optional): { label: 'lighter'|'suggestRest'|'push'|'normal', acceptRestSwap }
-  // — label maps from Loads.computeReadinessMultiplier's label; 'push'/'normal'/absent are no-ops.
+  // — label maps from Loads.computeReadinessMultiplier's key; 'push'/'normal'/absent are no-ops.
   build(plan, dateISO, benchmarks = null, readinessCtx = null) {
     const start = this.effectiveStart(plan?.settings);
     const ctx = this.resolveDate(dateISO, start, this.cycleWeeksOf(plan?.settings), plan?.settings?.peakType);
     const forceVolumeCut = !!(ctx && !ctx.outOfCycle
-      && Array.isArray(plan?.settings?.earlyVolumeCutWeekIndices)
-      && plan.settings.earlyVolumeCutWeekIndices.includes(ctx.weekIdx));
+      && Array.isArray(plan?.settings?.earlyVolumeCuts)
+      && plan.settings.earlyVolumeCuts.some(r => r && r.from && r.to && dateISO >= r.from && dateISO < r.to));
     return this.prescribeForContext(ctx, plan?.focus || 'hybrid', benchmarks, {
       forceVolumeCut,
       readinessLabel: readinessCtx?.label ?? null,
@@ -1199,5 +1203,5 @@ export const Program = {
   },
 
   buildAntiStyleCue,
-  isFirstBuildWeek
+  isBuildRunStart
 };

@@ -1,5 +1,5 @@
 // Service worker: cache-first shell, network-first for index.html, bypass Firestore/Auth.
-const CACHE = 'climb-planner-v43';
+const CACHE = 'climb-planner-v44';
 const SHELL = [
   './',
   './index.html',

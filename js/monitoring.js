@@ -109,7 +109,10 @@ export function retestTrajectorySignal(history) {
     key: 'retest-plateau',
     message: 'Your last two retests show no improvement — two flat cycles in a row.',
     action: "Review the end-of-cycle checklist's stimulus-rotation questions",
-    actionKey: 'review-checklist'
+    actionKey: 'review-checklist',
+    // Rendered by the views as a link — the checklist is a repo doc served
+    // alongside the app's static files.
+    href: 'docs/end-of-cycle-review.md'
   };
 }
 
@@ -125,7 +128,10 @@ export function painCheckInSignal(pain) {
       severity: 'red',
       message: "Pain above the amber zone (or worse this morning) — suggest skipping today's finger-loading exercises.",
       action: 'See the return-from-tweak guide',
-      actionKey: 'return-from-tweak'
+      actionKey: 'return-from-tweak',
+      // ADR-0014: the pain-red response links the KG-A7 return-from-tweak
+      // doc (the reason ticket #47 blocked #52) — served as a repo file.
+      href: 'docs/return-from-tweak.md'
     };
   }
   if (pain.value >= 3) {

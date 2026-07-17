@@ -7,14 +7,16 @@ import { Storage } from './storage.js';
 export const Loads = {
   // ===== readiness =====
   // readiness = {sleep, soreness, fatigue} each 1..5
+  // `key` is the stable machine-readable tier — gate on it, never on the
+  // human-readable `label`, which is display copy and free to be reworded.
   computeReadinessMultiplier(readiness) {
-    if (!readiness) return { multiplier: 1.0, label: 'Normal' };
+    if (!readiness) return { multiplier: 1.0, label: 'Normal', key: 'normal' };
     const { sleep = 3, soreness = 3, fatigue = 3 } = readiness;
     const avg = (sleep + soreness + fatigue) / 3;
-    if (avg >= 4.5) return { multiplier: 1.05, label: 'Push', avg };
-    if (avg >= 3.5) return { multiplier: 1.00, label: 'Normal', avg };
-    if (avg >= 2.5) return { multiplier: 0.85, label: 'Lighter', avg };
-    return { multiplier: 0,  label: 'Suggest rest / mobility only', avg };
+    if (avg >= 4.5) return { multiplier: 1.05, label: 'Push', key: 'push', avg };
+    if (avg >= 3.5) return { multiplier: 1.00, label: 'Normal', key: 'normal', avg };
+    if (avg >= 2.5) return { multiplier: 0.85, label: 'Lighter', key: 'lighter', avg };
+    return { multiplier: 0,  label: 'Suggest rest / mobility only', key: 'rest', avg };
   },
 
   // ===== Layoff decay (ADR-0008) =====
@@ -106,20 +108,24 @@ export const Loads = {
   // Resolve effective kg for today's session, applying:
   //   (1) prev-actual seed, (2) layoff decay, (3) auto-adjust, (4) readiness.
   // Deload weeks cut volume (handled in program.js), not intensity — kg is held constant.
-  resolveEffective({ exercise, previousActualKg, previousAvgRpe, previousActualSets = null, previousActualReps = null, daysSincePrevious = null, readinessMultiplier = 1.0, benchmarks = null }) {
+  // holdProgression (ADR-0014): the pain-amber response — an amber pain
+  // check-in holds the ADR-0009 targets-hit progression for the day (the
+  // ±5% RPE thermostat still runs; only the deliberate overload step pauses).
+  resolveEffective({ exercise, previousActualKg, previousAvgRpe, previousActualSets = null, previousActualReps = null, daysSincePrevious = null, readinessMultiplier = 1.0, benchmarks = null, holdProgression = false }) {
     const base = this.prescribeLoadKg(exercise, benchmarks);
     if (!base) return null;
 
     // ADR-0013: state the total-load convention in the trail every time (the
-    // UI range tooltip reads it), plus a migration note wherever a previous
-    // actual carries over from before the switch — a persistent in-range RPE
-    // at a load above the new range top is evidence the stored benchmark is
-    // stale, and the ADR-0012 micro-retest is the built-in corrective.
+    // UI range tooltip reads it), plus a migration note — but only while the
+    // previous actual actually sits above the new range top, the exact
+    // situation the note explains (spec §3 scopes it to "the first sessions
+    // after the switch"; this bound makes it naturally transient — it clears
+    // as soon as the benchmark refreshes or the working load falls in range).
     const reason = [base.conventionNote];
-    if (previousActualKg != null) {
+    const range = base.addedKgRange;
+    if (previousActualKg != null && previousActualKg > range[1]) {
       reason.push('ADR-0013: ranges re-based to total-load convention — if RPE stays in-range at loads above the new range top, your benchmark may be due for a refresh (ADR-0012 micro-retest).');
     }
-    const range = base.addedKgRange;
 
     // C3: when readiness score says "rest", signal that to the UI rather than suggesting 0 kg.
     if (readinessMultiplier <= 0) return { suggestedKg: null, restSuggested: true, range, reason };
@@ -135,8 +141,12 @@ export const Loads = {
       // in-range RPE *with all targets hit* earns a +2.5% progression step.
       if (adj === 1.0 && previousAvgRpe != null && exercise.rpeRange
           && this.targetsHit(exercise, previousActualSets, previousActualReps)) {
-        adj = TARGETS_HIT_PROGRESS;
-        reason.push('targets hit → +2.5%');
+        if (holdProgression) {
+          reason.push('pain amber — progression held (ADR-0014)');
+        } else {
+          adj = TARGETS_HIT_PROGRESS;
+          reason.push('targets hit → +2.5%');
+        }
       }
       kg = previousActualKg * decay * adj;
       reason.push(`prev ${previousActualKg}kg × auto-adj ${adj.toFixed(3)} (RPE ${previousAvgRpe ?? '—'})`);

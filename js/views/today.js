@@ -6,7 +6,7 @@ import { Loads } from '../loads.js';
 import { Warmup } from '../warmup.js';
 import { Replan } from '../replan.js';
 import { Monitoring } from '../monitoring.js';
-import { daysBetween } from '../dates.js';
+import { daysBetween, localIso } from '../dates.js';
 import { inputVisibility, repsLabel, actualHasResult, howto, unitLabel } from '../exercise-inputs.js';
 import { DRILL_CATEGORIES, WARMUP_DRILLS } from '../drills.js';
 
@@ -284,14 +284,24 @@ function signalsBannerHtml(signals) {
     const sig = signals[key];
     if (!sig) return '';
     const major = sig.severity === 'red' ? ' major' : '';
-    const acceptBtn = key === 'readinessTrend'
-      ? `<button type="button" class="primary" data-signal-accept="${key}">${sig.action}</button>`
-      : '';
+    // Every signal surfaces its prescribed response (ADR-0014), not just the
+    // one with a mutation: readinessTrend gets the accept button (the only
+    // response that changes the plan); doc-pointer responses render as links
+    // (pain-red → return-from-tweak guide, retest-plateau → end-of-cycle
+    // checklist); the rest show the response as advisory text.
+    let actionEl = '';
+    if (key === 'readinessTrend') {
+      actionEl = `<button type="button" class="primary" data-signal-accept="${key}">${sig.action}</button>`;
+    } else if (sig.href) {
+      actionEl = `<a class="ghost" style="text-decoration:none" href="${sig.href}" target="_blank" rel="noopener" data-signal-link="${key}">${sig.action} →</a>`;
+    } else if (sig.action) {
+      actionEl = `<span class="muted">→ ${sig.action}</span>`;
+    }
     return `<div class="gap-note${major}" data-signal-banner="${key}">
       <p>⚠ ${sig.message}</p>
-      <div class="row" style="gap:8px;margin-top:8px">
-        ${acceptBtn}
-        <button type="button" class="ghost" data-signal-dismiss="${key}">${acceptBtn ? 'Not now' : 'Got it'}</button>
+      <div class="row" style="gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap">
+        ${actionEl}
+        <button type="button" class="ghost" data-signal-dismiss="${key}">${key === 'readinessTrend' ? 'Not now' : 'Got it'}</button>
       </div>
     </div>`;
   }).join('');
@@ -336,10 +346,10 @@ function wireSignalsBanner(root, activePlan, ctx, date) {
     btn.addEventListener('click', () => {
       const key = btn.dataset.signalAccept;
       if (key === 'readinessTrend') {
-        const cur = Array.isArray(activePlan.settings.earlyVolumeCutWeekIndices) ? activePlan.settings.earlyVolumeCutWeekIndices : [];
-        if (ctx?.weekIdx != null && !cur.includes(ctx.weekIdx)) {
-          Storage.setPlanSettings(activePlan.id, { earlyVolumeCutWeekIndices: [...cur, ctx.weekIdx] });
-        }
+        // ADR-0014: the cut applies to "the coming week's sessions" — the 7
+        // days from acceptance, whatever the calendar-week boundary.
+        const cur = Array.isArray(activePlan.settings.earlyVolumeCuts) ? activePlan.settings.earlyVolumeCuts : [];
+        Storage.setPlanSettings(activePlan.id, { earlyVolumeCuts: [...cur, { from: date, to: addDaysIso(date, 7) }] });
       }
       dismissSignalForDay(date, key);
       renderToday(root);
@@ -446,10 +456,11 @@ export function renderToday(root) {
 
   const dayLog = Storage.getDay(date) || {};
   const readiness = dayLog.readiness || { sleep:3, soreness:3, fatigue:3 };
-  const { multiplier, label: rdLabel, avg: rdAvg } = Loads.computeReadinessMultiplier(readiness);
-  // ADR-0015: readiness gating for climbing (non-kg) sessions — reads the
-  // same day's readiness label the kg chain already modulates on.
-  const readinessGateLabel = rdLabel === 'Lighter' ? 'lighter' : rdLabel === 'Suggest rest / mobility only' ? 'suggestRest' : null;
+  const { multiplier, label: rdLabel, key: rdKey, avg: rdAvg } = Loads.computeReadinessMultiplier(readiness);
+  // ADR-0015: readiness gating for climbing (non-kg) sessions — gates on the
+  // stable `key` tier from Loads (never the display label, which is free to
+  // be reworded without silently disabling the gating).
+  const readinessGateLabel = rdKey === 'lighter' ? 'lighter' : rdKey === 'rest' ? 'suggestRest' : null;
   const session = Program.build(activePlan, date, Storage.get().benchmarks, {
     label: readinessGateLabel,
     acceptRestSwap: dayLog.acceptedReadinessSwap === true
@@ -470,14 +481,22 @@ export function renderToday(root) {
     : null;
   const signals = rawSignals && Object.fromEntries(Object.entries(rawSignals).map(([k, v]) => [k, dismissedSignals[k] ? null : v]));
 
-  // ADR-0012: Build-Monday micro-retest gate — first Build Monday of the
-  // cycle, only when the stored max-hang benchmark is >4 weeks old.
+  // ADR-0012: Build-Monday micro-retest gate — the Monday opening any Build
+  // run (both blocks of a double-block cycle), only when the stored max-hang
+  // BENCHMARK is >4 weeks old. Benchmark age comes from the last retest-save
+  // history entry (ADR-0014's history is the canonical freshness record) —
+  // not benchmarks.updatedAt, which any Profile edit (even bodyweight-only)
+  // bumps and would silently suppress a due micro-retest. Fallback to
+  // updatedAt (converted to a LOCAL date — it's a UTC timestamp) covers a
+  // manually-entered benchmark that has never been through a retest save.
   const microRetest = ctx.slot === 'mon-main' && ctx.phase === 'build'
-    && Program.isFirstBuildWeek(Program.phasePattern(activePlan.settings), ctx.weekIdx)
+    && Program.isBuildRunStart(Program.phasePattern(activePlan.settings), ctx.weekIdx)
     && (() => {
-      const updatedAt = Storage.get().benchmarks?.updatedAt;
-      if (!updatedAt) return true; // never benchmarked at all — treat as maximally stale
-      return daysBetween(updatedAt.slice(0, 10), date) > Warmup.MICRO_RETEST_STALE_DAYS;
+      const bm = Storage.get().benchmarks;
+      const lastRetest = (bm?.history || []).filter(e => e?.date).map(e => e.date).sort().pop();
+      const anchor = lastRetest || (bm?.updatedAt ? localIso(new Date(bm.updatedAt)) : null);
+      if (!anchor) return true; // never benchmarked at all — treat as maximally stale
+      return daysBetween(anchor, date) > Warmup.MICRO_RETEST_STALE_DAYS;
     })();
   const { warmup, cooldown, skillDrills } = Warmup.forSession(session, { microRetest });
 
@@ -885,6 +904,8 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
       previousActualReps: prevActual?.reps ?? null,
       daysSincePrevious: prev ? daysBetween(prev._prevDate, date) : null,
       readinessMultiplier: readinessMult,
+      // ADR-0014: an amber pain check-in holds the ADR-0009 progression.
+      holdProgression: Monitoring.painCheckInSignal(dayLog.readiness?.pain)?.severity === 'amber',
     });
     const rangeStr = suggestion?.range ? `${suggestion.range[0]}–${suggestion.range[1]} kg` : '';
     // ADR-0013: percentages are now of total system load, so a kg range needs
@@ -1017,6 +1038,7 @@ function wire(root, date, session, ctx, readinessMult) {
           previousActualReps: prevActual?.reps ?? null,
           daysSincePrevious: prev ? daysBetween(prev._prevDate, date) : null,
           readinessMultiplier: multiplier,
+          holdProgression: Monitoring.painCheckInSignal(d.readiness?.pain)?.severity === 'amber',
         });
         if (eff && eff.suggestedKg != null) {
           btn.textContent = `Suggested: ${eff.suggestedKg} kg → tap to use`;

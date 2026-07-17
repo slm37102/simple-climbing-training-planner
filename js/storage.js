@@ -26,7 +26,7 @@ function defaultSettings() {
     peakType: 'comp', // 'comp' | 'trip' | 'project' — drives taper length (ADR-0007)
     scheduleShiftDays: 0, // days added to effectiveStart to absorb a missed-session gap (ADR-0008); ignored in compDate mode
     gapAcknowledgedThrough: null, // ISO date up to which a detected gap was handled/acknowledged (ADR-0008)
-    earlyVolumeCutWeekIndices: [], // weekIdx values with an accepted readiness-trend early volume cut (ADR-0014)
+    earlyVolumeCuts: [], // accepted readiness-trend early volume cuts: [{from, to}] ISO date ranges, to exclusive (ADR-0014)
     units: 'kg',
     syncEnabled: true,
     localOnly: false,

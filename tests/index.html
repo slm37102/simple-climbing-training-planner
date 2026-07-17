@@ -2616,8 +2616,15 @@ test('[ADR-0013] previous-actual seeding is not clamped to the (now lower) range
   // to what the athlete is actually lifting.
   const res = Loads.resolveEffective({ exercise: hang, previousActualKg: 16, previousAvgRpe: 8.5, daysSincePrevious: 5, benchmarks });
   assertEq(res.suggestedKg, 16, 'suggestion must seed from the previous actual, not get clamped down to the displayed range');
-  assert(res.reason.some(r => /ADR-0013/.test(r)), 'migration note must appear in the reason trail when a previous actual carries over');
+  assert(res.reason.some(r => /ADR-0013/.test(r)), 'migration note must appear while the previous actual sits above the new range top');
   assert(res.reason.some(r => /total max/.test(r)), 'convention statement must appear in the reason trail');
+
+  // Spec §3 scopes the migration line to "the first sessions after the
+  // switch" — once the working load sits inside the new range, the note
+  // must stop appearing (it is bounded, not permanent).
+  const inRange = Loads.resolveEffective({ exercise: hang, previousActualKg: 10, previousAvgRpe: 8.5, daysSincePrevious: 5, benchmarks });
+  assert(!inRange.reason.some(r => /ADR-0013/.test(r)), 'migration note must NOT appear once the previous actual is inside the new range');
+  assert(inRange.reason.some(r => /total max/.test(r)), 'the convention statement itself stays permanent');
 });
 
 test('[ADR-0013] the Base→Peak ramp is monotone in TOTAL-load terms (mid-band %)', () => {
@@ -2759,17 +2766,18 @@ test('[ADR-0012] browsing before the cycle start is unaffected by the post-goal 
   assertEq(sess.sessionId, 'out-of-cycle');
 });
 
-test('[ADR-0012] isFirstBuildWeek: only the cycle-wide first Build week, not each double-block sub-run', () => {
+test('[ADR-0012] isBuildRunStart: the first week of EACH Build run — both blocks of a double-block cycle qualify', () => {
   const pattern12 = buildPhasePattern(12, 'comp');
-  assert(Program.isFirstBuildWeek(pattern12, 7), 'wk7 should be the first Build week in a 12-wk cycle');
-  assert(!Program.isFirstBuildWeek(pattern12, 8), 'wk8 is Build but not the first');
-  assert(!Program.isFirstBuildWeek(pattern12, 6), 'wk6 is Base, not Build');
+  assert(Program.isBuildRunStart(pattern12, 7), 'wk7 should open the Build run in a 12-wk cycle');
+  assert(!Program.isBuildRunStart(pattern12, 8), 'wk8 is Build but not the run start');
+  assert(!Program.isBuildRunStart(pattern12, 6), 'wk6 is Base, not Build');
 
   const pattern24 = buildPhasePattern(24, 'comp');
-  assertEq(pattern24[7].phase, 'build', 'fixture: wk8 (idx7) should be the first Build week of block 1');
-  assertEq(pattern24[17].phase, 'build', 'fixture: wk18 (idx17) should be the first Build week of block 2');
-  assert(Program.isFirstBuildWeek(pattern24, 8), 'block-1 first Build week reads true');
-  assert(!Program.isFirstBuildWeek(pattern24, 18), 'block-2 first Build week must NOT also read true');
+  assertEq(pattern24[7].phase, 'build', 'fixture: wk8 (idx7) should open block 1\'s Build run');
+  assertEq(pattern24[17].phase, 'build', 'fixture: wk18 (idx17) should open block 2\'s Build run');
+  assert(Program.isBuildRunStart(pattern24, 8), 'block-1 Build-run start reads true');
+  assert(Program.isBuildRunStart(pattern24, 18), 'block-2 Build-run start must ALSO read true — the ADR names the second block explicitly; the staleness gate is what keeps it silent when fresh');
+  assert(!Program.isBuildRunStart(pattern24, 9), 'wk9 is mid-run, not a run start');
 });
 
 test('[ADR-0012] Warmup.forSession appends the micro-retest step only when opts.microRetest is true', () => {
@@ -2814,18 +2822,38 @@ test('[ADR-0012] REGRESSION: micro-retest appears on the first Build Monday when
   } finally { root.remove(); }
 });
 
-test('[ADR-0012] REGRESSION: micro-retest never appears on a non-first Build Monday even when stale', () => {
+test('[ADR-0012] REGRESSION: micro-retest never appears on a mid-run Build Monday even when stale', () => {
   resetStorage();
   const plan = Storage.getActivePlan();
   Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 24, peakType: 'comp' });
   Storage.setGlobalBenchmarks({ bodyweight: 70, maxHang20mm: 20, pullup1RM: 30 });
   Storage.raw().globalBenchmarks.updatedAt = '2026-01-01T00:00:00.000Z';
-  sessionStorage.setItem('todaySelectedDate', addIsoDays('2026-05-04', (18 - 1) * 7)); // wk18 Mon, block-2's first Build week
+  sessionStorage.setItem('todaySelectedDate', addIsoDays('2026-05-04', (9 - 1) * 7)); // wk9 Mon, second week of block-1's Build run
   const root = document.createElement('div');
   document.body.appendChild(root);
   try {
     renderToday(root);
-    assert(!/micro-retest/i.test(root.textContent), 'only the cycle-wide first Build Monday should ever show the micro-retest');
+    assert(!/micro-retest/i.test(root.textContent), 'only a Build-run-opening Monday should ever show the micro-retest');
+  } finally { root.remove(); }
+});
+
+test('[ADR-0012] REGRESSION: micro-retest fires on block-2\'s Build-run start when stale, and benchmark age comes from retest history, not updatedAt', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 24, peakType: 'comp' });
+  const wk18Mon = addIsoDays('2026-05-04', (18 - 1) * 7); // block-2's Build-run start
+  // Last RETEST was >4wk before wk18 Mon, but a bodyweight-only Profile edit
+  // bumped updatedAt yesterday — the gate must read the retest history and
+  // still fire (updatedAt alone would silently suppress a due micro-retest).
+  Storage.saveRetestBenchmarks({ bodyweight: 70, maxHang20mm: 20, pullup1RM: 30 }, addIsoDays(wk18Mon, -40));
+  Storage.setGlobalBenchmarks({ bodyweight: 71 });
+  Storage.raw().globalBenchmarks.updatedAt = addIsoDays(wk18Mon, -1) + 'T00:00:00.000Z'; // "yesterday" relative to the fixture Monday
+  sessionStorage.setItem('todaySelectedDate', wk18Mon);
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    assert(/micro-retest/i.test(root.textContent), 'block-2 Build-run start with a stale benchmark must show the micro-retest despite a fresh updatedAt');
   } finally { root.remove(); }
 });
 
@@ -2930,6 +2958,49 @@ test('[ADR-0014] painCheckInSignal: green/amber/red per the Silbernagel gate, in
   assertEq(red.key, 'pain-red');
   const worseMorning = Monitoring.painCheckInSignal({ value: 2, settledByMorning: false });
   assertEq(worseMorning.key, 'pain-red', 'worse-next-morning must trigger red even at green-level pain');
+});
+
+test('[ADR-0014] pain-red carries the return-from-tweak href; retest-plateau carries the checklist href; both render as links on Today', () => {
+  assertEq(Monitoring.painCheckInSignal({ value: 6 }).href, 'docs/return-from-tweak.md');
+  const plateau = Monitoring.retestTrajectorySignal([
+    { date: '2026-05-01', maxHang20mm: 20, pullup1RM: 30 },
+    { date: '2026-06-08', maxHang20mm: 20, pullup1RM: 30 },
+  ]);
+  assertEq(plateau.href, 'docs/end-of-cycle-review.md');
+
+  // DOM: a pain-red day must render the guide link in the Today banner —
+  // the explicit #47→#52 blocker dependency ("pain-red banner links the
+  // return-from-tweak doc").
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: datesToday() });
+  Storage.setDay(datesToday(), { readiness: { sleep: 3, soreness: 3, fatigue: 3, pain: { value: 7 } } });
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const link = root.querySelector('[data-signal-banner="painCheckIn"] a[href="docs/return-from-tweak.md"]');
+    assert(link, 'pain-red banner must link docs/return-from-tweak.md');
+  } finally { root.remove(); }
+});
+
+test('[ADR-0014] amber pain check-in holds the ADR-0009 targets-hit progression (kg mirrors instead of +2.5%)', () => {
+  const exercise = { kind: 'hangboard', loadPctRange: [0.87, 0.92], rpeRange: [8, 9], prescribedSets: 2, prescribedReps: 4 };
+  const benchmarks = { maxHang20mm: 20, bodyweight: 70 };
+  const args = { exercise, previousActualKg: 12, previousAvgRpe: 8.5, previousActualSets: 2, previousActualReps: 4, daysSincePrevious: 5, benchmarks };
+  const normal = Loads.resolveEffective(args);
+  assertEq(normal.suggestedKg, 12.5, 'sanity: targets hit normally progresses +2.5% (12 × 1.025 = 12.3 → 12.5 after rounding)');
+  const held = Loads.resolveEffective({ ...args, holdProgression: true });
+  assertEq(held.suggestedKg, 12, 'amber holds the progression — load mirrors');
+  assert(held.reason.some(r => /progression held/i.test(r)), 'reason trail must record the hold');
+});
+
+test('[Standards] computeReadinessMultiplier exposes a stable key tier alongside the display label', () => {
+  assertEq(Loads.computeReadinessMultiplier({ sleep: 5, soreness: 5, fatigue: 5 }).key, 'push');
+  assertEq(Loads.computeReadinessMultiplier({ sleep: 4, soreness: 4, fatigue: 4 }).key, 'normal');
+  assertEq(Loads.computeReadinessMultiplier({ sleep: 3, soreness: 3, fatigue: 3 }).key, 'lighter');
+  assertEq(Loads.computeReadinessMultiplier({ sleep: 1, soreness: 1, fatigue: 1 }).key, 'rest');
+  assertEq(Loads.computeReadinessMultiplier(null).key, 'normal');
 });
 
 test('[ADR-0014] computeSignals aggregates all four independently', () => {
@@ -3037,15 +3108,22 @@ test('[ADR-0014] REGRESSION: readiness-trend banner appears on Today and its acc
     assert(acceptBtn, 'expected the accept button');
     acceptBtn.click();
 
-    // Re-render and confirm the week now carries an early volume cut. Check
-    // that week's Monday specifically (not "today" itself) since the accept
-    // action targets the whole week by weekIdx, and today's own slot could
-    // be a non-main day (tue-light/rest/sun-optional) depending on what the
-    // real current weekday happens to be when this test runs.
+    // Re-render and confirm the COMING week (the 7 days from acceptance —
+    // ADR-0014's "the coming week's sessions", not the already-in-progress
+    // calendar week's index) now carries the early volume cut. Scan the
+    // window for a cut session since some of those days are rest days
+    // (forceVolumeCut deliberately skips isRest), and assert a day beyond
+    // the window is uncut.
     renderToday(root);
-    const weekMonday = datesSnapToMonday(datesToday());
-    const session = Program.build(Storage.getActivePlan(), weekMonday);
-    assert(session.deloadNote && /early volume cut/i.test(session.deloadNote), `expected an early-cut deloadNote, got "${session.deloadNote}"`);
+    const freshPlan = Storage.getActivePlan();
+    const cutSessions = [];
+    for (let off = 0; off < 7; off++) {
+      const s = Program.build(freshPlan, datesAddDays(datesToday(), off));
+      if (s.deloadNote && /early volume cut/i.test(s.deloadNote)) cutSessions.push(s);
+    }
+    assert(cutSessions.length >= 3, `expected most non-rest sessions in the coming 7 days to carry the early cut, got ${cutSessions.length}`);
+    const beyond = Program.build(freshPlan, datesAddDays(datesToday(), 8)); // wk2 of a fresh cycle — never a natural deload
+    assert(!(beyond.deloadNote && /early volume cut/i.test(beyond.deloadNote)), 'a day beyond the 7-day window must not carry the early cut');
   } finally { root.remove(); }
 });
 
