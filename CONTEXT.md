@@ -47,6 +47,8 @@ Each week is biased toward either **boulder** or **sport** climbing. The plan's 
 
 - `focus: 'boulder'` → all Thu/Sat sessions are boulder-flavored
 - `focus: 'sport'` → all Thu/Sat sessions are sport-flavored
-- `focus: 'hybrid'` → odd weeks boulder, even weeks sport (alternating)
+- `focus: 'hybrid'` → odd weeks boulder, even weeks sport (alternating) — **in Peak and Taper only**
 
 This affects Thu/Sat sessions only — Monday's hangboard protocol is determined by phase, not flavor.
+
+**In Base and Build, hybrid mixes within the week instead (ADR-0010):** the energy system is fixed per slot and `weekFlavor` just picks the format alternating inside it, not the identity of the whole week. Base needs no special case (its Thu/Sat templates already alternate two aerobic-appropriate formats every week). In Build, Thursday is always limit bouldering (`thu-limit`); Saturday alternates boulder triples (odd weeks) with the 60/60 threshold session (even weeks, `sat-6060-threshold` — the same content that serves sport-focus Thursday). `sat-4x4-build` (route 4×4) no longer appears in hybrid mode at all.

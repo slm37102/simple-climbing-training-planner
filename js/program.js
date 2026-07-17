@@ -333,6 +333,11 @@ function densityRest(weeksLeft, baseSec = 240) {
   return `${m}:${s}`;
 }
 
+// ADR-0006 band 1 exercise content, shared between sport-focus Build Thursday
+// (thu-6060-threshold) and hybrid Build's even-week Saturday (ADR-0010,
+// sat-6060-threshold) — extracted so the two sessions can never drift apart.
+const SIXTY_SIXTY_EXERCISE = { kind:'circuit', name: '60/60 intervals', prescribed: '60s moderately hard climbing / 60s rest · 10–30 min total · stop before the deep pump (never above 8.5)', rpeRange: [7, 8.5], prescribedTarget: { value: 20, unit: 'min' } };
+
 function buildThuMain(phase, flavor, isDeload, weeksLeft = null, peakType = 'comp') {
   if (flavor === 'boulder') {
     if (phase === 'peak') {
@@ -422,14 +427,15 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null, peakType = 'com
   if (phase === 'build') {
     // ADR-0006 band 1 — the aerobic-power "engine": 60/60 threshold intervals at
     // RPE 7–8.5, deliberately below the deep-pump zone. The old 1-on-1-off at
-    // RPE 8.5–9.5 straddled the band boundary.
+    // RPE 8.5–9.5 straddled the band boundary. ADR-0010: the same exercise
+    // content also serves hybrid Build's even-week Saturday session
+    // (buildSat6060Threshold) via the shared SIXTY_SIXTY_EXERCISE constant so
+    // the two sessions can never drift apart.
     return {
       sessionId: 'thu-6060-threshold',
       label: '60/60 threshold intervals (Build)',
       energySystem: 'Aerobic power',
-      exercises: [
-        { kind:'circuit', name: '60/60 intervals', prescribed: '60s moderately hard climbing / 60s rest · 10–30 min total · stop before the deep pump (never above 8.5)', rpeRange: [7, 8.5], prescribedTarget: { value: 20, unit: 'min' } }
-      ]
+      exercises: [{ ...SIXTY_SIXTY_EXERCISE }]
     };
   }
   if (phase === 'peak') {
@@ -477,6 +483,21 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null, peakType = 'com
       { kind:'route', name: 'Project / redpoint attempts', prescribed: '2–3 quality goes on a project · 20+ min rest between goes', rpeRange: [9, 9.5], prescribedTarget: { value: 4, unit: 'goes' },
         howto: 'A few quality, well-rested goes on your project. Stop while still fresh — don’t grind out fatigued attempts.' }
     ]
+  };
+}
+
+// ADR-0010: hybrid Build's even-week Saturday session — the 60/60 threshold
+// band moved here from sport-focus Thursday so it lands weekly (alternating
+// with odd-week sat-boulder-triples) instead of fortnightly in hybrid mode.
+// Same exercise content as thu-6060-threshold (shared SIXTY_SIXTY_EXERCISE);
+// no densityRest wiring, matching that session (band-1 60/60 carries no
+// density string today).
+function buildSat6060Threshold() {
+  return {
+    sessionId: 'sat-6060-threshold',
+    label: '60/60 threshold intervals (Build, Sat)',
+    energySystem: 'Aerobic power',
+    exercises: [{ ...SIXTY_SIXTY_EXERCISE }]
   };
 }
 
@@ -952,21 +973,37 @@ export const Program = {
       return session;
     }
 
+    // ADR-0010: in hybrid Build, fix the energy system per slot instead of
+    // letting weekFlavor alternate the whole week — Thursday is always limit
+    // bouldering, Saturday alternates boulder-triples (odd/boulder weeks) with
+    // the new 60/60-threshold session (even/sport weeks). Base, Peak, Taper,
+    // and non-hybrid focuses are untouched (KG-B4).
+    const hybridBuildMix = focus === 'hybrid' && phase === 'build';
+
     let session;
     if (slot === 'mon-main') {
       if (deload && retest) session = buildRetestSession();
       else session = buildMonHangboard(phase, deload, focus);
     } else if (slot === 'thu-main') {
-      session = buildThuMain(phase, resolvedFlavor, deload, weeksLeft, ctx.peakType);
+      const thuFlavor = hybridBuildMix ? 'boulder' : resolvedFlavor;
+      session = buildThuMain(phase, thuFlavor, deload, weeksLeft, ctx.peakType);
     } else if (slot === 'sat-main') {
-      session = buildSatMain(phase, resolvedFlavor, deload, weeksLeft, ctx.peakType);
+      session = (hybridBuildMix && flavor === 'sport')
+        ? buildSat6060Threshold()
+        : buildSatMain(phase, resolvedFlavor, deload, weeksLeft, ctx.peakType);
     } else {
       session = LIGHT_DAY;
     }
 
     // KG-A10: anti-style cue, gated on phase/flavor/slot (not sessionId) so it
     // keeps applying if a phase's Thu/Sat template is ever split or renamed.
-    if ((slot === 'thu-main' || slot === 'sat-main') && resolvedFlavor === 'boulder' && (phase === 'base' || phase === 'build')) {
+    // Thursday's actual content-flavor follows the hybridBuildMix override
+    // above (thu-limit is always a boulder/problems session in hybrid Build,
+    // even on nominally sport-parity weeks); Saturday's sat-6060-threshold is
+    // a mileage/interval session, not discrete problem selection, so it's
+    // excluded from the cue the same way sport-focus 60/60 always has been.
+    const styleFlavor = (slot === 'thu-main' && hybridBuildMix) ? 'boulder' : resolvedFlavor;
+    if ((slot === 'thu-main' || slot === 'sat-main') && styleFlavor === 'boulder' && (phase === 'base' || phase === 'build')) {
       session = attachStyleNote(session, benchmarks);
     }
 

@@ -1,6 +1,6 @@
 # Spec: within-week mixing restructure (ADR-0010 implementation)
 
-**Status:** Spec locked 2026-07-17 via wayfinder [map #22](https://github.com/slm37102/simple-climbing-training-planner/issues/22), ticket [#45](https://github.com/slm37102/simple-climbing-training-planner/issues/45). **Not yet implemented** — implementation ticket cut at the map's assembly step ([#33](https://github.com/slm37102/simple-climbing-training-planner/issues/33)).
+**Status:** Spec locked 2026-07-17 via wayfinder [map #22](https://github.com/slm37102/simple-climbing-training-planner/issues/22), ticket [#45](https://github.com/slm37102/simple-climbing-training-planner/issues/45). **Implemented 2026-07-17** via [issue #48](https://github.com/slm37102/simple-climbing-training-planner/issues/48).
 
 > **This is a decision/spec, not the change itself.** [ADR-0010](../adr/0010-hybrid-within-week-mixing.md) records *why*; this spec defines *what* to build against the code as it stands after the Group 1 implementation wave (flash pyramid, comp templates, taper single-cut all landed).
 

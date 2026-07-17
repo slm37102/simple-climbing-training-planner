@@ -1,6 +1,6 @@
 # Hybrid mode: within-week mixing (system-per-slot, format alternation)
 
-**Status:** Accepted — decided 2026-07-15 ([wayfinder ticket #24](https://github.com/slm37102/simple-climbing-training-planner/issues/24)); implementation pending (spec → tickets via the map's assembly step).
+**Status:** Implemented — decided 2026-07-15 ([wayfinder ticket #24](https://github.com/slm37102/simple-climbing-training-planner/issues/24)); shipped 2026-07-17 via [the implementation spec](../specs/within-week-mixing-spec.md) and [issue #48](https://github.com/slm37102/simple-climbing-training-planner/issues/48).
 
 ## Context
 

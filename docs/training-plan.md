@@ -347,11 +347,11 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
   - **Skill drill (optional, no fingers)** — pick one drill to focus on today · *(optional)*
   - **Tuesday antagonist/shoulder block** — Wrist extensor curls: 3 × 20 · 60s rest between sets; Band cactus (external rotation): 2 × 12–15 · 45–60s rest between sets
 - **Wed** — Rest day
-- **Thu** — 60/60 threshold intervals (Build) *(Aerobic power)*
-  - **60/60 intervals** — 60s moderately hard climbing / 60s rest · 10–30 min total · stop before the deep pump (never above 8.5) · RPE 7–8.5 · target: 20 min
+- **Thu** — Limit Bouldering (Build) *(Strength)*
+  - **Limit boulders** — 3–5 problems · 3–5 attempts · 3–5 min rest · 2–3 sets · RPE 8.5–9.5 · target: 4 problems
 - **Fri** — Rest day
-- **Sat** — 4×4 power-endurance (Build) *(Anaerobic capacity)*
-  - **4×4 circuits** — 4 routes/links back-to-back · 4 min rest · 3 sets · at 50–60% redpoint · RPE 8.5–9.5 · target: 3 sets
+- **Sat** — 60/60 threshold intervals (Build, Sat) *(Aerobic power)*
+  - **60/60 intervals** — 60s moderately hard climbing / 60s rest · 10–30 min total · stop before the deep pump (never above 8.5) · RPE 7–8.5 · target: 20 min
 - **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
   - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
 
