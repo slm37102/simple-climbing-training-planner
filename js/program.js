@@ -737,14 +737,16 @@ const DELOAD_VOLUME_MULTIPLIER = 0.6; // keep 60% of sets
 // climbing-kind exercise's concrete prescribedTarget the same way prescribedSets
 // is cut, producing a real integer instead of a vague "drop ~40%" note. Count
 // units floor to a whole number (min 1); the 'min' duration unit rounds to the
-// nearest 5.
-function scaleTarget(target) {
+// nearest 5. mult defaults to the deload cut but is parameterized so ADR-0015's
+// readiness "Lighter" scaling (×0.85) can reuse the same downward rounding
+// convention.
+function scaleTarget(target, mult = DELOAD_VOLUME_MULTIPLIER) {
   if (!target) return target;
   if (target.unit === 'min') {
-    const scaled = Math.max(5, Math.round((target.value * DELOAD_VOLUME_MULTIPLIER) / 5) * 5);
+    const scaled = Math.max(5, Math.round((target.value * mult) / 5) * 5);
     return { value: scaled, unit: target.unit };
   }
-  return { value: Math.max(1, Math.floor(target.value * DELOAD_VOLUME_MULTIPLIER)), unit: target.unit };
+  return { value: Math.max(1, Math.floor(target.value * mult)), unit: target.unit };
 }
 
 function applyDeloadVolume(session) {
@@ -866,6 +868,64 @@ function applyTaperVolume(session) {
   };
   out.taperNote = 'Taper — volume cut, intensity held. Short, crisp, stop fresh.';
   return out;
+}
+
+// ============== Readiness gating for climbing sessions (ADR-0015) ==============
+// Extends the readiness signal (already modulating hangboard/pullup kg via
+// Loads.resolveEffective) to climbing (non-kg) kinds, which previously got
+// zero same-day modulation despite carrying the highest injury/overreach
+// exposure. Downward-only, matching ADR-0009's asymmetric posture (Push is a
+// no-op for climbing here — controlled upward progression already belongs
+// to the kg-side progression engine). Both constants are app conventions,
+// unvalidated (KG-C7 posture) — they inherit the readiness multiplier's
+// existing convention status rather than adding new ones.
+const READINESS_LIGHTER_MULTIPLIER = 0.85;
+const READINESS_RPE_CAP = 8.5;
+const READINESS_RPE_CAP_NOTE = 'today: stay ≤8.5, stop at first quality drop';
+const CLIMBING_KINDS = new Set(['boulder', 'route', 'circuit', 'arc', 'open-climb', 'limit-boulder', 'campus']);
+
+// Scales climbing-kind prescribedTarget ×0.85 (deload's rounding rules) and
+// caps any climbing exercise whose rpeRange tops out above 8.5 with a note —
+// campus/limit-boulder are the kinds this actually catches (their sport-
+// climbing-kind siblings don't run that hot outside Peak/PE work). Hangboard/
+// pullup are untouched here; their readiness modulation is already the
+// existing kg-side readinessMultiplier in Loads.resolveEffective.
+function applyReadinessLighter(session) {
+  if (!session?.exercises) return session;
+  const out = {
+    ...session,
+    exercises: session.exercises.map(ex => {
+      if (!ex || !CLIMBING_KINDS.has(ex.kind)) return ex;
+      const next = { ...ex };
+      if (next.prescribedTarget) {
+        next.readinessScaledFrom = next.prescribedTarget;
+        next.prescribedTarget = scaleTarget(next.prescribedTarget, READINESS_LIGHTER_MULTIPLIER);
+      }
+      if (Array.isArray(next.rpeRange) && next.rpeRange[1] > READINESS_RPE_CAP) {
+        next.readinessCapNote = READINESS_RPE_CAP_NOTE;
+      }
+      return next;
+    })
+  };
+  out.readinessNote = 'Readiness: lighter — climbing targets scaled ×0.85, cap on higher-intensity work.';
+  return out;
+}
+
+// The single adopted substitution: Peak-Thursday sport-flavor 30/30 lactic
+// (RPE 9.5–10) swaps to the 60/60 threshold template on a Lighter day —
+// phase-clean by ADR-0006's own taxonomy (band-1 is legal wherever band-2
+// is), and it reuses an already-designed session rather than inventing
+// content. The shared SIXTY_SIXTY_EXERCISE constant (ADR-0010) means this
+// is byte-identical to whatever Build would prescribe that week.
+function applyPeakLacticSwap(session) {
+  if (session?.sessionId !== 'thu-3030-lactic') return null;
+  return {
+    sessionId: session.sessionId,
+    label: session.label,
+    energySystem: 'Aerobic power',
+    exercises: [{ ...SIXTY_SIXTY_EXERCISE }],
+    readinessNote: 'Readiness: lighter — swapped 30/30 lactic for 60/60 threshold (ADR-0015).'
+  };
 }
 
 // ===== Public API =====
@@ -1099,6 +1159,23 @@ export const Program = {
       session.deloadNote = 'Early volume cut — accepted from the readiness-trend signal (ADR-0014).';
     }
 
+    // ADR-0015: readiness gating for climbing sessions — applied last, the
+    // same way the kg chain applies its readiness multiplier after
+    // decay/auto-adjust. Downward-only: 'push'/'normal'/absent are no-ops.
+    // 'suggestRest' with an explicit one-tap accept swaps the whole session
+    // for the light template (mobility/skill/Tuesday antagonist block);
+    // declining (or not yet answering) falls through to the same Lighter
+    // levers 'lighter' gets — "keeps the planned session with Lighter
+    // levers applied" per the ADR.
+    const readinessLabel = overrides?.readinessLabel;
+    if ((readinessLabel === 'lighter' || readinessLabel === 'suggestRest') && !session.isRest && !session.isRetest) {
+      if (readinessLabel === 'suggestRest' && overrides?.acceptRestSwap) {
+        session = { ...LIGHT_DAY, sessionId: 'readiness-rest-swap', readinessNote: 'Readiness: suggested rest — session swapped for a light day.' };
+      } else {
+        session = applyPeakLacticSwap(session) || applyReadinessLighter(session);
+      }
+    }
+
     return { ...session, phase, flavor: resolvedFlavor, focus, deload, retest, weekIdx: ctx.weekIdx, cycleWeeks: weeks };
   },
 
@@ -1106,13 +1183,19 @@ export const Program = {
   // benchmarks (KG-A10, optional) — see prescribeForContext. ADR-0014: reads
   // settings.earlyVolumeCutWeekIndices (an athlete-accepted readiness-trend
   // signal, by weekIdx) to force the volume cut for that week's sessions.
-  build(plan, dateISO, benchmarks = null) {
+  // readinessCtx (ADR-0015, optional): { label: 'lighter'|'suggestRest'|'push'|'normal', acceptRestSwap }
+  // — label maps from Loads.computeReadinessMultiplier's label; 'push'/'normal'/absent are no-ops.
+  build(plan, dateISO, benchmarks = null, readinessCtx = null) {
     const start = this.effectiveStart(plan?.settings);
     const ctx = this.resolveDate(dateISO, start, this.cycleWeeksOf(plan?.settings), plan?.settings?.peakType);
     const forceVolumeCut = !!(ctx && !ctx.outOfCycle
       && Array.isArray(plan?.settings?.earlyVolumeCutWeekIndices)
       && plan.settings.earlyVolumeCutWeekIndices.includes(ctx.weekIdx));
-    return this.prescribeForContext(ctx, plan?.focus || 'hybrid', benchmarks, { forceVolumeCut });
+    return this.prescribeForContext(ctx, plan?.focus || 'hybrid', benchmarks, {
+      forceVolumeCut,
+      readinessLabel: readinessCtx?.label ?? null,
+      acceptRestSwap: !!readinessCtx?.acceptRestSwap
+    });
   },
 
   buildAntiStyleCue,

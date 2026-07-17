@@ -1,6 +1,6 @@
 # Readiness gating for climbing sessions: downward-only, auto-applied scaling + one-tap rest swap
 
-**Status:** Accepted — decided 2026-07-16 ([wayfinder ticket #30](https://github.com/slm37102/simple-climbing-training-planner/issues/30)); implementation pending (ticket cut at the map's assembly step). Adjudicates KG-A14 (coach-review W5).
+**Status:** Implemented — decided 2026-07-16 ([wayfinder ticket #30](https://github.com/slm37102/simple-climbing-training-planner/issues/30)); shipped 2026-07-17 via [issue #53](https://github.com/slm37102/simple-climbing-training-planner/issues/53). Adjudicates KG-A14 (coach-review W5).
 
 ## Context
 

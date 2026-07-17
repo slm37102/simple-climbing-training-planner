@@ -235,10 +235,11 @@ function headerHtml(date, ctx, session) {
     ${(() => {
       // One shared slot for phase-mechanics notes: deload cut, taper cut
       // (previously built by ADR-0007 but never rendered here), the
-      // ADR-0009 Base aerobic ramp, or the coach-review §8 Sunday
-      // pre-heavy-Monday hint (sun-optional's own session never sets the
-      // other three, so this list is always mutually exclusive).
-      const note = session?.deloadNote || session?.taperNote || session?.rampNote || session?.sunHint;
+      // ADR-0009 Base aerobic ramp, the ADR-0015 readiness-gating note, or
+      // the coach-review §8 Sunday pre-heavy-Monday hint (sun-optional's own
+      // session never sets the others, so this list is always mutually
+      // exclusive).
+      const note = session?.deloadNote || session?.taperNote || session?.rampNote || session?.readinessNote || session?.sunHint;
       return note ? `<div class="deload-note" style="margin-top:10px">⚙ ${note}</div>` : '';
     })()}
     ${session?.styleNote ? `<div class="deload-note" style="margin-top:10px">↔ ${session.styleNote}</div>` : ''}
@@ -294,6 +295,35 @@ function signalsBannerHtml(signals) {
       </div>
     </div>`;
   }).join('');
+}
+
+// ADR-0015: suggest-rest one-tap session swap. Swap-by-consent (ADR-0008/
+// 0014 idiom) — declining keeps the planned session with the Lighter levers
+// (applied unconditionally in prescribeForContext whenever it's not
+// swapped, per the ADR's "keeps the planned session with Lighter levers"
+// framing), not a further reduction.
+function readinessSwapBannerHtml(readinessGateLabel, dayLog) {
+  if (readinessGateLabel !== 'suggestRest' || dayLog.acceptedReadinessSwap || dayLog.declinedReadinessSwap) return '';
+  return `<div class="gap-note major" data-readiness-swap-banner>
+    <p>⏸ Readiness suggests rest today. Swap this session for a light day (mobility + skill drill + antagonist mini-block)?</p>
+    <div class="row" style="gap:8px;margin-top:8px">
+      <button type="button" class="primary" data-readiness-swap-accept>Swap for a light day</button>
+      <button type="button" class="ghost" data-readiness-swap-decline>Keep planned session</button>
+    </div>
+  </div>`;
+}
+
+function wireReadinessSwapBanner(root, date) {
+  root.querySelector('[data-readiness-swap-accept]')?.addEventListener('click', () => {
+    const day = Storage.getDay(date) || {};
+    Storage.setDay(date, { ...day, acceptedReadinessSwap: true });
+    renderToday(root);
+  });
+  root.querySelector('[data-readiness-swap-decline]')?.addEventListener('click', () => {
+    const day = Storage.getDay(date) || {};
+    Storage.setDay(date, { ...day, declinedReadinessSwap: true });
+    renderToday(root);
+  });
 }
 
 function dismissSignalForDay(date, key) {
@@ -414,10 +444,16 @@ export function renderToday(root) {
     return;
   }
 
-  const session = Program.build(activePlan, date, Storage.get().benchmarks);
   const dayLog = Storage.getDay(date) || {};
   const readiness = dayLog.readiness || { sleep:3, soreness:3, fatigue:3 };
   const { multiplier, label: rdLabel, avg: rdAvg } = Loads.computeReadinessMultiplier(readiness);
+  // ADR-0015: readiness gating for climbing (non-kg) sessions — reads the
+  // same day's readiness label the kg chain already modulates on.
+  const readinessGateLabel = rdLabel === 'Lighter' ? 'lighter' : rdLabel === 'Suggest rest / mobility only' ? 'suggestRest' : null;
+  const session = Program.build(activePlan, date, Storage.get().benchmarks, {
+    label: readinessGateLabel,
+    acceptRestSwap: dayLog.acceptedReadinessSwap === true
+  });
   // Only surface a gap on the real current date — not while browsing history (ADR-0008).
   const gap = date === realToday ? Replan.detectGap(activePlan, realToday) : null;
 
@@ -445,7 +481,7 @@ export function renderToday(root) {
     })();
   const { warmup, cooldown, skillDrills } = Warmup.forSession(session, { microRetest });
 
-  let body = dateNavHtml + planSwitcherHtml + completionHtml + headerHtml(date, ctx, session) + gapBannerHtml(gap) + signalsBannerHtml(signals);
+  let body = dateNavHtml + planSwitcherHtml + completionHtml + headerHtml(date, ctx, session) + gapBannerHtml(gap) + signalsBannerHtml(signals) + readinessSwapBannerHtml(readinessGateLabel, dayLog);
 
   if (session.isRest) {
     body += `<div class="card"><h2>Recovery checklist</h2>
@@ -558,6 +594,7 @@ export function renderToday(root) {
   wireCycleComplete(root, activePlan);
   wireGapBanner(root, activePlan, gap);
   wireSignalsBanner(root, activePlan, ctx, date);
+  wireReadinessSwapBanner(root, date);
   wire(root, date, session, ctx, multiplier);
   wirePlanSwitcher(root, root);
 }
@@ -864,8 +901,11 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
     prescribedStr = drillPickerHtml(i, ex, actual);
   } else if (ex.prescribedTarget) {
     const rpe = ex.rpeRange ? `RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : '';
+    // ADR-0015: readiness-gating RPE cap note (Lighter day, climbing kinds
+    // whose rpeRange tops out above 8.5 — campus/limit-boulder mainly).
+    const capNote = ex.readinessCapNote ? `<div class="muted" style="margin:4px 0">⚠ ${ex.readinessCapNote}</div>` : '';
     prescribedStr = targetCalloutHtml(ex) + howtoHtml(ex) +
-      `<div class="exercise-prescribe" style="margin:0 0 6px">${[ex.prescribed, rpe].filter(Boolean).join(' · ')}</div>`;
+      `<div class="exercise-prescribe" style="margin:0 0 6px">${[ex.prescribed, rpe].filter(Boolean).join(' · ')}</div>` + capNote;
   } else {
     const rpe = ex.rpeRange ? ` · RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : '';
     prescribedStr = (ex.prescribed || '') + rpe;
