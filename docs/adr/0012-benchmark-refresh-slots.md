@@ -1,6 +1,6 @@
 # Benchmark refresh: post-goal retest slot + staleness-gated Build-Monday micro-retest
 
-**Status:** Accepted — decided 2026-07-15 ([wayfinder ticket #31](https://github.com/slm37102/simple-climbing-training-planner/issues/31)); implementation pending (ticket cut at the map's assembly step). Adjudicates coach-review W13 (tracked inside KG-A8).
+**Status:** Implemented — decided 2026-07-15 ([wayfinder ticket #31](https://github.com/slm37102/simple-climbing-training-planner/issues/31)); shipped 2026-07-17 via [issue #51](https://github.com/slm37102/simple-climbing-training-planner/issues/51). Adjudicates coach-review W13 (tracked inside KG-A8).
 
 ## Context
 

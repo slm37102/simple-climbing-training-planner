@@ -65,16 +65,23 @@ function retestBenchmarkValues(session, date = getSelectedDate()) {
   const dayExercises = Storage.get().days?.[date]?.exercises || [];
   let maxHang20mm = null;
   let pullup1RM = null;
+  let pullupOptional = false;
 
   session.exercises.forEach((ex, i) => {
+    if (/1rm weighted pull-up/i.test(ex.name) && ex.optional) pullupOptional = true;
     const actual = asActualObj(dayExercises[i]?.actual);
     if (!Number.isFinite(actual.kg)) return;
     if (/max 10s hang on 20mm edge/i.test(ex.name)) maxHang20mm = actual.kg;
     if (/1rm weighted pull-up/i.test(ex.name)) pullup1RM = actual.kg;
   });
 
-  if (!Number.isFinite(maxHang20mm) || !Number.isFinite(pullup1RM)) return null;
-  return { maxHang20mm, pullup1RM };
+  // ADR-0012: the post-goal retest's pull-up test is optional (max hang is
+  // the only mandatory measurement there) — don't block the save on a
+  // skipped optional pull-up, but still require both on the Base-block
+  // retest, where pull-up isn't optional.
+  if (!Number.isFinite(maxHang20mm)) return null;
+  if (!pullupOptional && !Number.isFinite(pullup1RM)) return null;
+  return { maxHang20mm, pullup1RM: Number.isFinite(pullup1RM) ? pullup1RM : null };
 }
 
 function retestBenchmarkBtn(session, date, saved = false) {
@@ -89,6 +96,22 @@ function retestBenchmarkSection(session, date) {
   if (!session?.isRetest) return '';
   const content = retestBenchmarkBtn(session, date);
   return `<div class="field" id="retestBenchmarkBox" style="${content ? '' : 'display:none'}">${content}</div>`;
+}
+
+// ADR-0012: post-goal retest offer (goal day +1..+7) — a small standalone
+// card, not the full weekly session UI (there's no phase/week context to
+// show; it's an out-of-cycle measurement). Reuses renderExercise (which
+// never reads its ctx param) and the existing retest-benchmark save flow.
+function postGoalRetestCardHtml(session, date) {
+  const dayLog = Storage.getDay(date) || {};
+  return `<div class="card" data-post-goal-retest>
+    <h2 style="margin:0 0 4px">Post-goal retest</h2>
+    <p class="muted" style="margin:0 0 14px;font-size:.85rem">Your cycle's goal day has passed — a fresh, tapered measurement now (max hang; pull-up optional) captures this cycle's gains and gives your next cycle an honest starting benchmark.</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${session.exercises.map((ex, i) => renderExercise(ex, i, dayLog, null, 1.0, date, session.sessionId)).join('')}
+    </div>
+    ${retestBenchmarkSection(session, date)}
+  </div>`;
 }
 
 function tomorrowIso() {
@@ -307,11 +330,21 @@ export function renderToday(root) {
 
   const ctx = Program.resolveDate(date, Program.effectiveStart(activePlan.settings), Program.cycleWeeksOf(activePlan.settings), activePlan.settings?.peakType);
   if (ctx?.outOfCycle) {
+    // ADR-0012: post-goal retest offer, goal day +1..+7 — composes with the
+    // existing Cycle Complete celebration below rather than replacing it (in
+    // practice the two windows always coincide: showCycleComplete is true
+    // for every date on/after cycle end, exactly the window this can ever
+    // be true in; it's false only when browsing before the cycle's start).
+    const postGoalSession = Program.build(activePlan, date, Storage.get().benchmarks);
+    const postGoalHtml = postGoalSession?.isRetest ? postGoalRetestCardHtml(postGoalSession, date) : '';
+    const wirePostGoal = () => { if (postGoalSession?.isRetest) wire(root, date, postGoalSession, { weekIdx: null, phase: 'post-goal', flavor: null, deload: false, retest: true }, 1.0); };
+
     if (showCycleComplete) {
-      root.innerHTML = dateNavHtml + planSwitcherHtml + completionHtml;
+      root.innerHTML = dateNavHtml + planSwitcherHtml + completionHtml + postGoalHtml;
       wireDateNav(root);
       wireCycleComplete(root, activePlan);
       wirePlanSwitcher(root, root);
+      wirePostGoal();
       return;
     }
     const which = activePlan.settings.anchorMode === 'compDate'
@@ -320,10 +353,11 @@ export function renderToday(root) {
     const weeks = Program.cycleWeeksOf(activePlan.settings);
     root.innerHTML = dateNavHtml + planSwitcherHtml + `<div class="card"><h2>Outside cycle</h2>
       <p class="muted">${date} is outside the ${weeks}-week window. ${which}.</p>
-      <button class="ghost" onclick="location.hash='#profile'">Adjust in Profile</button></div>`;
+      <button class="ghost" onclick="location.hash='#profile'">Adjust in Profile</button></div>` + postGoalHtml;
     wireDateNav(root);
     wireCycleComplete(root, activePlan);
     wirePlanSwitcher(root, root);
+    wirePostGoal();
     return;
   }
 
@@ -334,7 +368,16 @@ export function renderToday(root) {
   // Only surface a gap on the real current date — not while browsing history (ADR-0008).
   const gap = date === realToday ? Replan.detectGap(activePlan, realToday) : null;
 
-  const { warmup, cooldown, skillDrills } = Warmup.forSession(session);
+  // ADR-0012: Build-Monday micro-retest gate — first Build Monday of the
+  // cycle, only when the stored max-hang benchmark is >4 weeks old.
+  const microRetest = ctx.slot === 'mon-main' && ctx.phase === 'build'
+    && Program.isFirstBuildWeek(Program.phasePattern(activePlan.settings), ctx.weekIdx)
+    && (() => {
+      const updatedAt = Storage.get().benchmarks?.updatedAt;
+      if (!updatedAt) return true; // never benchmarked at all — treat as maximally stale
+      return daysBetween(updatedAt.slice(0, 10), date) > Warmup.MICRO_RETEST_STALE_DAYS;
+    })();
+  const { warmup, cooldown, skillDrills } = Warmup.forSession(session, { microRetest });
 
   let body = dateNavHtml + planSwitcherHtml + completionHtml + headerHtml(date, ctx, session) + gapBannerHtml(gap);
 
@@ -1075,7 +1118,9 @@ function wire(root, date, session, ctx, readinessMult) {
     Storage.setGlobalBenchmarks({
       bodyweight: benchmarks.bodyweight ?? null,
       maxHang20mm: values.maxHang20mm,
-      pullup1RM: values.pullup1RM
+      // ADR-0012: a skipped optional pull-up (post-goal retest) must not
+      // erase the last known pull-up benchmark with null.
+      pullup1RM: values.pullup1RM != null ? values.pullup1RM : (benchmarks.pullup1RM ?? null)
     });
     refreshRetestBenchmarkBox(true);
   });

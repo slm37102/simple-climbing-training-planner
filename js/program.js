@@ -658,6 +658,25 @@ function buildSatMain(phase, flavor, isDeload, weeksLeft = null, peakType = 'com
   };
 }
 
+// ADR-0012: post-goal retest slot — unconditional, in the out-of-cycle
+// window immediately after the goal/comp day (goal day +1..+7). Maximum-
+// validity measurement (tapered, peaked, zero further training cost since
+// the cycle is over): max hang mandatory, pull-up 1RM optional (the athlete
+// may not want a second max-effort test the same day). Feeds cycle N+1's
+// starting benchmark and the end-of-cycle review checklist.
+function buildPostGoalRetestSession() {
+  return {
+    sessionId: 'post-goal-retest',
+    label: 'Post-goal retest',
+    energySystem: 'Test',
+    isRetest: true,
+    exercises: [
+      { kind:'test', name: 'Max 10s hang on 20mm edge', prescribed: 'find heaviest 10s hold (RPE 9.5 cap) · 3–5 min rest between attempts' },
+      { kind:'test', name: '1RM weighted pull-up', prescribed: 'work up to 1 hard rep · 3–5 min rest between attempts', optional: true }
+    ]
+  };
+}
+
 // Retest replaces Mon main on retest deload weeks.
 function buildRetestSession() {
   return {
@@ -760,6 +779,15 @@ function appendDeloadNote(text) {
   if (!text) return text;
   if (/deload/i.test(text)) return text;
   return text + ' · Deload: drop ~40% volume';
+}
+
+// ADR-0012: identifies the very first Build week of the whole cycle (not
+// per sub-block — a double-block cycle has two Build runs, but the
+// Build-Monday micro-retest slot fires only once, at the genuine Base→Build
+// transition). Used to gate the staleness-gated micro-retest warm-up step.
+export function isFirstBuildWeek(pattern, weekIdx) {
+  const idx = pattern.findIndex(w => w.phase === 'build');
+  return idx >= 0 && idx === weekIdx - 1;
 }
 
 // ============== Base aerobic volume ramp (ADR-0009) ==============
@@ -902,7 +930,10 @@ export const Program = {
     const d = new Date(dateStr + 'T00:00:00');
     const diffDays = Math.floor((d - start) / 86400000);
     const totalDays = cycleDays(cycleWeeks);
-    if (diffDays < 0 || diffDays >= totalDays) return { outOfCycle: true, diffDays };
+    // ADR-0012: totalDays/cycleWeeks carry through even when out of cycle so
+    // prescribeForContext can detect the post-goal retest window (goal day
+    // +1..+7) without a second date resolve.
+    if (diffDays < 0 || diffDays >= totalDays) return { outOfCycle: true, diffDays, totalDays, cycleWeeks: clampCycleWeeks(cycleWeeks) };
     const pattern = buildPhasePattern(cycleWeeks, peakType);
     const weekIdx = Math.floor(diffDays / 7) + 1;
     const dayInWeek = diffDays % 7; // 0=Mon
@@ -949,6 +980,17 @@ export const Program = {
   prescribeForContext(ctx, focus = 'hybrid', benchmarks = null) {
     const weeks = ctx?.cycleWeeks ?? DEFAULT_CYCLE_WEEKS;
     if (!ctx || ctx.outOfCycle) {
+      // ADR-0012: the post-goal retest window — goal day +1 through +7 — is
+      // the only out-of-cycle state with real behavior. diffDays/totalDays
+      // are only reliable when ctx actually came from resolveDate's
+      // out-of-cycle branch (both null-checked; a bare `{outOfCycle:true}`
+      // caller shape still falls through to the generic message below).
+      if (ctx && ctx.diffDays != null && ctx.totalDays != null) {
+        const postGoalOffset = ctx.diffDays - ctx.totalDays; // 0-indexed: 0 = goal day +1
+        if (postGoalOffset >= 0 && postGoalOffset <= 6) {
+          return buildPostGoalRetestSession();
+        }
+      }
       return { sessionId: 'out-of-cycle', label: `Outside ${weeks}-week cycle`, exercises: [] };
     }
     const { phase, flavor, slot, deload, retest } = ctx;
@@ -1055,5 +1097,6 @@ export const Program = {
     return this.prescribeForContext(ctx, plan?.focus || 'hybrid', benchmarks);
   },
 
-  buildAntiStyleCue
+  buildAntiStyleCue,
+  isFirstBuildWeek
 };

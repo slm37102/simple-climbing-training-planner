@@ -27,8 +27,18 @@ const COOLDOWN_GENERIC = [
   'Hydrate, refuel within 30 min'
 ];
 
+// ADR-0012: staleness-gated Build-Monday micro-retest — a 15-minute max-hang
+// -only re-measurement folded into the first Build Monday's warm-up, only
+// when the stored benchmark is older than ~4 weeks (silent at the default
+// 12-week cycle shape, where the week-6 retest just ran). Threshold is an
+// app convention (unvalidated — KG-C7 posture), not a validated cutoff.
+const MICRO_RETEST_STALE_DAYS = 28;
+
 export const Warmup = {
-  forSession(session) {
+  // opts.microRetest (ADR-0012, optional): true when this session is the
+  // first Build Monday AND the stored benchmark is stale — appends a
+  // 15-minute max-hang-only micro-retest step to the warm-up.
+  forSession(session, opts = null) {
     if (!session) return { warmup: [], cooldown: [], skillDrills: null };
     const id = session.sessionId || '';
     const isHangboard = id.startsWith('mon-hangboard') || id === 'mon-retest';
@@ -38,6 +48,9 @@ export const Warmup = {
     let warmup = [...TWO_STAGE_WARMUP];
     if (isHangboard) warmup = warmup.concat(HANGBOARD_PROGRESSION);
     if (isClimbing)  warmup = warmup.concat(CLIMBING_PROGRESSION);
+    if (opts?.microRetest) {
+      warmup = warmup.concat(['15-min micro-retest: find today\'s heaviest 10s max hang on 20mm (RPE 9.5 cap) — your last benchmark is 4+ weeks old (ADR-0012)']);
+    }
 
     return {
       warmup,
@@ -47,6 +60,7 @@ export const Warmup = {
       skillDrills: isClimbing ? WARMUP_DRILLS : null
     };
   },
+  MICRO_RETEST_STALE_DAYS,
   restRecoveryChecklist() {
     return [
       'Sleep 8h target',
