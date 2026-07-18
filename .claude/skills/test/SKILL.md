@@ -5,7 +5,7 @@ description: Run or extend this repo's in-browser smoke test suite (tests/index.
 
 # Running this project's test suite
 
-There is **no build, no lint, no CLI test runner** for this repo. Tests are an in-browser smoke suite at `tests/index.html`.
+There is **no build, no lint, no CLI test runner** for this repo. Tests are an in-browser smoke suite: `tests/index.html` is the shell, `tests/harness.js` is the runner (`test`/`assert`/`assertEq`/`resetStorage`), and the cases live in **`tests/cases/*.js`** — one ES module per domain area, imported by the page in display order.
 
 ## Running the suite
 
@@ -15,15 +15,15 @@ There is **no build, no lint, no CLI test runner** for this repo. Tests are an i
 
 ## What's covered
 
-`Storage` round-trips, `Today` input persistence + pre-fill defaults, `Log` edit/save, `inputVisibility` per kind, optional Done, `Program.resolveDate`, `buildPhasePattern` for various cycle lengths, deload semantics, and the Cycle summary card.
+`Storage` round-trips + merge/LWW, `Today` input persistence + pre-fill defaults, `inputVisibility` per kind, optional Done, `Program.resolveForSettings`/`resolveDate`, `buildPhasePattern` for various cycle lengths, deload semantics, the prescription pipeline (notes[] + provenance), loads chain (`resolveForDay`), monitoring signals, readiness gating, and the view smoke tests (Log is read-only; Calendar summary card).
 
 ## Running a single test
 
-There's no filter flag — comment out the other test registrations, or temporarily filter the `tests` array in the runner, then reload.
+There's no filter flag — comment out the other `import './cases/…'` lines in `tests/index.html` to run one file, or temporarily filter the `tests` array in `tests/harness.js`, then reload.
 
 ## When to add a case
 
-Add a test case in `tests/index.html` before or after any bug fix or input/storage change, so the regression can't silently come back.
+Add a test case before or after any bug fix or input/storage change, so the regression can't silently come back. Put it in the matching `tests/cases/` file (each carries the same import block, so moving cases between files is trivial); a genuinely new area gets a new numbered file plus an `import` line in `tests/index.html`.
 
 ## End-to-end checks with Playwright MCP
 
