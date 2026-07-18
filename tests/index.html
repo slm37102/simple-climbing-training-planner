@@ -359,7 +359,7 @@ test('Today: renders the cycle-complete screen without throwing (cycleStats actu
 
 // ─── Log view ─────────────────────────────────────────────────────────────
 
-test('Log: Edit + Save on hangboard entry persists changes', () => {
+test('Log: feed is read-only — expand shows detail, no edit affordance', () => {
   resetStorage();
   Storage.setDay('2026-05-18', {
     sessionId: 'mon-hangboard-base',
@@ -374,78 +374,16 @@ test('Log: Edit + Save on hangboard entry persists changes', () => {
   document.body.appendChild(root);
   try {
     renderLog(root);
-    root.querySelector('[data-log-toggle]').click(); // expand — Edit lives in the expanded detail
-    const editBtn = root.querySelector('button[data-edit-log]');
-    assert(editBtn, 'Edit button missing');
-    editBtn.click();
-
-    const kgIn  = root.querySelector('[data-edit-ex="0"][data-edit-ex-field="kg"]');
-    const rpeIn = root.querySelector('[data-edit-ex="0"][data-edit-ex-field="rpe"]');
-    assert(kgIn,  'kg input missing');
-    assert(rpeIn, 'rpe input missing');
-    kgIn.value  = '40';
-    rpeIn.value = '9';
-
-    root.querySelector('button[data-edit-save]').click();
-
-    const back = Storage.getDay('2026-05-18');
-    assertEq(back.exercises[0].actual.kg,  40);
-    assertEq(back.exercises[0].actual.rpe, 9);
-  } finally { root.remove(); }
-});
-
-test('Log: editing boulder entry (no kg input) does not throw on Save', () => {
-  resetStorage();
-  Storage.setDay('2026-05-20', {
-    sessionId: 'thu-main',
-    phase: 'base',
-    status: 'completed',
-    exercises: [
-      { name: 'Boulder', kind: 'boulder', actual: { sets: 4, reps: 4, rpe: 8 } }
-    ]
-  });
-  const root = document.createElement('div');
-  document.body.appendChild(root);
-  try {
-    renderLog(root);
-    root.querySelector('[data-log-toggle]').click(); // expand first
-    root.querySelector('button[data-edit-log]').click();
-    const kgIn = root.querySelector('[data-edit-ex="0"][data-edit-ex-field="kg"]');
-    assert(!kgIn, 'kg input should not exist for boulder kind');
-    const repsIn = root.querySelector('[data-edit-ex="0"][data-edit-ex-field="reps"]');
-    assert(repsIn, 'reps input missing');
-    repsIn.value = '5';
-    root.querySelector('button[data-edit-save]').click();
-    const back = Storage.getDay('2026-05-20');
-    assertEq(back.exercises[0].actual.reps, 5);
-  } finally { root.remove(); }
-});
-
-test('Log: optional exercise edit form shows Done checkbox + persists', () => {
-  resetStorage();
-  Storage.setDay('2026-05-20', {
-    // kind is deliberately not 'skill' here — that kind now specifically means
-    // "has a drill picker" (KG-A9 addendum); this tests the generic optional
-    // Done-checkbox path any other kind gets via ex.optional.
-    exercises: [
-      { name: 'Optional stretch', kind: 'mobility', optional: true, actual: {} }
-    ]
-  });
-  const root = document.createElement('div');
-  document.body.appendChild(root);
-  try {
-    renderLog(root);
-    root.querySelector('[data-log-toggle]').click(); // expand first
-    root.querySelector('button[data-edit-log]').click();
-    const doneCb = root.querySelector('[data-edit-ex="0"][data-edit-ex-field="done"]');
-    assert(doneCb, 'Done checkbox missing for optional');
-    // Should NOT have numeric inputs
-    assert(!root.querySelector('[data-edit-ex="0"][data-edit-ex-field="kg"]'),   'kg should be hidden');
-    assert(!root.querySelector('[data-edit-ex="0"][data-edit-ex-field="sets"]'), 'sets should be hidden');
-    doneCb.checked = true;
-    root.querySelector('button[data-edit-save]').click();
-    const back = Storage.getDay('2026-05-20');
-    assertEq(back.exercises[0].actual.done, true);
+    const toggle = root.querySelector('[data-log-toggle]');
+    assert(toggle, 'feed row missing');
+    toggle.click(); // expand
+    assert(root.innerHTML.includes('25kg'), 'expanded detail should show the logged kg');
+    // The in-feed edit form was removed deliberately (edit past days via the
+    // Today tab date navigation) — no edit affordance may come back.
+    assert(!root.querySelector('[data-edit-log]'),  'no Edit button in read-only feed');
+    assert(!root.querySelector('[data-edit-form]'), 'no edit form in read-only feed');
+    toggle.click(); // collapse still works
+    assert(!root.innerHTML.includes('25kg') || root.querySelector('[data-log-toggle]'), 'collapse re-renders');
   } finally { root.remove(); }
 });
 
@@ -1511,37 +1449,6 @@ test('[Gym-ready] REGRESSION: a freshly-initialized day persists kind/drills so 
   root.remove();
 });
 
-test('[Gym-ready] log.js edit form: skill drill shows as a <select> and can be changed', () => {
-  resetStorage();
-  const plan = Storage.getActivePlan();
-  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
-  Storage.setDay('2026-05-05', {
-    sessionId: 'light',
-    exercises: [
-      { name: 'Skill drill (optional, no fingers)', kind: 'skill', drills: Program.SKILL_DRILLS, actual: { drill: 'silent-feet', done: true } },
-      { name: '15–20 min mobility', kind: 'mobility', actual: {} }
-    ]
-  });
-  const root = document.createElement('div');
-  document.body.appendChild(root);
-  try {
-    renderLog(root);
-    root.querySelector('[data-log-toggle]').click();
-    root.querySelector('button[data-edit-log]').click();
-    const sel = root.querySelector('[data-edit-ex="0"][data-edit-ex-field="drill"]');
-    assert(sel, 'expected a drill <select> for the skill exercise');
-    assertEq(sel.value, 'silent-feet', 'select should show the previously-persisted drill');
-
-    sel.value = 'falling-practice';
-    sel.dispatchEvent(new Event('change', { bubbles: true }));
-    root.querySelector('button[data-edit-save]').click();
-
-    const back = Storage.getDay('2026-05-05');
-    assertEq(back.exercises[0].actual.drill, 'falling-practice');
-    assertEq(back.exercises[0].actual.done, true);
-  } finally { root.remove(); }
-});
-
 // ─── KG-A9 addendum: expanded technique-drill library ──────────────────────
 
 test('[KG-A9 addendum] catalog: 19 drills across 5 categories; WARMUP_DRILLS is the footwork+positioning subset', () => {
@@ -1632,43 +1539,6 @@ test('[KG-A9 addendum] category chips filter the visible pill-group without chan
     // Switching categories is a view-only filter — it must not touch storage.
     const back = Storage.getDay('2026-05-05');
     assert(!back, 'switching category chips must not persist anything');
-  } finally { root.remove(); }
-});
-
-test('[KG-A9 addendum] log.js: warm-up drill select shows only on Thu/Sat entries and saves', () => {
-  resetStorage();
-  const plan = Storage.getActivePlan();
-  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
-  Storage.setDay('2026-05-07', { sessionId: 'thu-main', exercises: [] }); // Thu wk1
-  Storage.setDay('2026-05-05', { sessionId: 'light', exercises: [] });    // Tue wk1 — no warm-up picker
-  const root = document.createElement('div');
-  document.body.appendChild(root);
-  try {
-    renderLog(root);
-
-    // Each click below triggers log.js to re-render #logContent, so re-query
-    // from `root` fresh every time rather than caching element references.
-    function toggleAndEdit(dateFrag) {
-      const toggle = [...root.querySelectorAll('[data-log-toggle]')].find(t => t.dataset.logToggle?.includes(dateFrag));
-      assert(toggle, `expected a row for ${dateFrag}`);
-      toggle.click();
-      const editBtn = [...root.querySelectorAll('button[data-edit-log]')].find(b => b.dataset.editLog?.includes(dateFrag));
-      assert(editBtn, `expected an Edit button for ${dateFrag}`);
-      editBtn.click();
-    }
-
-    toggleAndEdit('2026-05-07');
-    const thuSel = root.querySelector(`[data-edit-form$="2026-05-07"] [data-edit-field="warmupDrill"]`);
-    assert(thuSel, 'expected a warm-up drill select on the Thu entry');
-
-    thuSel.value = 'quiet-hands';
-    thuSel.dispatchEvent(new Event('change', { bubbles: true }));
-    root.querySelector(`[data-edit-form$="2026-05-07"] button[data-edit-save]`).click();
-    assertEq(Storage.getDay('2026-05-07').warmupDrill, 'quiet-hands');
-
-    toggleAndEdit('2026-05-05');
-    const tueSel = root.querySelector(`[data-edit-form$="2026-05-05"] [data-edit-field="warmupDrill"]`);
-    assert(!tueSel, 'Tuesday entry should not show a warm-up drill select');
   } finally { root.remove(); }
 });
 
@@ -3270,6 +3140,74 @@ test('[ADR-0015] REGRESSION: RPE-cap note renders on the Today tab for a capped 
   try {
     renderToday(root);
     assert(/stay ≤8\.5/i.test(root.textContent), 'expected the RPE-cap note text in the rendered session');
+  } finally { root.remove(); }
+});
+
+// ─── Prescription pipeline (notes[] channel + provenance render) ───────────
+
+test('[pipeline] session.notes carries co-occurring notes in pass order (deload + readiness)', () => {
+  // Before the pipeline refactor, notes were assumed mutually exclusive and
+  // the Today view rendered deloadNote || … || readinessNote — silently
+  // dropping the readiness note whenever both fired (possible since ADR-0015).
+  const plan = { settings: { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' }, focus: 'boulder' };
+  const sess = Program.build(plan, '2026-05-30', null, { label: 'lighter' }); // wk4 Sat, natural deload
+  assert(Array.isArray(sess.notes), 'every built session must carry notes[]');
+  assert(sess.deloadNote && sess.readinessNote, 'fixture must fire both passes');
+  assert(sess.notes.includes(sess.deloadNote),    'notes[] must include the deload note');
+  assert(sess.notes.includes(sess.readinessNote), 'notes[] must include the readiness note');
+  assert(sess.notes.indexOf(sess.deloadNote) < sess.notes.indexOf(sess.readinessNote),
+    'notes[] must be in pass order (cut before readiness gate)');
+});
+
+test('[pipeline] REGRESSION: Today renders BOTH notes when deload and readiness co-occur', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.updatePlan(plan.id, { focus: 'boulder' });
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-30'); // wk4 Sat, natural deload
+  Storage.setDay('2026-05-30', { readiness: { sleep: 3, soreness: 3, fatigue: 3 } }); // avg 3.0 → Lighter
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    assert(/Deload week — volume cut/.test(root.textContent), 'deload note must render');
+    assert(/Readiness: lighter/.test(root.textContent), 'readiness note must ALSO render (was silently dropped)');
+  } finally { root.remove(); }
+});
+
+test('[pipeline] REGRESSION: ramp + Lighter callout shows "Readiness target ↓ from", never a no-op "↑ from"', () => {
+  // Base wk2 ARC: template 30 min → ramp ×1.1 → 35 → readiness ×0.85 → 30.
+  // The old callout could only show rampedFrom, rendering the nonsense
+  // "Ramped target 30 min ↑ from 30 min".
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-16'); // wk2 Sat (hybrid even week → sport → ARC)
+  Storage.setDay('2026-05-16', { readiness: { sleep: 3, soreness: 3, fatigue: 3 } }); // avg 3.0 → Lighter
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    assert(/Readiness target/.test(root.textContent), 'callout must be owned by the last pass that scaled the target');
+    assert(/↓ from 35 min/.test(root.textContent), 'must show the immediate pre-readiness (ramped) value');
+    assert(/template 30 min/.test(root.textContent), 'must show the original template value');
+    assert(!/↑ from/.test(root.textContent), 'the ramp arrow must not render when readiness owns the callout');
+  } finally { root.remove(); }
+});
+
+test('Today: Missed status persists from the Today tab (Log is a read-only feed now)', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-18'); // Mon, wk 3
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const btn = root.querySelector('#markMissed');
+    assert(btn, 'Missed button missing from the Today status row');
+    btn.click();
+    assertEq(Storage.getDay('2026-05-18').status, 'missed');
   } finally { root.remove(); }
 });
 

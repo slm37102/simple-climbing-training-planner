@@ -930,6 +930,114 @@ function applyPeakLacticSwap(session) {
   };
 }
 
+// ============== Prescription pipeline ==============
+// The ordered post-build passes that shape a slot's built session. This used
+// to be an unnamed run of if-blocks inside prescribeForContext whose ordering,
+// exclusivity, and note semantics lived in scattered comments — now each pass
+// declares its firing guard next to its work, and the shared contract is
+// stated once:
+//
+//   • Ordering is the registration order below. The ramp runs before the
+//     volume cuts (mutually exclusive by guard — hardPhasePos returns null on
+//     deload/retest weeks, so a cut always scales the unramped template); the
+//     readiness gate runs last, mirroring where the kg chain applies its own
+//     readiness multiplier.
+//   • Exactly one volume-cut pass may fire per session (the deload / taper /
+//     forced-cut guards are disjoint) — KG-B13's taper templates are authored
+//     pre-cut and only display correctly if the cut runs exactly once.
+//   • A pass that scales a prescribedTarget records provenance on the
+//     exercise: originalTarget (cuts), rampedFrom (ramp), readinessScaledFrom
+//     (readiness gate). Views render target provenance from these.
+//   • A pass with something to tell the athlete writes its note field
+//     (deloadNote / taperNote / rampNote / readinessNote); finishSession
+//     collects every note into session.notes[] in pass order. Notes are NOT
+//     mutually exclusive — a deload week can also be a Lighter readiness day
+//     (ADR-0015) — so views must render the whole array.
+//
+// Rest / tue-light / sun-optional slots return before the pipeline runs —
+// they are pipeline-exempt by construction (a deload cut must never touch
+// Tuesday's antagonist block, and the readiness gate has no climbing kinds
+// to scale there).
+const PRESCRIPTION_PASSES = [
+  {
+    name: 'anti-style-cue', // KG-A10
+    when: (s, env) => (env.slot === 'thu-main' || env.slot === 'sat-main')
+      && env.styleFlavor === 'boulder' && (env.phase === 'base' || env.phase === 'build'),
+    apply: (s, env) => attachStyleNote(s, env.benchmarks)
+  },
+  {
+    name: 'base-volume-ramp', // ADR-0009
+    when: (s, env) => env.phase === 'base' && !env.deload && !env.retest,
+    apply: (s, env) => applyBaseVolumeRamp(
+      s, hardPhasePos(buildPhasePattern(env.weeks, env.ctx.peakType), env.ctx.weekIdx))
+  },
+  {
+    // Retest weeks are only exempt on Monday (KG-B10) — that's the
+    // non-cuttable retest protocol; Thu/Sat retest-week sessions still take
+    // the cut, or the athlete tests benchmarks on accumulated fatigue.
+    name: 'deload-volume-cut', // ADR-0003/0004
+    when: (s, env) => env.deload && !(env.retest && env.slot === 'mon-main') && !s.isRest,
+    apply: s => applyDeloadVolume(s)
+  },
+  {
+    name: 'taper-volume-cut', // ADR-0007 — same machinery, taper-flavored note
+    when: (s, env) => env.phase === 'taper' && !s.isRest,
+    apply: s => applyTaperVolume(s)
+  },
+  {
+    // ADR-0014: the readiness-trend signal's one-tap "accept" — an athlete-
+    // triggered early volume cut, reusing the deload mechanism as a pass
+    // rather than touching the phase-pattern's deload/retest flags. The guard
+    // is what makes it never double-cut an already-cut week.
+    name: 'forced-volume-cut',
+    when: (s, env) => !!env.overrides?.forceVolumeCut
+      && !env.deload && env.phase !== 'taper' && !s.isRest && !s.isRetest,
+    apply: s => ({
+      ...applyDeloadVolume(s),
+      deloadNote: 'Early volume cut — accepted from the readiness-trend signal (ADR-0014).'
+    })
+  },
+  {
+    // ADR-0015: readiness gating for climbing sessions. Downward-only:
+    // 'push'/'normal'/absent are no-ops. 'suggestRest' with an explicit
+    // one-tap accept swaps the whole session for the light template;
+    // declining (or not yet answering) falls through to the same Lighter
+    // levers 'lighter' gets.
+    name: 'readiness-gate',
+    when: (s, env) => (env.overrides?.readinessLabel === 'lighter' || env.overrides?.readinessLabel === 'suggestRest')
+      && !s.isRest && !s.isRetest,
+    apply: (s, env) => {
+      if (env.overrides.readinessLabel === 'suggestRest' && env.overrides.acceptRestSwap) {
+        return { ...LIGHT_DAY, sessionId: 'readiness-rest-swap', readinessNote: 'Readiness: suggested rest — session swapped for a light day.' };
+      }
+      return applyPeakLacticSwap(s) || applyReadinessLighter(s);
+    }
+  }
+];
+
+// Note fields collected into session.notes[], in pass order (sunHint last —
+// it's written by the sun-optional builder, not a pass).
+const NOTE_FIELDS = ['deloadNote', 'taperNote', 'rampNote', 'readinessNote', 'sunHint'];
+
+// Single exit for prescribeForContext: every session leaves as a fresh copy
+// (shared constants like REST_DAY/LIGHT_DAY must not escape by reference),
+// carries the same ctx-enrichment field skeleton on every in-cycle path, and
+// gets notes[] built from whatever note fields the builders/passes wrote.
+function finishSession(session, env) {
+  const out = { ...session };
+  if (env) {
+    out.phase = env.phase;
+    out.flavor = env.resolvedFlavor;
+    out.focus = env.focus;
+    out.deload = env.deload;
+    out.retest = env.retest;
+    out.weekIdx = env.ctx.weekIdx;
+    out.cycleWeeks = env.weeks;
+  }
+  out.notes = NOTE_FIELDS.map(f => out[f]).filter(Boolean);
+  return out;
+}
+
 // ===== Public API =====
 export const Program = {
   PHASE_PATTERN,
@@ -1052,30 +1160,41 @@ export const Program = {
       if (ctx && ctx.diffDays != null && ctx.totalDays != null) {
         const postGoalOffset = ctx.diffDays - ctx.totalDays; // 0-indexed: 0 = goal day +1
         if (postGoalOffset >= 0 && postGoalOffset <= 6) {
-          return buildPostGoalRetestSession();
+          return finishSession(buildPostGoalRetestSession(), null);
         }
       }
-      return { sessionId: 'out-of-cycle', label: `Outside ${weeks}-week cycle`, exercises: [] };
+      return finishSession({ sessionId: 'out-of-cycle', label: `Outside ${weeks}-week cycle`, exercises: [] }, null);
     }
     const { phase, flavor, slot, deload, retest } = ctx;
     const resolvedFlavor = focus === 'hybrid' ? flavor : focus;
     // Full weeks remaining after the current one (final week → 0) — drives the
     // ADR-0006 density progression inside the final 4 weeks.
     const weeksLeft = ctx.weekIdx != null ? weeks - ctx.weekIdx : null;
+    // ADR-0010: in hybrid Build, fix the energy system per slot instead of
+    // letting weekFlavor alternate the whole week — Thursday is always limit
+    // bouldering, Saturday alternates boulder-triples (odd/boulder weeks) with
+    // the 60/60-threshold session (even/sport weeks). Base, Peak, Taper, and
+    // non-hybrid focuses are untouched (KG-B4).
+    const hybridBuildMix = focus === 'hybrid' && phase === 'build';
+    // KG-A10: Thursday's actual content-flavor follows the hybridBuildMix
+    // override (thu-limit is always a boulder/problems session in hybrid
+    // Build, even on nominally sport-parity weeks).
+    const styleFlavor = (slot === 'thu-main' && hybridBuildMix) ? 'boulder' : resolvedFlavor;
+    const env = { ctx, weeks, phase, slot, deload, retest, focus, resolvedFlavor, styleFlavor, benchmarks, overrides };
 
     // ADR-0007: mandatory full rest the day before the goal/comp day, whatever
     // weekday it lands on — arrive fresh.
     if (ctx.diffDays === ctx.totalDays - 2) {
-      return {
+      return finishSession({
         ...REST_DAY,
         sessionId: 'rest-pre-goal',
-        label: 'Full rest — goal day tomorrow',
-        phase, flavor: resolvedFlavor, focus, deload, retest, weekIdx: ctx.weekIdx, cycleWeeks: weeks
-      };
+        label: 'Full rest — goal day tomorrow'
+      }, env);
     }
 
-    if (slot === 'rest') return REST_DAY;
-    if (slot === 'tue-light') return LIGHT_DAY;
+    // Pipeline-exempt slots (see PRESCRIPTION_PASSES header).
+    if (slot === 'rest') return finishSession(REST_DAY, env);
+    if (slot === 'tue-light') return finishSession(LIGHT_DAY, env);
     if (slot === 'sun-optional') {
       const session = {
         sessionId: 'sun-optional',
@@ -1091,23 +1210,15 @@ export const Program = {
       if (ctx.preHeavyMonday) {
         session.sunHint = 'Heavy fingers tomorrow — consider keeping this under ~60 minutes of easy mileage.';
       }
-      return session;
+      return finishSession(session, env);
     }
-
-    // ADR-0010: in hybrid Build, fix the energy system per slot instead of
-    // letting weekFlavor alternate the whole week — Thursday is always limit
-    // bouldering, Saturday alternates boulder-triples (odd/boulder weeks) with
-    // the new 60/60-threshold session (even/sport weeks). Base, Peak, Taper,
-    // and non-hybrid focuses are untouched (KG-B4).
-    const hybridBuildMix = focus === 'hybrid' && phase === 'build';
 
     let session;
     if (slot === 'mon-main') {
       if (deload && retest) session = buildRetestSession();
       else session = buildMonHangboard(phase, deload, focus);
     } else if (slot === 'thu-main') {
-      const thuFlavor = hybridBuildMix ? 'boulder' : resolvedFlavor;
-      session = buildThuMain(phase, thuFlavor, deload, weeksLeft, ctx.peakType);
+      session = buildThuMain(phase, styleFlavor, deload, weeksLeft, ctx.peakType);
     } else if (slot === 'sat-main') {
       session = (hybridBuildMix && flavor === 'sport')
         ? buildSat6060Threshold()
@@ -1116,69 +1227,10 @@ export const Program = {
       session = LIGHT_DAY;
     }
 
-    // KG-A10: anti-style cue, gated on phase/flavor/slot (not sessionId) so it
-    // keeps applying if a phase's Thu/Sat template is ever split or renamed.
-    // Thursday's actual content-flavor follows the hybridBuildMix override
-    // above (thu-limit is always a boulder/problems session in hybrid Build,
-    // even on nominally sport-parity weeks); Saturday's sat-6060-threshold is
-    // a mileage/interval session, not discrete problem selection, so it's
-    // excluded from the cue the same way sport-focus 60/60 always has been.
-    const styleFlavor = (slot === 'thu-main' && hybridBuildMix) ? 'boulder' : resolvedFlavor;
-    if ((slot === 'thu-main' || slot === 'sat-main') && styleFlavor === 'boulder' && (phase === 'base' || phase === 'build')) {
-      session = attachStyleNote(session, benchmarks);
+    for (const pass of PRESCRIPTION_PASSES) {
+      if (pass.when(session, env)) session = pass.apply(session, env);
     }
-
-    // ADR-0009: Base aerobic volume ramp across the hard weeks of the phase.
-    // Mutually exclusive with the deload cut below (hardPhasePos returns null
-    // on deload/retest weeks), so the deload always cuts the unramped template.
-    if (phase === 'base' && !deload && !retest) {
-      const pattern = buildPhasePattern(weeks, ctx.peakType);
-      session = applyBaseVolumeRamp(session, hardPhasePos(pattern, ctx.weekIdx));
-    }
-
-    // Apply Lattice-style volume cut on deload weeks. Retest weeks are only
-    // exempt on Monday (KG-B10) — that's the non-cuttable retest protocol;
-    // Thu/Sat retest-week sessions are ordinary templates and must still take
-    // the same cut as any other deload week, or the athlete tests benchmarks
-    // on accumulated fatigue and enters Build unrecovered.
-    if (deload && !(retest && slot === 'mon-main') && !session.isRest) {
-      session = applyDeloadVolume(session);
-    }
-    // ADR-0007: the taper is a step volume cut with intensity held — same
-    // machinery as a deload, taper-flavored note.
-    if (phase === 'taper' && !session.isRest) {
-      session = applyTaperVolume(session);
-    }
-
-    // ADR-0014: the readiness-trend monitoring signal's one-tap "accept"
-    // action — an athlete-triggered early volume cut for the current week,
-    // reusing the existing deload volume-cut mechanism as a post-processing
-    // step rather than touching the phase-pattern's deload/retest flags
-    // (which many other computations above key off). Never double-cuts a
-    // week that's already a natural deload/taper/retest/rest.
-    if (overrides?.forceVolumeCut && !deload && phase !== 'taper' && !session.isRest && !session.isRetest) {
-      session = applyDeloadVolume(session);
-      session.deloadNote = 'Early volume cut — accepted from the readiness-trend signal (ADR-0014).';
-    }
-
-    // ADR-0015: readiness gating for climbing sessions — applied last, the
-    // same way the kg chain applies its readiness multiplier after
-    // decay/auto-adjust. Downward-only: 'push'/'normal'/absent are no-ops.
-    // 'suggestRest' with an explicit one-tap accept swaps the whole session
-    // for the light template (mobility/skill/Tuesday antagonist block);
-    // declining (or not yet answering) falls through to the same Lighter
-    // levers 'lighter' gets — "keeps the planned session with Lighter
-    // levers applied" per the ADR.
-    const readinessLabel = overrides?.readinessLabel;
-    if ((readinessLabel === 'lighter' || readinessLabel === 'suggestRest') && !session.isRest && !session.isRetest) {
-      if (readinessLabel === 'suggestRest' && overrides?.acceptRestSwap) {
-        session = { ...LIGHT_DAY, sessionId: 'readiness-rest-swap', readinessNote: 'Readiness: suggested rest — session swapped for a light day.' };
-      } else {
-        session = applyPeakLacticSwap(session) || applyReadinessLighter(session);
-      }
-    }
-
-    return { ...session, phase, flavor: resolvedFlavor, focus, deload, retest, weekIdx: ctx.weekIdx, cycleWeeks: weeks };
+    return finishSession(session, env);
   },
 
   // Primary entry point: builds a session from a plan object and an ISO date string.

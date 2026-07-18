@@ -1,10 +1,12 @@
+// The Log tab is a READ-ONLY feed (+ charts/phases/signals). Editing a past
+// day happens on the Today tab via its date navigation — the old in-feed edit
+// form was a second, drift-prone copy of Today's logging surface and was
+// removed deliberately; don't reintroduce it.
 import { Storage } from '../storage.js';
 import { Program } from '../program.js';
 import { Monitoring } from '../monitoring.js';
 import { today } from '../dates.js';
-import { inputVisibility, repsLabel } from '../exercise-inputs.js';
 import { escHtml as esc } from '../ui.js';
-import { SKILL_DRILLS, WARMUP_DRILLS } from '../drills.js';
 
 export function renderLog(root) {
   let activeTab = 'feed';
@@ -12,7 +14,6 @@ export function renderLog(root) {
   let fromFilter = '';
   let toFilter = '';
   let chartRange = 'all'; // '4w' | '8w' | '12w' | 'all' — charts window, most recent N weeks
-  let editingSet  = new Set(); // tracks "planId:date" keys with edit form open
   let expandedSet = new Set(); // tracks collapsed/expanded rows
 
   // ── helpers ──────────────────────────────────────────────────────────────
@@ -148,217 +149,14 @@ export function renderLog(root) {
     });
   }
 
-  // ── Log entry edit form ───────────────────────────────────────────────
+  // ── Feed row expand/collapse ──────────────────────────────────────────
 
-  function editFormHtml(date, entry, plan) {
-    const key = plan.id + ':' + date;
-    const status = entry.status || '';
-    const feel   = entry.sessionFeel != null ? +entry.sessionFeel : null;
-    const notes  = entry.sessionNotes || '';
-
-    const statusBtn = (s, label, selBg, selColor) => {
-      const sel = s === status;
-      return `<button style="padding:4px 10px;border-radius:6px;border:none;cursor:pointer;font-size:.8rem;font-weight:600;background:${sel ? selBg : '#1A1E26'};color:${sel ? selColor : '#838B99'}" data-edit-status="${s}"${sel ? ' data-selected="1"' : ''}>${label}</button>`;
-    };
-
-    const stars = [1,2,3,4,5].map(n => {
-      const lit = feel != null && n <= feel;
-      return `<button style="background:none;border:none;font-size:1.4rem;cursor:pointer;padding:2px;line-height:1;color:${lit ? '#E0A53C' : '#ffffff30'}" data-edit-feel="${n}">${lit ? '★' : '☆'}</button>`;
-    }).join('');
-
-    const exRows = (entry.exercises || []).map((x, i) => {
-      const a = (x.actual && typeof x.actual === 'object') ? x.actual : {};
-      // KG-A9 addendum: the drills array is no longer persisted onto stored
-      // days, so fall back to the js/drills.js catalog; legacy days that still
-      // carry a stored `drills` array (pre-addendum) keep using their own copy.
-      if (x.kind === 'skill' || Array.isArray(x.drills)) {
-        const list = Array.isArray(x.drills) && x.drills.length ? x.drills : SKILL_DRILLS;
-        const options = list.map(d =>
-          `<option value="${esc(d.key)}"${a.drill === d.key ? ' selected' : ''}>${esc(d.name)}</option>`
-        ).join('');
-        return `<div style="padding:6px 0;border-bottom:1px solid #ffffff0f">
-          <div style="font-size:.8rem;color:var(--text);margin-bottom:4px;font-weight:600">${esc(x.name || 'Exercise ' + (i + 1))}</div>
-          <div class="row" style="gap:8px;align-items:center;flex-wrap:wrap">
-            <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">Drill
-              <select data-edit-ex="${i}" data-edit-ex-field="drill" style="width:170px">
-                <option value="">—</option>
-                ${options}
-              </select>
-            </label>
-            <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted);flex:1;min-width:80px">Notes<input type="text" data-edit-ex="${i}" data-edit-ex-field="notes" value="${esc(x.notes || '')}" style="width:100%"></label>
-          </div>
-        </div>`;
-      }
-      const vis = inputVisibility(x);
-      if (vis.none) {
-        return `<div style="padding:6px 0;border-bottom:1px solid #ffffff0f">
-          <div style="font-size:.8rem;color:var(--text);margin-bottom:4px;font-weight:600">${esc(x.name || 'Exercise ' + (i + 1))}</div>
-          <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">Notes<input type="text" data-edit-ex="${i}" data-edit-ex-field="notes" value="${esc(x.notes || '')}" style="width:100%"></label>
-        </div>`;
-      }
-      if (vis.optional) {
-        return `<div style="padding:6px 0;border-bottom:1px solid #ffffff0f">
-          <div style="font-size:.8rem;color:var(--text);margin-bottom:4px;font-weight:600">${esc(x.name || 'Exercise ' + (i + 1))}</div>
-          <div class="row" style="gap:8px;align-items:center;flex-wrap:wrap">
-            <label style="display:flex;gap:6px;align-items:center;font-size:.8rem"><input type="checkbox" data-edit-ex="${i}" data-edit-ex-field="done"${a.done ? ' checked' : ''}> Done</label>
-            <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted);flex:1;min-width:80px">Notes<input type="text" data-edit-ex="${i}" data-edit-ex-field="notes" value="${esc(x.notes || '')}" style="width:100%"></label>
-          </div>
-        </div>`;
-      }
-      return `<div style="padding:6px 0;border-bottom:1px solid #ffffff0f">
-        <div style="font-size:.8rem;color:var(--text);margin-bottom:4px;font-weight:600">${esc(x.name || 'Exercise ' + (i + 1))}</div>
-        <div class="row" style="gap:8px;flex-wrap:wrap">
-          ${vis.kg   ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">kg<input type="number" step="0.5" min="0" data-edit-ex="${i}" data-edit-ex-field="kg" value="${a.kg != null ? a.kg : ''}" style="width:60px"></label>` : ''}
-          ${vis.sets ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">Sets<input type="number" step="1" min="0" data-edit-ex="${i}" data-edit-ex-field="sets" value="${a.sets != null ? a.sets : ''}" style="width:52px"></label>` : ''}
-          ${vis.reps ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">${repsLabel(x)}<input type="number" step="1" min="0" data-edit-ex="${i}" data-edit-ex-field="reps" value="${a.reps != null ? a.reps : ''}" style="width:52px"></label>` : ''}
-          ${vis.rpe  ? `<label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted)">RPE<input type="number" step="0.5" min="1" max="10" data-edit-ex="${i}" data-edit-ex-field="rpe" value="${a.rpe != null ? a.rpe : ''}" style="width:52px"></label>` : ''}
-          <label style="display:flex;flex-direction:column;gap:2px;font-size:.75rem;color:var(--muted);flex:1;min-width:80px">Notes<input type="text" data-edit-ex="${i}" data-edit-ex-field="notes" value="${esc(x.notes || '')}" style="width:100%"></label>
-        </div>
-      </div>`;
-    }).join('');
-
-    // KG-A9 addendum: warm-up drill is a day-level field (not tied to an
-    // exercise index), so it's edited here rather than inside exRows — and
-    // only on Thu/Sat, the only sessions that ever offer it live.
-    const startISO = Program.effectiveStart(plan.settings);
-    const slotCtx = startISO ? Program.resolveDate(date, startISO, Program.cycleWeeksOf(plan.settings), plan.settings?.peakType) : null;
-    let warmupDrillRow = '';
-    if (slotCtx?.slot === 'thu-main' || slotCtx?.slot === 'sat-main') {
-      const wOptions = WARMUP_DRILLS.map(d =>
-        `<option value="${esc(d.key)}"${entry.warmupDrill === d.key ? ' selected' : ''}>${esc(d.name)}</option>`
-      ).join('');
-      warmupDrillRow = `<div class="row" style="gap:6px;margin-bottom:8px;align-items:center">
-        <span style="font-size:.8rem;color:var(--muted)">Warm-up drill:</span>
-        <select data-edit-field="warmupDrill" style="width:190px">
-          <option value="">—</option>
-          ${wOptions}
-        </select>
-      </div>`;
-    }
-
-    return `<div class="log-edit-form" data-edit-form="${key}" data-edit-feel-value="${feel != null ? feel : ''}" style="margin-top:10px;border-top:1px solid #ffffff20;padding-top:10px">
-      <div class="row" style="gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap">
-        <span style="font-size:.8rem;color:var(--muted)">Status:</span>
-        ${statusBtn('completed', 'Completed', '#3FB6A8', '#001')}
-        ${statusBtn('missed',    'Missed',    '#F0607A', '#fff')}
-        ${statusBtn('partial',   'Partial',   '#E0A53C', '#001')}
-      </div>
-      <div class="row" style="gap:4px;margin-bottom:8px;align-items:center">
-        <span style="font-size:.8rem;color:var(--muted)">Feel:</span>${stars}
-      </div>
-      ${warmupDrillRow}
-      <textarea data-edit-field="notes" placeholder="Session notes…" style="width:100%;min-height:56px;resize:vertical;border-radius:6px;padding:8px;background:#13161C;border:1px solid #1A1E26;color:var(--text);font-family:inherit;font-size:.9rem;margin-bottom:8px;box-sizing:border-box">${esc(notes)}</textarea>
-      ${exRows ? `<details style="margin-bottom:8px"><summary style="cursor:pointer;font-size:.8rem;color:var(--muted)">Edit exercise logs (${(entry.exercises || []).length})</summary>${exRows}</details>` : ''}
-      <div class="row" style="gap:8px;justify-content:flex-end">
-        <button class="ghost" data-edit-cancel="${key}" style="font-size:.85rem">Cancel</button>
-        <button class="primary" data-edit-save="${key}" style="font-size:.85rem">Save</button>
-      </div>
-    </div>`;
-  }
-
-  function wireEditHandlers(el) {
-    // Expand/collapse row on header tap
+  function wireFeedHandlers(el) {
     el.querySelectorAll('[data-log-toggle]').forEach(hdr => {
       hdr.addEventListener('click', e => {
-        // Don't toggle if user clicked inside (e.g. a button inside the header)
         if (e.target.closest('button')) return;
         const key = hdr.dataset.logToggle;
         expandedSet.has(key) ? expandedSet.delete(key) : expandedSet.add(key);
-        renderFeedList();
-      });
-    });
-
-    el.querySelectorAll('[data-edit-log]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const key = btn.dataset.editLog;
-        if (editingSet.has(key)) {
-          editingSet.delete(key);
-        } else {
-          editingSet.add(key);
-          expandedSet.add(key); // ensure row stays open when edit opens
-        }
-        renderFeedList();
-      });
-    });
-
-    el.querySelectorAll('[data-edit-status]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const form = btn.closest('[data-edit-form]');
-        if (!form) return;
-        form.querySelectorAll('[data-edit-status]').forEach(b => {
-          const s = b.dataset.editStatus;
-          const isThis = b === btn;
-          b.style.background = isThis ? (s === 'completed' ? '#3FB6A8' : s === 'missed' ? '#F0607A' : '#E0A53C') : '#1A1E26';
-          b.style.color      = isThis ? (s === 'missed' ? '#fff' : '#001') : '#838B99';
-          if (isThis) b.dataset.selected = '1'; else delete b.dataset.selected;
-        });
-      });
-    });
-
-    el.querySelectorAll('[data-edit-feel]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const form = btn.closest('[data-edit-form]');
-        if (!form) return;
-        const n = +btn.dataset.editFeel;
-        form.dataset.editFeelValue = n;
-        form.querySelectorAll('[data-edit-feel]').forEach(b => {
-          const i = +b.dataset.editFeel;
-          b.textContent = i <= n ? '★' : '☆';
-          b.style.color = i <= n ? '#E0A53C' : '#ffffff30';
-        });
-      });
-    });
-
-    el.querySelectorAll('[data-edit-save]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const key = btn.dataset.editSave;
-        const colonIdx = key.indexOf(':');
-        const planId = key.slice(0, colonIdx);
-        const date   = key.slice(colonIdx + 1);
-        const form   = el.querySelector(`[data-edit-form="${key}"]`);
-        if (!form) return;
-
-        const statusBtn  = form.querySelector('[data-edit-status][data-selected]');
-        const status     = statusBtn?.dataset.editStatus || null;
-        const feelRaw    = form.dataset.editFeelValue;
-        const sessionFeel = feelRaw !== '' && feelRaw != null ? +feelRaw : null;
-        const sessionNotes = form.querySelector('[data-edit-field="notes"]')?.value ?? '';
-        const warmupDrillSel = form.querySelector('[data-edit-field="warmupDrill"]');
-        const warmupDrill = warmupDrillSel && warmupDrillSel.value !== '' ? warmupDrillSel.value : null;
-
-        const existing = Storage.getDay(planId, date);
-        const exercises = (existing?.exercises || []).map((x, i) => {
-          const kg    = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="kg"]`);
-          const sets  = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="sets"]`);
-          const reps  = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="reps"]`);
-          const rpe   = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="rpe"]`);
-          const done  = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="done"]`);
-          const drill = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="drill"]`);
-          const nts   = form.querySelector(`[data-edit-ex="${i}"][data-edit-ex-field="notes"]`);
-          const prev  = (x.actual && typeof x.actual === 'object') ? x.actual : {};
-          const actual = { ...prev };
-          if (kg   && kg.value   !== '') actual.kg   = parseFloat(kg.value);
-          if (sets && sets.value !== '') actual.sets = parseInt(sets.value, 10);
-          if (reps && reps.value !== '') actual.reps = parseInt(reps.value, 10);
-          if (rpe  && rpe.value  !== '') actual.rpe  = parseFloat(rpe.value);
-          if (done) actual.done = done.checked;
-          if (drill && drill.value !== '') { actual.drill = drill.value; actual.done = true; }
-          return { ...x, actual, notes: nts?.value ?? x.notes ?? '' };
-        });
-
-        const patch = { exercises, sessionNotes };
-        if (status) patch.status = status;
-        if (sessionFeel != null) patch.sessionFeel = sessionFeel;
-        if (warmupDrillSel) patch.warmupDrill = warmupDrill;
-        Storage.setDay(planId, date, patch);
-        editingSet.delete(key);
-        renderFeedList();
-      });
-    });
-
-    el.querySelectorAll('[data-edit-cancel]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        editingSet.delete(btn.dataset.editCancel);
         renderFeedList();
       });
     });
@@ -390,8 +188,7 @@ export function renderLog(root) {
       const phase      = e.phase  || '';
       const status     = e.status || '';
       const key        = plan.id + ':' + date;
-      const isEditing  = editingSet.has(key);
-      const isExpanded = isEditing || expandedSet.has(key);
+      const isExpanded = expandedSet.has(key);
       const metric     = keyMetric(e);
 
       const statusDot = status === 'completed' ? '🟢'
@@ -432,15 +229,11 @@ export function renderLog(root) {
           </div>
           ${exRows ? `<ul style="margin:4px 0 6px;padding-left:16px">${exRows}</ul>` : ''}
           ${e.sessionNotes ? `<p class="muted" style="margin:4px 0;font-size:.85rem">${esc(e.sessionNotes)}</p>` : ''}
-          <div style="margin-top:8px">
-            <button style="background:none;border:1px solid #1A1E26;border-radius:6px;color:var(--muted);cursor:pointer;font-size:.75rem;padding:4px 10px" data-edit-log="${key}">Edit</button>
-          </div>
-          ${isEditing ? editFormHtml(date, e, plan) : ''}
         </div>
       </div>`;
     }).join('');
 
-    wireEditHandlers(el);
+    wireFeedHandlers(el);
   }
 
   function renderFeed() {

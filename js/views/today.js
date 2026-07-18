@@ -233,14 +233,14 @@ function headerHtml(date, ctx, session) {
     <div class="display-title">${displayTitle(session)}</div>
     <div class="row" style="margin-top:9px">${flavor}${deloadBadge}${retestBadge}${energyTip}</div>
     ${(() => {
-      // One shared slot for phase-mechanics notes: deload cut, taper cut
-      // (previously built by ADR-0007 but never rendered here), the
-      // ADR-0009 Base aerobic ramp, the ADR-0015 readiness-gating note, or
-      // the coach-review §8 Sunday pre-heavy-Monday hint (sun-optional's own
-      // session never sets the others, so this list is always mutually
-      // exclusive).
-      const note = session?.deloadNote || session?.taperNote || session?.rampNote || session?.readinessNote || session?.sunHint;
-      return note ? `<div class="deload-note" style="margin-top:10px">⚙ ${note}</div>` : '';
+      // Phase-mechanics notes from the prescription pipeline (session.notes,
+      // in pass order): deload/taper cut, ADR-0009 ramp, ADR-0015 readiness
+      // gating, coach-review §8 Sunday hint. Notes are NOT mutually
+      // exclusive — a deload week can also be a Lighter readiness day — so
+      // every entry renders. Legacy fallback covers stored/older sessions.
+      const notes = session?.notes
+        || [session?.deloadNote, session?.taperNote, session?.rampNote, session?.readinessNote, session?.sunHint].filter(Boolean);
+      return notes.map(n => `<div class="deload-note" style="margin-top:10px">⚙ ${n}</div>`).join('');
     })()}
     ${session?.styleNote ? `<div class="deload-note" style="margin-top:10px">↔ ${session.styleNote}</div>` : ''}
   </div>`;
@@ -595,6 +595,7 @@ export function renderToday(root) {
     <div class="row">
       <button class="primary" id="markCompleted" style="flex:1">${dayLog.status === 'completed' ? '✓ Completed' : 'Mark completed'}</button>
       <button class="ghost" id="markPartial">Partial</button>
+      <button class="ghost" id="markMissed">${dayLog.status === 'missed' ? '✗ Missed' : 'Missed'}</button>
     </div>
     ${retestBenchmarkSection(session, date)}</div>`;
 
@@ -810,6 +811,19 @@ function targetCalloutHtml(ex) {
   if (!ex.prescribedTarget) return '';
   const { value, unit } = ex.prescribedTarget;
   const label = unitLabel(value, unit);
+  // ADR-0015 readiness scaling runs last in the prescription pipeline, so it
+  // owns the callout when present. Show the immediate pre-readiness value,
+  // plus the original template when a ramp/cut also ran — without this, a
+  // ramp that readiness cancels out renders as "30 ↑ from 30".
+  if (ex.readinessScaledFrom) {
+    const { value: rv, unit: ru } = ex.readinessScaledFrom;
+    const base = ex.originalTarget || ex.rampedFrom;
+    if (rv !== value || base) {
+      const fromTxt = rv !== value ? `↓ from ${rv} ${unitLabel(rv, ru)}` : '';
+      const baseTxt = base && base.value !== rv ? `${fromTxt ? ' · ' : ''}template ${base.value} ${unitLabel(base.value, base.unit)}` : '';
+      return `<div class="callout"><span class="k">Readiness target</span><span class="v">${value} ${label} <span style="opacity:.6">${fromTxt}${baseTxt}</span></span></div>`;
+    }
+  }
   if (ex.originalTarget) {
     const { value: ov, unit: ou } = ex.originalTarget;
     return `<div class="callout deload-target"><span class="k">Deload target</span><span class="v"><s>${ov} ${unitLabel(ov, ou)}</s>${value} ${label}</span></div>`;
@@ -1278,6 +1292,13 @@ function wire(root, date, session, ctx, readinessMult) {
   });
   root.querySelector('#markPartial')?.addEventListener('click', () => {
     persist({ status: 'partial' });
+  });
+  // Missed lives here now that the Log tab is a read-only feed — the
+  // Calendar's missed-dot depends on this status being settable somewhere.
+  root.querySelector('#markMissed')?.addEventListener('click', () => {
+    persist({ status: 'missed' });
+    const btn = root.querySelector('#markMissed');
+    if (btn) btn.textContent = '✗ Missed';
   });
   root.addEventListener('click', (e) => {
     const btn = e.target.closest('[data-retest-benchmark]');
