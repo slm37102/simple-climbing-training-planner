@@ -106,12 +106,10 @@ export function renderLog(root) {
 
   // ── Signals panel (ADR-0014, closes KG-A4/KG-D6) ──────────────────────
   // Cross-tab, kept alive independent of feed/charts/phases — evaluated
-  // against the active plan's history, same as the Today-tab banner.
-  function dismissLogSignal(planId, date, key) {
-    const day = Storage.getDay(planId, date) || {};
-    Storage.setDay(planId, date, { ...day, dismissedSignals: { ...(day.dismissedSignals || {}), [key]: true } });
-  }
-
+  // against the active plan's history. Consumption goes through Monitoring's
+  // lifecycle helpers (activeSignals / dismissPatch / acceptSettingsPatch),
+  // the same seam the Today-tab banner uses — the two panels can't drift on
+  // what a dismissal writes or what an accept does.
   function renderSignalsPanel() {
     const el = document.getElementById('logSignalsPanel');
     if (!el) return;
@@ -119,14 +117,13 @@ export function renderLog(root) {
     if (!activePlan) { el.innerHTML = ''; return; }
     const asOfIso = today();
     const dayLog = Storage.getDay(activePlan.id, asOfIso) || {};
-    const dismissed = dayLog.dismissedSignals || {};
-    const raw = Monitoring.computeSignals({
+    const signals = Monitoring.activeSignals({
       days: Storage.listDays(activePlan.id),
       benchmarkHistory: Storage.get().benchmarks?.history,
-      todayPain: dayLog.readiness?.pain || null,
+      dayLog,
       asOfIso
     });
-    const active = Object.entries(raw).filter(([key, sig]) => sig && !dismissed[key]);
+    const active = Object.entries(signals).filter(([, sig]) => sig);
     if (!active.length) { el.innerHTML = ''; return; }
     el.innerHTML = `<div class="card" data-signals-panel style="margin-bottom:14px">
       <h2 style="margin:0 0 10px">Signals</h2>
@@ -135,15 +132,26 @@ export function renderLog(root) {
           <div class="bench-row" data-log-signal="${key}">
             <div class="b-name" style="max-width:75%">⚠ ${esc(sig.message)}${
               sig.href ? ` <a href="${esc(sig.href)}" target="_blank" rel="noopener">${esc(sig.action)} →</a>`
-                : sig.action ? ` <span class="muted">→ ${esc(sig.action)}</span>` : ''
+                : sig.action && !Monitoring.signalHasAccept(sig) ? ` <span class="muted">→ ${esc(sig.action)}</span>` : ''
             }</div>
+            ${Monitoring.signalHasAccept(sig) ? `<button class="mini-btn" type="button" data-log-signal-accept="${key}">${esc(sig.action)}</button>` : ''}
             <button class="mini-btn ghost-mini" type="button" data-log-signal-dismiss="${key}">Dismiss</button>
           </div>`).join('')}
       </div>
     </div>`;
+    el.querySelectorAll('[data-log-signal-accept]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.logSignalAccept;
+        const patch = Monitoring.acceptSettingsPatch(signals[key], activePlan.settings, asOfIso);
+        if (patch) Storage.setPlanSettings(activePlan.id, patch);
+        Storage.setDay(activePlan.id, asOfIso, Monitoring.dismissPatch(Storage.getDay(activePlan.id, asOfIso), key));
+        renderSignalsPanel();
+      });
+    });
     el.querySelectorAll('[data-log-signal-dismiss]').forEach(btn => {
       btn.addEventListener('click', () => {
-        dismissLogSignal(activePlan.id, asOfIso, btn.dataset.logSignalDismiss);
+        const key = btn.dataset.logSignalDismiss;
+        Storage.setDay(activePlan.id, asOfIso, Monitoring.dismissPatch(Storage.getDay(activePlan.id, asOfIso), key));
         renderSignalsPanel();
       });
     });
@@ -303,16 +311,14 @@ export function renderLog(root) {
         // Current week index for this plan (clamped into cycle) — the range window's right edge.
         let curWeek = cycleWeeks;
         if (startISO) {
-          const now = new Date();
-          const nowIso = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-          const nowCtx = Program.resolveDate(nowIso, startISO, cycleWeeks, plan.settings?.peakType);
+          const nowCtx = Program.resolveForSettings(plan.settings, today());
           if (nowCtx && !nowCtx.outOfCycle) curWeek = nowCtx.weekIdx;
         }
         const minWeek = rangeWeeks ? Math.max(1, curWeek - rangeWeeks + 1) : 1;
 
         for (const [date, entry] of Storage.listDays(plan.id)) {
           if (!startISO) continue;
-          const ctx = Program.resolveDate(date, startISO, cycleWeeks, plan.settings?.peakType);
+          const ctx = Program.resolveForSettings(plan.settings, date);
           if (!ctx || ctx.outOfCycle) continue;
           const w = ctx.weekIdx;
           if (w < minWeek) continue;
@@ -437,7 +443,7 @@ export function renderLog(root) {
         if (entry.status !== 'completed' && entry.status !== 'partial') continue;
         let ph = null;
         if (startISO) {
-          const ctx = Program.resolveDate(date, startISO, cycleWeeks, plan.settings?.peakType);
+          const ctx = Program.resolveForSettings(plan.settings, date);
           if (ctx && !ctx.outOfCycle) ph = ctx.phase;
         } else if (entry.phase && Object.prototype.hasOwnProperty.call(loggedByPhase, entry.phase)) {
           ph = entry.phase;

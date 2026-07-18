@@ -11,7 +11,7 @@
 // globalBenchmarks.history) -> flags. Nothing here mutates anything — the
 // caller decides how/whether to act on a returned flag (advisory + one-tap
 // accept, the ADR-0008 banner idiom).
-import { daysBetween } from './dates.js';
+import { daysBetween, addDays } from './dates.js';
 
 const READINESS_SHORT_WINDOW = 7;
 const READINESS_LONG_WINDOW = 28;
@@ -156,10 +156,49 @@ export function computeSignals({ days, benchmarkHistory, todayPain, asOfIso }) {
   };
 }
 
+// ===== Consumption lifecycle (the actionKey seam's adapter) =====
+// The Today banner and the Log signals panel share these instead of each
+// hand-rolling the computeSignals invocation, the dismissal write shape, and
+// a string-matched accept mutation. Still pure: dismiss/accept return PATCHES
+// for the caller to persist via Storage — this module never mutates anything.
+
+// Signals minus the day's dismissals, ready to render. dayLog is the asOf
+// day's stored entry (dismissals + the pain check-in both live there).
+export function activeSignals({ days, benchmarkHistory, dayLog, asOfIso }) {
+  const dismissed = dayLog?.dismissedSignals || {};
+  const raw = computeSignals({ days, benchmarkHistory, todayPain: dayLog?.readiness?.pain || null, asOfIso });
+  return Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, dismissed[k] ? null : v]));
+}
+
+// Day-log patch recording a dismissal (persist with Storage.setDay).
+export function dismissPatch(dayLog, key) {
+  return { ...(dayLog || {}), dismissedSignals: { ...(dayLog?.dismissedSignals || {}), [key]: true } };
+}
+
+// True when the signal's response mutates the plan (renders as a one-tap
+// accept); advisory/doc-link responses are dismissal-only.
+export function signalHasAccept(sig) {
+  return sig?.actionKey === 'early-deload';
+}
+
+// actionKey → settings patch: what accepting a signal DOES (persist with
+// Storage.setPlanSettings). ADR-0014: the readiness-trend accept cuts "the
+// coming week's sessions" — the 7 days from acceptance, whatever the
+// calendar-week boundary. Returns null for signals with no mutation.
+export function acceptSettingsPatch(sig, settings, asOfIso) {
+  if (!signalHasAccept(sig)) return null;
+  const cur = Array.isArray(settings?.earlyVolumeCuts) ? settings.earlyVolumeCuts : [];
+  return { earlyVolumeCuts: [...cur, { from: asOfIso, to: addDays(asOfIso, 7) }] };
+}
+
 export const Monitoring = {
   readinessTrendSignal,
   rpeDriftSignal,
   retestTrajectorySignal,
   painCheckInSignal,
-  computeSignals
+  computeSignals,
+  activeSignals,
+  dismissPatch,
+  signalHasAccept,
+  acceptSettingsPatch
 };

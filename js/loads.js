@@ -3,6 +3,7 @@
 // deload weeks cut volume (sets) and hold intensity. The volume cut is applied in program.js
 // when building the session; this module is purely about per-rep kg.
 import { Storage } from './storage.js';
+import { daysBetween } from './dates.js';
 
 export const Loads = {
   // ===== readiness =====
@@ -186,6 +187,41 @@ export const Loads = {
     }
 
     return { suggestedKg: round(kg), range, reason };
+  },
+
+  // History-aware resolve: owns the "what did the athlete last do for this
+  // session type?" lookup that callers previously assembled by hand (scan the
+  // day log, index-align exercises, flatten five fields into resolveEffective's
+  // option bag) — a shape that let a caller forget previousActualSets/Reps and
+  // silently disable the ADR-0009 targets-hit progression. Behind this door the
+  // module always has the full previous actual, so the invariant holds by
+  // construction. resolveEffective stays exported as the pure internal/test door.
+  //
+  // days: Storage.listDays()-shaped ascending [[iso, day], ...] entries.
+  // exerciseIndex: today's exercise position — the previous session's exercise
+  // at the same index is the continuity match (builders keep kg-kind exercise
+  // order stable within a sessionId).
+  resolveForDay({ exercise, exerciseIndex, sessionId, dateISO, days, readinessMultiplier = 1.0, benchmarks = null, holdProgression = false }) {
+    let prev = null, prevDate = null;
+    const list = days || [];
+    for (let i = list.length - 1; i >= 0; i--) {
+      const [d, entry] = list[i];
+      if (d >= dateISO) continue;
+      if (entry?.sessionId === sessionId && entry.exercises) { prev = entry; prevDate = d; break; }
+    }
+    const a = prev?.exercises?.[exerciseIndex]?.actual;
+    const prevActual = (a && typeof a === 'object') ? a : {};
+    return this.resolveEffective({
+      exercise,
+      previousActualKg: prevActual.kg ?? null,
+      previousAvgRpe: prevActual.rpe ?? null,
+      previousActualSets: prevActual.sets ?? null,
+      previousActualReps: prevActual.reps ?? null,
+      daysSincePrevious: prevDate ? daysBetween(prevDate, dateISO) : null,
+      readinessMultiplier,
+      benchmarks,
+      holdProgression
+    });
   },
 
   // Format helper

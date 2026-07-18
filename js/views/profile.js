@@ -5,23 +5,11 @@ import { Program } from '../program.js';
 import { Loads } from '../loads.js';
 import { Sync } from '../sync.js';
 import { flash, escHtml } from '../ui.js';
-import { mondayDow } from '../dates.js';
+import { localIso as toLocalISO, addDays, daysBetween, mondayDow } from '../dates.js';
 import { openOnboarding } from './onboarding.js';
 import { limiterReadout } from '../limiter.js';
 
 const COLORS = ['#5FD4E8', '#F0607A', '#3FB6A8', '#E0A53C', '#6E8BF0', '#F07850'];
-
-function toLocalISO(d) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-function addDays(iso, n) {
-  const d = new Date(iso + 'T00:00:00');
-  d.setDate(d.getDate() + n);
-  return toLocalISO(d);
-}
-function daysBetween(a, b) {
-  return Math.floor((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000);
-}
 
 function planDateRange(plan) {
   const start = Program.effectiveStart(plan.settings);
@@ -47,7 +35,7 @@ function suggestedPullupKg() {
     const session = Program.build(plan, toLocalISO(new Date()), Storage.get().benchmarks);
     const pull = (session?.exercises || []).find(e => e.kind === 'pullup');
     if (!pull) return null;
-    const base = Loads.prescribeLoadKg({ kind: 'pullup', loadPctRange: pull.pctRange }, Storage.get().benchmarks);
+    const base = Loads.prescribeLoadKg(pull, Storage.get().benchmarks);
     if (!base?.addedKgRange) return null;
     return Math.round((base.addedKgRange[0] + base.addedKgRange[1]) / 2);
   } catch (_) {

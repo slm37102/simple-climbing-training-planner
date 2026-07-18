@@ -3,6 +3,7 @@
 import { Storage } from '../storage.js';
 import { Program } from '../program.js';
 import { actualHasResult } from '../exercise-inputs.js';
+import { escHtml as esc } from '../ui.js';
 import { localIso, today, addDays, daysBetween, mondayDow } from '../dates.js';
 
 const MON_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -120,7 +121,7 @@ export function renderCalendar(root) {
 
     function cellHtml(rec) {
       const { iso, d } = rec;
-      const ctx = Program.resolveDate(iso, start, weeks, activePlan.settings?.peakType);
+      const ctx = Program.resolveForSettings(activePlan.settings, iso);
       const classes = ['cyc-cell'];
       if (ctx && !ctx.outOfCycle) {
         classes.push(ctx.phase);
@@ -174,8 +175,7 @@ export function renderCalendar(root) {
   }
 
   function detailCardHtml(iso) {
-    const weeks = Program.cycleWeeksOf(activePlan.settings);
-    const ctx = Program.resolveDate(iso, start, weeks, activePlan.settings?.peakType);
+    const ctx = Program.resolveForSettings(activePlan.settings, iso);
     if (!ctx || ctx.outOfCycle) {
       return `<div class="card detail-card"><p class="muted">${pretty(iso)} — outside the cycle window.</p></div>`;
     }
@@ -197,7 +197,7 @@ export function renderCalendar(root) {
       <div class="detail-title">${session?.label || '—'}</div>
       ${session?.energySystem && session.energySystem !== '—' ? `<div class="muted" style="margin:-4px 0 8px">${session.energySystem}</div>` : ''}
       <div>${items}</div>
-      ${log?.status ? `<div style="margin-top:10px"><span class="badge">${log.status}</span>${log.sessionNotes ? ` <span class="muted">${log.sessionNotes}</span>` : ''}</div>` : ''}
+      ${log?.status ? `<div style="margin-top:10px"><span class="badge">${esc(log.status)}</span>${log.sessionNotes ? ` <span class="muted">${esc(log.sessionNotes)}</span>` : ''}</div>` : ''}
       <button class="mini-btn" data-open-today style="margin-top:13px">Open in Today</button>
     </div>`;
   }
@@ -234,7 +234,7 @@ function summaryCardHtml(settings, days = {}) {
 
   for (let i = 0; i < 7; i++) {
     const iso = addDays(weekStartIso, i);
-    const ctx = Program.resolveDate(iso, startIso, cycleWeeks, settings?.peakType);
+    const ctx = Program.resolveForSettings(settings, iso);
     if (!ctx || ctx.outOfCycle || ctx.isRest) continue;
     scheduledSessions++;
     if (days[iso]?.exercises?.some(ex => actualHasResult(ex?.actual))) loggedSessions++;

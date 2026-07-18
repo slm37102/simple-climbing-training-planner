@@ -1067,12 +1067,8 @@ export const Program = {
   // cycle start date that places the final cycle day on the comp date.
   computeStartFromComp(compDateIso, cycleWeeks = DEFAULT_CYCLE_WEEKS) {
     if (!compDateIso) return null;
-    const d = new Date(compDateIso + 'T00:00:00');
-    d.setDate(d.getDate() - (cycleDays(cycleWeeks) - 1));
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
     // Snap to Monday so weekIdx always aligns with calendar weeks (C1).
-    return snapToMonday(`${d.getFullYear()}-${m}-${day}`);
+    return snapToMonday(addDays(compDateIso, -(cycleDays(cycleWeeks) - 1)));
   },
 
   // Resolve the effective cycle start date based on settings.anchorMode + cycleWeeks.
@@ -1089,6 +1085,19 @@ export const Program = {
     const shift = Number(settings.scheduleShiftDays) || 0;
     // Re-snap after shifting so C1 holds even if a non-multiple-of-7 shift is ever stored.
     return shift > 0 ? snapToMonday(addDays(base, shift)) : base;
+  },
+
+  // The one public door for "what cycle context is this date in?" given a
+  // plan's settings: derives effectiveStart, the clamped cycleWeeks, and
+  // peakType so callers can't forget one of them (resolveDate's silently
+  // defaulted peakType yields a comp-shaped pattern — the wrong Base/Build
+  // split for trip/project plans, a bug class this wrapper retires). Returns
+  // null when the plan has no anchor yet. Views and replan should call this;
+  // the positional resolveDate below stays as the internal/test door.
+  resolveForSettings(settings, dateISO) {
+    const start = this.effectiveStart(settings);
+    if (!start) return null;
+    return this.resolveDate(dateISO, start, this.cycleWeeksOf(settings), settings?.peakType);
   },
 
   // Returns {weekIdx 1..N, dayIdx 0..6, phase, deload, retest, flavor, slot} for a given date relative to startDate.

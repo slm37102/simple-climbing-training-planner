@@ -23,7 +23,7 @@ export const Replan = {
     const settings = plan?.settings;
     const start = Program.effectiveStart(settings);
     if (!start) return null;
-    const ctx = Program.resolveDate(todayISO, start, Program.cycleWeeksOf(settings), settings.peakType);
+    const ctx = Program.resolveForSettings(settings, todayISO);
     if (!ctx || ctx.outOfCycle) return null;
 
     // Anchor = the latest signal that the schedule was on track: last touched

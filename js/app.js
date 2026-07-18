@@ -1,8 +1,5 @@
 // Entry point: registers SW, wires nav, mounts views, gates on auth.
 import { Storage } from './storage.js';
-import { Program } from './program.js';
-import { Loads } from './loads.js';
-import { Warmup } from './warmup.js';
 import { Sync } from './sync.js';
 import { renderToday } from './views/today.js';
 import { renderCalendar } from './views/calendar.js';
@@ -21,14 +18,15 @@ const views = {
 
 const TAB_FOR = { calendar: 'cycle', settings: 'profile', plans: 'profile' };
 
-const ctx = { Storage, Program, Loads, Warmup, Sync };
-
+// Views take just (root) and import their own domain modules — the old `ctx`
+// bundle was a seam with zero receivers (no view ever read it, no test ever
+// substituted a fake), so it was deleted rather than kept as a fiction.
 function navigate(name) {
   const tab = TAB_FOR[name] || name;
   document.querySelectorAll('#tabs .tab').forEach(b => b.classList.toggle('active', b.dataset.view === tab));
   const root = document.getElementById('view');
   root.innerHTML = '';
-  (views[name] || renderToday)(root, ctx);
+  (views[name] || renderToday)(root);
   location.hash = '#' + (views[name] ? name : 'today');
   window.scrollTo(0, 0);
 }

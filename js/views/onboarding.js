@@ -7,24 +7,13 @@
 import { Storage } from '../storage.js';
 import { Program } from '../program.js';
 import { flash } from '../ui.js';
-import { mondayDow } from '../dates.js';
+import { localIso as toLocalISO, addDays, daysBetween, mondayDow } from '../dates.js';
 
 const V_GRADES = ['V4', 'V5', 'V6', 'V7', 'V8', 'V9', 'V10', 'V11'];
 const F_GRADES = ['6c', '7a', '7a+', '7b', '7b+', '7c', '7c+', '8a'];
 const COLORS = ['#5FD4E8', '#F0607A', '#3FB6A8', '#E0A53C', '#6E8BF0', '#F07850'];
 const MON_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-function toLocalISO(d) {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-function addDays(iso, n) {
-  const d = new Date(iso + 'T00:00:00');
-  d.setDate(d.getDate() + n);
-  return toLocalISO(d);
-}
-function daysBetween(a, b) {
-  return Math.floor((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000);
-}
 function pretty(iso) {
   if (!iso) return '—';
   const d = new Date(iso + 'T00:00:00');

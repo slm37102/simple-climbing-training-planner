@@ -6,24 +6,12 @@ import { Loads } from '../loads.js';
 import { Warmup } from '../warmup.js';
 import { Replan } from '../replan.js';
 import { Monitoring } from '../monitoring.js';
-import { daysBetween, localIso } from '../dates.js';
+import { daysBetween, localIso, today as todayIso, addDays as addDaysIso } from '../dates.js';
 import { inputVisibility, repsLabel, actualHasResult, howto, unitLabel } from '../exercise-inputs.js';
+import { escHtml as esc } from '../ui.js';
 import { DRILL_CATEGORIES, WARMUP_DRILLS } from '../drills.js';
 
 const SELECTED_DATE_KEY = 'todaySelectedDate';
-
-function todayIso() {
-  const d = new Date();
-  const m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
-  return `${d.getFullYear()}-${m}-${day}`;
-}
-
-function addDaysIso(iso, n) {
-  const d = new Date(iso + 'T00:00:00');
-  d.setDate(d.getDate() + n);
-  const mm = String(d.getMonth()+1).padStart(2,'0'), dd = String(d.getDate()).padStart(2,'0');
-  return `${d.getFullYear()}-${mm}-${dd}`;
-}
 
 const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -38,16 +26,6 @@ function getSelectedDate() {
 
 function setSelectedDate(iso) {
   sessionStorage.setItem(SELECTED_DATE_KEY, iso);
-}
-
-function findPrevSameSession(date, sessionId) {
-  const days = Storage.listDays();
-  for (let i = days.length - 1; i >= 0; i--) {
-    const [d, entry] = days[i];
-    if (d >= date) continue;
-    if (entry.sessionId === sessionId && entry.exercises) return { ...entry, _prevDate: d };
-  }
-  return null;
 }
 
 function asActualObj(a) {
@@ -290,7 +268,7 @@ function signalsBannerHtml(signals) {
     // (pain-red → return-from-tweak guide, retest-plateau → end-of-cycle
     // checklist); the rest show the response as advisory text.
     let actionEl = '';
-    if (key === 'readinessTrend') {
+    if (Monitoring.signalHasAccept(sig)) {
       actionEl = `<button type="button" class="primary" data-signal-accept="${key}">${sig.action}</button>`;
     } else if (sig.href) {
       actionEl = `<a class="ghost" style="text-decoration:none" href="${sig.href}" target="_blank" rel="noopener" data-signal-link="${key}">${sig.action} →</a>`;
@@ -301,7 +279,7 @@ function signalsBannerHtml(signals) {
       <p>⚠ ${sig.message}</p>
       <div class="row" style="gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap">
         ${actionEl}
-        <button type="button" class="ghost" data-signal-dismiss="${key}">${key === 'readinessTrend' ? 'Not now' : 'Got it'}</button>
+        <button type="button" class="ghost" data-signal-dismiss="${key}">${Monitoring.signalHasAccept(sig) ? 'Not now' : 'Got it'}</button>
       </div>
     </div>`;
   }).join('');
@@ -337,20 +315,17 @@ function wireReadinessSwapBanner(root, date) {
 }
 
 function dismissSignalForDay(date, key) {
-  const day = Storage.getDay(date) || {};
-  Storage.setDay(date, { ...day, dismissedSignals: { ...(day.dismissedSignals || {}), [key]: true } });
+  Storage.setDay(date, Monitoring.dismissPatch(Storage.getDay(date), key));
 }
 
-function wireSignalsBanner(root, activePlan, ctx, date) {
+function wireSignalsBanner(root, activePlan, date, signals) {
   root.querySelectorAll('[data-signal-accept]').forEach(btn => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.signalAccept;
-      if (key === 'readinessTrend') {
-        // ADR-0014: the cut applies to "the coming week's sessions" — the 7
-        // days from acceptance, whatever the calendar-week boundary.
-        const cur = Array.isArray(activePlan.settings.earlyVolumeCuts) ? activePlan.settings.earlyVolumeCuts : [];
-        Storage.setPlanSettings(activePlan.id, { earlyVolumeCuts: [...cur, { from: date, to: addDaysIso(date, 7) }] });
-      }
+      // Monitoring owns what an accept DOES (the actionKey adapter) — the
+      // view only persists the returned patch.
+      const patch = Monitoring.acceptSettingsPatch(signals?.[key], activePlan.settings, date);
+      if (patch) Storage.setPlanSettings(activePlan.id, patch);
       dismissSignalForDay(date, key);
       renderToday(root);
     });
@@ -405,7 +380,7 @@ export function renderToday(root) {
   if (allPlans.length >= 2) {
     const tabs = allPlans.map(p =>
       `<button class="plan-tab ${p.id === activePlan.id ? 'active' : ''}" data-plan-id="${p.id}" style="--plan-color:${p.color}">
-        ${p.name}
+        ${esc(p.name)}
       </button>`
     ).join('');
     planSwitcherHtml = `<div class="row" id="planSwitcher" style="gap:6px">${tabs}</div>`;
@@ -421,7 +396,7 @@ export function renderToday(root) {
     return;
   }
 
-  const ctx = Program.resolveDate(date, Program.effectiveStart(activePlan.settings), Program.cycleWeeksOf(activePlan.settings), activePlan.settings?.peakType);
+  const ctx = Program.resolveForSettings(activePlan.settings, date);
   if (ctx?.outOfCycle) {
     // ADR-0012: post-goal retest offer, goal day +1..+7 — composes with the
     // existing Cycle Complete celebration below rather than replacing it (in
@@ -470,16 +445,14 @@ export function renderToday(root) {
 
   // ADR-0014: monitoring signals — same real-current-date restriction as the
   // gap banner; dismissed-today signals stay hidden until they re-fire.
-  const dismissedSignals = dayLog.dismissedSignals || {};
-  const rawSignals = date === realToday
-    ? Monitoring.computeSignals({
+  const signals = date === realToday
+    ? Monitoring.activeSignals({
         days: Storage.listDays(activePlan.id),
         benchmarkHistory: Storage.get().benchmarks?.history,
-        todayPain: readiness.pain || null,
+        dayLog,
         asOfIso: date
       })
     : null;
-  const signals = rawSignals && Object.fromEntries(Object.entries(rawSignals).map(([k, v]) => [k, dismissedSignals[k] ? null : v]));
 
   // ADR-0012: Build-Monday micro-retest gate — the Monday opening any Build
   // run (both blocks of a double-block cycle), only when the stored max-hang
@@ -518,7 +491,7 @@ export function renderToday(root) {
     wireDateNav(root);
     wireCycleComplete(root, activePlan);
     wireGapBanner(root, activePlan, gap);
-    wireSignalsBanner(root, activePlan, ctx, date);
+    wireSignalsBanner(root, activePlan, date, signals);
     wirePlanSwitcher(root, root);
     return;
   }
@@ -591,7 +564,7 @@ export function renderToday(root) {
       </div>
     </div>
     <div class="field"><label>Notes</label>
-      <textarea id="sessionNotes" placeholder="anything to remember">${dayLog.sessionNotes || ''}</textarea></div>
+      <textarea id="sessionNotes" placeholder="anything to remember">${esc(dayLog.sessionNotes || '')}</textarea></div>
     <div class="row">
       <button class="primary" id="markCompleted" style="flex:1">${dayLog.status === 'completed' ? '✓ Completed' : 'Mark completed'}</button>
       <button class="ghost" id="markPartial">Partial</button>
@@ -613,7 +586,7 @@ export function renderToday(root) {
   wireDateNav(root);
   wireCycleComplete(root, activePlan);
   wireGapBanner(root, activePlan, gap);
-  wireSignalsBanner(root, activePlan, ctx, date);
+  wireSignalsBanner(root, activePlan, date, signals);
   wireReadinessSwapBanner(root, date);
   wire(root, date, session, ctx, multiplier);
   wirePlanSwitcher(root, root);
@@ -907,16 +880,12 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
   }
 
   if (ex.kind === 'hangboard' || ex.kind === 'pullup') {
-    const prev = findPrevSameSession(date, sessionId);
-    const prevEx = prev?.exercises?.[i] || null;
-    const prevActual = asActualObj(prevEx?.actual);
-    suggestion = Loads.resolveEffective({
+    suggestion = Loads.resolveForDay({
       exercise: ex,
-      previousActualKg: prevActual?.kg ?? null,
-      previousAvgRpe: prevActual?.rpe ?? null,
-      previousActualSets: prevActual?.sets ?? null,
-      previousActualReps: prevActual?.reps ?? null,
-      daysSincePrevious: prev ? daysBetween(prev._prevDate, date) : null,
+      exerciseIndex: i,
+      sessionId,
+      dateISO: date,
+      days: Storage.listDays(),
       readinessMultiplier: readinessMult,
       // ADR-0014: an amber pain check-in holds the ADR-0009 progression.
       holdProgression: Monitoring.painCheckInSignal(dayLog.readiness?.pain)?.severity === 'amber',
@@ -972,7 +941,7 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
 
 function notesField(i, value, openByDefault) {
   if (openByDefault) {
-    return `<textarea data-ex-notes="${i}" placeholder="notes" style="margin-top:8px">${value}</textarea>`;
+    return `<textarea data-ex-notes="${i}" placeholder="notes" style="margin-top:8px">${esc(value)}</textarea>`;
   }
   return `<button type="button" class="notes-toggle" data-notes-toggle="${i}">+ note</button>
     <textarea data-ex-notes="${i}" placeholder="notes" style="margin-top:8px;display:none"></textarea>`;
@@ -1041,16 +1010,12 @@ function wire(root, date, session, ctx, readinessMult) {
         if (ex.kind !== 'hangboard' && ex.kind !== 'pullup') return;
         const btn = root.querySelector(`[data-suggest-btn="${i}"]`);
         if (!btn) return;
-        const prev = findPrevSameSession(date, session.sessionId);
-        const prevEx = prev?.exercises?.[i] || null;
-        const prevActual = asActualObj(prevEx?.actual);
-        const eff = Loads.resolveEffective({
+        const eff = Loads.resolveForDay({
           exercise: ex,
-          previousActualKg: prevActual?.kg ?? null,
-          previousAvgRpe: prevActual?.rpe ?? null,
-          previousActualSets: prevActual?.sets ?? null,
-          previousActualReps: prevActual?.reps ?? null,
-          daysSincePrevious: prev ? daysBetween(prev._prevDate, date) : null,
+          exerciseIndex: i,
+          sessionId: session.sessionId,
+          dateISO: date,
+          days: Storage.listDays(),
           readinessMultiplier: multiplier,
           holdProgression: Monitoring.painCheckInSignal(d.readiness?.pain)?.severity === 'amber',
         });
