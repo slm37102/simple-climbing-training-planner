@@ -128,6 +128,24 @@ test('[ADR-0015] REGRESSION: suggest-rest banner renders on Today with accept/de
   } finally { root.remove(); }
 });
 
+test('[banner-registry] suggest-rest swap banner is absent on a rest day (was rendered dead pre-registry)', () => {
+  // Wed of wk1 is a rest slot. suggest-rest readiness there used to render the
+  // swap banner with unwired buttons; the TOP_BANNERS model now excludes rest
+  // sessions (a swap is a no-op there — the readiness gate guards !isRest).
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-06'); // wk1 Wed — rest slot
+  Storage.setDay('2026-05-06', { readiness: { sleep: 1, soreness: 1, fatigue: 1 } }); // avg 1.0 → suggest-rest
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    assert(/Recovery checklist/i.test(root.textContent), 'fixture check: Wed must be a rest day');
+    assert(!root.querySelector('[data-readiness-swap-banner]'), 'swap banner must not render on a rest day');
+  } finally { root.remove(); }
+});
+
 test('[ADR-0015] REGRESSION: RPE-cap note renders on the Today tab for a capped climbing exercise', () => {
   resetStorage();
   const plan = Storage.getActivePlan();

@@ -290,8 +290,8 @@ function signalsBannerHtml(signals) {
 // (applied unconditionally in prescribeForContext whenever it's not
 // swapped, per the ADR's "keeps the planned session with Lighter levers"
 // framing), not a further reduction.
-function readinessSwapBannerHtml(readinessGateLabel, dayLog) {
-  if (readinessGateLabel !== 'suggestRest' || dayLog.acceptedReadinessSwap || dayLog.declinedReadinessSwap) return '';
+function readinessSwapBannerHtml() {
+  // The show/hide guard lives in the TOP_BANNERS registry model below.
   return `<div class="gap-note major" data-readiness-swap-banner>
     <p>⏸ Readiness suggests rest today. Swap this session for a light day (mobility + skill drill + antagonist mini-block)?</p>
     <div class="row" style="gap:8px;margin-top:8px">
@@ -353,6 +353,52 @@ function wireGapBanner(root, activePlan, gap) {
       renderToday(root);
     });
   });
+}
+
+// The top-of-page advisory banners (gap · monitoring signals · suggest-rest
+// swap) as data instead of a per-branch list of render/wire calls. Each is the
+// same consent-banner idiom — a condition, some copy, an accept/dismiss, a
+// persisted flag, a re-render — so adding the next one (ADR-00NN) is one entry
+// here, not an edit to every `renderToday` branch. `model(env)` returns the
+// data the banner needs (falsy = don't show); `html`/`wire` are the existing
+// implementations above, adapted. Interventions that aren't top-of-page consent
+// banners stay where they are: the retest "Save as Benchmark" lives inside the
+// session card, the pain check-in is an input row, and cycle-complete replaces
+// the whole page.
+const TOP_BANNERS = [
+  {
+    key: 'gap',
+    model: env => env.gap,
+    html: gap => gapBannerHtml(gap),
+    wire: (root, gap, env) => wireGapBanner(root, env.activePlan, gap)
+  },
+  {
+    key: 'signals',
+    model: env => env.signals,
+    html: signals => signalsBannerHtml(signals),
+    wire: (root, signals, env) => wireSignalsBanner(root, env.activePlan, env.date, signals)
+  },
+  {
+    key: 'readinessSwap',
+    // Only where a swap is actionable: a suggest-rest readiness tier on a
+    // non-rest session the athlete hasn't already answered. (The pre-registry
+    // code rendered this on rest days too, where its buttons went unwired.)
+    model: env => env.readinessGateLabel === 'suggestRest' && !env.session.isRest
+      && !env.dayLog.acceptedReadinessSwap && !env.dayLog.declinedReadinessSwap,
+    html: () => readinessSwapBannerHtml(),
+    wire: (root, _m, env) => wireReadinessSwapBanner(root, env.date)
+  }
+];
+
+function topBannersHtml(env) {
+  return TOP_BANNERS.map(b => { const m = b.model(env); return m ? b.html(m, env) : ''; }).join('');
+}
+
+function wireTopBanners(root, env) {
+  for (const b of TOP_BANNERS) {
+    const m = b.model(env);
+    if (m) b.wire(root, m, env);
+  }
 }
 
 export function renderToday(root) {
@@ -473,7 +519,8 @@ export function renderToday(root) {
     })();
   const { warmup, cooldown, skillDrills } = Warmup.forSession(session, { microRetest });
 
-  let body = dateNavHtml + planSwitcherHtml + completionHtml + headerHtml(date, ctx, session) + gapBannerHtml(gap) + signalsBannerHtml(signals) + readinessSwapBannerHtml(readinessGateLabel, dayLog);
+  const bannerEnv = { activePlan, date, gap, signals, readinessGateLabel, dayLog, session };
+  let body = dateNavHtml + planSwitcherHtml + completionHtml + headerHtml(date, ctx, session) + topBannersHtml(bannerEnv);
 
   if (session.isRest) {
     body += `<div class="card"><h2>Recovery checklist</h2>
@@ -490,8 +537,7 @@ export function renderToday(root) {
     });
     wireDateNav(root);
     wireCycleComplete(root, activePlan);
-    wireGapBanner(root, activePlan, gap);
-    wireSignalsBanner(root, activePlan, date, signals);
+    wireTopBanners(root, bannerEnv);
     wirePlanSwitcher(root, root);
     return;
   }
@@ -585,9 +631,7 @@ export function renderToday(root) {
   root.innerHTML = body;
   wireDateNav(root);
   wireCycleComplete(root, activePlan);
-  wireGapBanner(root, activePlan, gap);
-  wireSignalsBanner(root, activePlan, date, signals);
-  wireReadinessSwapBanner(root, date);
+  wireTopBanners(root, bannerEnv);
   wire(root, date, session, ctx, multiplier);
   wirePlanSwitcher(root, root);
 }
