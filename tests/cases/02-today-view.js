@@ -229,3 +229,43 @@ test('Today: renders the cycle-complete screen without throwing (cycleStats actu
     assert(root.textContent.trim().length > 0, 'cycle-complete view should render content');
   } finally { root.remove(); }
 });
+
+test('Today: kg exercise with no benchmarks shows an empty load field + a hint naming what to set', () => {
+  // The load field is blank when resolve can't suggest (no bodyweight AND/OR no
+  // kind benchmark); the hint must name exactly what's missing so the empty
+  // stepper isn't a mystery (the old hint only mentioned bodyweight).
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' });
+  Storage.setGlobalBenchmarks({ bodyweight: null, maxHang20mm: null, pullup1RM: null });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-04'); // wk1 Mon — hangboard
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    assert(/Set your .*bodyweight.*max-hang.*in Profile/i.test(root.textContent),
+      'expected a load hint naming bodyweight + the max-hang benchmark');
+    const kg = root.querySelector('#ex-0-kg');
+    assert(kg && kg.value === '', 'the added-load field must be empty when there is no suggestion');
+    assertEq(kg.getAttribute('placeholder'), '—', 'empty load field carries a placeholder so it reads intentional');
+  } finally { root.remove(); }
+});
+
+test('Today: pain scale pills carry severity zones + the row has direction anchors', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-04');
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const zone = v => root.querySelector(`[data-pain-pill][data-val="${v}"]`)?.className || '';
+    assert(/pz-green/.test(zone(2)), '0–2 are the green (fine) zone');
+    assert(/pz-amber/.test(zone(4)), '3–5 are the amber (hold) zone');
+    assert(/pz-red/.test(zone(8)), '6–10 are the red (skip) zone');
+    const anchors = root.querySelector('.scale-anchors');
+    assert(anchors && /no pain/i.test(anchors.textContent) && /severe/i.test(anchors.textContent),
+      'the scale must show no-pain → severe direction anchors');
+  } finally { root.remove(); }
+});

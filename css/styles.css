@@ -114,6 +114,16 @@ label{display:block;font:600 10px 'Archivo';letter-spacing:.06em;text-transform:
 .pill:hover{border-color:var(--accent)}
 .pill.active{background:rgba(95,212,232,.14);color:var(--accent);border-color:var(--accent)}
 .pill:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* Pain scale (ADR-0014): a severity track under each pill + end anchors so the
+   0→10 direction and its zones (fine / hold / skip) read without a legend. */
+.pain-scale .pill{box-shadow:inset 0 -3px 0 var(--zone,transparent)}
+.pill.pz-green{--zone:rgba(63,182,168,.5)}
+.pill.pz-amber{--zone:rgba(224,165,60,.5)}
+.pill.pz-red{--zone:rgba(240,96,122,.5)}
+.pill.pz-green.active{background:rgba(63,182,168,.16);color:var(--good);border-color:var(--good)}
+.pill.pz-amber.active{background:rgba(224,165,60,.16);color:var(--warn);border-color:var(--warn)}
+.pill.pz-red.active{background:rgba(240,96,122,.16);color:var(--bad);border-color:var(--bad)}
+.scale-anchors{display:flex;justify-content:space-between;margin-top:6px;font:600 10px 'Archivo';letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 
 /* ── Technique-drill category chips (KG-A9 addendum) ───── */
 .chip-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}

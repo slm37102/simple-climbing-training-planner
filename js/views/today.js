@@ -556,14 +556,19 @@ export function renderToday(root) {
   // ADR-0014: pain check-in — distinct from generic soreness (0-10 finger/
   // elbow pain + a "worse this morning?" flag), the Silbernagel-model input.
   const pain = readiness.pain || null;
+  // Zone coloring mirrors the Silbernagel gate this input feeds (monitoring.js):
+  // 0–2 fine, 3–5 hold progression, 6–10 skip finger loading. The colored track
+  // + end anchors say which way the scale runs without a separate legend.
+  const painZone = v => v <= 2 ? 'pz-green' : v <= 5 ? 'pz-amber' : 'pz-red';
   const painRow = `
     <div class="field">
-      <label id="pill-lbl-pain">Finger/elbow pain (0–10)</label>
-      <div class="pill-group" role="group" aria-labelledby="pill-lbl-pain" data-pill-group="pain" style="flex-wrap:wrap">
+      <label id="pill-lbl-pain">Finger/elbow pain</label>
+      <div class="pill-group pain-scale" role="group" aria-labelledby="pill-lbl-pain" data-pill-group="pain" style="flex-wrap:wrap">
         ${Array.from({ length: 11 }, (_, v) => v).map(v =>
-          `<button type="button" class="pill ${pain?.value === v ? 'active' : ''}" data-pain-pill data-val="${v}" aria-pressed="${pain?.value === v}">${v}</button>`
+          `<button type="button" class="pill ${painZone(v)} ${pain?.value === v ? 'active' : ''}" data-pain-pill data-val="${v}" aria-pressed="${pain?.value === v}">${v}</button>`
         ).join('')}
       </div>
+      <div class="scale-anchors"><span>0 · no pain</span><span>10 · severe</span></div>
       <label style="display:flex;gap:8px;align-items:center;margin-top:8px;cursor:pointer;text-transform:none;letter-spacing:0;font:400 13px 'Archivo';color:var(--text2)">
         <input type="checkbox" data-pain-worse ${pain?.settledByMorning === false ? 'checked' : ''}> Worse this morning than after yesterday's session
       </label>
@@ -754,7 +759,7 @@ function exerciseInputs(i, ex, actual, suggestion) {
   const count = [vis.sets, vis.kg, vis.reps, vis.rpe].filter(Boolean).length;
   const rowCls = count >= 4 ? 'stepper-row four' : count === 2 ? 'stepper-row two' : count === 1 ? 'stepper-row one' : 'stepper-row';
   let row = `<div class="${rowCls}">`;
-  if (vis.kg)   row += stepper(`ex-${i}-kg`,   n(kgValue),  'Added load · kg', 0.5, kgIsDefault);
+  if (vis.kg)   row += stepper(`ex-${i}-kg`,   n(kgValue),  'Added load · kg', 0.5, kgIsDefault, '—');
   if (vis.rpe)  row += stepper(`ex-${i}-rpe`,  n(rpeValue), ex.rpeRange ? `RPE · target ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : 'RPE', 0.5, rpeIsDefault);
   if (vis.sets) row += stepper(`ex-${i}-sets`, n(setsValue), 'Sets', 1, setsIsDefault);
   if (vis.reps) row += stepper(`ex-${i}-reps`, n(repsValue), stepperCountLabel(ex), 1, repsIsDefault);
@@ -778,14 +783,14 @@ function stepperCountLabel(ex) {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
-function stepper(id, value, label, step, isDefault = false) {
+function stepper(id, value, label, step, isDefault = false, placeholder = '') {
   const wrapCls = isDefault ? 'stepper stepper-default' : 'stepper';
   const inputAttrs = isDefault ? ' data-default="1"' : '';
   return `<div>
     <div class="stepper-label">${label}</div>
     <div class="${wrapCls}">
       <button type="button" data-step="-" data-target="${id}" data-step-amount="${step}">−</button>
-      <input type="number" id="${id}" inputmode="decimal" step="${step}" value="${value}" placeholder=""${inputAttrs}>
+      <input type="number" id="${id}" inputmode="decimal" step="${step}" value="${value}" placeholder="${placeholder}"${inputAttrs}>
       <button type="button" data-step="+" data-target="${id}" data-step-amount="${step}">+</button>
     </div>
   </div>`;
@@ -935,16 +940,24 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
       holdProgression: Monitoring.painCheckInSignal(dayLog.readiness?.pain)?.severity === 'amber',
     });
     const rangeStr = suggestion?.range ? `${suggestion.range[0]}–${suggestion.range[1]} kg` : '';
-    // ADR-0013: percentages are now of total system load, so a kg range needs
-    // bodyweight — resolveEffective returns null entirely (not a silent
-    // added-only fallback) when it's unset. Surface that distinctly from the
-    // generic "no benchmark set" silence so the athlete knows exactly what to fix.
-    const bwHint = (!suggestion && Storage.get().benchmarks?.bodyweight == null)
-      ? '<div class="muted" style="margin:4px 0">Set your bodyweight in Settings to see a suggested load range.</div>'
-      : '';
+    // ADR-0013: a kg range needs bodyweight AND the kind's benchmark — resolve
+    // returns null (never a silent added-only fallback) when either is unset.
+    // Name exactly what's missing so the empty load field isn't a mystery
+    // (the old hint only covered bodyweight, so a missing max-hang benchmark
+    // left the field blank with no explanation).
+    let loadHint = '';
+    if (!suggestion) {
+      const bm = Storage.get().benchmarks || {};
+      const missing = [];
+      if (bm.bodyweight == null) missing.push('bodyweight');
+      if (ex.kind === 'hangboard' && bm.maxHang20mm == null) missing.push('max-hang (20 mm) benchmark');
+      if (ex.kind === 'pullup' && bm.pullup1RM == null) missing.push('pull-up 1RM benchmark');
+      const what = missing.length ? missing.join(' + ') : 'benchmarks';
+      loadHint = `<div class="muted" style="margin:4px 0">Set your ${what} in Profile to see a suggested load.</div>`;
+    }
     const sets = ex.sets || ex.reps || '';
     const rpe  = ex.rpeRange ? `RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : '';
-    prescribedStr = [ex.hang, sets, ex.rest, rangeStr, rpe].filter(Boolean).join(' · ') + bwHint;
+    prescribedStr = [ex.hang, sets, ex.rest, rangeStr, rpe].filter(Boolean).join(' · ') + loadHint;
   } else if (ex.drills) {
     prescribedStr = drillPickerHtml(i, ex, actual);
   } else if (ex.prescribedTarget) {
