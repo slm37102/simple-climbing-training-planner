@@ -24,8 +24,23 @@ let hydrated = false;
 // it once the first remote merge completes (otherwise the edit waits for the next change).
 let pendingUpload = false;
 const LAST_UID_KEY = 'climb-planner:lastUid';
+// A failed upload used to be terminal ("save failed" then nothing until the
+// next Storage change) — so a transient mobile-network blip could strand an
+// edit off the server until the app was next touched, or forever if it was
+// closed. Retry with exponential backoff instead; each retry re-reads
+// Storage.raw() so it always pushes the newest state.
+const UPLOAD_MAX_RETRIES = 5;
+let uploadAttempt = 0;
 
 function setStatus(s) { onStatusCb(s); }
+
+// Pure retry policy (exported for tests): ms to wait before retry `attempt`
+// (0-based) — 1s, 2s, 4s, 8s, 16s, capped at 30s — or null once the max is
+// reached and we stop until the next edit re-arms the pipeline.
+export function uploadRetryDelay(attempt, max = UPLOAD_MAX_RETRIES) {
+  if (attempt >= max) return null;
+  return Math.min(30000, 1000 * 2 ** attempt);
+}
 
 async function loadFirebase() {
   if (firebaseAvailable) return true;
@@ -165,6 +180,7 @@ export const Sync = {
 
   _scheduleUpload() {
     if (!user || !docRef) return;
+    uploadAttempt = 0; // a fresh edit restarts the backoff and supersedes any pending retry
     setStatus('saving…');
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => this._uploadNow(), 800);
@@ -177,10 +193,20 @@ export const Sync = {
     const { setDoc } = this._fs;
     try {
       await setDoc(docRef, Storage.raw(), { merge: false });
+      uploadAttempt = 0;
       setStatus('synced ' + new Date().toLocaleTimeString());
     } catch (e) {
       console.warn('upload failed', e);
-      setStatus('save failed');
+      const delay = uploadRetryDelay(uploadAttempt);
+      if (delay != null) {
+        uploadAttempt++;
+        setStatus(`save failed — retrying (${uploadAttempt}/${UPLOAD_MAX_RETRIES})…`);
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => this._uploadNow(), delay);
+      } else {
+        // Exhausted the burst; the next Storage change re-arms _scheduleUpload.
+        setStatus('save failed — will retry on your next change');
+      }
     }
   },
 

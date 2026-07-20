@@ -5,6 +5,7 @@
 // file carries the same block so moving tests between files stays trivial.
 import { test, assert, assertEq, resetStorage, localIso, addIsoDays } from '../harness.js';
 import { Storage, newer } from '../../js/storage.js';
+import { uploadRetryDelay } from '../../js/sync.js';
 import { Program, buildPhasePattern, hardPhasePos, DEFAULT_CYCLE_WEEKS, MIN_CYCLE_WEEKS, MAX_CYCLE_WEEKS } from '../../js/program.js';
 import { Loads } from '../../js/loads.js';
 import { Warmup } from '../../js/warmup.js';
@@ -259,4 +260,15 @@ test('[Phase2 S5] mergeRemote: activePlanId syncs from remote', () => {
   };
   Storage.mergeRemote(remote);
   assertEq(Storage.get().activePlanId, 'r-active', 'activePlanId should sync from remote');
+});
+
+test('[sync] uploadRetryDelay: exponential backoff then null once exhausted (failed upload is no longer terminal)', () => {
+  // 0-based attempts → 1s, 2s, 4s, 8s, 16s, capped at 30s, then stop.
+  assertEq(uploadRetryDelay(0, 5), 1000);
+  assertEq(uploadRetryDelay(1, 5), 2000);
+  assertEq(uploadRetryDelay(2, 5), 4000);
+  assertEq(uploadRetryDelay(3, 5), 8000);
+  assertEq(uploadRetryDelay(4, 5), 16000);
+  assertEq(uploadRetryDelay(5, 5), null, 'exhausted → null (re-arms on next edit, not a dead end)');
+  assertEq(uploadRetryDelay(10, 12), 30000, 'delay is capped at 30s');
 });
