@@ -19,7 +19,7 @@ python -m http.server 8765
 
 Then open `http://127.0.0.1:8765/` and click **"Use locally only"** on the auth gate. The service worker only activates over `https://` or `localhost`.
 
-**Tests** are an in-browser smoke suite at `tests/index.html`, no CLI runner. See the `test` skill for how to run it, what it covers, and Playwright MCP notes.
+**Tests** are an in-browser smoke suite at `tests/index.html`, no CLI runner. See the `test` skill for how to run it, what it covers, Playwright MCP notes, and this dev machine's environment quirks (stale `node`/`npx`/`python` PATH, Playwright MCP connection order).
 
 ## Deploy
 
@@ -58,7 +58,7 @@ The training logic lives in two modules and is grounded in `docs/training-philos
 - **Day-of-week determines the session slot, not cycle position.** `Program.resolveDate` uses `d.getDay()` to map Mon→`mon-main`, Thu/Sat→main, Wed/Fri→`rest`, Tue→`tue-light`, Sun→`sun-optional`. A non-Monday `startDate` therefore shifts which calendar day is "Wk 1 Mon-main".
 - **Percentages are of TOTAL system load, not added weight alone (ADR-0013).** `prescribeLoadKg` computes `added = pct × (bodyweight + benchmark) − bodyweight` for both `hangboard` and `pullup` kinds. **`benchmarks.bodyweight` is required** — when it's unset, `prescribeLoadKg`/`resolveEffective` return `null` outright (never a silent fallback to the old added-only math); views must show a "set bodyweight" hint (see `today.js`'s `bwHint`). The KG-B11a negative-benchmark clamp (`clampToBenchmark`) still runs but is now belt-and-braces — under total-load math a realistic (<1.0) band naturally stays safe for an assisted athlete.
 - **Load math chain (in `Loads.resolveEffective`, in order):** `prescribeLoadKg` (% range from benchmarks) → seed by previous-actual kg if present, else range midpoint → `layoffDecay` (ADR-0008: ×1.0 within a 10-day grace period since that session type was last logged, else −3%/week floored at ×0.85 — guards against resuming at full load after a layoff) → `autoAdjust` ±5% (previous avg RPE vs target `rpeRange`), upgraded to **+2.5% when RPE is in range AND `Loads.targetsHit` says the previous actual met today's prescribed sets/reps** (ADR-0009 — views call `Loads.resolveForDay` (exercise + index + sessionId + date + `Storage.listDays()`), which owns the previous-same-session scan and always feeds the full previous actual through, so the progression can't be silently disabled by a forgotten field; `resolveEffective` remains the pure internal/test door) → readiness multiplier (×0.85 / ×1.0 / ×1.05, or 0 = suggest rest) → **upward cap: total move ≤ +5% of the decayed previous actual per session** (ADR-0009; downward is never capped). Each step appends to `reason[]` for the UI tooltip. **No deload multiplier here** (see above).
-- **Base aerobic sessions ramp volume within the phase (ADR-0009).** In Base, sessions whose `energySystem` starts with "Aerobic" (route pyramid, ARC) get `prescribedTarget` scaled ×(1 + 0.10×(hardWeekPos−1)), capped ×1.30, via `applyBaseVolumeRamp` + `hardPhasePos` in `program.js`; the pre-ramp value lands in `rampedFrom` (NOT `originalTarget` — that field means "deload/taper cut" to the views) and a `rampNote` is set. Deload/retest weeks are exempt (`hardPhasePos` → null) so the deload cut always scales the unramped template; anaerobic Base sessions are deliberately excluded while KG-B12 is open. After editing `js/program.js`, regenerate the schedule section of `docs/training-plan.md` with `node --experimental-default-type=module tools/generate-schedule.mjs`.
+- **Base aerobic sessions ramp volume within the phase (ADR-0009).** In Base, sessions whose `energySystem` starts with "Aerobic" (route pyramid, ARC) get `prescribedTarget` scaled ×(1 + 0.10×(hardWeekPos−1)), capped ×1.30, via `applyBaseVolumeRamp` + `hardPhasePos` in `program.js`; the pre-ramp value lands in `rampedFrom` (NOT `originalTarget` — that field means "deload/taper cut" to the views) and a `rampNote` is set. Deload/retest weeks are exempt (`hardPhasePos` → null) so the deload cut always scales the unramped template; anaerobic Base sessions are deliberately excluded while KG-B12 is open. After editing `js/program.js`, regenerate the schedule section of `docs/training-plan.md` with `node tools/generate-schedule.mjs`.
 - **`exercise.kind` drives both rendering and load logic.** Only `hangboard` and `pullup` compute kg (`loadPctRange` against `maxHang20mm` / `pullup1RM`). `antagonist-block` has nested `items[]`. `test`, `boulder`, `route`, `circuit`, `arc`, `open-climb`, `mobility`, `skill`, `limit-boulder`, `campus` are prescription-text-only — don't try to compute kg for them.
 - **`js/exercise-inputs.js` is the single source of truth for which inputs to show.** `today.js` imports `inputVisibility(ex)` → `{ kg, sets, reps, rpe, optional, none }` and `repsLabel(ex)` (`'min'` for `arc`/`open-climb`, else `'reps'`). Never hardcode per-kind UI rules in a view — extend the sets in this helper (`NO_INPUT_KINDS`, `KG_KINDS`, `NO_SETS_KINDS`).
 - **The Log tab is a read-only feed — editing happens on Today.** `log.js`'s in-feed edit form was removed deliberately (it was a second, drift-prone copy of Today's logging surface); editing a past day = navigating the Today tab to that date. Don't reintroduce an edit form in Log. The `missed` status is set from Today's status row (`#markMissed`) — the Calendar's missed-dot depends on it.
@@ -101,7 +101,22 @@ The training logic lives in two modules and is grounded in `docs/training-philos
 - New post-build session mutation (a deload-like cut, a note, a swap) → register a pass in `PRESCRIPTION_PASSES` in `js/program.js`, not an if-block in `prescribeForContext`.
 - New top-level tab → register in the `views` map in `js/app.js`, add a `<button data-view="X">` in `index.html`, create `js/views/X.js`, then `node tools/generate-sw.mjs --bump`.
 - New monitoring signal (ADR-0014) → the signal function in `js/monitoring.js` plus, if its response mutates the plan, an `actionKey` case in `acceptSettingsPatch` — both the Today banner and the Log panel consume signals through `Monitoring.activeSignals`/`dismissPatch`/`acceptSettingsPatch`, so no view code is needed for a new advisory signal.
+- New limiter/norm comparison (ADR-0011) → `js/limiter.js`'s `limiterReadout(benchmarks)` — a pure function returning `{lines, caveat}` or `null`; consumed by the Profile-tab card, which recomputes on any benchmark change. Informational only — never wire a limiter verdict into a prescription path.
 
 ## Disclaimer
 
 The training content is not medical advice; that framing is intentional and surfaced in the app.
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in GitHub Issues (via the `gh` CLI); external PRs are not pulled into `/triage`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default label vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`) — no repo-specific overrides. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context layout — `CONTEXT.md` (glossary) + `docs/adr/` at the repo root. See `docs/agents/domain.md`.

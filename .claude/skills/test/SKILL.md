@@ -32,3 +32,11 @@ The Playwright MCP browser is available for driving the app live. Init scripts f
 ```js
 evaluate('async () => { const {Storage} = await import("/js/storage.js"); ... }')
 ```
+
+## Environment quirks on this machine (Windows, this dev's setup)
+
+- **`node`/`npm`/`npx` and `python` are not reliably on `PATH` in a fresh Bash tool session**, even though `node.exe`/`npm.cmd`/`npx.cmd` are installed at `C:\Program Files\nodejs\` (confirm with `Test-Path` in PowerShell if `where`/`which` comes up empty — the file's usually there). Workarounds, in order of preference:
+  - Prepend node's dir for that one command: `PATH="/c/Program Files/nodejs:$PATH" npx ...` (Bash), or call the `.cmd`/`.exe` by full path directly: `"/c/Program Files/nodejs/node.exe" ...`.
+  - `gh` has hit the exact same stale-PATH symptom mid-conversation before resolving itself after a session/terminal restart — if a tool that should exist reports "not found," suspect PATH staleness before assuming it's uninstalled.
+  - The `python` resolved by plain `python`/`py` on PATH is often just the Windows Store install-stub alias, not a real interpreter (`python -c "print(1)"` fails with an "install from the Microsoft Store" message). Prefer `node`/`npx http-server` over `python -m http.server` here unless a real Python is confirmed present.
+- **Playwright MCP is not connected by default in a fresh session even after `npx @playwright/mcp@latest` + `npx playwright install chromium` are run.** Installing the npm package/browser binary does not retroactively attach the MCP server to a running session — the server connection is only established at session/plugin startup. If `mcp__*playwright*` tools don't show up via ToolSearch right after installing, that's expected. **Fix order that actually works, in sequence:** (1) get `node`/`npx` genuinely on `PATH` first (see above — a stale PATH silently breaks the MCP server's spawn even after other steps below), (2) run `/plugin` and look for "Reconnected to plugin:playwright:playwright" (a plain app/session restart alone was *not* sufficient in practice — this explicit reconnect step was the one that worked), (3) `/reload-plugins`. Only then do `mcp__plugin_playwright_playwright__*` tools appear via ToolSearch.

@@ -192,7 +192,7 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
 ## Generated 12-Week Schedule (hybrid focus, comp peak)
 
 > **Auto-generated from `js/program.js`** (`Program.build`, default 12-week cycle, `focus: hybrid`, `peakType: comp`).
-> Regenerate with `node --experimental-default-type=module tools/generate-schedule.mjs` after changing `js/program.js` — do not hand-edit this section.
+> Regenerate with `node tools/generate-schedule.mjs` after changing `js/program.js` — do not hand-edit this section.
 > Loads show the prescribed **% of total system load** (bodyweight + benchmark — ADR-0013); the app converts these to added kg from your benchmarks and applies targets-hit progression / auto-adjust / readiness / layoff-decay on the day (ADR-0009).
 > Deload/taper volume cuts and the Base aerobic volume ramp are shown already applied. Every session gets the standard two-stage warm-up and cool-down from `js/warmup.js`.
 

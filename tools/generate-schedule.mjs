@@ -1,10 +1,11 @@
 // Regenerate the "Generated 12-Week Schedule" section of docs/training-plan.md
 // from the app's real Program module (js/program.js). Run from the repo root:
 //
-//   node --experimental-default-type=module tools/generate-schedule.mjs
+//   node tools/generate-schedule.mjs
 //
-// The flag is required because the repo has no package.json — it tells Node to
-// treat the app's extensionless-".js" ES modules as ESM. The script replaces
+// No flag needed — the .mjs extension already tells Node to treat this file
+// (and its imports from js/*.js, which the browser also loads as ES modules)
+// as ESM, regardless of the repo having no package.json. The script replaces
 // everything from the section marker to end-of-file; content above the marker
 // is untouched. Uses a nominal Monday start so day-of-week slots resolve
 // exactly as in the app; dates themselves are not shown.
@@ -87,7 +88,7 @@ const out = [];
 out.push(MARKER + ' (hybrid focus, comp peak)');
 out.push('');
 out.push('> **Auto-generated from `js/program.js`** (`Program.build`, default 12-week cycle, `focus: hybrid`, `peakType: comp`).');
-out.push('> Regenerate with `node --experimental-default-type=module tools/generate-schedule.mjs` after changing `js/program.js` — do not hand-edit this section.');
+out.push('> Regenerate with `node tools/generate-schedule.mjs` after changing `js/program.js` — do not hand-edit this section.');
 out.push('> Loads show the prescribed **% of total system load** (bodyweight + benchmark — ADR-0013); the app converts these to added kg from your benchmarks and applies targets-hit progression / auto-adjust / readiness / layoff-decay on the day (ADR-0009).');
 out.push('> Deload/taper volume cuts and the Base aerobic volume ramp are shown already applied. Every session gets the standard two-stage warm-up and cool-down from `js/warmup.js`.');
 out.push('');
