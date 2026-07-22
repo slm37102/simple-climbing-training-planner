@@ -9,3 +9,7 @@ node_modules/
 .firebase/
 # Reference PDFs (not source)
 *.pdf
+
+# Personal / machine-specific Claude Code config (not shared)
+.claude/settings.local.json
+.claude/launch.json
