@@ -37,7 +37,7 @@ For longer cycles the planner switches to a **double-block** structure above 20 
 
 ## Deload cadence (3:1 — every 4th week)
 
-Three weeks hard, one week deload — across Base and Build. The last Base deload is also a **retest** (re-measure max hang, weighted pull-up 1RM, current best boulder grade). Updated benchmarks reset load prescriptions for the Build phase. This 3:1 cadence matches Lattice's published default and sits inside Hörst's "every 3–4 weeks of hard training" bound. Decided in [ADR-0004](adr/0004-deload-cadence-3-to-1.md) and implemented 2026-07-04 (`(i+1)%4` in `buildPhasePattern`) — the code previously deloaded every 3rd week, a 2:1 cadence mislabeled "3:1" (see [KG-B3](knowledge-gaps.md#kg-b3--deload-cadence-code-is-21-doc-says-31-lattices-31-is-every-4th-week-p2-g1g3), Closed).
+Three weeks hard, one week deload — across Base and Build. The last Base deload is also a **retest** (re-measure max hang, weighted pull-up 1RM, current best boulder grade). Updated benchmarks reset load prescriptions for the Build phase. This 3:1 cadence matches Lattice's published default and sits inside Hörst's "every 3–4 weeks of hard training" bound. Decided in [ADR-0004](adr/0004-deload-cadence-3-to-1.md) and implemented 2026-07-04 (`(i+1)%4` in `buildPhasePattern`) — the code previously deloaded every 3rd week, a 2:1 cadence mislabeled "3:1" (see [KG-B3](knowledge-gaps-archive.md#kg-b3--deload-cadence-code-is-21-doc-says-31-lattices-31-is-every-4th-week-p2-g1g3), Closed).
 
 ## Half-crimp dominance in Base
 

@@ -1,6 +1,6 @@
 # Benchmark norms — finger & pulling strength vs. grade
 
-Closes [KG-C6](knowledge-gaps.md#kg-c6--norms-data-provenance-p2). Produced by a 12-agent adversarial
+Closes [KG-C6](knowledge-gaps-archive.md#kg-c6--norms-data-provenance-p2). Produced by a 12-agent adversarial
 verification round (2026-07-08) over the corpus's "Assessment, benchmarks & finger-strength metrics"
 subtopic (29 claims, 3-vote check per claim — see the dated batch in
 [`research/verified-findings.md`](research/verified-findings.md#2026-07-08-assessment-norms-batch)),
@@ -125,7 +125,7 @@ measures.
 
 ## Should this become a feature?
 
-This was researched to support [KG-A1 / KG-D2](knowledge-gaps.md#kg-a1--no-limiter-diagnosis-p1-g1) (an
+This was researched to support [KG-A1 / KG-D2](knowledge-gaps-archive.md#kg-a1--no-limiter-diagnosis-p1-g1) (an
 in-app "likely limiter" readout). Given the R² finding above, the honest scope for that feature is narrow:
 
 - **What it could say, defensibly:** whether the athlete's finger strength and pull strength sit at,
@@ -152,5 +152,5 @@ Full citations, direct quotes, and vote tallies are in the dated batch of
 [`research/verified-findings.md`](research/verified-findings.md#2026-07-08-assessment-norms-batch). The
 two supplementary gathers (pull-up norms; independent finger-strength cross-checks) are single-pass —
 not yet run through the 3-vote adversarial check — and are queued alongside the rest of
-[KG-C1](knowledge-gaps.md#kg-c1--the-research-corpus-is-half-verified-p2--verification-deferred)'s
+[KG-C1](knowledge-gaps-archive.md#kg-c1--the-research-corpus-is-half-verified-p2--closed-2026-07-10)'s
 backlog for future verification.

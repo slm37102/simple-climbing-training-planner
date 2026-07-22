@@ -1,6 +1,6 @@
 # Return-From-Finger-Tweak Guide (KG-A7 mitigation)
 
-A one-page guide for the **"finger tweaked but not injured"** episode — a niggle or strain you feel during or after a session that is *not* a diagnosed pulley tear. This is the most common intermediate finger scenario and, until now, had no protocol in this app. Closes [KG-A7](knowledge-gaps.md#kg-a7--injury-prevention-dosing-is-partial-p2-g3)'s return-from-tweak half (the dosing half closed separately in #40). Evidence: [`research/return-from-tweak-evidence.md`](research/return-from-tweak-evidence.md).
+A one-page guide for the **"finger tweaked but not injured"** episode — a niggle or strain you feel during or after a session that is *not* a diagnosed pulley tear. This is the most common intermediate finger scenario and, until now, had no protocol in this app. Closes [KG-A7](knowledge-gaps-archive.md#kg-a7--injury-prevention-dosing-is-partial-p2-g3)'s return-from-tweak half (the dosing half closed separately in #40). Evidence: [`research/return-from-tweak-evidence.md`](research/return-from-tweak-evidence.md).
 
 This is deliberately a **printed reference, not app logic** — every numeric constant below is practitioner convention or a cross-tissue extrapolation, not a validated finger-specific rule, and no RCT ranks one return-from-tweak protocol over another. Nothing in this repo enforces, checks, or gates on any of it.
 
