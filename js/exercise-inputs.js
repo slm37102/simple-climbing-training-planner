@@ -9,7 +9,7 @@
 // optional: true on an exercise → hide all numeric inputs; show "Done ✓" checkbox only.
 // kind === 'antagonist-block' → no inputs at all (composite item; uses notes).
 
-const NO_INPUT_KINDS = new Set(['antagonist-block', 'mobility', 'skill']);
+const NO_INPUT_KINDS = new Set(['antagonist-block', 'mobility', 'skill', 'core']);
 const KG_KINDS       = new Set(['hangboard', 'pullup', 'test']);
 // Climbing-kind exercises carry a single concrete prescribedTarget (see
 // js/program.js) instead of a separate sets+reps pair — one count input,

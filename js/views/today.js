@@ -783,6 +783,27 @@ function stepperCountLabel(ex) {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
+// Renders prescription facts as stacked rows instead of one "·"-joined
+// line, so every exercise kind reads the same way. Pass ['Label', value]
+// for a named fact (hang/rest/sets/RPE) or a bare string for a free-text
+// clause split off ex.prescribed (climbing kinds have no per-field data
+// to label, so those rows render without a label column).
+function rxRowHtml(row) {
+  if (Array.isArray(row)) {
+    const [label, val] = row;
+    return `<div class="rx-row"><span class="rx-label">${label}</span><span class="rx-val">${val}</span></div>`;
+  }
+  return `<div class="rx-row"><span class="rx-val">${row}</span></div>`;
+}
+function rxGridHtml(rows) {
+  return `<div class="rx-grid">${rows.filter(Boolean).map(rxRowHtml).join('')}</div>`;
+}
+// Splits a program-authored ex.prescribed string on its ' · ' clause
+// delimiter (used consistently across js/program.js) into separate rows.
+function prescribedClauseRows(prescribed) {
+  return (prescribed || '').split(' · ').filter(Boolean);
+}
+
 function stepper(id, value, label, step, isDefault = false, placeholder = '') {
   const wrapCls = isDefault ? 'stepper stepper-default' : 'stepper';
   const inputAttrs = isDefault ? ' data-default="1"' : '';
@@ -963,28 +984,25 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
     // Labeled rows instead of a single "·"-joined line — hang/rest/sets read
     // as distinct facts (work time vs. rest vs. rep scheme) rather than one
     // run-on sentence the athlete has to parse apart.
-    const rxRows = [
+    prescribedStr = rxGridHtml([
       ex.hang && ['Work', ex.hang],
       sets && ['Sets', sets],
       ex.rest && ['Rest', ex.rest],
       rangeStr && ['Load', rangeStr],
       rpe && ['Target', rpe]
-    ].filter(Boolean);
-    prescribedStr = `<div class="rx-grid">${rxRows.map(([label, val]) =>
-      `<div class="rx-row"><span class="rx-label">${label}</span><span class="rx-val">${val}</span></div>`
-    ).join('')}</div>` + loadHint;
+    ]) + loadHint;
   } else if (ex.drills) {
     prescribedStr = drillPickerHtml(i, ex, actual);
   } else if (ex.prescribedTarget) {
-    const rpe = ex.rpeRange ? `RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : '';
+    const rpe = ex.rpeRange ? ['Target', `RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}`] : null;
     // ADR-0015: readiness-gating RPE cap note (Lighter day, climbing kinds
     // whose rpeRange tops out above 8.5 — campus/limit-boulder mainly).
     const capNote = ex.readinessCapNote ? `<div class="muted" style="margin:4px 0">⚠ ${ex.readinessCapNote}</div>` : '';
     prescribedStr = targetCalloutHtml(ex) + howtoHtml(ex) +
-      `<div class="exercise-prescribe" style="margin:0 0 6px">${[ex.prescribed, rpe].filter(Boolean).join(' · ')}</div>` + capNote;
+      `<div style="margin:0 0 6px">${rxGridHtml([...prescribedClauseRows(ex.prescribed), rpe])}</div>` + capNote;
   } else {
-    const rpe = ex.rpeRange ? ` · RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : '';
-    prescribedStr = (ex.prescribed || '') + rpe;
+    const rpe = ex.rpeRange ? ['Target', `RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}`] : null;
+    prescribedStr = rxGridHtml([...prescribedClauseRows(ex.prescribed), rpe]);
   }
 
   // Climbing-kind exercises and drill-choice exercises build their own

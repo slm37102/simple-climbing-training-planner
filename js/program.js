@@ -210,9 +210,16 @@ const ANTAGONIST_BLOCK = [
   { name: 'Push-ups', prescribed: '3 × 15–25 · 60–90s rest between sets' },
   { name: 'Inverted rows / band cactus', prescribed: '3 × 10–15 · 60–90s rest between sets' },
   { name: 'Wrist extensor curls', prescribed: '3 × 20 · 60s rest between sets' },
-  { name: "Farmer's carry", prescribed: '3 × 20–30 steps · 60–90s rest between sets' },
-  { name: 'Core (plank or hanging knee raise or L-sit)', prescribed: 'choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets' }
+  { name: "Farmer's carry", prescribed: '3 × 20–30 steps · 60–90s rest between sets' }
 ];
+
+// Core used to live as a 5th item buried inside the antagonist-block accordion
+// (easy to miss/skip since the block collapses by default and shares one
+// notes field across all 5 items). It's promoted to its own Monday exercise
+// so it gets a normal card, its own notes, and shows up in the deload-note
+// pipeline like any other plain-prescribed exercise (applyDeloadToExercise's
+// generic `prescribed` branch, not the antagonist-block-items branch).
+const MON_CORE = { kind: 'core', name: 'Core', prescribed: 'choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets' };
 
 // ~10-minute Tuesday version — a subset sized for the light day, distinct from
 // Monday's full block so a skipped/short session is visible in the logs.
@@ -329,6 +336,7 @@ function buildMonHangboard(phase, isDeload, focus = 'hybrid') {
   // existing antagonist-block branch (below) volume-cuts it via a per-item
   // deload note instead of dropping it entirely (isDeload param kept for
   // call-site clarity even though it's no longer read here).
+  exercises.push({ ...MON_CORE });
   exercises.push({ kind: 'antagonist-block', name: 'S&C antagonist block', items: ANTAGONIST_BLOCK });
   return {
     sessionId: `mon-hangboard-${phase}`,

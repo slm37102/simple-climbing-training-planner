@@ -43,8 +43,8 @@ test('inputVisibility arc → reps+rpe (min, no sets/kg)', () => {
   assertEq(repsLabel({ kind: 'boulder' }), 'reps');
 });
 
-test('inputVisibility mobility/skill/antagonist-block → no inputs', () => {
-  for (const k of ['mobility', 'skill', 'antagonist-block']) {
+test('inputVisibility mobility/skill/antagonist-block/core → no inputs', () => {
+  for (const k of ['mobility', 'skill', 'antagonist-block', 'core']) {
     const v = inputVisibility({ kind: k });
     assert(v.none === true, `kind ${k} should be none`);
     assert(!v.kg && !v.sets && !v.reps && !v.rpe, `kind ${k} should have no numeric fields`);
