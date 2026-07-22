@@ -944,9 +944,12 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
     // returns null (never a silent added-only fallback) when either is unset.
     // Name exactly what's missing so the empty load field isn't a mystery
     // (the old hint only covered bodyweight, so a missing max-hang benchmark
-    // left the field blank with no explanation).
+    // left the field blank with no explanation). But a null loadPctRange (e.g.
+    // 7/3 Repeaters — bodyweight-only, no % prescription exists) means there
+    // was never a suggestion to compute, so don't blame the benchmarks for it.
+    const hasLoadPct = !!(ex.loadPctRange || ex.pctRange);
     let loadHint = '';
-    if (!suggestion) {
+    if (!suggestion && hasLoadPct) {
       const bm = Storage.get().benchmarks || {};
       const missing = [];
       if (bm.bodyweight == null) missing.push('bodyweight');
@@ -957,7 +960,19 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
     }
     const sets = ex.sets || ex.reps || '';
     const rpe  = ex.rpeRange ? `RPE ${ex.rpeRange[0]}–${ex.rpeRange[1]}` : '';
-    prescribedStr = [ex.hang, sets, ex.rest, rangeStr, rpe].filter(Boolean).join(' · ') + loadHint;
+    // Labeled rows instead of a single "·"-joined line — hang/rest/sets read
+    // as distinct facts (work time vs. rest vs. rep scheme) rather than one
+    // run-on sentence the athlete has to parse apart.
+    const rxRows = [
+      ex.hang && ['Work', ex.hang],
+      sets && ['Sets', sets],
+      ex.rest && ['Rest', ex.rest],
+      rangeStr && ['Load', rangeStr],
+      rpe && ['Target', rpe]
+    ].filter(Boolean);
+    prescribedStr = `<div class="rx-grid">${rxRows.map(([label, val]) =>
+      `<div class="rx-row"><span class="rx-label">${label}</span><span class="rx-val">${val}</span></div>`
+    ).join('')}</div>` + loadHint;
   } else if (ex.drills) {
     prescribedStr = drillPickerHtml(i, ex, actual);
   } else if (ex.prescribedTarget) {
