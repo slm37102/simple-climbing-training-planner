@@ -294,10 +294,31 @@ test('[Gym-ready] antagonist-block items each specify rest between sets', () => 
   const sess = Program.prescribeForContext(ctx, 'hybrid');
   const block = sess.exercises.find(e => e.kind === 'antagonist-block');
   assert(block, 'Monday session should have an antagonist-block');
-  assert(block.items.length >= 5, `expected 5 antagonist items, got ${block.items.length}`);
+  assert(block.items.length >= 4, `expected 4 antagonist items, got ${block.items.length}`);
   for (const item of block.items) {
     assert(/rest/i.test(item.prescribed), `antagonist item "${item.name}" missing rest info: "${item.prescribed}"`);
   }
+});
+
+test('[Gym-ready] Core is a standalone Monday exercise, not a buried antagonist-block item', () => {
+  const ctx = Program.resolveDate('2026-05-04', '2026-05-04', 12); // wk1 Mon, base, non-deload
+  const sess = Program.prescribeForContext(ctx, 'hybrid');
+  const core = sess.exercises.find(e => e.kind === 'core');
+  assert(core, 'Monday session should have a standalone core exercise');
+  assert(/rest/i.test(core.prescribed), `core exercise missing rest info: "${core.prescribed}"`);
+  const block = sess.exercises.find(e => e.kind === 'antagonist-block');
+  assert(!block.items.some(i => /core/i.test(i.name)), 'antagonist-block items should no longer include Core');
+});
+
+test('[Gym-ready] Core is phase-shaped: Base = plank/HKR/L-sit, Build+ = tension progression (front lever/HLR-to-toes)', () => {
+  const base = Program.prescribeForContext(Program.resolveDate('2026-05-04', '2026-05-04', 12), 'hybrid'); // wk1 Mon, base
+  const baseCore = base.exercises.find(e => e.kind === 'core');
+  assert(/plank/i.test(baseCore.prescribed), `Base core should include plank, got "${baseCore.prescribed}"`);
+
+  const build = Program.prescribeForContext(Program.resolveDate('2026-06-15', '2026-05-04', 12), 'hybrid'); // wk7 Mon, build, hard week
+  const buildCore = build.exercises.find(e => e.kind === 'core');
+  assert(/front lever/i.test(buildCore.prescribed), `Build core should include a front-lever progression, got "${buildCore.prescribed}"`);
+  assert(!/plank/i.test(buildCore.prescribed), `Build core should not still be the Base plank/HKR/L-sit template, got "${buildCore.prescribed}"`);
 });
 
 test('[KG-A7] Tuesday light day carries a short antagonist/shoulder block (2x/week dosing)', () => {
@@ -332,7 +353,7 @@ test('[KG-A7] Monday antagonist block is unchanged (full volume, no deload note)
   const block = sess.exercises.find(e => e.kind === 'antagonist-block');
   assert(block, 'Monday session should have an antagonist-block on a hard week');
   assertEq(block.name, 'S&C antagonist block', 'Monday block name should be unchanged on a hard week');
-  assert(block.items.length >= 5, `Monday block should keep its full item count on a hard week, got ${block.items.length}`);
+  assert(block.items.length >= 4, `Monday block should keep its full item count on a hard week, got ${block.items.length}`);
   for (const item of block.items) {
     assert(!/deload/i.test(item.prescribed), `hard-week antagonist item "${item.name}" should NOT carry a deload note, got "${item.prescribed}"`);
   }

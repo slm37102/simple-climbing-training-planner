@@ -187,6 +187,10 @@ label{display:block;font:600 10px 'Archivo';letter-spacing:.06em;text-transform:
 .exercise:first-child{border-top:0;padding-top:0}
 .exercise-title{font:800 15px 'Archivo';text-transform:uppercase;letter-spacing:.01em}
 .exercise-prescribe{color:var(--muted);font:400 12px 'Archivo';margin:3px 0 6px}
+.rx-grid{display:flex;flex-direction:column;gap:4px}
+.rx-row{display:flex;gap:10px;align-items:baseline}
+.rx-row .rx-label{flex:0 0 68px;font:700 10px 'Archivo';letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.rx-row .rx-val{font:500 13px 'Archivo';color:var(--text)}
 .suggest-btn{background:var(--field);border:1px dashed var(--accent);color:var(--accent);padding:7px 11px;border-radius:8px;font:600 12px 'Archivo';cursor:pointer;margin-bottom:6px}
 .suggest-btn:hover{background:var(--accent);color:var(--accent-ink)}
 .notes-toggle{background:transparent;border:0;color:var(--muted);font:500 12px 'Archivo';cursor:pointer;padding:4px 0;margin-top:4px}

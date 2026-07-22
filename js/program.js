@@ -210,9 +210,29 @@ const ANTAGONIST_BLOCK = [
   { name: 'Push-ups', prescribed: '3 × 15–25 · 60–90s rest between sets' },
   { name: 'Inverted rows / band cactus', prescribed: '3 × 10–15 · 60–90s rest between sets' },
   { name: 'Wrist extensor curls', prescribed: '3 × 20 · 60s rest between sets' },
-  { name: "Farmer's carry", prescribed: '3 × 20–30 steps · 60–90s rest between sets' },
-  { name: 'Core (plank or hanging knee raise or L-sit)', prescribed: 'choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets' }
+  { name: "Farmer's carry", prescribed: '3 × 20–30 steps · 60–90s rest between sets' }
 ];
+
+// Core used to live as a 5th item buried inside the antagonist-block accordion
+// (easy to miss/skip since the block collapses by default and shares one
+// notes field across all 5 items). It's promoted to its own Monday exercise
+// so it gets a normal card, its own notes, and shows up in the deload-note
+// pipeline like any other plain-prescribed exercise (applyDeloadToExercise's
+// generic `prescribed` branch, not the antagonist-block-items branch).
+//
+// Phase-shaped like the hangboard slot (ADR-0005 precedent): Base keeps the
+// general anti-extension/anti-rotation holds (plank/HKR/L-sit — this trio is
+// what the project's own gathered research recommends for climbers, see
+// docs/research/deep-research-report.md). Build/Peak/Taper swap in a
+// climbing-specific tension progression instead — coach-review.md's W7 flagged
+// the old single "3 sets, 1×/week, no progression" prescription as a token
+// (planks plateau within weeks); Lattice's own core-conditioning guidance
+// calls for varied planes/tools rather than one static hold, and the tuck
+// front lever is a standard graduated progression (negative tuck → tuck →
+// advanced tuck → straddle) that builds the hollow-body tension steep
+// climbing actually uses, unlike a flat plank.
+const CORE_BASE = { kind: 'core', name: 'Core', prescribed: 'choose 1: 3 × 60–90s plank · 3 × 10 HKR · 3 × 10s L-sit · 60s rest between sets' };
+const CORE_TENSION = { kind: 'core', name: 'Core', prescribed: 'choose 1: 3 × 10–20s tuck front lever hold · 3 × 8 hanging leg raise to toes · 3 × 10s L-sit · 60s rest between sets · increase hold time or reps week to week as each becomes controlled' };
 
 // ~10-minute Tuesday version — a subset sized for the light day, distinct from
 // Monday's full block so a skipped/short session is visible in the logs.
@@ -329,6 +349,7 @@ function buildMonHangboard(phase, isDeload, focus = 'hybrid') {
   // existing antagonist-block branch (below) volume-cuts it via a per-item
   // deload note instead of dropping it entirely (isDeload param kept for
   // call-site clarity even though it's no longer read here).
+  exercises.push({ ...(phase === 'base' ? CORE_BASE : CORE_TENSION) });
   exercises.push({ kind: 'antagonist-block', name: 'S&C antagonist block', items: ANTAGONIST_BLOCK });
   return {
     sessionId: `mon-hangboard-${phase}`,
