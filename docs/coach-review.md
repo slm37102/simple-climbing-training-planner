@@ -74,12 +74,12 @@
 
 ### W7 — Core is a token; grip variety is narrow (Medium)
 
-- **Observation:** Core = "choose 1 of plank/HKR/L-sit, 3 sets, 1×/week", with no progression standard. All fingerboard work is 20mm half-crimp + open-crimp; no pinch, no sloper/drag, no three-finger drag anywhere in the cycle.
+- **Observation:** ~~Core = "choose 1 of plank/HKR/L-sit, 3 sets, 1×/week", with no progression standard.~~ **Addressed 2026-07-22:** Core is now phase-shaped (`CORE_BASE`/`CORE_TENSION` in `js/program.js`) — Base keeps plank/HKR/L-sit (still the project's own researched recommendation, see `docs/research/deep-research-report.md`), Build/Peak/Taper rotate to a tuck-front-lever + hanging-leg-raise-to-toes progression with a week-to-week hold/rep increase cue. It's also promoted out of the antagonist-block accordion into its own Monday exercise card with its own notes field. Grip variety is still open: all fingerboard work is 20mm half-crimp + open-crimp; no pinch, no sloper/drag, no three-finger drag anywhere in the cycle.
 - **Why it matters:** Body-tension (front-lever family, toe-pressure work) is the core quality that transfers to steep climbing — planks plateau within weeks. Pinch and drag strength don't develop from crimp hangs, and boulder grades past V6 routinely gate on them. (KG-A10's anti-style logic is the tracked half of this; the untrained grip *types* are untracked.)
 - **Potential impact:** Style-dependent plateau: the athlete gets stronger on crimps and keeps failing compression/sloper problems at the same grade.
-- **Recommendation:** Rotate the core slot toward tension progressions (tuck front lever rows, hanging leg raise to toes, ab-wheel); add one pinch-block or wide-pinch hang line to Build Mondays as an optional exercise.
-- **Trade-offs:** Pinch blocks need equipment; front-lever work adds elbow load (keep volume small, RPE-capped).
-- **Priority:** Medium.
+- **Recommendation:** ~~Rotate the core slot toward tension progressions (tuck front lever rows, hanging leg raise to toes, ab-wheel)~~ done — see above. Still open: add one pinch-block or wide-pinch hang line to Build Mondays as an optional exercise.
+- **Trade-offs:** Pinch blocks need equipment; front-lever work adds elbow load (keep volume small, RPE-capped — the Build/Peak/Taper prescription caps hold time at 10–20s for this reason).
+- **Priority:** Medium (grip-variety half still open).
 
 ### W8 — Comp peak type has no comp-format work **[new]** (Medium, only if `peakType: 'comp'`)
 

@@ -310,6 +310,17 @@ test('[Gym-ready] Core is a standalone Monday exercise, not a buried antagonist-
   assert(!block.items.some(i => /core/i.test(i.name)), 'antagonist-block items should no longer include Core');
 });
 
+test('[Gym-ready] Core is phase-shaped: Base = plank/HKR/L-sit, Build+ = tension progression (front lever/HLR-to-toes)', () => {
+  const base = Program.prescribeForContext(Program.resolveDate('2026-05-04', '2026-05-04', 12), 'hybrid'); // wk1 Mon, base
+  const baseCore = base.exercises.find(e => e.kind === 'core');
+  assert(/plank/i.test(baseCore.prescribed), `Base core should include plank, got "${baseCore.prescribed}"`);
+
+  const build = Program.prescribeForContext(Program.resolveDate('2026-06-15', '2026-05-04', 12), 'hybrid'); // wk7 Mon, build, hard week
+  const buildCore = build.exercises.find(e => e.kind === 'core');
+  assert(/front lever/i.test(buildCore.prescribed), `Build core should include a front-lever progression, got "${buildCore.prescribed}"`);
+  assert(!/plank/i.test(buildCore.prescribed), `Build core should not still be the Base plank/HKR/L-sit template, got "${buildCore.prescribed}"`);
+});
+
 test('[KG-A7] Tuesday light day carries a short antagonist/shoulder block (2x/week dosing)', () => {
   const ctx = Program.resolveDate('2026-05-05', '2026-05-04', 12); // Tue wk1, base
   assertEq(ctx.slot, 'tue-light');
