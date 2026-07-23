@@ -10,6 +10,14 @@ export const Loads = {
   // readiness = {sleep, soreness, fatigue} each 1..5
   // `key` is the stable machine-readable tier — gate on it, never on the
   // human-readable `label`, which is display copy and free to be reworded.
+  //
+  // KG-C7: these multipliers (×1.05/1.00/0.85/rest) and the bucket boundaries
+  // (avg ≥4.5/3.5/2.5) are an APP CONVENTION, UNVALIDATED — invented for this
+  // app, cited nowhere, and wellness-questionnaire evidence in sport science is
+  // mixed. The direction (down-regulate on poor readiness) is sound; the exact
+  // numbers are not evidence. Tune them from the athlete's own logs via the
+  // KG-A4 monitoring signals, not from literature. Same posture as the layoff
+  // and progression constants at the bottom of this file.
   computeReadinessMultiplier(readiness) {
     if (!readiness) return { multiplier: 1.0, label: 'Normal', key: 'normal' };
     const { sleep = 3, soreness = 3, fatigue = 3 } = readiness;
@@ -31,6 +39,8 @@ export const Loads = {
 
   // ===== Auto-adjust from previous actual =====
   // Given previous actual avg RPE vs target rpeRange, returns multiplier to apply to previous actual load.
+  // KG-C7: the ±5% step is likewise app convention, unvalidated — a plausible
+  // RPE thermostat, but the 5% magnitude is not a cited finding. Tune via KG-A4.
   autoAdjust(previousAvgRpe, rpeRange) {
     if (previousAvgRpe == null || !rpeRange) return 1.0;
     if (previousAvgRpe > rpeRange[1]) return 0.95;

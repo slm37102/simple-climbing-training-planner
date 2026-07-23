@@ -230,6 +230,23 @@ test('Today: renders the cycle-complete screen without throwing (cycleStats actu
   } finally { root.remove(); }
 });
 
+test('Today: cycle-complete screen prompts the end-of-cycle review before starting the next cycle (KG-A8 nudge)', () => {
+  // KG-A8 automation ruled won't-fix; the shipped slice is a reminder nudge
+  // on the cycle-complete card linking the review checklist (not an engine).
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
+  sessionStorage.setItem('todaySelectedDate', '2027-01-01'); // past the cycle end
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const link = root.querySelector('[data-eoc-review]');
+    assert(link, 'cycle-complete card should carry the review-checklist nudge');
+    assert(/end-of-cycle-review\.md$/.test(link.getAttribute('href')), 'nudge must link the end-of-cycle review doc');
+  } finally { root.remove(); }
+});
+
 test('Today: kg exercise with no benchmarks shows an empty load field + a hint naming what to set', () => {
   // The load field is blank when resolve can't suggest (no bodyweight AND/OR no
   // kind benchmark); the hint must name exactly what's missing so the empty

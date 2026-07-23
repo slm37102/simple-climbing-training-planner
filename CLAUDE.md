@@ -6,6 +6,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A single-user, offline-first **PWA** that prescribes a periodized climbing training macrocycle (Base → Build → Peak → Taper) for one intermediate climber (V5–V6 boulder / ~7a lead) doing both bouldering and sport. **Vanilla HTML / CSS / JS ES modules — no build step, no bundler, no npm runtime deps, no test framework.** Optional Firebase Auth (Google) + Firestore sync.
 
+## Weighing work
+
+**Code is cheap here — do NOT weigh development/implementation time as a cost** when recommending whether to build something. "It's a lot of work" / "poor ROI for the effort" / "too many hours to save a few minutes" are not valid arguments in this repo. Judge a build/don't-build call purely on: does it improve training outcomes for this one athlete, is it correct, is it safe (G3 durability outranks everything), is the evidence real (not uncited convention dressed as behaviour), and does the *ongoing* complexity earn its place (the `project-goals.md` "simple over clever" principle — a maintenance/surface-area cost, distinct from build time). If the only thing arguing against a feature is how long it'd take to write, build it.
+
 ## Commands
 
 There is **no build, no lint, no `package.json`**. Everything is served as static files.

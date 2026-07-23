@@ -166,6 +166,11 @@ function cycleCompleteHtml(plan) {
       <div><div class="muted" style="font-size:.8rem">Best hang</div><b>${formatKgStat(bestHang)}</b></div>
       <div><div class="muted" style="font-size:.8rem">Best pull</div><b>${formatKgStat(bestPull)}</b></div>
     </div>
+    <div class="card" style="text-align:left;max-width:460px;margin:0 auto 16px;padding:12px 14px">
+      <p style="margin:0 0 4px;font:600 13px 'Archivo';color:var(--text)">Before you start the next cycle</p>
+      <p class="muted" style="margin:0 0 8px;font-size:.85rem">Walk the end-of-cycle review — retest trajectory, protocol rotation, whether your limiter shifted — so Cycle N+1 isn't a byte-identical repeat with new numbers.</p>
+      <a class="ghost" style="text-decoration:none" href="docs/end-of-cycle-review.md" target="_blank" rel="noopener" data-eoc-review>Open the review checklist →</a>
+    </div>
     <button class="primary" type="button" data-cycle-open>Start New Cycle</button>
     <div data-cycle-form hidden style="margin-top:16px;text-align:left;max-width:420px;margin-left:auto;margin-right:auto">
       <div class="field">
@@ -581,6 +586,13 @@ export function renderToday(root) {
       ${readinessRow('soreness')}
       ${readinessRow('fatigue')}
       <p class="muted" data-readiness-summary style="margin:4px 0 0">Avg ${rdAvg ? rdAvg.toFixed(1) : '—'} → <b>${rdLabel}</b> ${multiplier ? `(×${multiplier})` : ''}</p>
+      <details class="muted" style="margin-top:6px;font-size:0.85em">
+        <summary style="cursor:pointer">About these numbers</summary>
+        The readiness multipliers (×1.05 / ×1.0 / ×0.85 / rest) and the ±5% RPE
+        step are an app convention, not clinical thresholds — the direction is
+        sound, the exact numbers aren't validated. Trust your own logged trends
+        over the multiplier, and adjust it if it consistently reads wrong for you.
+      </details>
     </div>
     <div class="card" style="margin-top:10px">
       ${painRow}
