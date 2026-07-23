@@ -8,7 +8,7 @@ What the planner **doesn't know yet**. The app was largely built *before* the re
 - Every gap has a stable ID (`KG-A1`, …) so ADRs and commits can cite it (e.g. "closes KG-B1"). **This doc only carries the full write-up for gaps still Open/Researching.** Once a gap closes (or is ruled Won't-fix/Resolved/Accepted), its write-up moves to [`knowledge-gaps-archive.md`](knowledge-gaps-archive.md) under the same ID and this doc keeps just its one-line table row + a link — never delete an ID from either doc.
 - **Priority:** P1 = gates a goal · P2 = meaningful · P3 = nice-to-have. **Status:** Open / Researching / Closed / Won't-fix.
 - Entries contain *pointers, not quotations* — protocols live in [`training-philosophy.md`](training-philosophy.md), evidence in [`research/verified-findings.md`](research/verified-findings.md), code facts in the referenced files. All code facts below were verified against the current source (2026-07-02).
-- As of 2026-07-23, only **one** gap remains open: **KG-A8** (the automation half of inter-cycle progression, P3). Everything else that was ever tracked here has closed, been ruled won't-fix, or been accepted as a permanent limitation — see the archive for the full history. (KG-A13 was mistakenly reopened by a 2026-07-16 doc-restructure commit that overwrote its closure — see the archive; it shipped and closed same-day.)
+- As of 2026-07-23, **no** gap remains open. Everything ever tracked here has closed, been ruled won't-fix, or been accepted as a permanent limitation — see the archive for the full history. KG-A8 was the last, resolved 2026-07-23 (checklist + a cycle-end reminder nudge shipped; the auto-detect/auto-actuate half ruled Won't-fix — see the archive for why). (KG-A13 was mistakenly reopened by a 2026-07-16 doc-restructure commit that overwrote its closure — see the archive; it shipped and closed same-day.)
 
 ---
 
@@ -25,7 +25,7 @@ What making a good climbing plan requires that neither the docs nor the code cur
 | KG-A5 | Taper knowledge is a stub | P2 | G2 | Closed (ADR-0007, 2026-07-04) |
 | KG-A6 | Power-endurance dosing unresolved | P2 | G2 G3 | Closed (ADR-0006, 2026-07-04) |
 | KG-A7 | Injury-prevention dosing partial | P2 | G3 | Closed — dosing half (#40, 2026-07-16); return-from-tweak half (#47, 2026-07-17) |
-| KG-A8 | No inter-cycle progression model | P2 | G1 | **Open** |
+| KG-A8 | No inter-cycle progression model | P2 | G1 | Checklist + nudge shipped; automation Won't-fix (2026-07-23) |
 | KG-A9 | No technique/skill programming | P2 | G1 | Closed (2026-07-14) |
 | KG-A10 | Style individualization unused | P3 | G1 | Closed (issue #41, 2026-07-16) |
 | KG-A11 | No outdoor conversion | P3 | G2 | Won't-fix (in code) |
@@ -33,15 +33,7 @@ What making a good climbing plan requires that neither the docs nor the code cur
 | KG-A13 | Comp peak type has no comp-format specificity | P3 | G2 | Closed (issue #39, 2026-07-16) |
 | KG-A14 | Readiness autoregulation never touches climbing sessions | P2 | G3 G1 | Closed (ADR-0015, issue #53, 2026-07-17) |
 
-Full detail for every Closed/Won't-fix row above is in [the archive, Lens A](knowledge-gaps-archive.md#lens-a). Only the one still-open gap gets a write-up here.
-
-### KG-A8 — No inter-cycle progression model (P2, G1)
-
-**Nothing defines what changes in cycle N+1.** V5→V7 is a multi-cycle, 1–2+ year project; retests reset the kg math but the program itself is identical every cycle — same protocols, same edges, same session library. Needed: when to rotate protocols, when to shift phase ratios toward the evolving limiter, and when to ratchet Peak aggressiveness back up (the [training-philosophy open question](training-philosophy.md#peer-reviewed-support-and-gaps) — which becomes live exactly when the athlete succeeds at G1).
-
-- *Verdict:* close as a written end-of-cycle review checklist first (KG-D7, done); automation is P3 and remains unbuilt.
-- **Checklist half shipped 2026-07-16** → [`end-of-cycle-review.md`](end-of-cycle-review.md) (issue [#43](https://github.com/slm37102/simple-climbing-training-planner/issues/43), closed KG-D7). Covers retest trajectory (incl. what two flat retests in a row means — a judgment call), which protocols to rotate, when to shift phase ratios toward the evolving limiter, and the Peak-aggressiveness ratchet-up question above. **This entry stays Open** — the automation half (auto-detecting drift/limiter shift with no human read required) is unbuilt and P3.
-- **Adjacent, resolved 2026-07-17 → issue #51 (ADR-0012).** Benchmarks also go stale *within* a cycle (only retest closes Base at week 6, so Build/Peak percentages ride week-6 numbers into cycle N+1). Both a post-goal retest slot and a staleness-gated Build-Monday micro-retest now ship — see [the archive's KG-A8 entry](knowledge-gaps-archive.md#lens-a) if you need that implementation detail; it doesn't change this gap's remaining (open) scope, which is the inter-cycle *model*, not benchmark freshness.
+Full detail for every row above is in [the archive, Lens A](knowledge-gaps-archive.md#lens-a). No Lens A gap remains open.
 
 ---
 
