@@ -8,7 +8,7 @@ What the planner **doesn't know yet**. The app was largely built *before* the re
 - Every gap has a stable ID (`KG-A1`, …) so ADRs and commits can cite it (e.g. "closes KG-B1"). **This doc only carries the full write-up for gaps still Open/Researching.** Once a gap closes (or is ruled Won't-fix/Resolved/Accepted), its write-up moves to [`knowledge-gaps-archive.md`](knowledge-gaps-archive.md) under the same ID and this doc keeps just its one-line table row + a link — never delete an ID from either doc.
 - **Priority:** P1 = gates a goal · P2 = meaningful · P3 = nice-to-have. **Status:** Open / Researching / Closed / Won't-fix.
 - Entries contain *pointers, not quotations* — protocols live in [`training-philosophy.md`](training-philosophy.md), evidence in [`research/verified-findings.md`](research/verified-findings.md), code facts in the referenced files. All code facts below were verified against the current source (2026-07-02).
-- As of 2026-07-22, only **four** gaps remain open: KG-A8, KG-A13, KG-C7, KG-C8. Everything else that was ever tracked here has closed, been ruled won't-fix, or been accepted as a permanent limitation — see the archive for the full history.
+- As of 2026-07-23, only **three** gaps remain open: KG-A8, KG-C7, KG-C8. Everything else that was ever tracked here has closed, been ruled won't-fix, or been accepted as a permanent limitation — see the archive for the full history. (KG-A13 was mistakenly reopened by a 2026-07-16 doc-restructure commit that overwrote its closure — see the archive; it shipped and closed same-day.)
 
 ---
 
@@ -30,10 +30,10 @@ What making a good climbing plan requires that neither the docs nor the code cur
 | KG-A10 | Style individualization unused | P3 | G1 | Closed (issue #41, 2026-07-16) |
 | KG-A11 | No outdoor conversion | P3 | G2 | Won't-fix (in code) |
 | KG-A12 | No cross-session fatigue model | P3 | G3 | Won't-fix (fold into A4) |
-| KG-A13 | Comp peak type has no comp-format specificity | P3 | G2 | **Open** |
+| KG-A13 | Comp peak type has no comp-format specificity | P3 | G2 | Closed (issue #39, 2026-07-16) |
 | KG-A14 | Readiness autoregulation never touches climbing sessions | P2 | G3 G1 | Closed (ADR-0015, issue #53, 2026-07-17) |
 
-Full detail for every Closed/Won't-fix row above is in [the archive, Lens A](knowledge-gaps-archive.md#lens-a). Only the two still-open gaps get a write-up here.
+Full detail for every Closed/Won't-fix row above is in [the archive, Lens A](knowledge-gaps-archive.md#lens-a). Only the one still-open gap gets a write-up here.
 
 ### KG-A8 — No inter-cycle progression model (P2, G1)
 
@@ -42,13 +42,6 @@ Full detail for every Closed/Won't-fix row above is in [the archive, Lens A](kno
 - *Verdict:* close as a written end-of-cycle review checklist first (KG-D7, done); automation is P3 and remains unbuilt.
 - **Checklist half shipped 2026-07-16** → [`end-of-cycle-review.md`](end-of-cycle-review.md) (issue [#43](https://github.com/slm37102/simple-climbing-training-planner/issues/43), closed KG-D7). Covers retest trajectory (incl. what two flat retests in a row means — a judgment call), which protocols to rotate, when to shift phase ratios toward the evolving limiter, and the Peak-aggressiveness ratchet-up question above. **This entry stays Open** — the automation half (auto-detecting drift/limiter shift with no human read required) is unbuilt and P3.
 - **Adjacent, resolved 2026-07-17 → issue #51 (ADR-0012).** Benchmarks also go stale *within* a cycle (only retest closes Base at week 6, so Build/Peak percentages ride week-6 numbers into cycle N+1). Both a post-goal retest slot and a staleness-gated Build-Monday micro-retest now ship — see [the archive's KG-A8 entry](knowledge-gaps-archive.md#lens-a) if you need that implementation detail; it doesn't change this gap's remaining (open) scope, which is the inter-cycle *model*, not benchmark freshness.
-
-### KG-A13 — Comp peak type has no comp-format specificity (P3, G2)
-
-**`settings.peakType: 'comp'` changes only the taper length (1 wk vs 2).** Peak/Taper sessions are identical to a trip/project peak — project attempts and redpoint goes on known climbs — while a comp day demands the opposite profile: unseen problems, ~4-minute rounds, limited attempts, no beta rehearsal. Physically peaked but tactically unprepared. Surfaced by the 2026-07-14 external coaching review ([`coach-review.md`](coach-review.md), W8).
-
-- *Pointers:* `js/program.js` — `taperWeeksFor` is the only `peakType` consumer; `buildThuMain`/`buildSatMain` peak/taper branches are peak-type-blind.
-- *Verdict:* close cheaply if comps are ever a real goal — swap Peak Saturdays to a comp-simulation template (rounds of unseen flash-only problems) when `peakType === 'comp'`; otherwise leave open at P3.
 
 ---
 
