@@ -8,7 +8,7 @@ What the planner **doesn't know yet**. The app was largely built *before* the re
 - Every gap has a stable ID (`KG-A1`, …) so ADRs and commits can cite it (e.g. "closes KG-B1"). **This doc only carries the full write-up for gaps still Open/Researching.** Once a gap closes (or is ruled Won't-fix/Resolved/Accepted), its write-up moves to [`knowledge-gaps-archive.md`](knowledge-gaps-archive.md) under the same ID and this doc keeps just its one-line table row + a link — never delete an ID from either doc.
 - **Priority:** P1 = gates a goal · P2 = meaningful · P3 = nice-to-have. **Status:** Open / Researching / Closed / Won't-fix.
 - Entries contain *pointers, not quotations* — protocols live in [`training-philosophy.md`](training-philosophy.md), evidence in [`research/verified-findings.md`](research/verified-findings.md), code facts in the referenced files. All code facts below were verified against the current source (2026-07-02).
-- As of 2026-07-23, only **three** gaps remain open: KG-A8, KG-C7, KG-C8. Everything else that was ever tracked here has closed, been ruled won't-fix, or been accepted as a permanent limitation — see the archive for the full history. (KG-A13 was mistakenly reopened by a 2026-07-16 doc-restructure commit that overwrote its closure — see the archive; it shipped and closed same-day.)
+- As of 2026-07-23, only **one** gap remains open: **KG-A8** (the automation half of inter-cycle progression, P3). Everything else that was ever tracked here has closed, been ruled won't-fix, or been accepted as a permanent limitation — see the archive for the full history. (KG-A13 was mistakenly reopened by a 2026-07-16 doc-restructure commit that overwrote its closure — see the archive; it shipped and closed same-day.)
 
 ---
 
@@ -79,18 +79,10 @@ Weaknesses in the evidence base itself.
 | KG-C4 | Half-crimp dominance not externally replicated | P3 | Accepted |
 | KG-C5 | Hörst vs Lattice PE contradiction unreconciled | P2 | Resolved (ADR-0006) |
 | KG-C6 | Benchmark-vs-grade norms provenance | P2 | Closed (2026-07-08) |
-| KG-C7 | Readiness/RPE multipliers are app inventions | P3 | **Open** |
-| KG-C8 | Refuted-claim dependency check | P3 | **Open** |
+| KG-C7 | Readiness/RPE multipliers are app inventions | P3 | Closed (disclosed 2026-07-23) |
+| KG-C8 | Refuted-claim dependency check | P3 | Closed (audit 2026-07-23) |
 
-Full detail for the five resolved rows above is in [the archive, Lens C](knowledge-gaps-archive.md#lens-c).
-
-### KG-C7 — The autoregulation constants are uncited (P3)
-
-The readiness multipliers (×0.85/1.0/1.05/rest at bucket boundaries 2.5/3.5/4.5, `js/loads.js:10-18`) and the ±5% RPE auto-adjust (`js/loads.js:22-27`) were invented for this app — plausible, but cited nowhere, and wellness-questionnaire evidence in sport science is mixed. Document as "app convention, unvalidated"; tune from the athlete's own logs via KG-A4 rather than from literature.
-
-### KG-C8 — Refuted-claim dependency check (P3)
-
-Three claims were refuted (§ Refuted in verified-findings). Quick audit that nothing in-app leans on them — especially the refuted "4-month base / 2-month peak" claim vs how Base stretches in long single-block cycles below the 20-week threshold.
+Full detail for every resolved row above is in [the archive, Lens C](knowledge-gaps-archive.md#lens-c). No Lens C gap remains open.
 
 ---
 

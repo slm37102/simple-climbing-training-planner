@@ -581,6 +581,13 @@ export function renderToday(root) {
       ${readinessRow('soreness')}
       ${readinessRow('fatigue')}
       <p class="muted" data-readiness-summary style="margin:4px 0 0">Avg ${rdAvg ? rdAvg.toFixed(1) : '—'} → <b>${rdLabel}</b> ${multiplier ? `(×${multiplier})` : ''}</p>
+      <details class="muted" style="margin-top:6px;font-size:0.85em">
+        <summary style="cursor:pointer">About these numbers</summary>
+        The readiness multipliers (×1.05 / ×1.0 / ×0.85 / rest) and the ±5% RPE
+        step are an app convention, not clinical thresholds — the direction is
+        sound, the exact numbers aren't validated. Trust your own logged trends
+        over the multiplier, and adjust it if it consistently reads wrong for you.
+      </details>
     </div>
     <div class="card" style="margin-top:10px">
       ${painRow}

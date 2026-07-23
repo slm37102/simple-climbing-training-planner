@@ -242,6 +242,30 @@ The benchmark-vs-grade tables KG-A1 needs rest on proprietary, self-reported dat
 
 - **CLOSED 2026-07-08.** A 12-agent adversarial round (3 lenses × 4 source clusters) verified the corpus's "Assessment, benchmarks & finger-strength metrics" subtopic (29 claims → 25 kept, 4 refuted), plus two supplementary single-pass gathers (pull-up norms; independent finger-strength cross-checks). The most load-bearing finding was a **unit bug**: the widely-quoted Lattice grade table (V4=128% … V11=170%) is TOTAL load as %BW (bodyweight + added), not added load as the corpus originally logged it — this app's own `maxHang20mm`/`pullup1RM` fields store *added* kg, so the two conventions had to be reconciled before the numbers were usable. Synthesized into a grade-anchored norms table with confidence labels at [`benchmark-norms.md`](benchmark-norms.md), independently cross-validated by a 2025 peer-reviewed study (Buraas et al., EJAP) whose N=19 mean finger strength at ~7b+ redpoint (+44% BW added) lands within 2 points of Lattice's V7 anchor (+46%). The table also surfaces the sobering caveat that matters most for KG-D2: within this athlete's own Advanced tier, finger strength explains only ~17% of grade variance and pulling strength ~8–12% — the norms are a rough sanity check, not a precise diagnostic instrument.
 
+### KG-C7 — The autoregulation constants are uncited (P3)
+
+The readiness multipliers (×1.05/1.0/0.85/rest at bucket boundaries 4.5/3.5/2.5, `js/loads.js` `computeReadinessMultiplier`) and the ±5% RPE auto-adjust (`js/loads.js` `autoAdjust`) were invented for this app — plausible, but cited nowhere, and wellness-questionnaire evidence in sport science is mixed.
+
+- *Verdict:* document as "app convention, unvalidated"; tune from the athlete's own logs via KG-A4, not from literature. The constants themselves stay unvalidated by design — validating them would require running a trial (out of scope, like KG-C2/C3/C4) — so the deliverable was always the *disclosure*, not new evidence.
+- **CLOSED 2026-07-23 (disclosed).** Both constant sets now carry an explicit "app convention, unvalidated (KG-C7), tune via KG-A4" note in `js/loads.js` — matching the posture the ADR-0008 layoff constants and ADR-0009 progression constants already carried, and the ADR-0014 monitoring thresholds ("all adopted thresholds labelled app-convention-unvalidated (KG-C7 posture)"). Added an athlete-facing disclosure too: a collapsed "About these numbers" note under the Readiness card in `js/views/today.js` states the multipliers and the ±5% step are an app convention, not clinical thresholds, and to trust logged trends over the multiplier. No behavioural change — the numbers are unchanged; only their provenance is now honest in code and UI. `sw.js` CACHE v50→v51.
+
+### KG-C8 — Refuted-claim dependency check (P3)
+
+Eleven claims were refuted across the verification passes (§ Refuted in [`verified-findings.md`](research/verified-findings.md); the entry originally said "three", written when only the original 3 existed). Quick audit that nothing in-app leans on them — especially the refuted "4-month base / 2-month peak" claim vs how Base stretches in long single-block cycles.
+
+- **CLOSED 2026-07-23 (audit, no code change needed).** All 11 refuted claims checked against current source; **none is load-bearing.** Item by item:
+  1. *Bent-arm-hang unreliable for intermediates* → the app benchmarks on a fixed-edge weighted 20 mm max hang (7–10 s), never a bodyweight bent-arm hang (`buildRetestSession`/`buildPostGoalRetestSession`, `BASE_MAX_INTRO`). The app already does what the refutation's implication recommends.
+  2. *4-month base / 2-month peak macrocycle* (the one KG-C8 explicitly flagged) → `buildPhasePattern` derives Base as "whatever remains after Build ≈⅓, Peak = 2 wk, Taper = 1–2 wk", scaling with the configurable `cycleWeeks`; there is no 4mo/2mo ratio anywhere. **Confirmed not leaned on.**
+  3. *Taper recalibrates the central governor* → taper logic is a volume cut only (`applyTaperVolume`, ADR-0007); the mechanistic explanation is used nowhere.
+  4. *Deload every 4-6/6-8/6-12 wk (seriousness-tiered buckets)* → the app uses a fixed 3:1 cadence (every 4th week, ADR-0004), not the tiered buckets.
+  5. *Min-edge training rationale* → min-edge was deleted (ADR-0005); the refutation reinforces the deletion.
+  6. *Hörst 60/60 mechanistic framing* → the app's 60/60 is a practical prescription (RPE ≤8.5 cap, `SIXTY_SIXTY_EXERCISE`); ADR-0006's two-band model rests on other kept claims, not this framing.
+  7. *Anaerobic-lactic 1:5 ratio / 20s–2min* → the app's 30/30 lactic intervals run 1:1 (30 s on / 30 s off), not the refuted 1:5 ratio.
+  8. *Lattice %BW table logged as "added load"* → the app uses the **corrected** TOTAL-load convention (`benchmark-norms.md`; `limiter.js` `FINGER_NORM_ADDED_PCT` V4=0.28 = 128% total − 100% bodyweight). It leans on the corrected fact, not the refuted one.
+  9. *Half-crimp + front-three-drag = 66% of variance* → `limiter.js` deliberately uses the far weaker ~17% (finger) / ~8–12% (pulling) R² figures and states a sanity-check caveat; it never cites 66% or "front-three drag".
+  10. *Hörst endurance-hang test conflation* → the app has no continuous endurance-hang benchmark; the only adjacent item is an optional "7/3 repeater to failure" capacity check with no benchmark thresholds attached.
+  11. *Max Hang + Weighted Pull-Up = "two strongest predictors" (misattribution)* → the *fact* is accurate; only the citation was wrong. The app's use of these two benchmarks stands on the correctly-attributed source, so nothing depends on the error.
+
 ---
 
 ## The shortlist (historical — all five items shipped)
