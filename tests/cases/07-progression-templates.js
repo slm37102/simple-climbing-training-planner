@@ -77,7 +77,11 @@ test('[ADR-0009] ramp is aerobic-only and Base-only: hangboard, projecting, and 
   // wk3 Sat, boulder flavor — Build's anaerobic triples must not ramp when it recurs there (KG-B12: Base is now the aerobic flash pyramid, tested separately)
   const satBuild = Program.prescribeForContext(Program.resolveDate('2026-06-20', '2026-05-04', 12), 'boulder');
   assertEq(satBuild.sessionId, 'sat-boulder-triples');
-  assertEq(satBuild.exercises[0].prescribedTarget, { value: 4, unit: 'sets' });
+  // ADR-0016: this Build boulder Saturday is the week's third near-max finger
+  // day, so the density guard cuts its volume (4 → 2 sets); intensity is held.
+  // The assertion this test cares about is the absence of a RAMP, not the number.
+  assertEq(satBuild.exercises[0].prescribedTarget, { value: 2, unit: 'sets' });
+  assertEq(satBuild.exercises[0].originalTarget, { value: 4, unit: 'sets' }, 'pre-cut template volume');
   assert(!satBuild.rampNote, 'Build sessions must not ramp (ramp is Base-only)');
   // wk3 Thu projecting (Skill / Strength) must not ramp
   const proj = Program.prescribeForContext(Program.resolveDate('2026-05-21', '2026-05-04', 12), 'boulder');
@@ -111,7 +115,11 @@ test('[KG-B12] Base boulder-Saturday is the flash pyramid; Build boulder-Saturda
   assertEq(build.sessionId, 'sat-boulder-triples', 'Build boulder-Saturday must still be the unchanged 4×4 triples');
   assertEq(build.energySystem, 'Anaerobic capacity');
   const triples = build.exercises.find(e => e.kind === 'circuit');
-  assertEq(triples.prescribedTarget, { value: 4, unit: 'sets' });
+  // ADR-0016 density guard cuts this week's third near-max day 4 → 2 sets
+  // (intensity held). This test's point is that Build still serves the TRIPLES
+  // template rather than Base's flash pyramid — unchanged by the cut.
+  assertEq(triples.prescribedTarget, { value: 2, unit: 'sets' });
+  assertEq(triples.originalTarget, { value: 4, unit: 'sets' }, 'pre-cut template volume');
 });
 
 test('[KG-B12] flash pyramid ramps across hard Base weeks (ADR-0009): wk2 hard week 2 → 18 → 20 problems', () => {

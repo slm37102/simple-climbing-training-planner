@@ -337,8 +337,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
   - **Limit boulders** — 3–5 problems · 3–5 attempts · 3–5 min rest · 2–3 sets · RPE 8.5–9.5 · target: 4 problems
 - **Fri** — Rest day
 - **Sat** — Boulder triples + open climb *(Anaerobic capacity)*
-  - **Boulder triples (4×4)** — 4 boulders · climbed back-to-back · 4 min rest · 3–4 sets · 2–3 grades below max · RPE 8.5–9.5 · target: 4 sets
-  - **Open climbing (technique)** — 30–45 min mileage on submax problems · RPE 6–7.5 · target: 40 min · *(optional)*
+  - **Boulder triples (4×4)** — 4 boulders · climbed back-to-back · 4 min rest · 3–4 sets · 2–3 grades below max · RPE 8.5–9.5 · target today: 2 sets (cut from 4)
+  - **Open climbing (technique)** — 30–45 min mileage on submax problems · RPE 6–7.5 · target today: 25 min (cut from 40) · *(optional)*
 - **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
   - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
 
@@ -378,8 +378,8 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
   - **Limit boulders** — 3–5 problems · 3–5 attempts · 3–5 min rest · 2–3 sets · RPE 8.5–9.5 · target: 4 problems
 - **Fri** — Rest day
 - **Sat** — Boulder triples + open climb *(Anaerobic capacity)*
-  - **Boulder triples (4×4)** — 4 boulders · climbed back-to-back · 3:55 rest · 3–4 sets · 2–3 grades below max · RPE 8.5–9.5 · target: 4 sets
-  - **Open climbing (technique)** — 30–45 min mileage on submax problems · RPE 6–7.5 · target: 40 min · *(optional)*
+  - **Boulder triples (4×4)** — 4 boulders · climbed back-to-back · 3:55 rest · 3–4 sets · 2–3 grades below max · RPE 8.5–9.5 · target today: 2 sets (cut from 4)
+  - **Open climbing (technique)** — 30–45 min mileage on submax problems · RPE 6–7.5 · target today: 25 min (cut from 40) · *(optional)*
 - **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
   - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
 
@@ -399,7 +399,7 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
   - **30/30 intervals** — 30s all-out / 30s rest × 6 = 1 set · 3:50 between sets · 2–3 sets · deep pump expected, stop when movement degrades · RPE 9.5–10 · target: 2 sets
 - **Fri** — Rest day
 - **Sat** — Lead comp simulation (Peak) *(Sport-specific)*
-  - **Unseen routes — single-attempt simulation** — 2–3 unseen (or long-unseen) routes · brief preview only, no beta rehearsal · one redpoint-style attempt each · full rest between routes · RPE 9–9.5 · target: 2 routes
+  - **Unseen routes — single-attempt simulation** — 2–3 unseen (or long-unseen) routes · brief preview only, no beta rehearsal · one redpoint-style attempt each · full rest between routes · RPE 9–9.5 · target today: 1 route (cut from 2)
 - **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
   - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
 
@@ -420,7 +420,7 @@ Update via the **Retest session** at the end of each Base block (week 6 in the d
   - **Campus board: basic ladders (1-3-5, matched feet)** — 2–3 attempts × 2 sets · 3–5 min rest · gate: 15–20 strict pull-ups + 1-2-3-4-5 ladder without matching · skip on any finger tweak · RPE 8.5–9 · target: 2 sets
 - **Fri** — Rest day
 - **Sat** — Boulder comp simulation (Peak) *(Strength / Power)*
-  - **Unseen problems — comp rounds** — 4–5 unseen (or long-unseen) problems · one round each, ~4 min limit · max 4–5 attempts per problem, no beta rehearsal · full rest between rounds · RPE 8.5–9.5 · target: 4 problems
+  - **Unseen problems — comp rounds** — 4–5 unseen (or long-unseen) problems · one round each, ~4 min limit · max 4–5 attempts per problem, no beta rehearsal · full rest between rounds · RPE 8.5–9.5 · target today: 2 problems (cut from 4)
 - **Sun** — Optional: easy open climb or rest *(Aerobic base / —)*
   - **Easy open climbing (optional)** — 45–90 min mileage well below max · RPE 4–6 · target: 60 min · *(optional)*
 
