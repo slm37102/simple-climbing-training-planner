@@ -59,7 +59,7 @@ The service worker requires the app to be served over **https** (or localhost) t
 - **Macrocycle**: length is configurable (8–40 weeks, default 12), and the phase split is *derived* from length, not hardcoded (`docs/adr/0002`). Deloads land every **4th** week (3 hard : 1 deload — `docs/adr/0004`) and cut **volume ~40% (sets ×0.6) while holding intensity** — kg is never scaled down on a deload (`docs/adr/0003`). The **last Base week** of each block is also the **retest** session. Taper length follows the plan's **peak type** (comp 1 wk, trip/project 2 wk — `docs/adr/0007`), keeps near-peak loads with cut volume, and the day before the goal is a forced rest day.
 - **Cycles above 20 weeks run a double block** (two Base→Build cycles before Peak/Taper) instead of one long block.
 - **Two anchor modes**: `startDate` (plan begins on a chosen Monday; a missed-session gap can offer to shift the schedule forward, `docs/adr/0008`) or `compDate` (the plan is built backwards from a fixed goal date, so a gap is shown as information only — the goal date never moves).
-- **Weekly schedule**: Mon/Thu/Sat main, Wed/Fri rest, Tue/Sun light/optional. 3 finger-loading days/week (within Hörst's ≤4 cap, with 48–72h tendon recovery between hard days).
+- **Weekly schedule**: Mon/Thu/Sat main, Wed/Fri rest, Tue/Sun light/optional. 3 finger-loading days/week (within Hörst's ≤4 cap, with 48–72h tendon recovery between hard days). At most **two** carry *full-volume* near-maximal work (RPE ≥9), 72h apart (Mon/Thu); a third near-max day keeps its intensity but has its volume cut (`docs/adr/0016`).
 - **Hangboard protocols by phase**: 7/3 Repeaters + intro max-hangs (Base) → Max-Weight 10s, 2×4 @ RPE 8–9 (Build) → 7-53 (Peak) → near-max taper touch. Drawn from the Hörst / López / Lattice protocol families — see `docs/training-philosophy.md` and `docs/adr/0005`.
 - **Power-endurance** runs a two-band model (`docs/adr/0006`): 60/60 threshold intervals in Build (sport weeks), 30/30 lactic sharpening only in the final ≤4 weeks, with interval rest tightening 5s/week toward the goal.
 - **Hybrid focus mixes within the week, not across it**, in Base/Build (`docs/adr/0010`) — e.g. Saturday alternates a boulder format with a sport format week to week rather than the whole week flipping identity.
@@ -124,6 +124,7 @@ docs/adr/                     Decisions and their trade-offs
 docs/specs/                   Locked feature specs awaiting or guiding implementation
 docs/research/                Evidence corpus (verified claims + raw gathered claims)
 docs/coach-review.md          External coaching audit — adversarial review of the plan the code generates
+docs/deep-audit.md            Deep audit (2026-07-25) — 46 findings across coaching, sport-science and software
 docs/improvement-audit.md     Engineering audit (sync, correctness, UX, PWA) — not training content
 docs/trip-conversion-note.md  Converting Peak/Taper for an outdoor trip instead of a comp/gym goal
 docs/end-of-cycle-review.md   Manual walkthrough checklist after each macrocycle completes
