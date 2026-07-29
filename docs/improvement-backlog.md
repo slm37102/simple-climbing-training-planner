@@ -73,9 +73,10 @@ Open P1 items — work these first.
 | IB-046 | Only one exercise substitution exists — no swap for equipment, injury or preference | training | P3 | — | Open | [deep-audit §12](deep-audit.md) |
 | IB-047 | Q1 partial — `js/dates.js` exists and `storage.js` uses it, but the views still carry local date-helper copies | eng | P3 | — | Open | [improvement-audit](improvement-audit.md) Q1 |
 | IB-048 | `.github/copilot-instructions.md` has drifted from `CLAUDE.md` — `buildPhasePattern` without `peakType`, taper length without the ADR-0007 derivation, no KG-B10 Monday-only retest correction, cites a removed Log edit-Save test | eng | P3 | — | Open | audit-loop L2 |
+| IB-049 | ADR-0002/0003/0004 carry no `[ADR-000N]`-tagged test, so lens L3 re-flags them every pass. The behaviour *is* covered (21 deload/cadence cases incl. `Deload week (non-retest) … cuts prescribedSets ~40%` and `[Phase2 C2] no two adjacent weeks are both deload…`) — the fix is tagging the cases that already exist | eng | P3 | — | Open | audit-loop L3 |
 
 ## Pass log
 
 One line per `/audit-loop` pass — what the lenses found, what closed, where it shipped. Keeps the loop resumable and auditable.
 
-- **2026-07-29** — pass 0 (bootstrap): brought `deep-audit.md` onto `main` (`1f836ab`, docs-only); seeded IB-001…IB-046 from its 46 findings (IB-007/IB-023 already Closed by ADR-0016); carried `improvement-audit.md`'s partial Q1 across as IB-047; L2 raised IB-048. 48 rows, 46 open — 3 P1 · 16 P2 · 27 P3, split 17 `eng` · 29 `training`.
+- **2026-07-29** — pass 0 (bootstrap): brought `deep-audit.md` onto `main` (`1f836ab`, docs-only); seeded IB-001…IB-046 from its 46 findings (IB-007/IB-023 already Closed by ADR-0016); carried `improvement-audit.md`'s partial Q1 across as IB-047; L2 raised IB-048; L3 raised IB-049. L1 clean — generated artifacts in sync. 49 rows, 47 open — 3 P1 · 16 P2 · 28 P3, split 18 `eng` · 29 `training`.
