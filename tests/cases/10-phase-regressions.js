@@ -278,8 +278,11 @@ test('[sync] uploadRetryDelay: exponential backoff then null once exhausted (fai
 // enforced it; on Mon/Thu/Sat (72/48/48h) three hard days can't satisfy it.
 // The guard caps the week at two near-max finger days by cutting Saturday's
 // VOLUME (intensity held), leaving Mon+Thu a real 72h apart.
-const densityPlan = (over = {}) => ({
-  settings: { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp', focus: 'hybrid', ...over },
+// NB: focus is read off the PLAN (`Program.build` → `plan?.focus`), not off
+// settings — putting it in settings silently yields a hybrid plan.
+const densityPlan = ({ focus = 'hybrid', ...over } = {}) => ({
+  focus,
+  settings: { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp', ...over },
   days: {}
 });
 // Mon of week N is start + (N-1)*7; Sat is +5 from that Monday.
@@ -311,15 +314,27 @@ test('[ADR-0016] fires on Build boulder weeks, never on Base or Build sport week
   for (const w of [1, 2, 3, 5]) assert(!fired(w), `Base week ${w} is aerobic — must not fire`);
 });
 
+test('[ADR-0016] the guard follows plan focus, not just hybrid week-flavor alternation', () => {
+  const firedFor = (focus, w) => !!Program.build(densityPlan({ focus }), dayOfWeekN(w, 5)).densityNote;
+  // wk8 is a hybrid SPORT week (no fire); a boulder-focus plan makes every
+  // Build Saturday the triples, so the same week now fires.
+  assert(firedFor('boulder', 8), 'boulder focus: every Build Saturday is near-max triples → must fire');
+  // Sport focus pairs a 60/60 Thursday (RPE ≤8.5) with the 4×4 Saturday, so a
+  // Build week never reaches three near-max finger days.
+  for (const w of [7, 8, 9]) assert(!firedFor('sport', w), `sport-focus Build week ${w} must not fire`);
+});
+
 test('[ADR-0016] never double-cuts: at most one volume-cut note per session, all cycle lengths', () => {
-  for (const weeks of [8, 12, 16, 20, 24, 32, 40]) {
-    for (const peakType of ['comp', 'trip']) {
-      const plan = densityPlan({ cycleWeeks: weeks, peakType });
-      for (let w = 1; w <= weeks; w++) {
-        for (const off of [0, 3, 5]) {
-          const s = Program.build(plan, dayOfWeekN(w, off));
-          const cuts = [s.deloadNote, s.taperNote, s.densityNote].filter(Boolean);
-          assert(cuts.length <= 1, `${weeks}wk/${peakType} wk${w}+${off}d took ${cuts.length} cuts: ${cuts}`);
+  for (const focus of ['hybrid', 'boulder', 'sport']) {
+    for (const weeks of [8, 12, 16, 20, 24, 32, 40]) {
+      for (const peakType of ['comp', 'trip']) {
+        const plan = densityPlan({ focus, cycleWeeks: weeks, peakType });
+        for (let w = 1; w <= weeks; w++) {
+          for (const off of [0, 3, 5]) {
+            const s = Program.build(plan, dayOfWeekN(w, off));
+            const cuts = [s.deloadNote, s.taperNote, s.densityNote].filter(Boolean);
+            assert(cuts.length <= 1, `${focus}/${weeks}wk/${peakType} wk${w}+${off}d took ${cuts.length} cuts: ${cuts}`);
+          }
         }
       }
     }
@@ -333,13 +348,15 @@ test('[ADR-0016] every in-cycle week carries at most two FULL-VOLUME near-max fi
   const isNearMax = s => (s.exercises || []).some(e =>
     e && NEAR_MAX_KINDS.has(e.kind) && Array.isArray(e.rpeRange) && e.rpeRange[1] >= 9);
   const wasCut = s => !!s.densityNote || !!s.deloadNote || !!s.taperNote;
-  for (const weeks of [12, 24]) {
-    const plan = densityPlan({ cycleWeeks: weeks });
-    for (let w = 1; w <= weeks; w++) {
-      const days = [0, 3, 5].map(off => Program.build(plan, dayOfWeekN(w, off)));
-      const fullVolumeNearMax = days.filter(s => isNearMax(s) && !wasCut(s)).length;
-      assert(fullVolumeNearMax <= 2,
-        `${weeks}wk cycle, week ${w}: ${fullVolumeNearMax} full-volume near-max days (max 2)`);
+  for (const focus of ['hybrid', 'boulder', 'sport']) {
+    for (const weeks of [12, 24]) {
+      const plan = densityPlan({ focus, cycleWeeks: weeks });
+      for (let w = 1; w <= weeks; w++) {
+        const days = [0, 3, 5].map(off => Program.build(plan, dayOfWeekN(w, off)));
+        const fullVolumeNearMax = days.filter(s => isNearMax(s) && !wasCut(s)).length;
+        assert(fullVolumeNearMax <= 2,
+          `${focus} ${weeks}wk cycle, week ${w}: ${fullVolumeNearMax} full-volume near-max days (max 2)`);
+      }
     }
   }
 });
