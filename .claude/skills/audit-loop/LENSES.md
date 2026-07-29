@@ -23,7 +23,7 @@ git checkout -- sw.js docs/training-plan.md       # ratchet 5, always
 
 ## L2 · Invariant drift
 
-`CLAUDE.md`'s "Key invariants" section and `.github/copilot-instructions.md` both make specific, checkable claims about the code. Either can go stale, and a stale invariant misleads every future agent that reads it.
+The `domain-invariants` skill (`.claude/skills/domain-invariants/SKILL.md`, "Key invariants" section) and `.github/copilot-instructions.md` both make specific, checkable claims about the code. Either can go stale, and a stale invariant misleads every future agent that reads it.
 
 Walk each claim and grep it against the code. The two files also disagree with each other, which is itself a finding — `copilot-instructions.md` is the one that has drifted (that is IB-048).
 
