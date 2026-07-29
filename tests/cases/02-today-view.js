@@ -81,6 +81,29 @@ test('Today: kg + rpe inputs pre-fill defaults with data-default flag', () => {
   } finally { root.remove(); }
 });
 
+test('[IB-041] Today: suggested-load reason[] renders as an info-badge tooltip', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
+  Storage.setGlobalBenchmarks({ bodyweight: 70, maxHang20mm: 25, pullup1RM: 40 });
+  // 2026-06-15 = Mon Wk 7 Build — ex[0] is a weighted max-hang that computes a
+  // kg suggestion, so Loads.resolveForDay populates reason[] (range → … →
+  // readiness). Before IB-041 that array was computed and thrown away.
+  sessionStorage.setItem('todaySelectedDate', '2026-06-15');
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    assert(/title="Why this load:/.test(root.innerHTML),
+      'expected a "Why this load" info-badge tooltip on the suggested load');
+    assert(/class="info-badge"/.test(root.innerHTML), 'expected the info-badge element');
+    // The tooltip must carry chain provenance, not just a label — the readiness
+    // step is always appended when a kg suggestion is computed.
+    const tip = root.innerHTML.match(/title="Why this load:[^"]*/)[0];
+    assert(/readiness ×/.test(tip), 'reason tooltip should include the readiness multiplier step');
+  } finally { root.remove(); }
+});
+
 test('Today: default pre-fill is NOT persisted until user touches that field', () => {
   resetStorage();
   const plan = Storage.getActivePlan();
