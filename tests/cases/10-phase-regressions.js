@@ -272,3 +272,74 @@ test('[sync] uploadRetryDelay: exponential backoff then null once exhausted (fai
   assertEq(uploadRetryDelay(5, 5), null, 'exhausted → null (re-arms on next edit, not a dead end)');
   assertEq(uploadRetryDelay(10, 12), 30000, 'delay is capped at 30s');
 });
+
+// ===== [ADR-0016] Weekly finger-density guard =====
+// ADR-0006 stated "≥72h between high-intensity power sessions" and nothing
+// enforced it; on Mon/Thu/Sat (72/48/48h) three hard days can't satisfy it.
+// The guard caps the week at two near-max finger days by cutting Saturday's
+// VOLUME (intensity held), leaving Mon+Thu a real 72h apart.
+const densityPlan = (over = {}) => ({
+  settings: { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp', focus: 'hybrid', ...over },
+  days: {}
+});
+// Mon of week N is start + (N-1)*7; Sat is +5 from that Monday.
+const dayOfWeekN = (n, offset) => addIsoDays('2026-05-04', (n - 1) * 7 + offset);
+
+test('[ADR-0016] Peak Saturday is volume-cut with intensity held (third near-max finger day)', () => {
+  const sat = Program.build(densityPlan(), dayOfWeekN(11, 5)); // wk11 = peak, boulder
+  assertEq(sat.phase, 'peak');
+  const ex = sat.exercises.find(e => e.originalTarget);
+  assert(ex, 'a Peak Saturday exercise should carry a cut target');
+  assert(ex.prescribedTarget.value < ex.originalTarget.value, 'volume must be cut');
+  assertEq(ex.rpeRange[1], 9.5, 'intensity (RPE band) must be HELD, not capped');
+  assert(sat.notes.some(n => /ADR-0016/.test(n)), 'density note must reach session.notes[]');
+});
+
+test('[ADR-0016] the guard leaves Monday and Thursday untouched (they are the 72h pair)', () => {
+  const mon = Program.build(densityPlan(), dayOfWeekN(11, 0));
+  const thu = Program.build(densityPlan(), dayOfWeekN(11, 3));
+  for (const [label, s] of [['Mon', mon], ['Thu', thu]]) {
+    assert(!s.densityNote, `${label} must not be cut — Mon→Thu is already 72h`);
+    assert(!(s.exercises || []).some(e => e.originalTarget), `${label} targets must be untouched`);
+  }
+});
+
+test('[ADR-0016] fires on Build boulder weeks, never on Base or Build sport weeks', () => {
+  const fired = w => !!Program.build(densityPlan(), dayOfWeekN(w, 5)).densityNote;
+  assert(fired(7) && fired(9), 'Build boulder weeks (Thu limit + Sat triples) must fire');
+  assert(!fired(8), 'Build sport week (60/60 threshold, RPE ≤8.5) must not fire');
+  for (const w of [1, 2, 3, 5]) assert(!fired(w), `Base week ${w} is aerobic — must not fire`);
+});
+
+test('[ADR-0016] never double-cuts: at most one volume-cut note per session, all cycle lengths', () => {
+  for (const weeks of [8, 12, 16, 20, 24, 32, 40]) {
+    for (const peakType of ['comp', 'trip']) {
+      const plan = densityPlan({ cycleWeeks: weeks, peakType });
+      for (let w = 1; w <= weeks; w++) {
+        for (const off of [0, 3, 5]) {
+          const s = Program.build(plan, dayOfWeekN(w, off));
+          const cuts = [s.deloadNote, s.taperNote, s.densityNote].filter(Boolean);
+          assert(cuts.length <= 1, `${weeks}wk/${peakType} wk${w}+${off}d took ${cuts.length} cuts: ${cuts}`);
+        }
+      }
+    }
+  }
+});
+
+test('[ADR-0016] every in-cycle week carries at most two FULL-VOLUME near-max finger days', () => {
+  // The guard holds intensity, so a cut Saturday is still a high-RPE day — the
+  // invariant it actually enforces is on full-volume exposure, not RPE count.
+  const NEAR_MAX_KINDS = new Set(['hangboard', 'limit-boulder', 'campus', 'boulder', 'route', 'circuit']);
+  const isNearMax = s => (s.exercises || []).some(e =>
+    e && NEAR_MAX_KINDS.has(e.kind) && Array.isArray(e.rpeRange) && e.rpeRange[1] >= 9);
+  const wasCut = s => !!s.densityNote || !!s.deloadNote || !!s.taperNote;
+  for (const weeks of [12, 24]) {
+    const plan = densityPlan({ cycleWeeks: weeks });
+    for (let w = 1; w <= weeks; w++) {
+      const days = [0, 3, 5].map(off => Program.build(plan, dayOfWeekN(w, off)));
+      const fullVolumeNearMax = days.filter(s => isNearMax(s) && !wasCut(s)).length;
+      assert(fullVolumeNearMax <= 2,
+        `${weeks}wk cycle, week ${w}: ${fullVolumeNearMax} full-volume near-max days (max 2)`);
+    }
+  }
+});

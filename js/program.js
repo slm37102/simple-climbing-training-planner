@@ -872,23 +872,25 @@ function applyBaseVolumeRamp(session, pos) {
 // ADR-0007: the taper is a step volume cut with intensity held — the same
 // mechanics as a deload week, but labelled as the taper so the athlete knows
 // this is sharpening, not recovery. Loads stay near peak (see HANGBOARD.taper).
+// The "cut volume, hold intensity" lever, shared by the taper cut (ADR-0007)
+// and the finger-density guard (ADR-0016). Unlike applyDeloadToExercise it
+// leaves prescription TEXT alone — both callers scale concrete numbers only.
+function cutExerciseVolume(ex) {
+  if (!ex) return ex;
+  const next = { ...ex };
+  if (typeof next.prescribedSets === 'number' && next.prescribedSets > 1) {
+    next.prescribedSets = Math.max(1, Math.floor(next.prescribedSets * DELOAD_VOLUME_MULTIPLIER));
+  }
+  if (next.prescribedTarget) {
+    next.originalTarget = next.prescribedTarget;
+    next.prescribedTarget = scaleTarget(next.prescribedTarget);
+  }
+  return next;
+}
+
 function applyTaperVolume(session) {
   if (!session?.exercises) return session;
-  const out = {
-    ...session,
-    exercises: session.exercises.map(ex => {
-      if (!ex) return ex;
-      const next = { ...ex };
-      if (typeof next.prescribedSets === 'number' && next.prescribedSets > 1) {
-        next.prescribedSets = Math.max(1, Math.floor(next.prescribedSets * DELOAD_VOLUME_MULTIPLIER));
-      }
-      if (next.prescribedTarget) {
-        next.originalTarget = next.prescribedTarget;
-        next.prescribedTarget = scaleTarget(next.prescribedTarget);
-      }
-      return next;
-    })
-  };
+  const out = { ...session, exercises: session.exercises.map(cutExerciseVolume) };
   out.taperNote = 'Taper — volume cut, intensity held. Short, crisp, stop fresh.';
   return out;
 }
@@ -949,6 +951,58 @@ function applyPeakLacticSwap(session) {
     exercises: [{ ...SIXTY_SIXTY_EXERCISE }],
     readinessNote: 'Readiness: lighter — swapped 30/30 lactic for 60/60 threshold (ADR-0015).'
   };
+}
+
+// ============== Weekly finger-density guard (ADR-0016) ==============
+// ADR-0006 wrote itself a "≥72h between high-intensity power sessions"
+// guardrail that no code ever checked. On the fixed Mon/Thu/Sat skeleton
+// ≥72h between THREE hard days is arithmetically impossible — Mon→Thu is 72h,
+// but Thu→Sat and Sat→Mon are both 48h — so the rule was structurally
+// unmeetable and silently ignored rather than reconciled.
+//
+// Saturday is the unique slot whose gaps are 48h on BOTH sides, so it is the
+// one that gives: when Saturday would be the week's THIRD near-maximal finger
+// day, cut its VOLUME and hold its intensity. The enforced invariant is about
+// FULL-VOLUME exposure, not RPE count — Saturday stays a high-RPE day, but
+// only Mon + Thu (a real 72h apart) carry full-volume maximal work. ADR-0006's
+// literal "≥72h between all high-intensity sessions" is unsatisfiable on this
+// skeleton and is therefore REPLACED by that rule, not met.
+//
+// Volume-not-intensity is deliberate and matches ADR-0003/0007: the athlete
+// keeps the max-recruitment / goal-simulation stimulus (which needs the high
+// RPE) at a lower cumulative finger load. In Peak that is also textbook
+// peaking — fewer, higher-quality goes rather than a softer session.
+//
+// Detection reads the actually-built sessions rather than a hardcoded list of
+// week shapes, so it keeps working if a template's RPE, flavor split or
+// sessionId later changes (same reasoning as KG-A10's phase/flavor/slot gate).
+const NEAR_MAX_RPE = 9;
+const NEAR_MAX_KINDS = new Set(['hangboard', 'limit-boulder', 'campus', 'boulder', 'route', 'circuit']);
+const MAX_NEAR_MAX_DAYS_PER_WEEK = 2;
+
+function isNearMaxDay(session) {
+  return !!session?.exercises?.some(ex => ex
+    && NEAR_MAX_KINDS.has(ex.kind)
+    && Array.isArray(ex.rpeRange) && ex.rpeRange[1] >= NEAR_MAX_RPE);
+}
+
+// How many of this week's three main days are near-maximal, given the Saturday
+// session under evaluation. Mon/Thu are rebuilt from the same env the pipeline
+// already resolved — these are plain builders, not prescribeForContext, so
+// there is no pipeline recursion. Deload is passed as false by construction:
+// the guard's own firing condition excludes deload weeks.
+function weekNearMaxDays(env, satSession) {
+  const mon = buildMonHangboard(env.phase, false, env.focus);
+  const thuFlavor = env.hybridBuildMix ? 'boulder' : env.resolvedFlavor;
+  const thu = buildThuMain(env.phase, thuFlavor, false, env.weeksLeft, env.ctx.peakType);
+  return [mon, thu, satSession].filter(isNearMaxDay).length;
+}
+
+function applyDensityGuard(session) {
+  if (!session?.exercises) return session;
+  const out = { ...session, exercises: session.exercises.map(cutExerciseVolume) };
+  out.densityNote = 'Third hard finger day this week — volume cut, intensity held, so only Mon/Thu (72h apart) carry full-volume maximal work (ADR-0016).';
+  return out;
 }
 
 // ============== Prescription pipeline ==============
@@ -1019,6 +1073,18 @@ const PRESCRIPTION_PASSES = [
     })
   },
   {
+    // ADR-0016: weekly finger-density guard — the enforcement ADR-0006's
+    // ≥72h guardrail never had. Saturday-only (the 48h-on-both-sides slot).
+    // Its guard is disjoint from the other three volume cuts (deload /
+    // taper / forced), so the "exactly one volume-cut pass fires per
+    // session" contract above still holds.
+    name: 'finger-density-guard',
+    when: (s, env) => env.slot === 'sat-main' && !s.isRest && !s.isRetest
+      && !env.deload && env.phase !== 'taper' && !env.overrides?.forceVolumeCut
+      && weekNearMaxDays(env, s) > MAX_NEAR_MAX_DAYS_PER_WEEK,
+    apply: s => applyDensityGuard(s)
+  },
+  {
     // ADR-0015: readiness gating for climbing sessions. Downward-only:
     // 'push'/'normal'/absent are no-ops. 'suggestRest' with an explicit
     // one-tap accept swaps the whole session for the light template;
@@ -1038,7 +1104,7 @@ const PRESCRIPTION_PASSES = [
 
 // Note fields collected into session.notes[], in pass order (sunHint last —
 // it's written by the sun-optional builder, not a pass).
-const NOTE_FIELDS = ['deloadNote', 'taperNote', 'rampNote', 'readinessNote', 'sunHint'];
+const NOTE_FIELDS = ['deloadNote', 'taperNote', 'rampNote', 'densityNote', 'readinessNote', 'sunHint'];
 
 // Single exit for prescribeForContext: every session leaves as a fresh copy
 // (shared constants like REST_DAY/LIGHT_DAY must not escape by reference),
@@ -1210,7 +1276,9 @@ export const Program = {
     // override (thu-limit is always a boulder/problems session in hybrid
     // Build, even on nominally sport-parity weeks).
     const styleFlavor = (slot === 'thu-main' && hybridBuildMix) ? 'boulder' : resolvedFlavor;
-    const env = { ctx, weeks, phase, slot, deload, retest, focus, resolvedFlavor, styleFlavor, benchmarks, overrides };
+    // weeksLeft/hybridBuildMix are carried so the ADR-0016 density guard can
+    // rebuild this week's Mon/Thu exactly as the pipeline would.
+    const env = { ctx, weeks, phase, slot, deload, retest, focus, resolvedFlavor, styleFlavor, benchmarks, overrides, weeksLeft, hybridBuildMix };
 
     // ADR-0007: mandatory full rest the day before the goal/comp day, whatever
     // weekday it lands on — arrive fresh.

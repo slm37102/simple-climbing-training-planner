@@ -24,6 +24,8 @@ Hörst and Lattice describe **two different energy-system bands**, and both fram
 
 **Guardrails (apply to whatever ships):** ≤1 dedicated lactic (band-2) session/week during the micro-block, with ≥72h between high-intensity power sessions, so the 3-slot athlete's aggregate stays inside injury caps; long-PE overtraining caution is explicit in the corpus [new-verified 239]; the micro-block/retest weeks stay exempt from the `applyDeloadVolume` cut.
 
+> **Amended 2026-07-25 by [ADR-0016](0016-weekly-finger-density-guard.md) — the ≥72h clause as written was unenforceable and unenforced.** On the fixed Mon/Thu/Sat skeleton the gaps are 72h/48h/48h, so ≥72h between *three* hard days is arithmetically impossible; no code ever checked it. The clause is therefore **replaced, not met**: at most **two _full-volume_ near-maximal finger/power days per week, those two 72h apart** (Mon + Thu) — a third would-be near-max day (Saturday, the only slot 48h from both neighbours) gets its volume cut with intensity held, so it remains a high-RPE session at reduced volume. The ≤1-lactic-per-week clause above was already honored in code (30/30 is confined to Peak Thursday) and is unchanged.
+
 **Phasing:** land the two low-risk guardrails first — a `compDate`-anchored density cut and a 2–4-week lactic cap (brief "Option A") — then layer the full band separation.
 
 ## Considered options
