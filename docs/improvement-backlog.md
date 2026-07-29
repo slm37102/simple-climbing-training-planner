@@ -17,7 +17,7 @@ The **live** to-do ledger — what the app should get better at next, and what h
 
 Open P1 items — work these first.
 
-- **IB-028** (eng) — deload weeks silently progress load +2.5% against the reduced target
+- **IB-028** (eng) — deload weeks silently progress load +2.5% against the reduced target. **Routed to the multi-session path** (trip-wire 6: changes prescribed kg, so it needs an ADR or an ADR-0009 addendum) — next step is `/grill-with-docs` → `/to-spec` → `/to-tickets`, shipping as a PR. Pass 1 sharpened it: the fix is one expression in `today.js`, not new plumbing.
 - **IB-014** (training) — no injury-history intake; finger load is never pre-softened
 - **IB-024** (training) — antagonist block is pull-dominant with no vertical/scapular press
 
@@ -27,7 +27,7 @@ Open P1 items — work these first.
 |----|---------|------|---|-------|--------|--------|
 | IB-014 | No injury-history intake — finger loading is only ever moderated reactively, never pre-softened | training | P1 | G3 | Open | [deep-audit §5](deep-audit.md) |
 | IB-024 | Antagonist block is pull-dominant — one pressing movement, no vertical/scapular press | training | P1 | G3 | Open | [deep-audit §7](deep-audit.md) |
-| IB-028 | Deload weeks silently progress finger/pull load +2.5%, contradicting the "deload = intensity held" invariant | eng | P1 | G3 | Open | [deep-audit §8](deep-audit.md) |
+| IB-028 | Deload weeks silently progress finger/pull load +2.5%, contradicting the "deload = intensity held" invariant. **Re-verified 2026-07-29:** the suppression flag already exists and works — `resolveEffective`'s `holdProgression` (ADR-0014) — but is set only from amber pain (`today.js:973`, `:1122`), never from deload/retest. The fix is to also set that flag, not to thread a new one; `js/loads.js` need not change | eng | P1 | G3 | Open | [deep-audit §8](deep-audit.md) |
 | IB-007 | ADR-0006's ≥72h high-intensity guardrail never enforced; Peak stacks its two hardest sessions 48h apart | training | P1 | G3 | Closed ([ADR-0016](adr/0016-weekly-finger-density-guard.md), 2026-07-25) | [deep-audit §3](deep-audit.md) |
 | IB-023 | Same ≥72h guardrail, seen from the injury-prevention lens | training | P1 | G3 | Closed ([ADR-0016](adr/0016-weekly-finger-density-guard.md), 2026-07-25) | [deep-audit §7](deep-audit.md) |
 | IB-001 | The advertised Lattice 80/20 polarization is not what the prescriptions deliver — the plan is concurrent/threshold | training | P2 | G1 | Open | [deep-audit §1](deep-audit.md) |
@@ -46,6 +46,8 @@ Open P1 items — work these first.
 | IB-041 | Suggested load is shown with no explanation — `reason[]` is computed, never rendered, and comments claim a tooltip that does not exist | eng | P2 | G1, G3 | Open | [deep-audit §11](deep-audit.md) |
 | IB-042 | Internal jargon "flavor" is surfaced to the athlete unexplained | eng | P2 | — | Open | [deep-audit §11](deep-audit.md) |
 | IB-044 | Plateau detection is limited to strength retests and never sees climbing-grade progress | training | P2 | G1 | Open | [deep-audit §12](deep-audit.md) |
+| IB-050 | `CLAUDE.md`'s load-chain invariants omitted `holdProgression` (ADR-0014) and asserted `resolveEffective` "has no deload parameter at all" — literally true of a *multiplier*, but it hid the flag that makes IB-028 a one-expression fix and would send a reader off building a new one | eng | P2 | G3 | Closed (audit-loop pass 1, 2026-07-29) | audit-loop L2 |
+| IB-051 | `/audit-loop` presumes handoffs it cannot make. Five of the skills it delegates to are `disable-model-invocation: true` — `/implement`, `/grill-with-docs`, `/to-spec`, `/to-tickets`, `/improve-codebase-architecture` — so an agent cannot invoke them and stages 1/3 stall on a trip-wire item (`/tdd`, `/code-review`, `/test`, `/diagnosing-bugs` are reachable). Stage 4's unconditional "mint a GitHub issue" has the same root: its stated purpose is to give `/implement` a ticket, so it is noise on a docs-only pass done inline. Fix: have the skill do what those describe, or hand back for the user to type them, and make the issue conditional on a real handoff | eng | P2 | — | Open | audit-loop, pass 1 |
 | IB-004 | `peakType: 'project'` is a distinct UI choice with no distinct behaviour — the Profile label promises a "rolling" taper never built | eng | P3 | — | Open | [deep-audit §2](deep-audit.md) |
 | IB-005 | 3:1 deload cadence degrades to an isolated single hard week before the Base retest | training | P3 | G1 | Open | [deep-audit §2](deep-audit.md) |
 | IB-006 | Inter-cycle progression rests entirely on benchmark retest → load autoscaling; structure never advances | training | P3 | G1 | Open | [deep-audit §2](deep-audit.md) |
@@ -80,3 +82,4 @@ Open P1 items — work these first.
 One line per `/audit-loop` pass — what the lenses found, what closed, where it shipped. Keeps the loop resumable and auditable.
 
 - **2026-07-29** — pass 0 (bootstrap): brought `deep-audit.md` onto `main` (`1f836ab`, docs-only); seeded IB-001…IB-046 from its 46 findings (IB-007/IB-023 already Closed by ADR-0016); carried `improvement-audit.md`'s partial Q1 across as IB-047; L2 raised IB-048; L3 raised IB-049. L1 clean — generated artifacts in sync. 49 rows, 47 open — 3 P1 · 16 P2 · 28 P3, split 18 `eng` · 29 `training`.
+- **2026-07-29** — pass 1: L1 clean · L2 raised **IB-050** · L3 nothing new (IB-049 already owns it). L4–L6 parked (19 open P1/P2, threshold is <5, no `--full`). Frontier IB-028 re-verified against current code and **routed to the multi-session path** on trip-wire 6, un-actioned here; its row now records that `holdProgression` already exists so the fix is one expression in `today.js`. Closed **IB-050** — the `CLAUDE.md` drift that hid exactly that. Also filed **IB-051** (this skill presumes handoffs it cannot make). No GitHub issue minted — the work was docs-only and done inline, so there was no `/implement` handoff for a ticket to serve; that gap is part of IB-051. Docs-only, so ratchet 1 satisfied trivially; auto-merged. 51 rows, 48 open — 3 P1 · 17 P2 · 28 P3, split 19 `eng` · 29 `training`.
