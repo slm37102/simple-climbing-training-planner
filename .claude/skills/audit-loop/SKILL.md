@@ -15,7 +15,7 @@ The ledger is `docs/improvement-backlog.md`. It is what makes the survey **cumul
 
 A **ratchet** turns one way. Every pass preserves these five, so the repo can only improve:
 
-1. **Ship only a green suite.** Green → the branch test decides where it goes. Red or un-runnable → commit on the branch, stop, and report which of the two it was. Un-runnable is an ordinary outcome: the suite needs a static server plus Playwright MCP, and the `test` skill documents how often that is not connected on this machine.
+1. **Ship only a green suite.** Green → the branch test decides where it goes. Red or un-runnable → commit on the branch, stop, and report which of the two it was. Un-runnable is an ordinary outcome: the suite needs a static server plus Playwright MCP, and the `test` skill documents how often that is not connected on this machine. A diff that touches none of `js/`, `css/`, `sw.js` or `tests/` satisfies this trivially — there is nothing the suite could catch — so a docs-only pass ships without one.
 2. **One item per pass.**
 3. **Close findings; leave them in place.** IDs are stable and never reused, so a closed row keeps its provenance.
 4. **Decisions in `docs/adr/` stand.** To change one, add a dated `## Addendum (YYYY-MM-DD)` section to that ADR — the mechanism ADR-0001 already uses.
