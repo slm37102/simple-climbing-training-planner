@@ -104,6 +104,25 @@ test('[IB-041] Today: suggested-load reason[] renders as an info-badge tooltip',
   } finally { root.remove(); }
 });
 
+test('[IB-042] Today: flavor badge carries an explanatory title (not bare jargon)', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan(); // default focus 'hybrid' → ctx.flavor always set
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04' });
+  sessionStorage.setItem('todaySelectedDate', '2026-06-15'); // Mon Wk 7 Build
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const badge = root.querySelector('.badge[class*="focus-"]');
+    assert(badge, 'expected a flavor focus badge in the header');
+    const title = badge.getAttribute('title') || '';
+    assert(/Session focus this week:/.test(title),
+      'flavor badge must explain itself via a title, like the energy badge does');
+    // The caveat that defuses the hybrid alternation confusion must be present.
+    assert(/alternates automatically/.test(title), 'title should note hybrid week-to-week alternation');
+  } finally { root.remove(); }
+});
+
 test('Today: default pre-fill is NOT persisted until user touches that field', () => {
   resetStorage();
   const plan = Storage.getActivePlan();
