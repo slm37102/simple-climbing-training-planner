@@ -1,0 +1,82 @@
+# Improvement backlog
+
+The **live** to-do ledger — what the app should get better at next, and what has been ruled out. Maintained by the `/audit-loop` skill, which surveys the code, files what it finds here, and drains one item per pass.
+
+**How to read this doc**
+
+- Every item has a stable ID (`IB-001`, …) so commits, issues and PRs can cite it ("closes IB-028"). IDs are **never reused and never deleted** — a finished item keeps its row with closure provenance, the same rule [`knowledge-gaps.md`](knowledge-gaps.md) uses for `KG-*`.
+- Rows carry **pointers, not write-ups**. The reasoning lives in the source document named in the Source column — for the seeded rows that is [`deep-audit.md`](deep-audit.md), by dimension section (`§9` = its `## 9. Software Design`).
+- **Kind** routes the work. `eng` = fixable by reading code alone (the audit's own `basis: software-only`). `training` = needs a training-content decision first; when one is made it **graduates** to a `KG-*` row in [`knowledge-gaps.md`](knowledge-gaps.md) plus an ADR, per this repo's decision-log convention. Raw findings are not KG entries — a KG row carries an adjudicated *Verdict*, and nothing here has been adjudicated yet.
+- **Priority** re-derives the audit's own High/Medium/Low under [`project-goals.md`](project-goals.md)'s order — **safety (G3) > prescription correctness (G1/G2) > convenience > polish**. The mapping is mechanical so it stays auditable: **P1** = the audit's High, or an item on its "Highest injury risks" list · **P2** = its Medium · **P3** = its Low. Per `CLAUDE.md`, implementation effort is **not** an input to priority.
+- **Status:** Open / Researching / Closed / Won't-fix.
+- Engineering-quality items live here. Training-content *gaps* — once decided — live in [`knowledge-gaps.md`](knowledge-gaps.md). The 2026-06-24 [`improvement-audit.md`](improvement-audit.md) and the 2026-07-14 [`coach-review.md`](coach-review.md) are historical records, not trackers.
+
+**Inherited caveats.** `deep-audit.md` is honest about two weaknesses of its own, and they travel with the rows seeded from it: **IB-033** never completed adversarial verification (the run hit a usage limit), and one evidence subagent was flagged for a security-policy violation while working the hangboard-protocol topic, so external citations in that area deserve extra skepticism. Code citations are independently checkable and unaffected. The audit's priorities are the auditor's, not a ratified plan — every row is re-verified against current code when the loop picks it up, not at import time.
+
+## Frontier
+
+Open P1 items — work these first.
+
+- **IB-028** (eng) — deload weeks silently progress load +2.5% against the reduced target
+- **IB-014** (training) — no injury-history intake; finger load is never pre-softened
+- **IB-024** (training) — antagonist block is pull-dominant with no vertical/scapular press
+
+## Items
+
+| ID | Finding | Kind | P | Goals | Status | Source |
+|----|---------|------|---|-------|--------|--------|
+| IB-014 | No injury-history intake — finger loading is only ever moderated reactively, never pre-softened | training | P1 | G3 | Open | [deep-audit §5](deep-audit.md) |
+| IB-024 | Antagonist block is pull-dominant — one pressing movement, no vertical/scapular press | training | P1 | G3 | Open | [deep-audit §7](deep-audit.md) |
+| IB-028 | Deload weeks silently progress finger/pull load +2.5%, contradicting the "deload = intensity held" invariant | eng | P1 | G3 | Open | [deep-audit §8](deep-audit.md) |
+| IB-007 | ADR-0006's ≥72h high-intensity guardrail never enforced; Peak stacks its two hardest sessions 48h apart | training | P1 | G3 | Closed ([ADR-0016](adr/0016-weekly-finger-density-guard.md), 2026-07-25) | [deep-audit §3](deep-audit.md) |
+| IB-023 | Same ≥72h guardrail, seen from the injury-prevention lens | training | P1 | G3 | Closed ([ADR-0016](adr/0016-weekly-finger-density-guard.md), 2026-07-25) | [deep-audit §7](deep-audit.md) |
+| IB-001 | The advertised Lattice 80/20 polarization is not what the prescriptions deliver — the plan is concurrent/threshold | training | P2 | G1 | Open | [deep-audit §1](deep-audit.md) |
+| IB-002 | 8-week trip/project cycle degenerates to a single hard Base week before the retest | training | P2 | G1, G2 | Open | [deep-audit §2](deep-audit.md) |
+| IB-003 | ADR-0002 still documents the pre-ADR-0004/0007 phase-derivation formula (`%3` cadence, weeks≥14 taper) | eng | P2 | — | Open | [deep-audit §2](deep-audit.md) |
+| IB-008 | Hybrid Build provides almost no lead/route-specific climbing, under-serving the 7b goal | training | P2 | G1 | Open | [deep-audit §3](deep-audit.md) |
+| IB-009 | Dedicated progressive-overload finger training is only 1×/week, below the 2×/week the philosophy calls the #1 grade lever | training | P2 | G1 | Open | [deep-audit §4](deep-audit.md) |
+| IB-013 | Prescription structure never scales to current ability — only target grade and discipline are captured | training | P2 | G1 | Open | [deep-audit §5](deep-audit.md) |
+| IB-018 | Power, contact strength and coordination are thin for the actual (hybrid) athlete | training | P2 | G1 | Open | [deep-audit §6](deep-audit.md) |
+| IB-019 | All fingerboard work is 20mm half-crimp/open-crimp — no pinch, sloper or drag | training | P2 | G1 | Open | [deep-audit §6](deep-audit.md) |
+| IB-020 | Limiter readout compares a 10-second benchmark against a 7-second norm table | training | P2 | G1 | Open | [deep-audit §6](deep-audit.md) |
+| IB-029 | The autoregulation magnitudes (±5% RPE step, readiness ×0.85/1.05, −3%/wk decay, +2.5%, +5% cap) are app-invented and unvalidated | training | P2 | G1, G3 | Open | [deep-audit §8](deep-audit.md) |
+| IB-032 | Domain logic leaked into the Today view — micro-retest staleness and readiness-label mapping | eng | P2 | — | Open | [deep-audit §9](deep-audit.md) |
+| IB-033 | Inconsistent magic-number discipline — build fraction `0.33` inlined at three sites, `densityRest` params, double-block threshold | eng | P2 | — | Open | [deep-audit §9](deep-audit.md) — *unverified, see caveats* |
+| IB-038 | The advertised uniform "3:1 / every 4th week" cadence is not what the generator produces at the retest seam | training | P2 | G1 | Open | [deep-audit §10](deep-audit.md) |
+| IB-041 | Suggested load is shown with no explanation — `reason[]` is computed, never rendered, and comments claim a tooltip that does not exist | eng | P2 | G1, G3 | Open | [deep-audit §11](deep-audit.md) |
+| IB-042 | Internal jargon "flavor" is surfaced to the athlete unexplained | eng | P2 | — | Open | [deep-audit §11](deep-audit.md) |
+| IB-044 | Plateau detection is limited to strength retests and never sees climbing-grade progress | training | P2 | G1 | Open | [deep-audit §12](deep-audit.md) |
+| IB-004 | `peakType: 'project'` is a distinct UI choice with no distinct behaviour — the Profile label promises a "rolling" taper never built | eng | P3 | — | Open | [deep-audit §2](deep-audit.md) |
+| IB-005 | 3:1 deload cadence degrades to an isolated single hard week before the Base retest | training | P3 | G1 | Open | [deep-audit §2](deep-audit.md) |
+| IB-006 | Inter-cycle progression rests entirely on benchmark retest → load autoscaling; structure never advances | training | P3 | G1 | Open | [deep-audit §2](deep-audit.md) |
+| IB-010 | Base boulder Thursday prescription is internally muddled | training | P3 | G1 | Open | [deep-audit §4](deep-audit.md) |
+| IB-011 | ADR-0006's density progression is barely realized and the ADR overstates what it accomplishes | training | P3 | — | Open | [deep-audit §4](deep-audit.md) |
+| IB-012 | Monday warm-up ramps only to 80% before near-max hangs; posterior-cuff dosing is thinner than claimed | training | P3 | G3 | Open | [deep-audit §4](deep-audit.md) |
+| IB-015 | Anti-style cue is hard-coded to a crimp/overhang specialist — the personalization fields have no editor (KG-A10 closed but unusable) | eng | P3 | G1 | Open | [deep-audit §5](deep-audit.md) |
+| IB-016 | No equipment constraints — the plan assumes hangboard, campus board, lead wall and boulder wall are all available | training | P3 | — | Open | [deep-audit §5](deep-audit.md) |
+| IB-017 | Limiter is detected but deliberately never feeds the plan — strengths/weaknesses change no prescription | training | P3 | G1 | Open | [deep-audit §5](deep-audit.md) |
+| IB-021 | Lock-off and single-arm/max pulling strength are not developed | training | P3 | G1 | Open | [deep-audit §6](deep-audit.md) |
+| IB-022 | Technique and tactics reach the athlete only as optional, non-progressed drill text | training | P3 | G1 | Open | [deep-audit §6](deep-audit.md) |
+| IB-025 | Fingers never receive an intensity deload; deload/retest weeks hold near-max hangboard load | training | P3 | G3 | Open | [deep-audit §7](deep-audit.md) |
+| IB-026 | Default 12-week cycle runs five consecutive loaded weeks into a single-week comp taper | training | P3 | G2, G3 | Open | [deep-audit §7](deep-audit.md) |
+| IB-027 | No cumulative finger-load ceiling; the +5% cap is per-session only while hangboard recurs weekly | training | P3 | G3 | Open | [deep-audit §7](deep-audit.md) |
+| IB-030 | Deload cut and readiness-"Lighter" scaling stack multiplicatively on climbing volume with no combined floor (~×0.51) | eng | P3 | G1 | Open | [deep-audit §8](deep-audit.md) |
+| IB-031 | RPE-drift monitoring signal and the `autoAdjust` thermostat react to the same input at cross purposes | eng | P3 | — | Open | [deep-audit §8](deep-audit.md) |
+| IB-034 | Coaching knowledge is hardcoded as branching JS in `program.js`, not editable structured data | eng | P3 | — | Open | [deep-audit §9](deep-audit.md) |
+| IB-035 | Test suite is browser-only with no CLI runner; sync, charts and service worker partially uncovered | eng | P3 | — | Open | [deep-audit §9](deep-audit.md) |
+| IB-036 | `program.js` and `today.js` concentrate mixed responsibilities in single ~1300-line files | eng | P3 | — | Open | [deep-audit §9](deep-audit.md) |
+| IB-037 | Benchmark grade fields default to inconsistent empty types (`null` vs `''`) across code paths | eng | P3 | — | Open | [deep-audit §9](deep-audit.md) |
+| IB-039 | Weighted pull-up %-bands carry the same load-precision framing as finger bands despite being non-climbing-specific convention | training | P3 | — | Open | [deep-audit §10](deep-audit.md) |
+| IB-040 | Double-block threshold (20 wk) and the 1/3 build split are app-invented numbers presented with tri-source "consensus" framing | training | P3 | — | Open | [deep-audit §10](deep-audit.md) |
+| IB-043 | Target-provenance callout can render dense, ambiguous phrasing on stacked-pass days | eng | P3 | — | Open | [deep-audit §11](deep-audit.md) |
+| IB-045 | Injury return-to-load is a doc link, not an in-app graded protocol | training | P3 | G3 | Open | [deep-audit §12](deep-audit.md) |
+| IB-046 | Only one exercise substitution exists — no swap for equipment, injury or preference | training | P3 | — | Open | [deep-audit §12](deep-audit.md) |
+| IB-047 | Q1 partial — `js/dates.js` exists and `storage.js` uses it, but the views still carry local date-helper copies | eng | P3 | — | Open | [improvement-audit](improvement-audit.md) Q1 |
+| IB-048 | `.github/copilot-instructions.md` has drifted from `CLAUDE.md` — `buildPhasePattern` without `peakType`, taper length without the ADR-0007 derivation, no KG-B10 Monday-only retest correction, cites a removed Log edit-Save test | eng | P3 | — | Open | audit-loop L2 |
+| IB-049 | ADR-0002/0003/0004 carry no `[ADR-000N]`-tagged test, so lens L3 re-flags them every pass. The behaviour *is* covered (21 deload/cadence cases incl. `Deload week (non-retest) … cuts prescribedSets ~40%` and `[Phase2 C2] no two adjacent weeks are both deload…`) — the fix is tagging the cases that already exist | eng | P3 | — | Open | audit-loop L3 |
+
+## Pass log
+
+One line per `/audit-loop` pass — what the lenses found, what closed, where it shipped. Keeps the loop resumable and auditable.
+
+- **2026-07-29** — pass 0 (bootstrap): brought `deep-audit.md` onto `main` (`1f836ab`, docs-only); seeded IB-001…IB-046 from its 46 findings (IB-007/IB-023 already Closed by ADR-0016); carried `improvement-audit.md`'s partial Q1 across as IB-047; L2 raised IB-048; L3 raised IB-049. L1 clean — generated artifacts in sync. 49 rows, 47 open — 3 P1 · 16 P2 · 28 P3, split 18 `eng` · 29 `training`.

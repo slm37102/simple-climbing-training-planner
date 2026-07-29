@@ -123,8 +123,10 @@ docs/benchmark-norms.md       Grade-anchored finger/pulling-strength norms behin
 docs/adr/                     Decisions and their trade-offs
 docs/specs/                   Locked feature specs awaiting or guiding implementation
 docs/research/                Evidence corpus (verified claims + raw gathered claims)
+docs/improvement-backlog.md   Live to-do ledger (IB-*) — what to improve next, drained by /audit-loop
 docs/coach-review.md          External coaching audit — adversarial review of the plan the code generates
-docs/improvement-audit.md     Engineering audit (sync, correctness, UX, PWA) — not training content
+docs/deep-audit.md            Deep audit (2026-07-25) — 46 findings across coaching, sport-science and software
+docs/improvement-audit.md     Engineering audit (2026-06-24) — historical record, superseded as a tracker
 docs/trip-conversion-note.md  Converting Peak/Taper for an outdoor trip instead of a comp/gym goal
 docs/end-of-cycle-review.md   Manual walkthrough checklist after each macrocycle completes
 docs/return-from-tweak.md     Return-from-finger-tweak guide — pain gate, de-escalation, reload ramp

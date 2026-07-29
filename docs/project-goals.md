@@ -46,7 +46,9 @@ When trade-offs bite, the priority order is: **safety (G3) > prescription correc
 | [`benchmark-norms.md`](benchmark-norms.md) | Grade-anchored finger/pulling-strength norms, with confidence labels (closes KG-C6) |
 | [`adr/`](adr/) | Decisions and their trade-offs |
 | [`specs/`](specs/) | Locked feature specs awaiting or guiding implementation (incl. the [remaining goal-gaps roadmap](specs/remaining-goal-gaps-spec.md)) |
+| [`improvement-backlog.md`](improvement-backlog.md) | The live to-do ledger (`IB-*`) — what to improve next, and what was ruled out. Surveyed and drained by the `/audit-loop` skill |
 | [`coach-review.md`](coach-review.md) | External coaching audit (2026-07-14) — adversarial review of the plan the code actually generates |
+| [`deep-audit.md`](deep-audit.md) | Deep audit (2026-07-25) — 46 verified findings across 12 coaching / sport-science / software dimensions, with provenance caveats |
 | [`improvement-audit.md`](improvement-audit.md) | Engineering findings (sync, correctness, UX, PWA) — not training content |
 | [`training-plan.md`](training-plan.md) | Human-readable prescription tables (mirror of `js/program.js`) |
 | [`trip-conversion-note.md`](trip-conversion-note.md) | Converting Peak/Taper weeks for an outdoor trip instead of a comp/gym goal (KG-A11 mitigation) |

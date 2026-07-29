@@ -93,7 +93,7 @@ App capabilities blocked on the knowledge above. Each names its prerequisite; no
 | KG-D7 | ~~End-of-cycle review checklist (may be a doc, not code)~~ **Closed 2026-07-16** with [`end-of-cycle-review.md`](end-of-cycle-review.md) (issue [#43](https://github.com/slm37102/simple-climbing-training-planner/issues/43)) — automation (auto-detecting drift, auto-rotating protocols) remains its own P3 remainder, tracked back in KG-A8 | P3 | KG-A8 |
 | KG-D8 | ~~Style-biased session text from `dominantStyle`/`dominantAngle`~~ **Closed 2026-07-16** with KG-A10 (issue #41 — `styleNote` anti-style cue on Base/Build boulder-flavor Thu/Sat) | P3 | KG-A10 |
 
-Engineering-quality items (sync, a11y, PWA, refactors) are owned by [`improvement-audit.md`](improvement-audit.md) and deliberately excluded here.
+Engineering-quality items (sync, a11y, PWA, refactors) are owned by [`improvement-backlog.md`](improvement-backlog.md) and deliberately excluded here.
 
 ---
 

@@ -124,3 +124,7 @@ Default label vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `read
 ### Domain docs
 
 Single-context layout — `CONTEXT.md` (glossary) + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
+### Improvement backlog
+
+`docs/improvement-backlog.md` is the **live** to-do ledger (`IB-*` IDs) — engineering findings and, until they graduate to a `KG-*` row, training-content ones too. `docs/improvement-audit.md`, `docs/coach-review.md` and `docs/deep-audit.md` are dated historical audits that feed it, not trackers. The user-invoked **`/audit-loop`** skill surveys the repo, files what it finds there, and closes one item per pass.
