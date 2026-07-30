@@ -59,3 +59,22 @@ Default 12-week shape (sport-flavor weeks): ARC 30 → wk2 35 → deload 20 → 
 **Scope — deliberately minimal.** This suppresses *only* the +2.5% progression bonus. The ±5% RPE thermostat (`autoAdjust`) stays deload-unaware **by design**: a recovery week does not *progress*, but it still *autoregulates* — a below-range RPE can still nudge ×1.05 (capped +5%), reflecting a real athlete signal. Freezing the thermostat's upward move on deload too was considered and **rejected**: the effect being corrected is small (net deload finger tonnage ≈ 0.6 × 1.025 ≈ 0.62× the prior week, with no plausible single-nudge injury pathway per `deep-audit.md` §8), so the extra suppression path is not worth its complexity. The invariant this restores is "recovery weeks don't ratchet load upward via *earned progression*," not "intensity is frozen."
 
 **Build (separate, multi-session).** Changes prescribed kg → trip-wire; ships via `/to-spec → /to-tickets → PR`, not inline. Locus: the two `today.js` `resolveForDay` call sites, `holdProgression: <amber-pain> || ctx.deload || ctx.retest`. Pin with an `[IB-028]` regression: a deload week following a targets-hit full week **holds** (no +2.5%), while a non-deload week still progresses.
+
+## Addendum (2026-07-30, second) — two corrections found while building IB-028
+
+Spec'd as #62, built as #63 → #64. Neither correction changes the decision above; both fix claims it made about the code.
+
+**1. "No `js/loads.js` change" no longer holds — the reason trail became user-visible.** The first addendum asserted the fix needs no `js/loads.js` change, which was true of the *suppression logic* and remains true. But `resolveEffective` also hardcoded the trail line `pain amber — progression held (ADR-0014)`, and **IB-041** (audit-loop pass 4, after that addendum was written) started rendering `reason[]` to the athlete as the "Why this load:" badge. Setting the flag from `ctx.deload` with that string intact would tell an athlete who reported no pain that their pain was amber.
+
+So `holdProgression` now carries the **cause** rather than a bare boolean: `'pain-amber'`, `'deload'`, or `'retest'`, with the trail line derived from it. Any truthy value still holds progression, and a bare `true` produces a cause-neutral line, so every pre-existing caller and test keeps working — the ADR-0014 regression case passes unedited, and the pain-amber wording is byte-identical to what it replaced. This is a change to the flag's *interface and explanation*, not to what a hold does.
+
+**2. The retest leg of the rationale is unreachable in the current program.** The first addendum justified including retest weeks by pointing at "retest **Thu/Sat** sessions, which take the deload cut (KG-B10), and … the retest **Monday** test itself, where a +2.5% bump would move the test target." Neither happens, and the reason is that **no session in a retest week carries a `loadPctRange` exercise at all**:
+
+- retest Monday is `mon-retest`, whose four exercises are all `kind: 'test'` — no percentage range, so `prescribeLoadKg` returns null and `resolveEffective` exits before `holdProgression` is ever consulted. A progression step cannot move the test target because no suggestion is produced.
+- retest Thu/Sat are Base climbing sessions (route pyramid / ARC / flash pyramid / projecting) — climbing kinds, no kg.
+
+Verified exhaustively over 945 day-builds spanning 11 cycle lengths × {comp, trip, project} × {hybrid, boulder, sport}: **zero** retest-week days produce a kg-bearing exercise. The same sweep confirms **`retest` never occurs without `deload`** (the forced end-of-Base week sets both), so the decision's `ctx.deload || ctx.retest` is equivalent to `ctx.deload` today.
+
+Both halves of that sweep are **pinned as an `[IB-028]` regression**, not left as prose here — this addendum's claim is load-bearing (it is why no end-to-end retest hold is asserted anywhere), so if a retest session ever gains a weighted exercise the suite fails and sends the reader back to this section.
+
+The `retest` disjunct and its trail wording are kept deliberately — they cost one lookup-table entry, they keep the predicate honest about the week it is describing, and they are already correct if the retest protocol ever gains a weighted exercise. But no test asserts a retest-week kg hold end-to-end, because there is nothing to assert: the state is currently unreachable. **Do not read a passing retest expectation as coverage of that path.**
