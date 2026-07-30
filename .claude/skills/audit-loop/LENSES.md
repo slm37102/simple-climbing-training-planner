@@ -2,7 +2,7 @@
 
 Six ways to look at this repo. **L1–L3** are deterministic and cheap — run them every pass. **L4–L6** are open-ended and fan out to sub-agents, so they fire only on `--full` or when fewer than five P1/P2 items remain open.
 
-Every command below runs from the repo root. If `node` reports as missing, the PATH is stale rather than the install broken — the `test` skill documents the workaround.
+Every command below runs against **your worktree** (`$WT`, opened in SKILL.md stage 3) — not the primary checkout, which a parallel session may be using. L1 matters most here: it regenerates artifacts, so running it in a shared tree dirties that tree under someone else. Prefix git with `git -C "$WT"` and invoke the generators by their `$WT` path. If `node` reports as missing, the PATH is stale rather than the install broken — the `test` skill documents the workaround.
 
 ---
 
@@ -11,10 +11,10 @@ Every command below runs from the repo root. If `node` reports as missing, the P
 `sw.js` and the tail of `docs/training-plan.md` are generated, so either can silently fall behind the source it derives from.
 
 ```
-node tools/generate-sw.mjs          # SHELL only, no version bump
-node tools/generate-schedule.mjs
-git diff --quiet -- sw.js docs/training-plan.md   # exit 0 = in sync, 1 = drift
-git checkout -- sw.js docs/training-plan.md       # ratchet 5, always
+node "$WT/tools/generate-sw.mjs"          # SHELL only, no version bump
+node "$WT/tools/generate-schedule.mjs"
+git -C "$WT" diff --quiet -- sw.js docs/training-plan.md   # exit 0 = in sync, 1 = drift
+git -C "$WT" checkout -- sw.js docs/training-plan.md       # ratchet 5, always
 ```
 
 **Use `git diff --quiet`, not `git status`.** The generators write LF and this checkout is CRLF, so `git status` lists both files as modified even when the content is identical — a false positive every time. The `git checkout --` is unconditional for the same reason: the detection run dirties the tree whether or not it found anything.
