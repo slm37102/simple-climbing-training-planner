@@ -1,5 +1,12 @@
 // Warm-up & cooldown checklists by session type.
 import { WARMUP_DRILLS } from './drills.js';
+// Named functions, not the Program singleton — this module needs two pure
+// helpers, not the macrocycle entry point. Direction is warmup → program and
+// must stay that way: program.js already shares drills.js with this file, so if
+// Program ever needs a warm-up, import it from a third module rather than
+// reaching back here and closing a cycle.
+import { buildPhasePattern, isBuildRunStart } from './program.js';
+import { daysBetween, localIso } from './dates.js';
 
 const TWO_STAGE_WARMUP = [
   '5 min easy cardio (jog / bike / row)',
@@ -61,6 +68,42 @@ export const Warmup = {
     };
   },
   MICRO_RETEST_STALE_DAYS,
+
+  // ADR-0012: is a Build-Monday micro-retest due for this day? Two conditions,
+  // both domain rules, so they belong beside the threshold and the warm-up step
+  // they gate rather than in the view (IB-032 — inline in the Today view this
+  // could only be exercised by mounting the view):
+  //
+  //   1. The day is the Monday opening a Build run — both blocks of a
+  //      double-block cycle qualify (`isBuildRunStart`).
+  //   2. The stored max-hang benchmark is older than MICRO_RETEST_STALE_DAYS.
+  //
+  // The phase pattern is rebuilt from `ctx` alone: `resolveDate` carries the
+  // clamped `cycleWeeks` and the normalized `peakType` precisely so a caller can
+  // reproduce the pattern it used (ADR-0009), so there is no reason to also take
+  // `settings` and re-derive it from the same plan a second time.
+  //
+  // Benchmark age is anchored on the last retest-save history entry (ADR-0014's
+  // history is the canonical freshness record) — NOT `benchmarks.updatedAt`,
+  // which any Profile edit (even bodyweight-only) bumps and which would
+  // therefore silently suppress a due micro-retest. The `updatedAt` fallback
+  // (converted to a LOCAL date — it is a UTC timestamp) covers a manually
+  // entered benchmark that has never been through a retest save. Never
+  // benchmarked at all → treat as maximally stale.
+  //
+  // A null / out-of-cycle `ctx` reads as "not due". That is deliberately one
+  // step safer than the inline version this replaced, which indexed `ctx.slot`
+  // unguarded: `resolveForSettings` returns null for a plan with no resolvable
+  // start, so that throw was latent rather than impossible.
+  isMicroRetestDue({ ctx, benchmarks, dateISO }) {
+    if (ctx?.slot !== 'mon-main' || ctx?.phase !== 'build') return false;
+    if (!isBuildRunStart(buildPhasePattern(ctx.cycleWeeks, ctx.peakType), ctx.weekIdx)) return false;
+    const lastRetest = (benchmarks?.history || []).filter(e => e?.date).map(e => e.date).sort().pop();
+    const anchor = lastRetest || (benchmarks?.updatedAt ? localIso(new Date(benchmarks.updatedAt)) : null);
+    if (!anchor) return true;
+    return daysBetween(anchor, dateISO) > MICRO_RETEST_STALE_DAYS;
+  },
+
   restRecoveryChecklist() {
     return [
       'Sleep 8h target',

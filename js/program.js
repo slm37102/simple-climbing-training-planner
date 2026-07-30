@@ -1331,6 +1331,20 @@ export const Program = {
     return finishSession(session, env);
   },
 
+  // ADR-0015: adapter from `Loads.computeReadinessMultiplier`'s tier `key` to the
+  // gate label `build` consumes below. Two vocabularies meet here — Loads names
+  // the bottom tier 'rest', the readiness-gate pass names it 'suggestRest' — and
+  // this module owns the label vocabulary, so it owns the entry adapter. Gate on
+  // the stable `key`, never the display label, which is free to be reworded
+  // without silently disabling the gating. Downward-only: 'push'/'normal'/absent
+  // all map to null (no override). IB-032: this mapping lived inline in the Today
+  // view, where it could drift from the labels the readiness-gate pass matches on.
+  readinessGateLabel(readinessKey) {
+    if (readinessKey === 'lighter') return 'lighter';
+    if (readinessKey === 'rest') return 'suggestRest';
+    return null;
+  },
+
   // Primary entry point: builds a session from a plan object and an ISO date string.
   // benchmarks (KG-A10, optional) — see prescribeForContext. ADR-0014: reads
   // settings.earlyVolumeCuts — [{from, to} ISO date ranges, to exclusive] —

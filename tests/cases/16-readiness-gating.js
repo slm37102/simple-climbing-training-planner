@@ -90,6 +90,41 @@ test('[ADR-0015] Push day is a no-op for climbing sessions', () => {
   assertEq(push, normal, 'push-day climbing session must be byte-identical to the unmodified prescription');
 });
 
+// ─── IB-032: the Loads-key → gate-label adapter as a domain seam ───────────
+// Two vocabularies meet at this boundary and differ at exactly one tier:
+// Loads.computeReadinessMultiplier names the bottom tier 'rest', the
+// readiness-gate pass matches 'suggestRest'. The adapter used to live inline
+// in the Today view, where nothing pinned the two vocabularies together.
+
+test('[IB-032] REGRESSION: Program.readinessGateLabel adapts Loads tier keys to gate labels', () => {
+  assertEq(Program.readinessGateLabel('lighter'), 'lighter');
+  assertEq(Program.readinessGateLabel('rest'), 'suggestRest', "Loads' 'rest' tier is the gate's 'suggestRest' label");
+  assertEq(Program.readinessGateLabel('push'), null, 'gating is downward-only — push is a no-op');
+  assertEq(Program.readinessGateLabel('normal'), null);
+  assertEq(Program.readinessGateLabel(undefined), null, 'an absent readiness key must not override anything');
+});
+
+test('[IB-032] REGRESSION: every tier Loads can mint maps to a label the readiness-gate pass acts on', () => {
+  const plan = { settings: { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' }, focus: 'boulder' };
+  const baseline = Program.build(plan, '2026-05-09');
+  const seen = new Set();
+  // One score per tier boundary in computeReadinessMultiplier (≥4.5 / ≥3.5 / ≥2.5 / below).
+  for (const v of [5, 4, 3, 1]) {
+    const { key } = Loads.computeReadinessMultiplier({ sleep: v, soreness: v, fatigue: v });
+    seen.add(key);
+    const label = Program.readinessGateLabel(key);
+    assert(label === null || label === 'lighter' || label === 'suggestRest',
+      `readiness key '${key}' mapped to an unrecognised gate label '${label}'`);
+    // The round-trip that matters: a non-null label must actually change the
+    // prescription, and a null one must not. A vocabulary drift (e.g. passing
+    // 'rest' straight through) would silently land in the no-op branch here.
+    const built = Program.build(plan, '2026-05-09', null, { label });
+    if (label === null) assertEq(built, baseline, `key '${key}' should be a no-op`);
+    else assert(built.readinessNote, `key '${key}' → '${label}' must reach the readiness-gate pass`);
+  }
+  assertEq(seen.size, 4, 'fixture should exercise all four readiness tiers');
+});
+
 test('[ADR-0015] composes with an existing deload cut (readiness scaling applies on top of the already-cut value)', () => {
   const plan = { settings: { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' }, focus: 'boulder' };
   const ctx = Program.resolveDate('2026-05-30', '2026-05-04', 12); // wk4 Sat, natural deload

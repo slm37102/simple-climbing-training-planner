@@ -223,6 +223,93 @@ test('[ADR-0012] REGRESSION: micro-retest fires on block-2\'s Build-run start wh
   } finally { root.remove(); }
 });
 
+// ─── IB-032: the ADR-0012 staleness rule as a domain seam ─────────────────
+// The four REGRESSION cases above can only reach this rule by mounting the
+// Today view, because the rule lived inline in it. `Warmup.isMicroRetestDue`
+// is the extracted seam; these exercise it directly. Same rule, no DOM.
+
+test('[IB-032] REGRESSION: Warmup.isMicroRetestDue resolves the ADR-0012 staleness rule without mounting a view', () => {
+  const settings = { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' };
+  const buildMon = '2026-06-15'; // wk7 Mon — opens the 12-wk cycle's Build run
+  const ctx = Program.resolveForSettings(settings, buildMon);
+  assertEq(ctx.slot, 'mon-main', 'fixture: wk7 Monday should be the main Monday slot');
+  assertEq(ctx.phase, 'build', 'fixture: wk7 should be Build');
+
+  assert(!Warmup.isMicroRetestDue({ ctx, benchmarks: { history: [{ date: '2026-06-08' }] }, dateISO: buildMon }),
+    'a 7-day-old retest is well inside MICRO_RETEST_STALE_DAYS');
+  assert(Warmup.isMicroRetestDue({ ctx, benchmarks: { history: [{ date: '2026-04-01' }] }, dateISO: buildMon }),
+    'a 75-day-old retest is stale');
+  assert(Warmup.isMicroRetestDue({ ctx, benchmarks: {}, dateISO: buildMon }),
+    'no history and no updatedAt → never benchmarked → maximally stale');
+
+  // The anchor precedence ADR-0014 fixes: retest history wins over updatedAt,
+  // which any Profile edit bumps. updatedAt is a fallback, not a competitor.
+  assert(Warmup.isMicroRetestDue({
+    ctx, dateISO: buildMon,
+    benchmarks: { history: [{ date: '2026-04-01' }], updatedAt: '2026-06-14T00:00:00.000Z' }
+  }), 'a freshly bumped updatedAt must NOT suppress a due micro-retest — history is the freshness record');
+  assert(!Warmup.isMicroRetestDue({ ctx, benchmarks: { updatedAt: '2026-06-08T00:00:00.000Z' }, dateISO: buildMon }),
+    'with no retest history, a fresh updatedAt is the fallback anchor');
+
+  // Exactly the boundary: MICRO_RETEST_STALE_DAYS is a `>` comparison, so the
+  // 28th day is still fresh and the 29th is stale.
+  const onBoundary = addIsoDays(buildMon, -Warmup.MICRO_RETEST_STALE_DAYS);
+  assert(!Warmup.isMicroRetestDue({ ctx, benchmarks: { history: [{ date: onBoundary }] }, dateISO: buildMon }),
+    'exactly MICRO_RETEST_STALE_DAYS old is NOT yet stale (> not >=)');
+  assert(Warmup.isMicroRetestDue({ ctx, benchmarks: { history: [{ date: addIsoDays(onBoundary, -1) }] }, dateISO: buildMon }),
+    'one day past the threshold is stale');
+});
+
+test('[IB-032] REGRESSION: Warmup.isMicroRetestDue gates on slot and Build-run start, not staleness alone', () => {
+  const settings = { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 24, peakType: 'comp' };
+  const stale = { history: [{ date: '2026-01-01' }] };
+
+  const midRunMon = addIsoDays('2026-05-04', (9 - 1) * 7); // wk9 Mon — Build, but mid-run
+  const midCtx = Program.resolveForSettings(settings, midRunMon);
+  assertEq(midCtx.phase, 'build', 'fixture: wk9 should be Build');
+  assert(!Warmup.isMicroRetestDue({ ctx: midCtx, benchmarks: stale, dateISO: midRunMon }),
+    'a mid-run Build Monday never qualifies, however stale the benchmark');
+
+  const block2Mon = addIsoDays('2026-05-04', (18 - 1) * 7); // block-2's Build-run start
+  const b2Ctx = Program.resolveForSettings(settings, block2Mon);
+  assert(Warmup.isMicroRetestDue({ ctx: b2Ctx, benchmarks: stale, dateISO: block2Mon }),
+    'block-2 Build-run start qualifies too — ADR-0012 names it explicitly');
+
+  const thu = addIsoDays(block2Mon, 3);
+  const thuCtx = Program.resolveForSettings(settings, thu);
+  assert(!Warmup.isMicroRetestDue({ ctx: thuCtx, benchmarks: stale, dateISO: thu }),
+    'only the mon-main slot gates the micro-retest');
+
+  // NOT preserved behaviour: the inline version indexed ctx.slot unguarded and
+  // would have thrown here. resolveForSettings returns null for a plan with no
+  // resolvable start, so this pins the deliberate hardening, not the old shape.
+  assertEq(Program.resolveForSettings({ anchorMode: 'startDate', startDate: null }, thu), null,
+    'fixture: a plan with no resolvable start yields a null ctx');
+  assert(!Warmup.isMicroRetestDue({ ctx: null, benchmarks: stale, dateISO: thu }),
+    'a null ctx reads as not-due and must not throw');
+});
+
+test('[IB-032] REGRESSION: isMicroRetestDue rebuilds the phase pattern from ctx alone — same answer as deriving it from settings', () => {
+  // The `settings` param was dropped because ctx already carries the clamped
+  // cycleWeeks and normalized peakType (ADR-0009). Pin the equivalence so a
+  // future edit can't silently reintroduce a second derivation path that drifts.
+  const stale = { history: [{ date: '2026-01-01' }] };
+  for (const [cycleWeeks, peakType] of [[12, 'comp'], [24, 'comp'], [16, 'trip'], [20, 'project']]) {
+    const settings = { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks, peakType };
+    const pattern = Program.phasePattern(settings);
+    for (let wk = 1; wk <= cycleWeeks; wk++) {
+      const mon = addIsoDays('2026-05-04', (wk - 1) * 7);
+      const ctx = Program.resolveForSettings(settings, mon);
+      if (!ctx || ctx.outOfCycle) continue;
+      assertEq(
+        Warmup.isMicroRetestDue({ ctx, benchmarks: stale, dateISO: mon }),
+        ctx.slot === 'mon-main' && ctx.phase === 'build' && Program.isBuildRunStart(pattern, ctx.weekIdx),
+        `${cycleWeeks}wk/${peakType} wk${wk}: ctx-derived pattern must agree with the settings-derived one`
+      );
+    }
+  }
+});
+
 test('[ADR-0012] REGRESSION: post-goal retest card renders and saves with just max hang (optional pull-up skipped)', () => {
   resetStorage();
   const plan = Storage.getActivePlan();
