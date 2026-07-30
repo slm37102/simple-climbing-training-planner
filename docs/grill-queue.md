@@ -13,11 +13,23 @@ This is a lightweight, markdown-native cousin of the `/wayfinder` map: same phil
 - This is **not a mirror of the training backlog.** Only items that are *ready to decide* live here. The rest stay in the backlog as the catalogue; `/audit-loop` and the user graduate them in as they rise to the frontier (wayfinder's "fog of war" — don't pre-slice what you can't yet phrase as a sharp question).
 - **Status:** Queued / Grilling / Decided / Dropped.
 
+## Coordination across sessions — the claim
+
+Many sessions run at once, so a **claim** is what stops two of them grilling the same item. The claim lives on the **GitHub issue tracker**, not in this file — a markdown claim written on one session's branch is invisible to another until it merges, whereas an issue's state is visible to every session instantly. This mirrors `/wayfinder`'s "assign the ticket to yourself first, before any work."
+
+Every in-flight queue item is backed by a GitHub issue labelled **`grill-queue`**. The wrinkle here: all sessions authenticate as the **same GitHub user** (`slm37102`), so the assignee alone can't tell two sessions apart. So the claim is two-part:
+
+- **Assignee = the coarse "taken" flag.** Open + unassigned = free. `is:issue is:open label:grill-queue no:assignee` lists what's claimable.
+- **A `🔒 CLAIM` comment = the fine-grained claim + tiebreak.** It names your **Claude session id**, your **branch**, and the **UTC time**. If, right after claiming, you find an *earlier* `🔒 CLAIM` from a different session on the same issue, **yield** — unassign, take the next item. That comment ordering is the real lock; the assignee is just the fast visual flag.
+- **Stale claims release.** A claim with no follow-up activity for a few hours on a still-open issue is abandoned (a dead session); a new session may reclaim it with a `♻️ RECLAIM` comment noting the takeover.
+
+When an item is `Decided`, its issue is **closed** — off the board for everyone.
+
 ## How to work this queue — "run a grill section"
 
 Invoke **`/grill-queue`** (or just say "grill the next item"). One item per session. The ritual follows `/grill-with-docs` = `/grilling` + `/domain-modeling`:
 
-1. **Take the top `Queued` item** (or the one the user names). Mark it `Grilling`.
+1. **Take the top claimable item** — the highest-priority `Queued` row whose issue is **open and unassigned** (or the one the user names). **Claim it** per the section above (assign self + `🔒 CLAIM` comment; yield if an earlier claim exists). Then mark the row `Grilling`.
 2. **Grill interactively — HITL.** One question at a time, each with a recommended answer, waiting for the user's answer before the next. Look **facts** up in the code and the `docs/` (training-philosophy, the ADRs, knowledge-gaps); put **decisions** to the user. The agent **never answers its own questions** — a grill where the agent supplies the human's side is broken. Ground every branch in the evidence the way `docs/adr/` already does.
 3. **Produce a decision, not a deliverable.** The output of a grill is a settled call — what to build and why — not the code. Stop when there's shared understanding and nothing left to decide before someone builds it.
 4. **Record it** (this is where a training finding **graduates**, per the repo convention):
@@ -32,11 +44,13 @@ Grilling settles the *decision*; it does not ship code. Once an item is `Decided
 
 Ordered; top unblocked row is the frontier.
 
-| ID | Decision to settle | P | Status | Source |
-|----|--------------------|---|--------|--------|
-| IB-028 | Should deload/retest weeks set the existing `holdProgression` flag so the +2.5% targets-hit step is suppressed on a reduced-target week? (An ADR-0009 addendum, or a new ADR.) | P1 | Queued | [IB-028](improvement-backlog.md) |
-| IB-014 | What injury-history intake should exist, and how should it pre-soften finger load (vs. today's purely reactive moderation)? | P1 | Queued | [IB-014](improvement-backlog.md) |
-| IB-024 | Should the antagonist block gain a vertical/scapular press, and what/where? | P1 | Queued | [IB-024](improvement-backlog.md) |
+The **Issue** column is the claim surface — open + unassigned = claimable. Priority order; top claimable row is the frontier.
+
+| ID | Decision to settle | P | Issue (claim here) | Status |
+|----|--------------------|---|--------------------|--------|
+| IB-028 | Should deload/retest weeks set the existing `holdProgression` flag so the +2.5% targets-hit step is suppressed on a reduced-target week? (An ADR-0009 addendum, or a new ADR.) | P1 | [#59](https://github.com/slm37102/simple-climbing-training-planner/issues/59) | Queued |
+| IB-014 | What injury-history intake should exist, and how should it pre-soften finger load (vs. today's purely reactive moderation)? | P1 | [#60](https://github.com/slm37102/simple-climbing-training-planner/issues/60) | Queued |
+| IB-024 | Should the antagonist block gain a vertical/scapular press, and what/where? | P1 | [#61](https://github.com/slm37102/simple-climbing-training-planner/issues/61) | Queued |
 
 ## Decided
 
