@@ -131,6 +131,56 @@ test('[ADR-0014] amber pain check-in holds the ADR-0009 targets-hit progression 
   assert(held.reason.some(r => /progression held/i.test(r)), 'reason trail must record the hold');
 });
 
+// ─── IB-028 (1/2): holdProgression carries its CAUSE ──────────────────────
+// The trail line used to hardcode "pain amber". IB-041 made the trail
+// user-visible ("Why this load:"), so once deload weeks can hold progression
+// too, a hardcoded cause becomes a lie told to the athlete. The flag now
+// carries which cause held it; any truthy value still holds.
+
+test('[IB-028] holdProgression accepts a cause, and every cause holds the +2.5% step', () => {
+  const exercise = { kind: 'hangboard', loadPctRange: [0.87, 0.92], rpeRange: [8, 9], prescribedSets: 2, prescribedReps: 4 };
+  const benchmarks = { maxHang20mm: 20, bodyweight: 70 };
+  const args = { exercise, previousActualKg: 12, previousAvgRpe: 8.5, previousActualSets: 2, previousActualReps: 4, daysSincePrevious: 5, benchmarks };
+
+  assertEq(Loads.resolveEffective(args).suggestedKg, 12.5, 'sanity: targets hit normally progresses +2.5%');
+
+  // Recognised causes, a bare boolean, and an unrecognised value all hold.
+  for (const cause of ['pain-amber', 'deload', 'retest', true, 'not-a-known-cause']) {
+    assertEq(Loads.resolveEffective({ ...args, holdProgression: cause }).suggestedKg, 12,
+      `holdProgression=${JSON.stringify(cause)} must hold the load at the previous actual`);
+  }
+  // Falsy values are not a hold.
+  for (const cause of [false, null, undefined, '']) {
+    assertEq(Loads.resolveEffective({ ...args, holdProgression: cause }).suggestedKg, 12.5,
+      `holdProgression=${JSON.stringify(cause)} must NOT hold the load`);
+  }
+});
+
+test('[IB-028] the reason trail names the cause, and a non-pain hold never claims pain', () => {
+  const exercise = { kind: 'hangboard', loadPctRange: [0.87, 0.92], rpeRange: [8, 9], prescribedSets: 2, prescribedReps: 4 };
+  const benchmarks = { maxHang20mm: 20, bodyweight: 70 };
+  const args = { exercise, previousActualKg: 12, previousAvgRpe: 8.5, previousActualSets: 2, previousActualReps: 4, daysSincePrevious: 5, benchmarks };
+  const trail = cause => Loads.resolveEffective({ ...args, holdProgression: cause }).reason.join(' | ');
+
+  // Greppable substring is load-bearing: the ADR-0014 case above matches on it.
+  for (const cause of ['pain-amber', 'deload', 'retest', true, 'not-a-known-cause']) {
+    assert(/progression held/i.test(trail(cause)),
+      `holdProgression=${JSON.stringify(cause)} must keep the "progression held" substring`);
+  }
+
+  assert(/pain amber/i.test(trail('pain-amber')), 'the pain cause names amber pain');
+  assert(/ADR-0014/.test(trail('pain-amber')), 'the pain cause cites its ADR');
+  assert(/deload/i.test(trail('deload')), 'the deload cause names the deload week');
+  assert(/ADR-0009/.test(trail('deload')), 'the deload cause cites the progression ADR it modifies');
+  assert(/retest/i.test(trail('retest')), 'the retest cause names the retest week');
+
+  // The whole point of this ticket: IB-041 renders this trail to the athlete.
+  for (const cause of ['deload', 'retest', true, 'not-a-known-cause']) {
+    assert(!/pain/i.test(trail(cause)),
+      `holdProgression=${JSON.stringify(cause)} must NOT claim pain — the athlete reported none`);
+  }
+});
+
 test('[Standards] computeReadinessMultiplier exposes a stable key tier alongside the display label', () => {
   assertEq(Loads.computeReadinessMultiplier({ sleep: 5, soreness: 5, fatigue: 5 }).key, 'push');
   assertEq(Loads.computeReadinessMultiplier({ sleep: 4, soreness: 4, fatigue: 4 }).key, 'normal');

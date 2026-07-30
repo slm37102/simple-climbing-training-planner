@@ -119,9 +119,12 @@ export const Loads = {
   // Resolve effective kg for today's session, applying:
   //   (1) prev-actual seed, (2) layoff decay, (3) auto-adjust, (4) readiness.
   // Deload weeks cut volume (handled in program.js), not intensity — kg is held constant.
-  // holdProgression (ADR-0014): the pain-amber response — an amber pain
-  // check-in holds the ADR-0009 targets-hit progression for the day (the
-  // ±5% RPE thermostat still runs; only the deliberate overload step pauses).
+  // holdProgression (ADR-0014, + ADR-0009 addendum 2026-07-30): holds the
+  // ADR-0009 targets-hit progression for the day — the ±5% RPE thermostat still
+  // runs; only the deliberate overload step pauses. Any truthy value holds; pass
+  // a CAUSE and the reason trail names it (see HOLD_PROGRESSION_REASONS at the
+  // bottom of this file for the causes and why the cause matters). Callers decide
+  // *when* to hold; this module only decides what a hold does and how it reads.
   resolveEffective({ exercise, previousActualKg, previousAvgRpe, previousActualSets = null, previousActualReps = null, daysSincePrevious = null, readinessMultiplier = 1.0, benchmarks = null, holdProgression = false }) {
     const base = this.prescribeLoadKg(exercise, benchmarks);
     if (!base) return null;
@@ -153,7 +156,7 @@ export const Loads = {
       if (adj === 1.0 && previousAvgRpe != null && exercise.rpeRange
           && this.targetsHit(exercise, previousActualSets, previousActualReps)) {
         if (holdProgression) {
-          reason.push('pain amber — progression held (ADR-0014)');
+          reason.push(holdProgressionReason(holdProgression));
         } else {
           adj = TARGETS_HIT_PROGRESS;
           reason.push('targets hit → +2.5%');
@@ -263,3 +266,23 @@ const LAYOFF_FLOOR = 0.85;
 // tendon-limited lifts; the cap keeps stacked multipliers inside that band.
 const TARGETS_HIT_PROGRESS = 1.025;
 const MAX_SESSION_PROGRESS = 1.05;
+
+// IB-028 (ADR-0009 addendum 2026-07-30): `holdProgression` carries the CAUSE
+// progression was held, not just a boolean. It used to be a boolean and the
+// trail line hardcoded the pain-amber wording — safe while amber pain was the
+// only trigger, but IB-041 now renders this trail to the athlete under "Why
+// this load:", so a deload-week hold would tell someone who reported no pain
+// that their pain was amber. Every variant keeps the "progression held"
+// substring: it is the greppable anchor the ADR-0014 case matches on.
+const HOLD_PROGRESSION_REASONS = {
+  'pain-amber': 'pain amber — progression held (ADR-0014)',
+  deload: 'deload week — progression held (ADR-0009)',
+  retest: 'retest week — progression held (ADR-0009)'
+};
+// Cause-neutral fallback for a bare `true` (or any unrecognised value): still a
+// hold, but asserts no cause it cannot vouch for.
+const HOLD_PROGRESSION_REASON_GENERIC = 'progression held';
+
+function holdProgressionReason(cause) {
+  return HOLD_PROGRESSION_REASONS[cause] || HOLD_PROGRESSION_REASON_GENERIC;
+}

@@ -256,6 +256,101 @@ test('[ADR-0009] total upward move capped at +5%/session; downward moves never c
   assertEq(lighter.suggestedKg, 17, '20 × 0.85 = 17, no cap on the way down');
 });
 
+// IB-028 (1/2) BASELINE — deliberately asserts the BUG, and is INVERTED by the
+// deload/retest trigger ticket (2/2) rather than deleted, so the change of
+// intent is visible in that diff instead of a case quietly vanishing.
+//
+// Fixture geometry (12-wk comp, start 2026-05-04): wk3 Mon and wk4 Mon are both
+// `mon-hangboard-base`, so resolveForDay's same-session scan links them. The
+// deload cuts wk4's prescribedSets 2 → 1, so wk3's full-volume 2-set actual
+// clears the reduced target trivially and earns +2.5% — on the recovery week.
+// Readiness is seeded to 4s: the default 3s average to 'lighter' (×0.85), which
+// would confound the assertion with an unrelated downscale.
+test('[IB-028] BASELINE (inverted by 2/2): a deload week still earns the +2.5% step off the previous full week', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' });
+  Storage.setGlobalBenchmarks({ bodyweight: 70, maxHang20mm: 30, pullup1RM: 30 });
+
+  // resolveForDay's continuity match is by exercise INDEX within the sessionId,
+  // so seed the previous week's log from the real session shape rather than
+  // hardcoding a position — the kg-bearing max hang sits behind the repeaters,
+  // and hardcoding index 0 silently produces a midpoint seed instead of a
+  // previous-actual seed (which is exactly how this fixture first went green
+  // for the wrong reason).
+  const prevSession = Program.build(Storage.getActivePlan(), '2026-05-18', Storage.get().benchmarks);
+  const kgIdx = prevSession.exercises.findIndex(e => e.loadPctRange);
+  assert(kgIdx >= 0, 'fixture: the previous Monday must have a kg-bearing exercise');
+  Storage.setDay('2026-05-18', {
+    sessionId: prevSession.sessionId,
+    exercises: prevSession.exercises.map((e, i) => i === kgIdx
+      ? { kind: e.kind, actual: { kg: 12, rpe: 8.5, sets: 2, reps: 3 } }
+      : { kind: e.kind })
+  });
+  Storage.setDay('2026-05-25', { readiness: { sleep: 4, soreness: 4, fatigue: 4 } });
+
+  const ctx = Program.resolveForSettings(Storage.getActivePlan().settings, '2026-05-25');
+  assert(ctx.deload && !ctx.retest, 'fixture must be a natural (non-retest) deload week');
+  assertEq(ctx.slot, 'mon-main', 'fixture must be the Monday hangboard slot');
+
+  sessionStorage.setItem('todaySelectedDate', '2026-05-25');
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const m = root.textContent.match(/([\d.]+) kg suggested/);
+    assert(m, 'the deload-week hangboard must still render a kg suggestion');
+    assert(Number(m[1]) > 12, `BASELINE: deload week currently progresses above the previous 12kg actual (got ${m[1]})`);
+    // IB-041 puts the reason trail in the info badge's title, not in the
+    // visible text — assert there, or this silently checks nothing.
+    const trail = [...root.querySelectorAll('.info-badge')].map(b => b.getAttribute('title') || '').join(' | ');
+    assert(/targets hit/i.test(trail), `BASELINE: the trail currently credits a targets-hit progression on a deload week (trail: ${trail})`);
+  } finally { root.remove(); }
+});
+
+// The second ADR-0009 addendum records that the retest leg of the IB-028
+// rationale is currently unreachable: the load chain never consults
+// holdProgression in a retest week, because nothing in one carries a
+// loadPctRange. That claim is load-bearing — it is the reason no end-to-end
+// retest hold is asserted anywhere, in this ticket or in 2/2 — so pin it rather
+// than leaving it as prose in an ADR. If a retest session ever gains a weighted
+// exercise, this fails and both the addendum and 2/2's retest leg need revisiting.
+test('[IB-028] ADR addendum pinned: no retest-week day yields a kg-bearing exercise, and retest never occurs without deload', () => {
+  const benchmarks = { bodyweight: 70, maxHang20mm: 30, pullup1RM: 30 };
+  const kgInRetestWeek = [];
+  for (const weeks of [8, 12, 16, 24]) {
+    for (const peakType of ['comp', 'trip', 'project']) {
+      const pattern = buildPhasePattern(weeks, peakType);
+      for (const focus of ['hybrid', 'boulder', 'sport']) {
+        const plan = { settings: { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: weeks, peakType }, focus };
+        pattern.forEach((w, i) => {
+          if (!w.retest) return;
+          for (let d = 0; d < 7; d++) {
+            const iso = addIsoDays('2026-05-04', i * 7 + d);
+            const s = Program.build(plan, iso, benchmarks);
+            for (const e of s.exercises || []) {
+              if (e.loadPctRange) kgInRetestWeek.push(`${weeks}wk/${peakType}/${focus} ${iso} ${s.sessionId} — ${e.name}`);
+            }
+          }
+        });
+      }
+    }
+  }
+  assertEq(kgInRetestWeek, [], 'a kg-bearing retest-week exercise would make the ADR-0009 addendum stale and 2/2\'s retest leg live-but-untested');
+
+  // The other half of the same addendum: `ctx.deload || ctx.retest` is
+  // equivalent to `ctx.deload` today, because retest always sets deload too.
+  const retestWithoutDeload = [];
+  for (const weeks of [8, 9, 10, 12, 14, 16, 20, 24, 28, 32]) {
+    for (const peakType of ['comp', 'trip', 'project']) {
+      buildPhasePattern(weeks, peakType).forEach((w, i) => {
+        if (w.retest && !w.deload) retestWithoutDeload.push(`${weeks}wk/${peakType} wk${i + 1}`);
+      });
+    }
+  }
+  assertEq(retestWithoutDeload, [], 'every retest week must also carry the deload flag');
+});
+
 test('[Gym-ready] hangboard and pull-up exercises carry a rest field + a well-formed rpeRange across all phases', () => {
   // Monday, one date per phase, all non-deload/non-retest.
   const mondays = {

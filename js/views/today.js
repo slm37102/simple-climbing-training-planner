@@ -987,7 +987,9 @@ function renderExercise(ex, i, dayLog, ctx, readinessMult, date, sessionId) {
       days: Storage.listDays(),
       readinessMultiplier: readinessMult,
       // ADR-0014: an amber pain check-in holds the ADR-0009 progression.
-      holdProgression: Monitoring.painCheckInSignal(dayLog.readiness?.pain)?.severity === 'amber',
+      // Pass the CAUSE, not a bare boolean (IB-028): the load-reason trail is
+      // rendered to the athlete, so it must name why progression held.
+      holdProgression: Monitoring.painCheckInSignal(dayLog.readiness?.pain)?.severity === 'amber' ? 'pain-amber' : null,
     });
     const rangeStr = suggestion?.range ? `${suggestion.range[0]}–${suggestion.range[1]} kg` : '';
     // ADR-0013: a kg range needs bodyweight AND the kind's benchmark — resolve
@@ -1136,7 +1138,7 @@ function wire(root, date, session, ctx, readinessMult) {
           dateISO: date,
           days: Storage.listDays(),
           readinessMultiplier: multiplier,
-          holdProgression: Monitoring.painCheckInSignal(d.readiness?.pain)?.severity === 'amber',
+          holdProgression: Monitoring.painCheckInSignal(d.readiness?.pain)?.severity === 'amber' ? 'pain-amber' : null,
         });
         if (eff && eff.suggestedKg != null) {
           btn.textContent = `Suggested: ${eff.suggestedKg} kg → tap to use`;
