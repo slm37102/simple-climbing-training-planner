@@ -1,5 +1,6 @@
 // Warm-up & cooldown checklists by session type.
 import { WARMUP_DRILLS } from './drills.js';
+import { localIso, daysBetween } from './dates.js';
 
 const TWO_STAGE_WARMUP = [
   '5 min easy cardio (jog / bike / row)',
@@ -61,6 +62,21 @@ export const Warmup = {
     };
   },
   MICRO_RETEST_STALE_DAYS,
+  // ADR-0012 staleness test — is the stored max-hang benchmark old enough to
+  // warrant a micro-retest? Benchmark age comes from the last retest-save
+  // history entry (ADR-0014's history is the canonical freshness record) — NOT
+  // benchmarks.updatedAt, which any Profile edit (even bodyweight-only) bumps
+  // and would silently suppress a due micro-retest. Fallback to updatedAt (a
+  // UTC timestamp → LOCAL date) covers a manually-entered benchmark that has
+  // never been through a retest save. Never benchmarked at all → treat as
+  // maximally stale (due). Pure over storage shape, so the view calls rather
+  // than computes (IB-032) and this can't drift from MICRO_RETEST_STALE_DAYS.
+  isMicroRetestDue(benchmarks, dateISO) {
+    const lastRetest = (benchmarks?.history || []).filter(e => e?.date).map(e => e.date).sort().pop();
+    const anchor = lastRetest || (benchmarks?.updatedAt ? localIso(new Date(benchmarks.updatedAt)) : null);
+    if (!anchor) return true;
+    return daysBetween(anchor, dateISO) > MICRO_RETEST_STALE_DAYS;
+  },
   restRecoveryChecklist() {
     return [
       'Sleep 8h target',

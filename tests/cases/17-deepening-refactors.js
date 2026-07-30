@@ -87,6 +87,29 @@ test('[ADR-0014] REGRESSION: Log signals panel accept converges with Today — r
   } finally { root.remove(); }
 });
 
+test('[IB-032] REGRESSION: Warmup.isMicroRetestDue owns staleness — history wins over updatedAt, view only calls', () => {
+  const asOf = '2026-06-01';
+  const D = Warmup.MICRO_RETEST_STALE_DAYS;
+  // Never benchmarked → maximally stale (due).
+  assert(Warmup.isMicroRetestDue(null, asOf), 'no benchmarks → due');
+  assert(Warmup.isMicroRetestDue({ history: [] }, asOf), 'empty history, no updatedAt → due');
+  // Fresh vs stale retest-history entry, straddling the threshold.
+  assert(!Warmup.isMicroRetestDue({ history: [{ date: addIsoDays(asOf, -(D - 1)) }] }, asOf),
+    `retest ${D - 1}d ago (≤ ${D}) → not due`);
+  assert(Warmup.isMicroRetestDue({ history: [{ date: addIsoDays(asOf, -(D + 1)) }] }, asOf),
+    `retest ${D + 1}d ago (> ${D}) → due`);
+  // Newest (last-sorted) history date is the freshness anchor.
+  assert(!Warmup.isMicroRetestDue({ history: [{ date: addIsoDays(asOf, -100) }, { date: addIsoDays(asOf, -3) }] }, asOf),
+    'newest history date wins → recent → not due');
+  // ADR-0014: a Profile edit bumps updatedAt but must NOT reset staleness —
+  // history is canonical, so a stale last-retest stays due despite a fresh updatedAt.
+  assert(Warmup.isMicroRetestDue({ history: [{ date: addIsoDays(asOf, -(D + 5)) }], updatedAt: Date.parse(asOf + 'T00:00:00') }, asOf),
+    'stale retest + fresh updatedAt → still due (history is canonical, not updatedAt)');
+  // No history: updatedAt (UTC ms → LOCAL date) is the fallback anchor.
+  assert(!Warmup.isMicroRetestDue({ updatedAt: Date.parse(addIsoDays(asOf, -(D - 2)) + 'T12:00:00') }, asOf),
+    'no history, recent updatedAt → not due');
+});
+
 // ─── Prescription pipeline (notes[] channel + provenance render) ───────────
 
 test('[pipeline] session.notes carries co-occurring notes in pass order (deload + readiness)', () => {

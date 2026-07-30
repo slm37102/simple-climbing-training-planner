@@ -6,7 +6,7 @@ import { Loads } from '../loads.js';
 import { Warmup } from '../warmup.js';
 import { Replan } from '../replan.js';
 import { Monitoring } from '../monitoring.js';
-import { daysBetween, localIso, today as todayIso, addDays as addDaysIso } from '../dates.js';
+import { today as todayIso, addDays as addDaysIso } from '../dates.js';
 import { inputVisibility, repsLabel, actualHasResult, howto, unitLabel } from '../exercise-inputs.js';
 import { escHtml as esc } from '../ui.js';
 import { DRILL_CATEGORIES, WARMUP_DRILLS } from '../drills.js';
@@ -517,21 +517,12 @@ export function renderToday(root) {
 
   // ADR-0012: Build-Monday micro-retest gate — the Monday opening any Build
   // run (both blocks of a double-block cycle), only when the stored max-hang
-  // BENCHMARK is >4 weeks old. Benchmark age comes from the last retest-save
-  // history entry (ADR-0014's history is the canonical freshness record) —
-  // not benchmarks.updatedAt, which any Profile edit (even bodyweight-only)
-  // bumps and would silently suppress a due micro-retest. Fallback to
-  // updatedAt (converted to a LOCAL date — it's a UTC timestamp) covers a
-  // manually-entered benchmark that has never been through a retest save.
+  // BENCHMARK is stale. The applicability gate (Build-run-start) stays here; the
+  // staleness/history-shape decision lives in warmup.js (IB-032) so it can't
+  // drift from MICRO_RETEST_STALE_DAYS and is unit-testable without the view.
   const microRetest = ctx.slot === 'mon-main' && ctx.phase === 'build'
     && Program.isBuildRunStart(Program.phasePattern(activePlan.settings), ctx.weekIdx)
-    && (() => {
-      const bm = Storage.get().benchmarks;
-      const lastRetest = (bm?.history || []).filter(e => e?.date).map(e => e.date).sort().pop();
-      const anchor = lastRetest || (bm?.updatedAt ? localIso(new Date(bm.updatedAt)) : null);
-      if (!anchor) return true; // never benchmarked at all — treat as maximally stale
-      return daysBetween(anchor, date) > Warmup.MICRO_RETEST_STALE_DAYS;
-    })();
+    && Warmup.isMicroRetestDue(Storage.get().benchmarks, date);
   const { warmup, cooldown, skillDrills } = Warmup.forSession(session, { microRetest });
 
   const bannerEnv = { activePlan, date, gap, signals, readinessGateLabel, dayLog, session };
