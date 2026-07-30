@@ -48,7 +48,7 @@ The **Issue** column is the claim surface — an open issue with no active `🔒
 
 | ID | Decision to settle | P | Issue (claim here) | Status |
 |----|--------------------|---|--------------------|--------|
-| IB-028 | Should deload/retest weeks set the existing `holdProgression` flag so the +2.5% targets-hit step is suppressed on a reduced-target week? (An ADR-0009 addendum, or a new ADR.) | P1 | [#59](https://github.com/slm37102/simple-climbing-training-planner/issues/59) | Queued |
+| IB-028 | Should deload/retest weeks set the existing `holdProgression` flag so the +2.5% targets-hit step is suppressed on a reduced-target week? (An ADR-0009 addendum, or a new ADR.) | P1 | [#59](https://github.com/slm37102/simple-climbing-training-planner/issues/59) | Grilling |
 | IB-014 | What injury-history intake should exist, and how should it pre-soften finger load (vs. today's purely reactive moderation)? | P1 | [#60](https://github.com/slm37102/simple-climbing-training-planner/issues/60) | Queued |
 | IB-024 | Should the antagonist block gain a vertical/scapular press, and what/where? | P1 | [#61](https://github.com/slm37102/simple-climbing-training-planner/issues/61) | Queued |
 
