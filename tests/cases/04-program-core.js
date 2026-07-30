@@ -76,17 +76,48 @@ test('buildPhasePattern peakType scales taper: comp 1 wk, trip/project 2 wk (ADR
   assertEq(taperWeeks(buildPhasePattern(12)), 1, 'default peakType is comp');
 });
 
+// A double block is two Base→Build cycles before Peak, so counting the
+// base→build transitions is how these cases tell the two shapes apart.
+const baseToBuildTransitions = pattern => {
+  let n = 0;
+  for (let i = 1; i < pattern.length; i++) {
+    if (pattern[i - 1].phase === 'base' && pattern[i].phase === 'build') n++;
+  }
+  return n;
+};
+
+const basePhaseCounts = weeks => {
+  const c = { base: 0, build: 0 };
+  buildPhasePattern(weeks).forEach(w => { if (w.phase in c) c[w.phase]++; });
+  return c;
+};
+
 test('buildPhasePattern(24) switches to double-block', () => {
   const p = buildPhasePattern(24);
   assertEq(p.length, 24);
-  // double-block = two base→build cycles before peak
-  const sequence = p.map(w => w.phase).join(',');
-  // count base→build transitions
-  let transitions = 0;
-  for (let i = 1; i < p.length; i++) {
-    if (p[i - 1].phase === 'base' && p[i].phase === 'build') transitions++;
-  }
-  assertEq(transitions, 2, 'double-block has two base→build transitions');
+  assertEq(baseToBuildTransitions(p), 2, 'double-block has two base→build transitions');
+});
+
+// IB-033 named the constants that were inlined in the phase-split derivation
+// (BUILD_FRACTION_OF_REMAINING) and in densityRest (the DENSITY_* cluster).
+// DOUBLE_BLOCK_THRESHOLD was already named but had no case at its boundary —
+// only 24 wk, well inside double block, was covered — so the `>` vs `>=`
+// semantics were unpinned. Pin them: naming a constant invites retuning it.
+test('[IB-033] DOUBLE_BLOCK_THRESHOLD boundary: 20 wk is single block, 21 wk is double', () => {
+  assertEq(baseToBuildTransitions(buildPhasePattern(20)), 1, '20 wk is AT the threshold → still single block');
+  assertEq(baseToBuildTransitions(buildPhasePattern(21)), 2, '21 wk is above the threshold → double block');
+});
+
+// The BUILD_FRACTION_OF_REMAINING extraction is only a real de-duplication if
+// both derivation paths keep applying the same share. Pin exact Base/Build
+// counts either side of the threshold — a ratio assertion would be fragile,
+// because `max(2, round(...))` makes the realised share wobble 0.286–0.4
+// across the supported range. Double-block figures total both sub-blocks.
+test('[IB-033] BUILD_FRACTION_OF_REMAINING applies on both derivation paths', () => {
+  assertEq(basePhaseCounts(12), { base: 6, build: 3 }, 'default 12 wk, single block');
+  assertEq(basePhaseCounts(20), { base: 11, build: 6 }, '20 wk = at the threshold, still single block');
+  assertEq(basePhaseCounts(21), { base: 12, build: 6 }, '21 wk = first double block');
+  assertEq(basePhaseCounts(MAX_CYCLE_WEEKS), { base: 25, build: 12 }, '40 wk, double block');
 });
 
 test('buildPhasePattern clamps out-of-range weeks', () => {

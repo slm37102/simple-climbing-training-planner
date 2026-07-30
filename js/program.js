@@ -15,6 +15,13 @@ export const DEFAULT_CYCLE_WEEKS = 12;
 // instead of stretching a single Base further. Coach consensus (Lattice, Hörst, Anderson)
 // says single-block adaptations plateau beyond ~20 wk without phase transitions.
 const DOUBLE_BLOCK_THRESHOLD = 20;
+// Share of the non-Peak/non-Taper weeks that goes to Build; Base takes the rest
+// (ADR-0002's phase-split formula — a ~2:1 Base:Build ratio). Applied at three
+// derivation sites (single block, plus each double-block sub-block), so it lives
+// here rather than inline: the three must never drift apart. 0.33 is ADR-0002's
+// own wording and is indistinguishable from 1/3 in effect — the two agree for
+// every reachable `remaining` (5–37 wk). The *value* is app-invented (IB-040).
+const BUILD_FRACTION_OF_REMAINING = 0.33;
 
 export function clampCycleWeeks(weeks) {
   const n = Math.round(Number(weeks) || DEFAULT_CYCLE_WEEKS);
@@ -53,8 +60,8 @@ function _singleBlock(weeks, peakType) {
   const peak  = 2;
   const taper = taperWeeksFor(peakType);
   const remaining = weeks - peak - taper; // base + build
-  // Build = ~1/3 of remaining, min 2; Base takes the rest.
-  const build = Math.max(2, Math.round(remaining * 0.33));
+  // Build takes its share of `remaining`, min 2; Base takes the rest.
+  const build = Math.max(2, Math.round(remaining * BUILD_FRACTION_OF_REMAINING));
   const base  = Math.max(2, remaining - build);
   return _composeSingle({ base, build, peak, taper });
 }
@@ -66,9 +73,9 @@ function _doubleBlock(weeks, peakType) {
   // Split into two sub-blocks (Base→Build each).
   const sub1 = Math.floor(remaining / 2);
   const sub2 = remaining - sub1;
-  const build1 = Math.max(2, Math.round(sub1 * 0.33));
+  const build1 = Math.max(2, Math.round(sub1 * BUILD_FRACTION_OF_REMAINING));
   const base1  = Math.max(2, sub1 - build1);
-  const build2 = Math.max(2, Math.round(sub2 * 0.33));
+  const build2 = Math.max(2, Math.round(sub2 * BUILD_FRACTION_OF_REMAINING));
   const base2  = Math.max(2, sub2 - build2);
   return _composeDouble({ base1, build1, base2, build2, peak, taper });
 }
@@ -359,12 +366,20 @@ function buildMonHangboard(phase, isDeload, focus = 'hybrid') {
   };
 }
 
-// ADR-0006: interval rest tightens by 5s per week across the final 4 weeks of
-// the cycle (Lattice density progression toward the goal). weeksLeft counts
-// full weeks remaining AFTER the current one (final week → 0). Clamped ≥ 2:30.
-function densityRest(weeksLeft, baseSec = 240) {
-  if (weeksLeft == null || weeksLeft > 3) return null; // outside the final 4 weeks
-  const sec = Math.max(150, baseSec - 5 * (4 - weeksLeft)); // wkLeft 3→-5s … 0→-20s
+// ADR-0006 density progression (Lattice, toward the goal). The window length is
+// used twice — once to reject weeks outside it, once to size the step — so it is
+// named: an unnamed 4 and 3 on adjacent lines are the same number and would drift.
+const DENSITY_WINDOW_WEEKS = 4;     // progression runs over the final 4 weeks
+const DENSITY_STEP_SEC = 5;         // −5s of interval rest per week inside the window
+const DENSITY_BASE_REST_SEC = 240;  // 4:00 — pre-progression rest, the only base in use
+const DENSITY_FLOOR_SEC = 150;      // 2:30 — guard for a shorter future base; does NOT
+                                    // bind at 240 (the window bottoms out at 3:40)
+
+// weeksLeft counts full weeks remaining AFTER the current one (final week → 0),
+// and is always an integer (`weeks - ctx.weekIdx`).
+function densityRest(weeksLeft, baseSec = DENSITY_BASE_REST_SEC) {
+  if (weeksLeft == null || weeksLeft >= DENSITY_WINDOW_WEEKS) return null; // outside the window
+  const sec = Math.max(DENSITY_FLOOR_SEC, baseSec - DENSITY_STEP_SEC * (DENSITY_WINDOW_WEEKS - weeksLeft)); // wkLeft 3→-5s … 0→-20s
   const m = Math.floor(sec / 60), s = String(sec % 60).padStart(2, '0');
   return `${m}:${s}`;
 }
