@@ -21,7 +21,7 @@ const DOUBLE_BLOCK_THRESHOLD = 20;
 // here rather than inline: the three must never drift apart. 0.33 is ADR-0002's
 // own wording and is indistinguishable from 1/3 in effect — the two agree for
 // every reachable `remaining` (5–37 wk). The *value* is app-invented (IB-040).
-const BUILD_FRACTION = 0.33;
+const BUILD_FRACTION_OF_REMAINING = 0.33;
 
 export function clampCycleWeeks(weeks) {
   const n = Math.round(Number(weeks) || DEFAULT_CYCLE_WEEKS);
@@ -60,8 +60,8 @@ function _singleBlock(weeks, peakType) {
   const peak  = 2;
   const taper = taperWeeksFor(peakType);
   const remaining = weeks - peak - taper; // base + build
-  // Build = BUILD_FRACTION of remaining, min 2; Base takes the rest.
-  const build = Math.max(2, Math.round(remaining * BUILD_FRACTION));
+  // Build takes its share of `remaining`, min 2; Base takes the rest.
+  const build = Math.max(2, Math.round(remaining * BUILD_FRACTION_OF_REMAINING));
   const base  = Math.max(2, remaining - build);
   return _composeSingle({ base, build, peak, taper });
 }
@@ -73,9 +73,9 @@ function _doubleBlock(weeks, peakType) {
   // Split into two sub-blocks (Base→Build each).
   const sub1 = Math.floor(remaining / 2);
   const sub2 = remaining - sub1;
-  const build1 = Math.max(2, Math.round(sub1 * BUILD_FRACTION));
+  const build1 = Math.max(2, Math.round(sub1 * BUILD_FRACTION_OF_REMAINING));
   const base1  = Math.max(2, sub1 - build1);
-  const build2 = Math.max(2, Math.round(sub2 * BUILD_FRACTION));
+  const build2 = Math.max(2, Math.round(sub2 * BUILD_FRACTION_OF_REMAINING));
   const base2  = Math.max(2, sub2 - build2);
   return _composeDouble({ base1, build1, base2, build2, peak, taper });
 }
