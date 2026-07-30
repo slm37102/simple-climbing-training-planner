@@ -15,11 +15,11 @@ The **live** to-do ledger — what the app should get better at next, and what h
 
 ## Frontier
 
-Open P1 items — work these first.
+Open P1 items. All three are **decision-gated** (trip-wire / training-content), so they are not built by `/audit-loop` inline — they live in the **[grill queue](grill-queue.md)** and are worked with **`/grill-queue`** (interactive grilling → ADR + `KG-*` decision → build path). `/audit-loop` itself drains the highest-priority *inline-buildable* item each pass.
 
-- **IB-028** (eng) — deload weeks silently progress load +2.5% against the reduced target. **Routed to the multi-session path** (trip-wire 6: changes prescribed kg, so it needs an ADR or an ADR-0009 addendum) — next step is `/grill-with-docs` → `/to-spec` → `/to-tickets`, shipping as a PR. Pass 1 sharpened it: the fix is one expression in `today.js`, not new plumbing.
-- **IB-014** (training) — no injury-history intake; finger load is never pre-softened
-- **IB-024** (training) — antagonist block is pull-dominant with no vertical/scapular press
+- **IB-028** (eng) — deload weeks silently progress load +2.5% against the reduced target (trip-wire 6: changes prescribed kg). Queued for grilling. Pass 1 sharpened it: the fix is one expression in `today.js`, not new plumbing.
+- **IB-014** (training) — no injury-history intake; finger load is never pre-softened. Queued for grilling.
+- **IB-024** (training) — antagonist block is pull-dominant with no vertical/scapular press. Queued for grilling.
 
 ## Items
 
