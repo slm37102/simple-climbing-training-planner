@@ -89,6 +89,38 @@ test('buildPhasePattern(24) switches to double-block', () => {
   assertEq(transitions, 2, 'double-block has two base→build transitions');
 });
 
+// IB-033 named the three derivation constants (BUILD_FRACTION, and the
+// DENSITY_* cluster) that were inlined. DOUBLE_BLOCK_THRESHOLD was already
+// named but had no case at its boundary — only 24 wk (well inside double
+// block) was covered, so the `>` vs `>=` semantics of the threshold were
+// unpinned. Pin them, since a named constant invites someone to retune it.
+test('[IB-033] DOUBLE_BLOCK_THRESHOLD boundary: 20 wk is single block, 21 wk is double', () => {
+  const transitions = p => {
+    let n = 0;
+    for (let i = 1; i < p.length; i++) if (p[i - 1].phase === 'base' && p[i].phase === 'build') n++;
+    return n;
+  };
+  assertEq(transitions(buildPhasePattern(20)), 1, '20 wk is AT the threshold → still single block');
+  assertEq(transitions(buildPhasePattern(21)), 2, '21 wk is above the threshold → double block');
+});
+
+// The BUILD_FRACTION extraction is only a real de-duplication if both
+// derivation paths keep applying the same share. Pin exact Base/Build counts
+// either side of the threshold — a ratio assertion would be fragile, because
+// `max(2, round(...))` makes the realised share wobble 0.286–0.4 across the
+// supported range. Double-block figures are totals over both sub-blocks.
+test('[IB-033] BUILD_FRACTION applies on both derivation paths', () => {
+  const counts = weeks => {
+    const c = { base: 0, build: 0 };
+    buildPhasePattern(weeks).forEach(w => { if (w.phase in c) c[w.phase]++; });
+    return c;
+  };
+  assertEq(counts(12), { base: 6, build: 3 }, 'default 12 wk, single block');
+  assertEq(counts(20), { base: 11, build: 6 }, '20 wk = at the threshold, still single block');
+  assertEq(counts(21), { base: 12, build: 6 }, '21 wk = first double block');
+  assertEq(counts(MAX_CYCLE_WEEKS), { base: 25, build: 12 }, '40 wk, double block');
+});
+
 test('buildPhasePattern clamps out-of-range weeks', () => {
   assertEq(buildPhasePattern(4).length, MIN_CYCLE_WEEKS);
   assertEq(buildPhasePattern(100).length, MAX_CYCLE_WEEKS);
