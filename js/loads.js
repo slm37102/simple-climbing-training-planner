@@ -4,6 +4,9 @@
 // when building the session; this module is purely about per-rep kg.
 import { Storage } from './storage.js';
 import { daysBetween } from './dates.js';
+// Only the pain-severity helper, for holdProgressionFor below. Direction is
+// loads → monitoring and must stay that way (monitoring depends on dates alone).
+import { painCheckInSignal } from './monitoring.js';
 
 export const Loads = {
   // ===== readiness =====
@@ -114,6 +117,39 @@ export const Loads = {
       // ADR-0013: convention statement for the UI range tooltip.
       conventionNote: `range = ${Math.round(pctRange[0] * 100)}–${Math.round(pctRange[1] * 100)}% of total max (bodyweight + benchmark)`
     };
+  },
+
+  // ===== Is progression held today, and why? (IB-028) =====
+  // The single home for the hold condition, and the answer feeds straight into
+  // `holdProgression` below. It lived inline at both Today call sites, where it
+  // could only be exercised by mounting the view and the two copies could drift
+  // — the same defect IB-032 fixed for its neighbours.
+  //
+  // Returns the CAUSE, or null when progression is not held. Precedence:
+  //
+  //   1. 'pain-amber' — an amber pain check-in (ADR-0014). Pain is the safety
+  //      signal, so it wins outright: the athlete is told the thing that matters
+  //      most, not "deload week".
+  //   2. 'retest'     — a retest week. Beats deload because the forced
+  //      end-of-Base week sets BOTH flags, and retest is the more specific fact.
+  //   3. 'deload'     — a deload week (ADR-0009 addendum): the volume cut means
+  //      the previous full week's actual clears the reduced target trivially, so
+  //      without this the recovery week would earn a +2.5% step.
+  //
+  // A recovery week does not *progress*, but it still *autoregulates* — the ±5%
+  // RPE thermostat is deliberately deload-unaware (grilled and decided; see the
+  // addendum). Only the earned overload step is suppressed.
+  //
+  // NOTE: the 'retest' branch is currently unreachable via the load chain — no
+  // retest-week session carries a `loadPctRange` exercise, so `resolveEffective`
+  // returns before consulting the flag. Kept because it is correct if the retest
+  // protocol ever gains a weighted exercise, and pinned by an `[IB-028]` sweep
+  // so that change fails loudly. Do not read it as covered behaviour.
+  holdProgressionFor({ ctx = null, dayLog = null } = {}) {
+    if (painCheckInSignal(dayLog?.readiness?.pain)?.severity === 'amber') return 'pain-amber';
+    if (ctx?.retest) return 'retest';
+    if (ctx?.deload) return 'deload';
+    return null;
   },
 
   // Resolve effective kg for today's session, applying:
