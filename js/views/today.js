@@ -6,7 +6,7 @@ import { Loads } from '../loads.js';
 import { Warmup } from '../warmup.js';
 import { Replan } from '../replan.js';
 import { Monitoring } from '../monitoring.js';
-import { daysBetween, localIso, today as todayIso, addDays as addDaysIso } from '../dates.js';
+import { today as todayIso, addDays as addDaysIso } from '../dates.js';
 import { inputVisibility, repsLabel, actualHasResult, howto, unitLabel } from '../exercise-inputs.js';
 import { escHtml as esc } from '../ui.js';
 import { DRILL_CATEGORIES, WARMUP_DRILLS } from '../drills.js';
@@ -493,10 +493,10 @@ export function renderToday(root) {
   const dayLog = Storage.getDay(date) || {};
   const readiness = dayLog.readiness || { sleep:3, soreness:3, fatigue:3 };
   const { multiplier, label: rdLabel, key: rdKey, avg: rdAvg } = Loads.computeReadinessMultiplier(readiness);
-  // ADR-0015: readiness gating for climbing (non-kg) sessions — gates on the
-  // stable `key` tier from Loads (never the display label, which is free to
-  // be reworded without silently disabling the gating).
-  const readinessGateLabel = rdKey === 'lighter' ? 'lighter' : rdKey === 'rest' ? 'suggestRest' : null;
+  // ADR-0015: readiness gating for climbing (non-kg) sessions. The key→label
+  // adapter is Program's (IB-032) — it owns the label vocabulary its
+  // readiness-gate pass matches on.
+  const readinessGateLabel = Program.readinessGateLabel(rdKey);
   const session = Program.build(activePlan, date, Storage.get().benchmarks, {
     label: readinessGateLabel,
     acceptRestSwap: dayLog.acceptedReadinessSwap === true
@@ -515,23 +515,10 @@ export function renderToday(root) {
       })
     : null;
 
-  // ADR-0012: Build-Monday micro-retest gate — the Monday opening any Build
-  // run (both blocks of a double-block cycle), only when the stored max-hang
-  // BENCHMARK is >4 weeks old. Benchmark age comes from the last retest-save
-  // history entry (ADR-0014's history is the canonical freshness record) —
-  // not benchmarks.updatedAt, which any Profile edit (even bodyweight-only)
-  // bumps and would silently suppress a due micro-retest. Fallback to
-  // updatedAt (converted to a LOCAL date — it's a UTC timestamp) covers a
-  // manually-entered benchmark that has never been through a retest save.
-  const microRetest = ctx.slot === 'mon-main' && ctx.phase === 'build'
-    && Program.isBuildRunStart(Program.phasePattern(activePlan.settings), ctx.weekIdx)
-    && (() => {
-      const bm = Storage.get().benchmarks;
-      const lastRetest = (bm?.history || []).filter(e => e?.date).map(e => e.date).sort().pop();
-      const anchor = lastRetest || (bm?.updatedAt ? localIso(new Date(bm.updatedAt)) : null);
-      if (!anchor) return true; // never benchmarked at all — treat as maximally stale
-      return daysBetween(anchor, date) > Warmup.MICRO_RETEST_STALE_DAYS;
-    })();
+  // ADR-0012: Build-Monday micro-retest gate. The staleness rule itself is
+  // Warmup's (IB-032) — it lives beside the threshold and the warm-up step it
+  // gates; the view only supplies the day's context and the stored benchmarks.
+  const microRetest = Warmup.isMicroRetestDue({ ctx, benchmarks: Storage.get().benchmarks, dateISO: date });
   const { warmup, cooldown, skillDrills } = Warmup.forSession(session, { microRetest });
 
   const bannerEnv = { activePlan, date, gap, signals, readinessGateLabel, dayLog, session };
