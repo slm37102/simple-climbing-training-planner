@@ -15,6 +15,11 @@ export const DEFAULT_CYCLE_WEEKS = 12;
 // instead of stretching a single Base further. Coach consensus (Lattice, Hörst, Anderson)
 // says single-block adaptations plateau beyond ~20 wk without phase transitions.
 const DOUBLE_BLOCK_THRESHOLD = 20;
+// Fraction of the non-peak/non-taper span given to Build; Base takes the rest.
+// (~1/3 Build : 2/3 Base.) The *value*'s evidence basis is tracked separately —
+// see IB-040 — this constant only names it so the split lives in one place
+// instead of being inlined at every phase-derivation site.
+const BUILD_FRACTION = 0.33;
 
 export function clampCycleWeeks(weeks) {
   const n = Math.round(Number(weeks) || DEFAULT_CYCLE_WEEKS);
@@ -54,7 +59,7 @@ function _singleBlock(weeks, peakType) {
   const taper = taperWeeksFor(peakType);
   const remaining = weeks - peak - taper; // base + build
   // Build = ~1/3 of remaining, min 2; Base takes the rest.
-  const build = Math.max(2, Math.round(remaining * 0.33));
+  const build = Math.max(2, Math.round(remaining * BUILD_FRACTION));
   const base  = Math.max(2, remaining - build);
   return _composeSingle({ base, build, peak, taper });
 }
@@ -66,9 +71,9 @@ function _doubleBlock(weeks, peakType) {
   // Split into two sub-blocks (Base→Build each).
   const sub1 = Math.floor(remaining / 2);
   const sub2 = remaining - sub1;
-  const build1 = Math.max(2, Math.round(sub1 * 0.33));
+  const build1 = Math.max(2, Math.round(sub1 * BUILD_FRACTION));
   const base1  = Math.max(2, sub1 - build1);
-  const build2 = Math.max(2, Math.round(sub2 * 0.33));
+  const build2 = Math.max(2, Math.round(sub2 * BUILD_FRACTION));
   const base2  = Math.max(2, sub2 - build2);
   return _composeDouble({ base1, build1, base2, build2, peak, taper });
 }
