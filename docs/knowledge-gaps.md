@@ -56,6 +56,7 @@ The app was built before the research; these are the places where its decisions 
 | KG-B11 | %-of-added-load convention distorts true intensity | P2 | G1 G3 | Closed (clamp #36 2026-07-16; convention ADR-0013 #49 2026-07-17) |
 | KG-B12 | Base boulder-Saturday triples run Build-intensity (KG-B9's unfixed twin) | P2 | G1 G3 | Closed (implemented 2026-07-15) |
 | KG-B13 | Taper volume is cut twice | P3 | G2 | Closed (implemented 2026-07-16) |
+| KG-B14 | Deload/retest weeks progress finger/pull load +2.5% (full-actual clears the cut target), contradicting "deload = intensity held" | P2 | G3 | Resolved ([ADR-0009 addendum](adr/0009-intra-phase-progression.md), 2026-07-30) — graduated from IB-028; build via `/to-spec` pending |
 
 ---
 

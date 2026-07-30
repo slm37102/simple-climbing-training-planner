@@ -17,9 +17,9 @@ The **live** to-do ledger — what the app should get better at next, and what h
 
 Open P1 items. All three are **decision-gated** (trip-wire / training-content), so they are not built by `/audit-loop` inline — they live in the **[grill queue](grill-queue.md)** and are worked with **`/grill-queue`** (interactive grilling → ADR + `KG-*` decision → build path). `/audit-loop` itself drains the highest-priority *inline-buildable* item each pass.
 
-- **IB-028** (eng) — deload weeks silently progress load +2.5% against the reduced target (trip-wire 6: changes prescribed kg). Queued for grilling. Pass 1 sharpened it: the fix is one expression in `today.js`, not new plumbing.
-- **IB-014** (training) — no injury-history intake; finger load is never pre-softened. Queued for grilling.
-- **IB-024** (training) — antagonist block is pull-dominant with no vertical/scapular press. Queued for grilling.
+- **IB-028** (eng) — deload weeks silently progress load +2.5% against the reduced target. **Decided 2026-07-30** (grilled via #59 → ADR-0009 addendum + KG-B14): set `holdProgression` on deload/retest. Awaiting the build pass (`/to-spec → /to-tickets`).
+- **IB-014** (training) — no injury-history intake; finger load is never pre-softened. Queued for grilling ([#60](https://github.com/slm37102/simple-climbing-training-planner/issues/60)).
+- **IB-024** (training) — antagonist block is pull-dominant with no vertical/scapular press. Queued for grilling ([#61](https://github.com/slm37102/simple-climbing-training-planner/issues/61)).
 
 ## Items
 
@@ -27,7 +27,7 @@ Open P1 items. All three are **decision-gated** (trip-wire / training-content), 
 |----|---------|------|---|-------|--------|--------|
 | IB-014 | No injury-history intake — finger loading is only ever moderated reactively, never pre-softened | training | P1 | G3 | Open | [deep-audit §5](deep-audit.md) |
 | IB-024 | Antagonist block is pull-dominant — one pressing movement, no vertical/scapular press | training | P1 | G3 | Open | [deep-audit §7](deep-audit.md) |
-| IB-028 | Deload weeks silently progress finger/pull load +2.5%, contradicting the "deload = intensity held" invariant. **Re-verified 2026-07-29:** the suppression flag already exists and works — `resolveEffective`'s `holdProgression` (ADR-0014) — but is set only from amber pain (`today.js:973`, `:1122`), never from deload/retest. The fix is to also set that flag, not to thread a new one; `js/loads.js` need not change | eng | P1 | G3 | Open | [deep-audit §8](deep-audit.md) |
+| IB-028 | Deload weeks silently progress finger/pull load +2.5%, contradicting the "deload = intensity held" invariant. **Re-verified 2026-07-29:** the suppression flag already exists and works — `resolveEffective`'s `holdProgression` (ADR-0014) — but is set only from amber pain (`today.js:973`, `:1122`), never from deload/retest. The fix is to also set that flag, not to thread a new one; `js/loads.js` need not change | eng | P1 | G3 | **Decided** ([ADR-0009 addendum](adr/0009-intra-phase-progression.md) + KG-B14, grilled via #59, 2026-07-30) — build via `/to-spec → /to-tickets` pending | [deep-audit §8](deep-audit.md) |
 | IB-007 | ADR-0006's ≥72h high-intensity guardrail never enforced; Peak stacks its two hardest sessions 48h apart | training | P1 | G3 | Closed ([ADR-0016](adr/0016-weekly-finger-density-guard.md), 2026-07-25) | [deep-audit §3](deep-audit.md) |
 | IB-023 | Same ≥72h guardrail, seen from the injury-prevention lens | training | P1 | G3 | Closed ([ADR-0016](adr/0016-weekly-finger-density-guard.md), 2026-07-25) | [deep-audit §7](deep-audit.md) |
 | IB-001 | The advertised Lattice 80/20 polarization is not what the prescriptions deliver — the plan is concurrent/threshold | training | P2 | G1 | Open | [deep-audit §1](deep-audit.md) |
