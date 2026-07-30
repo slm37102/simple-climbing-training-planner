@@ -59,7 +59,7 @@ One test settles both how the work runs and how it ships. Read the intended diff
 
 **Any trip-wire — it's a multi-session build, and the decision comes first.** A change to prescription math can't be built inline; it needs a human decision, then a spec, then tickets, then a PR. Instead of leaving that as a dead "routed to multi-session" note that never moves, **enqueue it for grilling**:
 
-- Mint its backing **GitHub issue**, labelled `grill-queue`, **unassigned** (unassigned = unclaimed — it's the claim surface, minted here once at enqueue so a later `/grill-queue` claim is just an assign, never a create-race). Body: the one-line *decision to settle*, a pointer to the `IB-*` row + audit source, and the claim protocol (see `docs/grill-queue.md`).
+- Mint its backing **GitHub issue**, labelled `grill-queue` (no assignee — this is a solo project; a session claims later by posting a `🔒 CLAIM` comment, so an issue with no `🔒 CLAIM` is unclaimed). Mint it here once at enqueue so the claim surface exists before any session races for it. Body: the one-line *decision to settle*, a pointer to the `IB-*` row + audit source, and the claim protocol (see `docs/grill-queue.md`).
 - Add a `Queued` row to `docs/grill-queue.md` linking that issue.
 - Record the routing on the `IB-*` backlog row and sharpen the finding in place.
 

@@ -13,13 +13,13 @@ Grilling settles the **decision**; it does not ship code. Once decided, the buil
 
 ## Do this
 
-1. **Load the queue.** Read `docs/grill-queue.md`. The frontier is the highest-priority `Queued` row whose **GitHub issue is open and unassigned** (`is:issue is:open label:grill-queue no:assignee`) — many sessions run at once, so a row's markdown status can lag; the issue is the source of truth. Say the frontier and the claimable count out loud. An `IB-###` argument names the item instead.
+1. **Load the queue.** Read `docs/grill-queue.md`. The frontier is the highest-priority `Queued` row whose **GitHub issue is open with no active `🔒 CLAIM` comment** (`is:issue is:open label:grill-queue`, then read the top candidate's comments) — many sessions run at once, so a row's markdown status can lag; the issue is the source of truth. Say the frontier and the claimable count out loud. An `IB-###` argument names the item instead.
 
-2. **Claim it — on the tracker, before any work.** This is what stops two sessions grilling the same item (all sessions share one GitHub user, so the assignee is only the coarse flag). On the item's issue:
-   - Confirm it's open and unassigned; if assigned, it's taken — take the next claimable row.
-   - **Assign yourself** and post a `🔒 CLAIM` comment naming your **Claude session id**, **branch**, and **UTC time**.
-   - Re-read the comments: if an **earlier** `🔒 CLAIM` from a different session exists, **yield** (unassign, drop a one-line note) and take the next item. That ordering is the lock.
-   - A claim stale for hours on a still-open issue is a dead session — reclaim it with a `♻️ RECLAIM` comment.
+2. **Claim it — on the tracker, before any work.** This is what stops two of your sessions grilling the same item. Every session is the same GitHub user, so the claim is a comment, not an assignee. On the item's issue:
+   - Read its comments; if a non-stale `🔒 CLAIM` is already there, it's taken — take the next claimable row.
+   - Post a `🔒 CLAIM` comment naming your **Claude session id**, **branch**, and **UTC time**.
+   - Re-read the comments: if an **earlier** `🔒 CLAIM` from a different session exists, **yield** (drop a one-line "yielding to <session>" note) and take the next item. That ordering is the lock.
+   - A `🔒 CLAIM` stale for hours on a still-open issue is a dead session — reclaim it with a `♻️ RECLAIM` comment.
 
    Then mark the row `Grilling` in `docs/grill-queue.md` and read the item's full detail: its `IB-*` row in `docs/improvement-backlog.md`, the audit section it points to, and the training docs that bear on it (`docs/training-philosophy.md`, the relevant `docs/adr/`, `docs/knowledge-gaps.md`).
 
