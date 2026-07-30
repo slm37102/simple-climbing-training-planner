@@ -201,12 +201,22 @@ function displayTitle(session) {
   return (session.label || '').replace(/\s*\([^)]*\)\s*/g, ' ').trim().replace(/\s+·\s+/g, ' · ');
 }
 
+// IB-042: the flavor badge showed a bare "boulder"/"sport"/"hybrid" with no
+// explanation — the adjacent energy-system badge carries a title, this one
+// didn't. Name what the week-emphasis means, and note that on a hybrid plan the
+// label alternates automatically (so a given session may not match it — that's
+// the source of the "why does it say sport today?" confusion).
+function flavorLabel(flavor) {
+  const name = { boulder: 'bouldering', sport: 'sport / route climbing', hybrid: 'hybrid — both disciplines' }[flavor] || flavor;
+  return `Session focus this week: ${name}. On a hybrid plan this alternates automatically week to week, so a given session may not match the label.`;
+}
+
 function headerHtml(date, ctx, session) {
   const phaseName = ctx.phase.charAt(0).toUpperCase() + ctx.phase.slice(1);
   const deloadBadge = ctx.deload ? `<span class="badge deload">Deload</span>` : '';
   const retestBadge = session?.isRetest ? `<span class="badge taper">Retest</span>` : '';
-  const energyTip = session?.energySystem ? `<span class="info-badge" title="Energy system: ${session.energySystem}">i</span>` : '';
-  const flavor = ctx.flavor ? `<span class="badge focus-${ctx.flavor === 'boulder' ? 'boulder' : ctx.flavor === 'sport' ? 'sport' : 'hybrid'}">${ctx.flavor}</span>` : '';
+  const energyTip = session?.energySystem ? infoBadge('Energy system: ' + session.energySystem) : '';
+  const flavor = ctx.flavor ? `<span class="badge focus-${ctx.flavor === 'boulder' ? 'boulder' : ctx.flavor === 'sport' ? 'sport' : 'hybrid'}" title="${esc(flavorLabel(ctx.flavor))}">${ctx.flavor}</span>` : '';
   return `<div>
     <div class="eyebrow">
       <span>${prettyDate(date)}</span>
@@ -829,6 +839,26 @@ function stepper(id, value, label, step, isDefault = false, placeholder = '') {
   </div>`;
 }
 
+// Small shared idiom: a circular "i" chip whose native title tooltip carries
+// trusted, program-authored explanatory text. Used for the energy-system hint
+// and the load-chain reason[] (IB-041). Owns the escaping so every call site
+// stays consistent.
+function infoBadge(tip) {
+  return `<span class="info-badge" title="${esc(tip)}">i</span>`;
+}
+
+// IB-041: surface the load-chain provenance. `Loads.resolveForDay` builds a
+// step-by-step `reason[]` (benchmark range → decay → auto-adjust → readiness →
+// cap) that was computed but never shown; the comments in loads.js/CLAUDE.md
+// already promised "the UI tooltip". Only meaningful once a kg load is
+// suggested — the rest-suggested branch returns before the readiness step
+// annotates reason[], so it's excluded (see accSub). No reason → no badge.
+function loadReasonBadge(suggestion) {
+  const lines = suggestion?.reason?.filter(Boolean);
+  if (!lines || !lines.length) return '';
+  return ' ' + infoBadge(['Why this load:', ...lines].join('\n'));
+}
+
 // One-line summary under the accordion title: "2×5 · 62 kg suggested · RPE 8–9"
 // (hangboard/pullup) or "4 problems · RPE 8–9" (climbing-kind, from prescribedTarget)
 function accSub(ex, actual, suggestion) {
@@ -847,7 +877,7 @@ function accSub(ex, actual, suggestion) {
     else if (ex.sets) parts.push(ex.sets);
   }
   if (suggestion?.suggestedKg != null) {
-    parts.push(suggestion.restSuggested ? 'rest suggested' : `${suggestion.suggestedKg} kg suggested`);
+    parts.push(`${suggestion.suggestedKg} kg suggested` + loadReasonBadge(suggestion));
   } else if (suggestion?.restSuggested) {
     parts.push('rest suggested');
   } else if (ex.hang) {

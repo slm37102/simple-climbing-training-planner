@@ -7,7 +7,9 @@ argument-hint: "[--full to force the deep lens fan-out | IB-### to work one item
 
 # Audit loop
 
-An **on-ramp** in the `/ask-matt` sense: it generates work, files it, and merges onto the main flow. It owns the survey and the ledger. The main flow owns the build — this skill never restates `/implement`, `/tdd` or `/code-review`, it calls them.
+An **on-ramp** in the `/ask-matt` sense: it generates work, files it, and merges onto the main flow. It owns the survey and the ledger. The main flow owns the build — this skill never restates `/implement`, `/tdd` or `/code-review`, it defers to them.
+
+**Two of those skills answer to the keyboard, not to an agent.** `/implement`, `/grill-with-docs`, `/to-spec`, `/to-tickets` and `/improve-codebase-architecture` are all `disable-model-invocation: true`, so a running agent cannot call them — only the reachable four (`/tdd`, `/code-review`, `/test`, `/diagnosing-bugs`) can be invoked mid-pass. Where a stage below names an un-invokable skill, an agent does one of two things: **does the work that skill describes, inline, following its discipline**, or, when the pass is interactive and the user would rather drive, **hands back and names the slash command for them to type**. It never pretends to have invoked one. (This constraint is itself IB-051.)
 
 The ledger is `docs/improvement-backlog.md`. It is what makes the survey **cumulative**: `/improve-codebase-architecture` writes its report to a temp dir by design, so without a durable ledger nothing accrues between passes and nothing gets drained.
 
@@ -24,6 +26,10 @@ A **ratchet** turns one way. Every pass preserves these five, so the repo can on
 ## 1 · Survey
 
 Read `docs/improvement-backlog.md` first and say out loud the open count and the **frontier** — the highest-priority open item whose blockers are all closed. An `IB-###` argument names the item instead, skipping the frontier pick.
+
+If that frontier item is a trip-wire item that has already been enqueued in `docs/grill-queue.md`, it isn't this pass's inline work — its next step is a human decision via `/grill-queue`, not a build here. Note it, then take the highest-priority item that is actually buildable inline (no trip-wire) as the pass's item. That is the division of labour: this loop drains the *engineering* backlog; the grill queue drains the *decisions*.
+
+**Running several sessions at once.** Each session works its own designated branch, so commits never clobber — but two passes could still pick the *same* inline item and duplicate it, surfacing as a ledger conflict at merge. The strong cross-session claim (GitHub-issue assignment) lives in the grill queue, where sessions are long and human-driven; inline eng passes are short and cheap, so rather than mint a claim issue every pass (IB-051 removed that noise), coordinate the light way: if the user is dispatching parallel passes, give each a distinct `IB-###` argument. Absent that, a pass takes the frontier inline item and states which `IB-###` it claimed in its opening line, so a second session reading the branch/PR sees it taken and takes the next.
 
 Then run the lenses in [LENSES.md](LENSES.md). **L1–L3** are cheap and run every pass. **L4–L6** fan out to sub-agents and fire only on `--full`, or when fewer than five P1/P2 items remain open — that is what keeps a pass affordable while the queue is deep.
 
@@ -49,9 +55,15 @@ One test settles both how the work runs and how it ships. Read the intended diff
 6. A new ADR is needed, or an existing ADR's Decision is contradicted
 7. Ratchet 1 is unsatisfied
 
-**No trip-wire — build it here.** Run `/implement` in this same window. This is a single-session build.
+**No trip-wire — build it here.** A single-session build in this same window. A human runs `/implement`; an agent, which cannot invoke it, does the implement work directly following that skill's discipline, then invokes the reachable `/code-review` and `/test` to close it out.
 
-**Any trip-wire — hand it to the multi-session path.** `/grill-with-docs` to sharpen it, then `/to-spec`, then `/to-tickets`; report the tickets and stop. Each is worked later in a fresh context and ships as a PR. This is `/ask-matt` main-flow step 3 answering *yes*: a change to the training math is a multi-session build, and the same answer sends it to review rather than to `main`.
+**Any trip-wire — it's a multi-session build, and the decision comes first.** A change to prescription math can't be built inline; it needs a human decision, then a spec, then tickets, then a PR. Instead of leaving that as a dead "routed to multi-session" note that never moves, **enqueue it for grilling**:
+
+- Mint its backing **GitHub issue**, labelled `grill-queue` (no assignee — this is a solo project; a session claims later by posting a `🔒 CLAIM` comment, so an issue with no `🔒 CLAIM` is unclaimed). Mint it here once at enqueue so the claim surface exists before any session races for it. Body: the one-line *decision to settle*, a pointer to the `IB-*` row + audit source, and the claim protocol (see `docs/grill-queue.md`).
+- Add a `Queued` row to `docs/grill-queue.md` linking that issue.
+- Record the routing on the `IB-*` backlog row and sharpen the finding in place.
+
+Then tell the user it's queued and they can run **`/grill-queue`** to decide it — that skill runs the interactive `/grilling` + `/domain-modeling` grill (both invocable) and graduates the finding to an ADR + `KG-*` decision. An agent does **not** edit the trip-wired code inline. This grill-queue issue is the *decision* ticket; the *build* ticket (`ready-for-agent`, for `/implement`) is still minted downstream by the build path after the decision is settled — don't mint that one here.
 
 **Seams.** Prefer the one that already exists — a `test(...)` case in `tests/cases/*.js` calling a domain module directly, or a view mounted into a detached div. A new seam needs the user's sign-off before `/implement` starts. Name the case for its governing ID, `[IB-028] REGRESSION: …`, matching the `[ADR-0016]` / `[KG-B13]` idiom already in the suite.
 
@@ -59,11 +71,11 @@ One test settles both how the work runs and how it ships. Read the intended diff
 - `node tools/generate-sw.mjs --bump` when anything under `js/` or `css/` changed. CI hard-fails without it.
 - `node tools/generate-schedule.mjs` when `js/program.js` changed.
 
-*Done when* `/implement` has run `/code-review` and the suite has been run — or ratchet 1 has been invoked and the reason named.
+*Done when* the build's `/code-review` and the suite have both run — or ratchet 1 has been invoked and the reason named. (On a trip-wire hand-off nothing was built here, so this reduces to ratchet 1 satisfied trivially by a docs-only diff.)
 
 ## 4 · Ship and log
 
-Mint a GitHub issue for the item being worked, labelled `ready-for-agent`, so `/implement` has a ticket and the closed row has provenance. These findings are self-generated and agent-ready by construction, so `/triage` — which exists for issues that arrive raw — stays out of this flow.
+Mint a GitHub issue **only when there is a real handoff to serve** — a trip-wire item going to a separate `/implement`/PR session needs a ticket to carry it and give the closed row provenance, so label it `ready-for-agent`. A no-trip-wire item built and shipped inline in this same window has no downstream consumer for the issue, so **skip it** — the commit that closes the row is its own provenance. (Minting one anyway was noise; that was IB-051.) These findings are self-generated and agent-ready by construction, so `/triage` — which exists for issues that arrive raw — stays out of this flow either way.
 
 ```
 git checkout -b claude/ib-0NN-<slug>

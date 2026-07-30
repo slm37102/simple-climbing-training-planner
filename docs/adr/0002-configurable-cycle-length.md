@@ -34,3 +34,11 @@ The original implementation hard-coded a 12-week (84-day) macrocycle in `js/prog
 - López-Rivera E, González-Badillo JJ. *J Hum Kinet.* 2019;66:183–195. PMID 30988852. — 8-week fingerboard intervention; supports short cycle viability.
 - Lattice Training — "How long should a training cycle be?" coaching content; 12–24 week guidance with double-block recommendation for longer windows.
 - Hörst E. *Training for Climbing* (3rd ed.) — 12 to 16 week peaking cycles for sport climbers; longer base periods for capacity development.
+
+## Addendum (2026-07-29)
+
+Two later ADRs superseded parts of the "What we picked" formula above. The **cycle-length range, the Base:Build ~2:1 split, and the double-block threshold still stand** — only the taper and deload clauses changed. Recorded here (ratchet 4) so this ADR stops describing code that no longer exists; the superseding ADRs remain authoritative. This closes **IB-003**.
+
+- **Taper length is no longer `2 if weeks ≥ 14 else 1`.** ADR-0007 made taper length a function of `settings.peakType`, not cycle length: `taperWeeksFor(peakType)` returns 1 for `'comp'` and 2 for `'trip'`/`'project'` (`js/program.js`). A comp peaks on a single day (short 1-wk step-taper plus the mandatory `rest-pre-goal` day); a trip or open project rides the ~1-month peak window, so 2 wk.
+- **`buildPhasePattern` now takes `peakType`.** The signature is `buildPhasePattern(weeks, peakType = 'comp')`, because the taper clause above needs it. The back-compat `PHASE_PATTERN` export is `buildPhasePattern(12)` — i.e. the 12-week **comp** pattern — not `buildPhasePattern(DEFAULT_CYCLE_WEEKS)` as the Migration section says.
+- **Deload cadence is every 4th week, not every 3rd.** ADR-0004 changed the "Deload cadence" line from `weekIdx % 3 === 0` to a 3:1 loading pattern: `((i + 1) % 4 === 0)` within each Base/Build block (`js/program.js`). The end-of-Base-block retest replacing the old wk-3 retest is unchanged.
