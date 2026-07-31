@@ -256,17 +256,18 @@ test('[ADR-0009] total upward move capped at +5%/session; downward moves never c
   assertEq(lighter.suggestedKg, 17, '20 × 0.85 = 17, no cap on the way down');
 });
 
-// IB-028 (1/2) BASELINE — deliberately asserts the BUG, and is INVERTED by the
-// deload/retest trigger ticket (2/2) rather than deleted, so the change of
-// intent is visible in that diff instead of a case quietly vanishing.
+// IB-028 (2/2) — this case was the (1/2) BASELINE asserting the BUG (a deload
+// week earning +2.5%); it is INVERTED here rather than deleted, so the change of
+// intent is visible in the diff instead of a case quietly vanishing.
 //
 // Fixture geometry (12-wk comp, start 2026-05-04): wk3 Mon and wk4 Mon are both
 // `mon-hangboard-base`, so resolveForDay's same-session scan links them. The
 // deload cuts wk4's prescribedSets 2 → 1, so wk3's full-volume 2-set actual
-// clears the reduced target trivially and earns +2.5% — on the recovery week.
+// clears the reduced target trivially — which is exactly what used to earn the
+// step on the recovery week, and what the hold now suppresses.
 // Readiness is seeded to 4s: the default 3s average to 'lighter' (×0.85), which
 // would confound the assertion with an unrelated downscale.
-test('[IB-028] BASELINE (inverted by 2/2): a deload week still earns the +2.5% step off the previous full week', () => {
+test('[IB-028] REGRESSION: a deload week HOLDS the load off the previous full week — no +2.5% step', () => {
   resetStorage();
   const plan = Storage.getActivePlan();
   Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' });
@@ -300,12 +301,87 @@ test('[IB-028] BASELINE (inverted by 2/2): a deload week still earns the +2.5% s
     renderToday(root);
     const m = root.textContent.match(/([\d.]+) kg suggested/);
     assert(m, 'the deload-week hangboard must still render a kg suggestion');
-    assert(Number(m[1]) > 12, `BASELINE: deload week currently progresses above the previous 12kg actual (got ${m[1]})`);
+    assertEq(Number(m[1]), 12, 'the deload week must mirror the previous 12kg actual, not step above it');
+
     // IB-041 puts the reason trail in the info badge's title, not in the
     // visible text — assert there, or this silently checks nothing.
     const trail = [...root.querySelectorAll('.info-badge')].map(b => b.getAttribute('title') || '').join(' | ');
-    assert(/targets hit/i.test(trail), `BASELINE: the trail currently credits a targets-hit progression on a deload week (trail: ${trail})`);
+    assert(/deload week — progression held/i.test(trail), `the trail must name the deload as the cause (trail: ${trail})`);
+    assert(!/targets hit/i.test(trail), 'the targets-hit step must NOT be credited on a recovery week');
+    // The whole reason this ticket touched the load chain: never tell an athlete
+    // who reported no pain that their pain was amber.
+    assert(!/pain/i.test(trail), `no pain was reported, so the trail must not mention pain (trail: ${trail})`);
+
+    // Negative space — the deload's own behaviour must be untouched.
+    assert(/deload/i.test(root.textContent), 'the deload note must still be shown to the athlete');
   } finally { root.remove(); }
+
+  // ...and the ~40% volume cut itself must still fire. Asserted here rather than
+  // left to the ADR-0003/0004 cases, because "held load" and "cut sets" are the
+  // two halves of the deload invariant and this fix touches the first: a change
+  // that suppressed progression by neutering the cut would pass everything above.
+  const deloadSession = Program.build(Storage.getActivePlan(), '2026-05-25', Storage.get().benchmarks);
+  const cut = deloadSession.exercises.find(e => e.loadPctRange);
+  assertEq(cut.prescribedSets, 1, 'deload still cuts the max-hang sets (2 → 1)');
+  assertEq(cut.originalTarget ?? null, null, 'sets-cut exercises record no originalTarget — that field is for prescribedTarget cuts');
+  assert(deloadSession.deloadNote, 'the deload note must still be set on the session');
+});
+
+// The other half of the pair: an over-broad trigger that froze progression
+// everywhere would still pass the case above. This is what catches it.
+test('[IB-028] REGRESSION: an ordinary loading week still earns the +2.5% step', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' });
+  Storage.setGlobalBenchmarks({ bodyweight: 70, maxHang20mm: 30, pullup1RM: 30 });
+
+  // wk2 Mon → wk3 Mon: both hard weeks, same sessionId, so the same continuity
+  // scan applies with no deload anywhere in the pair.
+  const prevSession = Program.build(Storage.getActivePlan(), '2026-05-11', Storage.get().benchmarks);
+  const kgIdx = prevSession.exercises.findIndex(e => e.loadPctRange);
+  assert(kgIdx >= 0, 'fixture: the previous Monday must have a kg-bearing exercise');
+  Storage.setDay('2026-05-11', {
+    sessionId: prevSession.sessionId,
+    exercises: prevSession.exercises.map((e, i) => i === kgIdx
+      ? { kind: e.kind, actual: { kg: 12, rpe: 8.5, sets: 2, reps: 3 } }
+      : { kind: e.kind })
+  });
+  Storage.setDay('2026-05-18', { readiness: { sleep: 4, soreness: 4, fatigue: 4 } });
+
+  const prevCtx = Program.resolveForSettings(Storage.getActivePlan().settings, '2026-05-11');
+  const ctx = Program.resolveForSettings(Storage.getActivePlan().settings, '2026-05-18');
+  assert(!prevCtx.deload && !prevCtx.retest, 'fixture: the previous week must be a hard week too');
+  assert(!ctx.deload && !ctx.retest, 'fixture: today must be a hard week');
+
+  sessionStorage.setItem('todaySelectedDate', '2026-05-18');
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const m = root.textContent.match(/([\d.]+) kg suggested/);
+    assert(m, 'the loading-week hangboard must render a kg suggestion');
+    assert(Number(m[1]) > 12, `a hard week after a targets-hit week must still progress above 12kg (got ${m[1]})`);
+    const trail = [...root.querySelectorAll('.info-badge')].map(b => b.getAttribute('title') || '').join(' | ');
+    assert(/targets hit/i.test(trail), `the progression step must still be credited (trail: ${trail})`);
+    assert(!/progression held/i.test(trail), 'nothing should be holding progression on an ordinary loading week');
+  } finally { root.remove(); }
+});
+
+// Negative space the deload case cannot cover: a recovery week still
+// AUTOREGULATES. The grill explicitly rejected freezing the ±5% thermostat on
+// deload — a below-range RPE may still nudge upward (capped +5%). Only the
+// earned +2.5% progression step is suppressed.
+test('[IB-028] REGRESSION: a deload week still autoregulates — below-range RPE can still move the load up', () => {
+  const exercise = { kind: 'hangboard', loadPctRange: [0.8, 0.9], rpeRange: [8, 9], prescribedSets: 1, prescribedReps: 3 };
+  const benchmarks = { maxHang20mm: 20, bodyweight: 70 };
+  const args = { exercise, benchmarks, previousActualKg: 20, previousAvgRpe: 7, previousActualSets: 2, previousActualReps: 3, daysSincePrevious: 7 };
+  const held = Loads.resolveEffective({ ...args, holdProgression: 'deload' });
+  assertEq(held.suggestedKg, 21, 'RPE below range still earns the ×1.05 thermostat move on a deload week (20 → 21)');
+  assert(!held.reason.some(r => /progression held/i.test(r)),
+    'the hold line only appears when the targets-hit step was the thing suppressed — the thermostat is a different lever');
+  // And the downward direction is likewise untouched.
+  const over = Loads.resolveEffective({ ...args, previousAvgRpe: 9.5, holdProgression: 'deload' });
+  assertEq(over.suggestedKg, 19, 'RPE above range still backs off ×0.95 on a deload week');
 });
 
 // The second ADR-0009 addendum records that the retest leg of the IB-028

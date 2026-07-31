@@ -181,6 +181,78 @@ test('[IB-028] the reason trail names the cause, and a non-pain hold never claim
   }
 });
 
+// ─── IB-028 (2/2): the hold rule itself ───────────────────────────────────
+// One domain predicate owns "is progression held for this day, and why".
+// Previously the condition lived inline at both Today call sites, where it
+// could only be exercised by mounting the view (the IB-032 problem).
+
+test('[IB-028] REGRESSION: holdProgressionFor returns a cause per hold condition, and falsy on an ordinary week', () => {
+  const settings = { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' };
+  const loading = Program.resolveForSettings(settings, '2026-05-18'); // wk3 Mon — hard week
+  const deload  = Program.resolveForSettings(settings, '2026-05-25'); // wk4 Mon — natural deload
+  const retest  = Program.resolveForSettings(settings, '2026-06-08'); // wk6 Mon — forced retest-deload
+  assert(!loading.deload && !loading.retest, 'fixture: wk3 must be a hard week');
+  assert(deload.deload && !deload.retest, 'fixture: wk4 must be a natural (non-retest) deload');
+  assert(retest.retest && retest.deload, 'fixture: wk6 must be the forced retest-deload week');
+
+  // Amber = pain 3–5 that settled by morning (Silbernagel model, monitoring.js).
+  const amber = { readiness: { pain: { value: 4, settledByMorning: true } } };
+  assertEq(Monitoring.painCheckInSignal(amber.readiness.pain)?.severity, 'amber', 'fixture: this pain shape must read amber');
+  const green = { readiness: { pain: { value: 1, settledByMorning: true } } };
+  assertEq(Monitoring.painCheckInSignal(green.readiness.pain), null, 'fixture: green pain raises no signal');
+
+  assert(!Loads.holdProgressionFor({ ctx: loading, dayLog: {} }), 'ordinary loading week, no pain → no hold');
+  assert(!Loads.holdProgressionFor({ ctx: loading, dayLog: green }), 'green pain is not a hold');
+  assertEq(Loads.holdProgressionFor({ ctx: deload, dayLog: {} }), 'deload');
+  assertEq(Loads.holdProgressionFor({ ctx: retest, dayLog: {} }), 'retest', 'retest is the more specific fact on a retest-deload week');
+  assertEq(Loads.holdProgressionFor({ ctx: loading, dayLog: amber }), 'pain-amber');
+});
+
+test('[IB-028] REGRESSION: holdProgressionFor precedence — pain outranks the week, and every cause it returns is one the trail names', () => {
+  const settings = { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' };
+  const deload = Program.resolveForSettings(settings, '2026-05-25');
+  const retest = Program.resolveForSettings(settings, '2026-06-08');
+  const amber = { readiness: { pain: { value: 4, settledByMorning: true } } };
+
+  // Pain is the safety signal — it wins outright, so the athlete is told the
+  // thing that matters most rather than "deload week".
+  assertEq(Loads.holdProgressionFor({ ctx: deload, dayLog: amber }), 'pain-amber', 'pain outranks deload');
+  assertEq(Loads.holdProgressionFor({ ctx: retest, dayLog: amber }), 'pain-amber', 'pain outranks retest');
+
+  // Null-safety: an out-of-cycle or missing ctx must not throw.
+  assert(!Loads.holdProgressionFor({ ctx: null, dayLog: null }), 'null ctx and dayLog → no hold, no throw');
+  assert(!Loads.holdProgressionFor({}), 'absent inputs → no hold, no throw');
+  assert(!Loads.holdProgressionFor({ ctx: undefined, dayLog: undefined }), 'undefined inputs → no hold, no throw');
+
+  // Round-trip against the reason table: an unrecognised cause silently
+  // degrades to the neutral line (by design), so a typo would NOT fail loudly
+  // anywhere else. This is the case that would catch it — assert the literal
+  // line each cause must produce, which also pins the wording the athlete sees.
+  const exercise = { kind: 'hangboard', loadPctRange: [0.87, 0.92], rpeRange: [8, 9], prescribedSets: 2, prescribedReps: 4 };
+  const args = { exercise, benchmarks: { maxHang20mm: 20, bodyweight: 70 }, previousActualKg: 12, previousAvgRpe: 8.5, previousActualSets: 2, previousActualReps: 4, daysSincePrevious: 5 };
+  const EXPECTED_LINE = {
+    'pain-amber': 'pain amber — progression held (ADR-0014)',
+    deload: 'deload week — progression held (ADR-0009)',
+    retest: 'retest week — progression held (ADR-0009)'
+  };
+  for (const [cause, line] of Object.entries(EXPECTED_LINE)) {
+    const reason = Loads.resolveEffective({ ...args, holdProgression: cause }).reason;
+    assert(reason.includes(line),
+      `cause '${cause}' must produce exactly "${line}", not the cause-neutral fallback (got: ${reason.join(' | ')})`);
+  }
+  // Every cause the predicate can return must have such a line — otherwise a
+  // new cause would silently render as the vague fallback. (`settings` and the
+  // deload/retest contexts are already in scope from the top of this case.)
+  const causes = new Set([
+    Loads.holdProgressionFor({ ctx: deload, dayLog: {} }),
+    Loads.holdProgressionFor({ ctx: retest, dayLog: {} }),
+    Loads.holdProgressionFor({ ctx: Program.resolveForSettings(settings, '2026-05-18'), dayLog: amber })
+  ]);
+  for (const c of causes) {
+    assert(EXPECTED_LINE[c], `holdProgressionFor returned cause '${c}' with no named trail line — it would render as the vague fallback`);
+  }
+});
+
 test('[Standards] computeReadinessMultiplier exposes a stable key tier alongside the display label', () => {
   assertEq(Loads.computeReadinessMultiplier({ sleep: 5, soreness: 5, fatigue: 5 }).key, 'push');
   assertEq(Loads.computeReadinessMultiplier({ sleep: 4, soreness: 4, fatigue: 4 }).key, 'normal');
