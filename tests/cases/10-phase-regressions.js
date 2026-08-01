@@ -146,7 +146,7 @@ test('[Phase4 Q5] Storage.activeId() returns activePlanId', () => {
 
 // ─── Phase 2: C2 no adjacent deloads ─────────────────────────────────────
 
-test('[Phase2 C2] no two adjacent weeks are both deload for all supported cycle lengths', () => {
+test('[ADR-0004][Phase2 C2] no two adjacent weeks are both deload for all supported cycle lengths', () => {
   for (let w = MIN_CYCLE_WEEKS; w <= MAX_CYCLE_WEEKS; w++) {
     const p = buildPhasePattern(w);
     for (let i = 1; i < p.length; i++) {

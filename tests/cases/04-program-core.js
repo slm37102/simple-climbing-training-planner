@@ -35,7 +35,7 @@ test('Program.resolveDate before start → outOfCycle', () => {
 
 // ─── Configurable cycle length ────────────────────────────────────────────
 
-test('buildPhasePattern(12) preserves single-block shape (6 base, 3 build, 2 peak, 1 taper)', () => {
+test('[ADR-0002][ADR-0004] buildPhasePattern(12) preserves single-block shape (6 base, 3 build, 2 peak, 1 taper)', () => {
   const p = buildPhasePattern(12);
   assertEq(p.length, 12);
   const counts = { base: 0, build: 0, peak: 0, taper: 0 };
@@ -50,7 +50,7 @@ test('buildPhasePattern(12) preserves single-block shape (6 base, 3 build, 2 pea
   assert(!p[8].deload, 'wk9 should NOT be deload (3-wk build has no natural deload)');
 });
 
-test('buildPhasePattern(8) shortest single-block', () => {
+test('[ADR-0002] buildPhasePattern(8) shortest single-block', () => {
   const p = buildPhasePattern(8);
   assertEq(p.length, 8);
   assertEq(p[p.length - 1].phase, 'taper');
@@ -58,7 +58,7 @@ test('buildPhasePattern(8) shortest single-block', () => {
   assertEq(p[p.length - 3].phase, 'peak');
 });
 
-test('buildPhasePattern(16) single-block scaled', () => {
+test('[ADR-0002] buildPhasePattern(16) single-block scaled', () => {
   const p = buildPhasePattern(16);
   assertEq(p.length, 16);
   const counts = { base: 0, build: 0, peak: 0, taper: 0 };
@@ -92,7 +92,7 @@ const basePhaseCounts = weeks => {
   return c;
 };
 
-test('buildPhasePattern(24) switches to double-block', () => {
+test('[ADR-0002] buildPhasePattern(24) switches to double-block', () => {
   const p = buildPhasePattern(24);
   assertEq(p.length, 24);
   assertEq(baseToBuildTransitions(p), 2, 'double-block has two base→build transitions');
@@ -120,24 +120,24 @@ test('[IB-033] BUILD_FRACTION_OF_REMAINING applies on both derivation paths', ()
   assertEq(basePhaseCounts(MAX_CYCLE_WEEKS), { base: 25, build: 12 }, '40 wk, double block');
 });
 
-test('buildPhasePattern clamps out-of-range weeks', () => {
+test('[ADR-0002] buildPhasePattern clamps out-of-range weeks', () => {
   assertEq(buildPhasePattern(4).length, MIN_CYCLE_WEEKS);
   assertEq(buildPhasePattern(100).length, MAX_CYCLE_WEEKS);
 });
 
-test('Program.resolveDate with cycleWeeks=16 keeps day 100 inside cycle', () => {
+test('[ADR-0002] Program.resolveDate with cycleWeeks=16 keeps day 100 inside cycle', () => {
   const ctx = Program.resolveDate('2026-08-12', '2026-05-04', 16);
   assert(ctx && !ctx.outOfCycle, 'should be inside 16-wk cycle');
   assertEq(ctx.cycleWeeks, 16);
   assertEq(ctx.totalDays, 112);
 });
 
-test('Program.resolveDate with default cycleWeeks=12 → same day is outOfCycle', () => {
+test('[ADR-0002] Program.resolveDate with default cycleWeeks=12 → same day is outOfCycle', () => {
   const ctx = Program.resolveDate('2026-08-12', '2026-05-04');
   assert(!ctx || ctx.outOfCycle, '12-wk cycle ends much earlier');
 });
 
-test('Program.cycleWeeksOf falls back to default when settings missing', () => {
+test('[ADR-0002] Program.cycleWeeksOf falls back to default when settings missing', () => {
   assertEq(Program.cycleWeeksOf({}), DEFAULT_CYCLE_WEEKS);
   assertEq(Program.cycleWeeksOf({ cycleWeeks: 20 }), 20);
   assertEq(Program.cycleWeeksOf({ cycleWeeks: 5 }), MIN_CYCLE_WEEKS); // clamped
@@ -145,7 +145,7 @@ test('Program.cycleWeeksOf falls back to default when settings missing', () => {
 
 // ─── Deload semantics (volume cut, intensity held) ───────────────────────
 
-test('Deload week (non-retest) sets deloadNote and cuts prescribedSets ~40%', () => {
+test('[ADR-0003] Deload week (non-retest) sets deloadNote and cuts prescribedSets ~40%', () => {
   // wk4 of 12-wk cycle = deload but NOT retest (3:1 cadence — ADR-0004; retest is wk6)
   const ctx = Program.resolveDate('2026-05-25', '2026-05-04', 12); // start Mon 2026-05-04, wk4 Mon
   assert(ctx.deload && !ctx.retest, 'wk4 should be deload-only');
@@ -159,7 +159,7 @@ test('Deload week (non-retest) sets deloadNote and cuts prescribedSets ~40%', ()
   assert(pull.prescribedSets >= 1, 'should be ≥1');
 });
 
-test('Retest week skips volume cut (it has its own structure)', () => {
+test('[ADR-0003] Retest week skips volume cut (it has its own structure)', () => {
   // wk6 of 12-wk cycle = retest
   const ctx = Program.resolveDate('2026-06-08', '2026-05-04', 12);
   assertEq(ctx.weekIdx, 6);
