@@ -217,6 +217,19 @@ function migrate(s) {
   return s;
 }
 
+// Union two append-only retest-history arrays by date (IB-059). globalBenchmarks
+// `history` is append-only (ADR-0014, v6), but mergeRemote used to LWW-replace
+// the whole globalBenchmarks object, which dropped snapshots logged on another
+// device. Union by date instead — same-date entries dedupe (b/remote wins),
+// result sorted ascending so the retest-trajectory signal reads chronologically.
+function mergeBenchmarkHistory(a, b) {
+  const byDate = new Map();
+  for (const e of [...(a || []), ...(b || [])]) {
+    if (e && e.date) byDate.set(e.date, e);
+  }
+  return [...byDate.values()].sort((x, y) => String(x.date).localeCompare(String(y.date)));
+}
+
 let state = null;
 
 export const Storage = {
@@ -530,9 +543,20 @@ export const Storage = {
       changed = true;
     }
 
-    // Merge globalBenchmarks LWW
-    if (newer(remote.globalBenchmarks?.updatedAt, state.globalBenchmarks?.updatedAt)) {
-      state.globalBenchmarks = remote.globalBenchmarks; changed = true;
+    // Merge globalBenchmarks: scalar fields LWW on updatedAt, but `history` is
+    // append-only (ADR-0014) so union it by date (IB-059) — a wholesale replace
+    // would drop retest snapshots logged on another device, regardless of which
+    // side's updatedAt is newer.
+    if (remote.globalBenchmarks) {
+      const mergedHistory = mergeBenchmarkHistory(
+        state.globalBenchmarks?.history, remote.globalBenchmarks.history
+      );
+      if (newer(remote.globalBenchmarks.updatedAt, state.globalBenchmarks?.updatedAt)) {
+        state.globalBenchmarks = { ...remote.globalBenchmarks }; changed = true;
+      }
+      if (!state.globalBenchmarks) { state.globalBenchmarks = { ...remote.globalBenchmarks }; changed = true; }
+      if ((state.globalBenchmarks.history || []).length !== mergedHistory.length) changed = true;
+      state.globalBenchmarks.history = mergedHistory;
     }
 
     if (changed) {
