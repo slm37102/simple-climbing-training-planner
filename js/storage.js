@@ -39,8 +39,10 @@ function defaultBenchmarks() {
     bodyweight: null,
     maxHang20mm: null,
     pullup1RM: null,
-    sportGrade: null,
-    boulderGrade: null,
+    // Grades are strings — empty is '' (IB-037), matching globalBenchmarks and
+    // the mergeRemote coercion. Numeric benchmarks above stay null.
+    sportGrade: '',
+    boulderGrade: '',
     dominantStyle: 'crimp',
     dominantAngle: 'slight-overhang',
     history: [],

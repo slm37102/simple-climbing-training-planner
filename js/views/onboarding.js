@@ -414,7 +414,7 @@ export function openOnboarding({ onDone } = {}) {
     };
     if (state.discipline === 'boulder' || state.discipline === 'both') benchPatch.boulderGrade = grade;
     if (state.discipline === 'sport') benchPatch.sportGrade = grade;
-    if (state.discipline === 'both') benchPatch.sportGrade = Storage.get().benchmarks.sportGrade ?? null;
+    if (state.discipline === 'both') benchPatch.sportGrade = Storage.get().benchmarks.sportGrade ?? ''; // IB-037: grades use '' empty
     Storage.setGlobalBenchmarks(benchPatch);
     Storage.setActivePlan(newId);
 
