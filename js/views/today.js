@@ -6,7 +6,7 @@ import { Loads } from '../loads.js';
 import { Warmup } from '../warmup.js';
 import { Replan } from '../replan.js';
 import { Monitoring } from '../monitoring.js';
-import { today as todayIso, addDays as addDaysIso } from '../dates.js';
+import { today as todayIso, addDays as addDaysIso, daysBetween } from '../dates.js';
 import { inputVisibility, repsLabel, actualHasResult, howto, unitLabel } from '../exercise-inputs.js';
 import { escHtml as esc } from '../ui.js';
 import { DRILL_CATEGORIES, WARMUP_DRILLS } from '../drills.js';
@@ -126,8 +126,7 @@ function cycleStats(plan) {
   let totalSessions = 0;
 
   for (const [iso, entry] of Object.entries(plan.days || {})) {
-    const d = new Date(iso + 'T00:00:00');
-    const dayIdx = Math.floor((d - new Date(start + 'T00:00:00')) / 86400000);
+    const dayIdx = daysBetween(start, iso);
     if (dayIdx < 0 || dayIdx >= totalDays) continue;
 
     const exList = entry?.exercises || [];

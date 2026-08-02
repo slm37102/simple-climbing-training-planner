@@ -118,6 +118,24 @@ test('[Phase4 Q1] dates.js addDays and daysBetween round-trip', () => {
   assertEq(daysBetween('2026-06-08', base), -7, 'daysBetween negative');
 });
 
+// IB-047: the Today cycle-stats day index and the Profile comp-hint day count
+// were inline `Math.floor((d - start)/86400000)` / `Math.round(...)` copies of
+// daysBetween; they now call the helper. Pin the exact semantics the migrated
+// call sites depend on (floor, arg order = daysBetween(from, to)) so a future
+// change to daysBetween can't silently shift those readouts.
+test('[IB-047] daysBetween matches the inline day-diff the views used to compute', () => {
+  const start = '2026-05-04';
+  for (const iso of ['2026-05-04', '2026-05-05', '2026-06-08', '2026-07-27', '2026-05-03']) {
+    const inline = Math.floor(
+      (new Date(iso + 'T00:00:00') - new Date(start + 'T00:00:00')) / 86400000
+    );
+    assertEq(daysBetween(start, iso), inline, `daysBetween(start, ${iso}) === inline floor`);
+  }
+  // Profile comp-hint: days from today→start, positive when the cycle is ahead.
+  assertEq(daysBetween('2026-05-04', '2026-05-11'), 7, 'cycle starts in 7 days');
+  assertEq(daysBetween('2026-05-11', '2026-05-04'), -7, 'cycle started 7 days ago');
+});
+
 test('[Phase4 Q1] dates.js snapToMonday snaps any weekday to Monday', () => {
   assertEq(datesSnapToMonday('2026-06-01'), '2026-06-01', 'Monday stays');
   assertEq(datesSnapToMonday('2026-06-03'), '2026-06-01', 'Wednesday → Monday');
