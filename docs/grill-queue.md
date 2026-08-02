@@ -50,6 +50,7 @@ The **Issue** column is the claim surface — an open issue with no active `🔒
 |----|--------------------|---|--------------------|--------|
 | IB-014 | What injury-history intake should exist, and how should it pre-soften finger load (vs. today's purely reactive moderation)? | P1 | [#60](https://github.com/slm37102/simple-climbing-training-planner/issues/60) | Queued |
 | IB-024 | Should the antagonist block gain a vertical/scapular press, and what/where? | P1 | [#61](https://github.com/slm37102/simple-climbing-training-planner/issues/61) | Queued |
+| IB-056 | Should taper weeks hold the +2.5% targets-hit progression (like deload/retest now do), or does the taper *want* its near-max touch to creep? | P2 | [#68](https://github.com/slm37102/simple-climbing-training-planner/issues/68) | Queued |
 
 ## Decided
 
