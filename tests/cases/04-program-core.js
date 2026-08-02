@@ -76,6 +76,17 @@ test('buildPhasePattern peakType scales taper: comp 1 wk, trip/project 2 wk (ADR
   assertEq(taperWeeks(buildPhasePattern(12)), 1, 'default peakType is comp');
 });
 
+// IB-004: 'project' has no distinct macrocycle behaviour — it is identical to
+// 'trip' (both 2-wk taper), so the Profile label must not promise a "rolling"
+// taper that doesn't exist. Pin the equivalence: if someone ever gives project
+// its own shape, this fails and the honest label needs revisiting too.
+test('[IB-004] peakType project and trip produce identical phase patterns', () => {
+  for (const w of [8, 12, 16, 24, MAX_CYCLE_WEEKS]) {
+    assertEq(buildPhasePattern(w, 'project'), buildPhasePattern(w, 'trip'),
+      `project === trip pattern at ${w} wk`);
+  }
+});
+
 // A double block is two Base→Build cycles before Peak, so counting the
 // base→build transitions is how these cases tell the two shapes apart.
 const baseToBuildTransitions = pattern => {

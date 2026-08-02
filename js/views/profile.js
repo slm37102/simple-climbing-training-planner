@@ -199,7 +199,7 @@ export function renderProfile(root) {
         <select id="pf-peakType">
           <option value="comp" ${(settings.peakType || 'comp') === 'comp' ? 'selected' : ''}>Comp — 1-wk taper + rest day before</option>
           <option value="trip" ${settings.peakType === 'trip' ? 'selected' : ''}>Trip — 2-wk taper</option>
-          <option value="project" ${settings.peakType === 'project' ? 'selected' : ''}>Project — 2-wk rolling taper</option>
+          <option value="project" ${settings.peakType === 'project' ? 'selected' : ''}>Project — 2-wk taper (open window)</option>
         </select>
       </div>
       <div class="field">
