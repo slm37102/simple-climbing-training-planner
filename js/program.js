@@ -5,7 +5,7 @@
 //
 // See docs/training-philosophy.md and docs/adr/0002-configurable-cycle-length.md for rationale.
 
-import { snapToMonday, addDays } from './dates.js';
+import { snapToMonday, addDays, daysBetween } from './dates.js';
 import { SKILL_DRILLS } from './drills.js';
 
 export const MIN_CYCLE_WEEKS = 8;
@@ -1207,9 +1207,8 @@ export const Program = {
   // peakType (ADR-0007) shapes the taper length; omitted → 'comp'.
   resolveDate(dateStr, startDateStr, cycleWeeks = DEFAULT_CYCLE_WEEKS, peakType = 'comp') {
     if (!startDateStr) return null;
-    const start = new Date(startDateStr + 'T00:00:00');
     const d = new Date(dateStr + 'T00:00:00');
-    const diffDays = Math.floor((d - start) / 86400000);
+    const diffDays = daysBetween(startDateStr, dateStr);
     const totalDays = cycleDays(cycleWeeks);
     // ADR-0012: totalDays/cycleWeeks carry through even when out of cycle so
     // prescribeForContext can detect the post-goal retest window (goal day
