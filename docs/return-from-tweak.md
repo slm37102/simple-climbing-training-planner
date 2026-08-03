@@ -4,6 +4,8 @@ A one-page guide for the **"finger tweaked but not injured"** episode — a nigg
 
 This is deliberately a **printed reference, not app logic** — every numeric constant below is practitioner convention or a cross-tissue extrapolation, not a validated finger-specific rule, and no RCT ranks one return-from-tweak protocol over another. Nothing in this repo enforces, checks, or gates on any of it.
 
+> **Amendment 2026-08-03 — [ADR-0017](adr/0017-finger-tweak-return-state.md) partially reverses that.** A narrow slice of this guide is being given a code consumer: the **§2 grip mechanism** (the one VALIDATED item here) and the **§1 pain gate** now drive a declared *finger-tweak return* state that lowers hangboard intensity via a ramping ceiling, forces open-hand grip, and enforces the campus "skip on any finger tweak" gate. The **§3 reload principle** is honoured as *pain-gated, not calendrical*, and **§4's red flags** become an acknowledgement screen that refuses to arm the state. **Everything else stays here and stays advisory** — the three-stage ladder, the eccentric protocol, the per-stage rep schemes and the clinical detail are unchanged and enforce nothing. The ADR is a decision; the build is pending, so as of this writing the sentence above is still literally true of the shipped code.
+
 **Not medical advice.** This is a training de-escalation checklist, not a diagnosis. If a red flag in §4 applies, or a tweak isn't trending better on the timeline below, stop and see a hand/sports-medicine professional.
 
 **Evidence labels used below** (see the linked evidence sweep for full sourcing):
