@@ -876,8 +876,9 @@ function accSub(ex, actual, suggestion) {
 }
 
 // Crisp headline target for climbing-kind exercises (gym-ready spec §2):
-// "Today's target → 4 problems", or on a deload/taper week with the original
-// struck through: "Deload target → 4 sets 2 sets".
+// "Today's target → 4 problems", or on a deload/taper week the cut value leads
+// and the original is demoted to dimmed strikethrough: "Deload target → 2 sets 4 sets"
+// (IB-043 — final number first, provenance dimmed, matching the readiness/ramp branches).
 function targetCalloutHtml(ex) {
   if (!ex.prescribedTarget) return '';
   const { value, unit } = ex.prescribedTarget;
@@ -896,8 +897,11 @@ function targetCalloutHtml(ex) {
     }
   }
   if (ex.originalTarget) {
+    // IB-043: lead with the cut value and demote the struck-through original to
+    // dimmed provenance, mirroring the readiness/ramp branches — on a deload day
+    // the number the athlete acts on should be the headline, not the old template.
     const { value: ov, unit: ou } = ex.originalTarget;
-    return `<div class="callout deload-target"><span class="k">Deload target</span><span class="v"><s>${ov} ${unitLabel(ov, ou)}</s>${value} ${label}</span></div>`;
+    return `<div class="callout deload-target"><span class="k">Deload target</span><span class="v">${value} ${label} <span style="opacity:.6"><s>${ov} ${unitLabel(ov, ou)}</s></span></span></div>`;
   }
   // ADR-0009 Base aerobic ramp — volume stepped up from the phase template.
   if (ex.rampedFrom) {
