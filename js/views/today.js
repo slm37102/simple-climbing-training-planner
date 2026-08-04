@@ -202,12 +202,14 @@ function displayTitle(session) {
 
 // IB-042: the flavor badge showed a bare "boulder"/"sport"/"hybrid" with no
 // explanation — the adjacent energy-system badge carries a title, this one
-// didn't. Name what the week-emphasis means, and note that on a hybrid plan the
-// label alternates automatically (so a given session may not match it — that's
-// the source of the "why does it say sport today?" confusion).
+// didn't. Name what the emphasis means.
+// IB-052: the badge now reflects THIS session's content-flavor (session.styleFlavor),
+// not the raw week-alternation — so on a hybrid Build sport-parity Thursday it reads
+// "boulder" to match the limit-bouldering session, instead of contradicting it. The
+// old "may not match the label" caveat is retired because it now does match.
 function flavorLabel(flavor) {
   const name = { boulder: 'bouldering', sport: 'sport / route climbing', hybrid: 'hybrid — both disciplines' }[flavor] || flavor;
-  return `Session focus this week: ${name}. On a hybrid plan this alternates automatically week to week, so a given session may not match the label.`;
+  return `This session's focus: ${name}. On a hybrid plan the emphasis alternates week to week and each session is labelled by what it actually trains.`;
 }
 
 function headerHtml(date, ctx, session) {
@@ -215,7 +217,11 @@ function headerHtml(date, ctx, session) {
   const deloadBadge = ctx.deload ? `<span class="badge deload">Deload</span>` : '';
   const retestBadge = session?.isRetest ? `<span class="badge taper">Retest</span>` : '';
   const energyTip = session?.energySystem ? infoBadge('Energy system: ' + session.energySystem) : '';
-  const flavor = ctx.flavor ? `<span class="badge focus-${ctx.flavor === 'boulder' ? 'boulder' : ctx.flavor === 'sport' ? 'sport' : 'hybrid'}" title="${esc(flavorLabel(ctx.flavor))}">${ctx.flavor}</span>` : '';
+  // IB-052: prefer the session's day-level content-flavor over the week-level
+  // ctx.flavor, so the badge names the session actually prescribed. Falls back to
+  // ctx.flavor (e.g. the post-goal retest card, which carries no session flavor).
+  const dayFlavor = session?.styleFlavor ?? ctx.flavor;
+  const flavor = dayFlavor ? `<span class="badge focus-${dayFlavor === 'boulder' ? 'boulder' : dayFlavor === 'sport' ? 'sport' : 'hybrid'}" title="${esc(flavorLabel(dayFlavor))}">${dayFlavor}</span>` : '';
   return `<div>
     <div class="eyebrow">
       <span>${prettyDate(date)}</span>

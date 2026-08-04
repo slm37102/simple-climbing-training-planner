@@ -1130,6 +1130,13 @@ function finishSession(session, env) {
   if (env) {
     out.phase = env.phase;
     out.flavor = env.resolvedFlavor;
+    // IB-052: the day's actual content-flavor, which the hybridBuildMix override
+    // (ADR-0010/KG-A10) can pull away from the week-level `flavor` — a hybrid
+    // Build sport-parity Thursday is force-built as limit bouldering. `flavor`
+    // stays week-level (constant across the week, [Phase1 C1]; the schedule
+    // generator reads it as "<flavor>-flavor week"); `styleFlavor` lets the Today
+    // badge name the session actually prescribed instead of contradicting it.
+    out.styleFlavor = env.styleFlavor;
     out.focus = env.focus;
     out.deload = env.deload;
     out.retest = env.retest;
