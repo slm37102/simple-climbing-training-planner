@@ -57,7 +57,7 @@ Key invariants worth preserving when editing:
 
 When you add a settings field, add it to `defaultSettings()` AND let `migrate()` shallow-merge it onto loaded state (already done — just keep the pattern).
 
-**`sw.js` is generated, not hand-edited.** After changing anything under `js/` or `css/`, run `node tools/generate-sw.mjs --bump` — it regenerates the `SHELL` list and increments the `CACHE` version so PWA clients pick up the new payload. CI **hard-fails** the deploy when `js/`/`css/` changed but the `CACHE` line did not (`.github/workflows/firebase-deploy.yml`), so don't skip the bump. Bumping the schema still means bumping `SCHEMA_VERSION` in `js/storage.js` as well.
+**`sw.js` is generated, not hand-edited.** After changing anything under `js/` or `css/`, run `node tools/generate-sw.mjs` — it regenerates the `SHELL` list and sets the `CACHE` key to a content hash of the shell assets so PWA clients pick up the new payload. There is no `--bump`: the key is derived from content (IB-055), so regeneration is idempotent and two branches can't collide on a version. CI **hard-fails** the deploy when `js/`/`css/` changed but the `CACHE` line did not (`.github/workflows/firebase-deploy.yml`) — i.e. a forgotten regeneration — so don't skip it. Bumping the schema still means bumping `SCHEMA_VERSION` in `js/storage.js` as well.
 
 ## Key conventions
 
@@ -84,6 +84,6 @@ When you add a settings field, add it to `defaultSettings()` AND let `migrate()`
 
 Use the conventional commit subject + Co-authored-by trailer (see existing log). Push goes to `origin/main` at <https://github.com/slm37102/simple-climbing-training-planner>.
 
-**Deploy is automatic.** A push to `main` triggers `.github/workflows/firebase-deploy.yml`, which first **fails the run** if `js/`/`css/` changed without a `CACHE` bump in `sw.js` (so run `node tools/generate-sw.mjs --bump` before pushing), then deploys to Firebase Hosting. No manual `firebase deploy` is needed for the normal path. (For a manual deploy you'd still run `firebase deploy --only hosting`.)
+**Deploy is automatic.** A push to `main` triggers `.github/workflows/firebase-deploy.yml`, which first **fails the run** if `js/`/`css/` changed without a `CACHE` change in `sw.js` (so run `node tools/generate-sw.mjs` before pushing), then deploys to Firebase Hosting. No manual `firebase deploy` is needed for the normal path. (For a manual deploy you'd still run `firebase deploy --only hosting`.)
 
 Hosting URL: <https://simple-climbing-planner.web.app>
