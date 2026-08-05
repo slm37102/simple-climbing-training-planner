@@ -258,3 +258,37 @@ test('[ADR-0013] REGRESSION: Today tab shows a "set bodyweight" hint when bodywe
     assert(/set your bodyweight/i.test(root.textContent), 'expected a "set bodyweight" hint somewhere in the rendered Today tab');
   } finally { root.remove(); }
 });
+
+test('[IB-052] hybrid Build sport-parity Thursday: session.styleFlavor is boulder while week flavor stays sport', () => {
+  // wk8 Thu (2026-06-25) is a sport-parity week, but hybridBuildMix force-builds
+  // Thursday as limit bouldering (ADR-0010). The week-level `flavor` must stay
+  // 'sport' (constant across the week, schedule-consumed), but the day-level
+  // `styleFlavor` must name what this session actually trains: boulder.
+  const ctx = Program.resolveDate('2026-06-25', '2026-05-04', 12);
+  assertEq(ctx.flavor, 'sport', 'sanity: wk8 is the sport-parity week');
+  const thu = Program.prescribeForContext(ctx, 'hybrid');
+  assertEq(thu.sessionId, 'thu-limit', 'sanity: Thursday is limit bouldering');
+  assertEq(thu.flavor, 'sport', 'week-level flavor stays sport (invariant + schedule)');
+  assertEq(thu.styleFlavor, 'boulder', 'day-level content-flavor reflects the boulder session');
+  // Saturday of the same week is a genuine sport session — styleFlavor tracks it.
+  const sat = Program.prescribeForContext(Program.resolveDate('2026-06-27', '2026-05-04', 12), 'hybrid');
+  assertEq(sat.sessionId, 'sat-6060-threshold');
+  assertEq(sat.styleFlavor, 'sport', 'Saturday content-flavor is sport, matching the threshold session');
+});
+
+test('[IB-052] REGRESSION: Today badge on a sport-parity Thursday reads "boulder", not the contradicting "sport"', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan(); // default focus 'hybrid'
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' });
+  sessionStorage.setItem('todaySelectedDate', '2026-06-25'); // wk8 Thu — sport week, boulder session
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const badge = root.querySelector('.badge[class*="focus-"]');
+    assert(badge, 'a flavor badge must render');
+    assertEq(badge.textContent.trim(), 'boulder', 'the badge must name the prescribed (boulder) session, not the week alternation');
+    assert(badge.className.includes('focus-boulder'), 'badge styling must match the boulder session');
+    assert(!/may not match the label/i.test(root.innerHTML), 'the retired IB-042 caveat must be gone');
+  } finally { root.remove(); }
+});

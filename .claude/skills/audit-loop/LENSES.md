@@ -11,7 +11,7 @@ Every command below runs against **your worktree** (`$WT`, opened in SKILL.md st
 `sw.js` and the tail of `docs/training-plan.md` are generated, so either can silently fall behind the source it derives from.
 
 ```
-node "$WT/tools/generate-sw.mjs"          # SHELL only, no version bump
+node "$WT/tools/generate-sw.mjs"          # regenerates SHELL + content-hash CACHE (idempotent)
 node "$WT/tools/generate-schedule.mjs"
 git -C "$WT" diff --quiet -- sw.js docs/training-plan.md   # exit 0 = in sync, 1 = drift
 git -C "$WT" checkout -- sw.js docs/training-plan.md       # ratchet 5, always

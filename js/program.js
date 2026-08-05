@@ -5,7 +5,7 @@
 //
 // See docs/training-philosophy.md and docs/adr/0002-configurable-cycle-length.md for rationale.
 
-import { snapToMonday, addDays } from './dates.js';
+import { snapToMonday, addDays, daysBetween } from './dates.js';
 import { SKILL_DRILLS } from './drills.js';
 
 export const MIN_CYCLE_WEEKS = 8;
@@ -377,9 +377,9 @@ const DENSITY_FLOOR_SEC = 150;      // 2:30 — guard for a shorter future base;
 
 // weeksLeft counts full weeks remaining AFTER the current one (final week → 0),
 // and is always an integer (`weeks - ctx.weekIdx`).
-function densityRest(weeksLeft, baseSec = DENSITY_BASE_REST_SEC) {
+function densityRest(weeksLeft) {
   if (weeksLeft == null || weeksLeft >= DENSITY_WINDOW_WEEKS) return null; // outside the window
-  const sec = Math.max(DENSITY_FLOOR_SEC, baseSec - DENSITY_STEP_SEC * (DENSITY_WINDOW_WEEKS - weeksLeft)); // wkLeft 3→-5s … 0→-20s
+  const sec = Math.max(DENSITY_FLOOR_SEC, DENSITY_BASE_REST_SEC - DENSITY_STEP_SEC * (DENSITY_WINDOW_WEEKS - weeksLeft)); // wkLeft 3→-5s … 0→-20s
   const m = Math.floor(sec / 60), s = String(sec % 60).padStart(2, '0');
   return `${m}:${s}`;
 }
@@ -492,7 +492,7 @@ function buildThuMain(phase, flavor, isDeload, weeksLeft = null, peakType = 'com
   if (phase === 'peak') {
     // ADR-0006 band 2 — anaerobic-lactic sharpening, only inside the final ≤4
     // weeks (which Peak always is), density-progressed toward the goal date.
-    const rest = densityRest(weeksLeft, 240) || '4:00';
+    const rest = densityRest(weeksLeft) || '4:00';
     return {
       sessionId: 'thu-3030-lactic',
       label: '30/30 lactic sharpening (Peak)',
@@ -615,7 +615,7 @@ function buildSatMain(phase, flavor, isDeload, weeksLeft = null, peakType = 'com
     }
     // build — single-system session (ADR-0006): the capacity circuit is
     // the work; open-climb mileage is explicitly optional cool-down volume.
-    const triplesRest = densityRest(weeksLeft, 240) || '4 min';
+    const triplesRest = densityRest(weeksLeft) || '4 min';
     return {
       sessionId: 'sat-boulder-triples',
       label: 'Boulder triples + open climb',
@@ -646,7 +646,7 @@ function buildSatMain(phase, flavor, isDeload, weeksLeft = null, peakType = 'com
   if (phase === 'build') {
     // Band-1 anaerobic-capacity work; rest tightens 5s/week once inside the
     // final 4 weeks of the cycle (ADR-0006 density progression).
-    const rest = densityRest(weeksLeft, 240) || '4 min';
+    const rest = densityRest(weeksLeft) || '4 min';
     return {
       sessionId: 'sat-4x4-build',
       label: '4×4 power-endurance (Build)',
@@ -1130,6 +1130,13 @@ function finishSession(session, env) {
   if (env) {
     out.phase = env.phase;
     out.flavor = env.resolvedFlavor;
+    // IB-052: the day's actual content-flavor, which the hybridBuildMix override
+    // (ADR-0010/KG-A10) can pull away from the week-level `flavor` — a hybrid
+    // Build sport-parity Thursday is force-built as limit bouldering. `flavor`
+    // stays week-level (constant across the week, [Phase1 C1]; the schedule
+    // generator reads it as "<flavor>-flavor week"); `styleFlavor` lets the Today
+    // badge name the session actually prescribed instead of contradicting it.
+    out.styleFlavor = env.styleFlavor;
     out.focus = env.focus;
     out.deload = env.deload;
     out.retest = env.retest;
@@ -1207,9 +1214,8 @@ export const Program = {
   // peakType (ADR-0007) shapes the taper length; omitted → 'comp'.
   resolveDate(dateStr, startDateStr, cycleWeeks = DEFAULT_CYCLE_WEEKS, peakType = 'comp') {
     if (!startDateStr) return null;
-    const start = new Date(startDateStr + 'T00:00:00');
     const d = new Date(dateStr + 'T00:00:00');
-    const diffDays = Math.floor((d - start) / 86400000);
+    const diffDays = daysBetween(startDateStr, dateStr);
     const totalDays = cycleDays(cycleWeeks);
     // ADR-0012: totalDays/cycleWeeks carry through even when out of cycle so
     // prescribeForContext can detect the post-goal retest window (goal day

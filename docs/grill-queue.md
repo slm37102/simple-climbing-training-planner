@@ -50,9 +50,9 @@ The **Issue** column is the claim surface — an open issue with no active `🔒
 |----|--------------------|---|--------------------|--------|
 | IB-014 | What injury-history intake should exist, and how should it pre-soften finger load (vs. today's purely reactive moderation)? | P1 | [#60](https://github.com/slm37102/simple-climbing-training-planner/issues/60) | **Decided** → [ADR-0017](adr/0017-finger-tweak-return-state.md) |
 | IB-024 | Should the antagonist block gain a vertical/scapular press, and what/where? | P1 | [#61](https://github.com/slm37102/simple-climbing-training-planner/issues/61) | Queued |
-| IB-056 | Should taper weeks hold the +2.5% targets-hit progression? | P2 | [#68](https://github.com/slm37102/simple-climbing-training-planner/issues/68) | Queued |
-| IB-030 | Should the deload × readiness-Lighter volume stack have a combined floor? | P3 | [#69](https://github.com/slm37102/simple-climbing-training-planner/issues/69) | Queued |
-| IB-058 | Should a day with no readiness check-in default to Normal or Lighter? | P3 | [#70](https://github.com/slm37102/simple-climbing-training-planner/issues/70) | Queued |
+| IB-056 | Should taper weeks hold the +2.5% targets-hit progression (like deload/retest now do), or does the taper *want* its near-max touch to creep? | P2 | [#68](https://github.com/slm37102/simple-climbing-training-planner/issues/68) | Queued |
+| IB-058 | Should a day with **no readiness check-in** default to Normal (×1.0, matching `computeReadinessMultiplier(null)`) or stay at today's `{3,3,3}` = Lighter (×0.85 + RPE cap)? | P2 | [#70](https://github.com/slm37102/simple-climbing-training-planner/issues/70) | Queued |
+| IB-030 | On a deload + Lighter-readiness day, climbing volume is cut ×0.6 then ×0.85 = ×0.51 with no combined floor — is that intended, or should a floor apply? | P3 | [#69](https://github.com/slm37102/simple-climbing-training-planner/issues/69) | Queued |
 
 ## Decided
 
