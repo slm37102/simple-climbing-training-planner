@@ -15,7 +15,7 @@ The **live** to-do ledger — what the app should get better at next, and what h
 
 ## Frontier
 
-Decision-gated P1 items — not built by `/audit-loop` inline; they live in the **[grill queue](grill-queue.md)** and are worked with **`/grill-queue`** (interactive grilling → ADR + `KG-*` decision → build path). `/audit-loop` itself drains the highest-priority *inline-buildable* item each pass. **As of 2026-08-05 the frontier is empty of undecided items** — IB-056 (2026-08-05), IB-024 (2026-08-05) and IB-014 (2026-08-03) are all decided and awaiting the build path; **IB-028 cleared on 2026-07-31**, decided, spec'd, built and merged (PRs #65 + #66). The next grill-queue frontier is IB-030 ([#69](https://github.com/slm37102/simple-climbing-training-planner/issues/69)).
+Decision-gated P1 items — not built by `/audit-loop` inline; they live in the **[grill queue](grill-queue.md)** and are worked with **`/grill-queue`** (interactive grilling → ADR + `KG-*` decision → build path). `/audit-loop` itself drains the highest-priority *inline-buildable* item each pass. **As of 2026-08-05 the frontier is empty of undecided items** — IB-056 (2026-08-05), IB-024 (2026-08-05) and IB-014 (2026-08-03) are all decided and awaiting the build path; **IB-028 cleared on 2026-07-31**, decided, spec'd, built and merged (PRs #65 + #66). The next grill-queue frontier is IB-058 ([#70](https://github.com/slm37102/simple-climbing-training-planner/issues/70)) — IB-030 ([#69](https://github.com/slm37102/simple-climbing-training-planner/issues/69)) decided 2026-08-05.
 
 _This list is now empty of open decision-gated items._
 
@@ -65,7 +65,7 @@ _This list is now empty of open decision-gated items._
 | IB-025 | Fingers never receive an intensity deload; deload/retest weeks hold near-max hangboard load | training | P3 | G3 | Open | [deep-audit §7](deep-audit.md) |
 | IB-026 | Default 12-week cycle runs five consecutive loaded weeks into a single-week comp taper | training | P3 | G2, G3 | Open | [deep-audit §7](deep-audit.md) |
 | IB-027 | No cumulative finger-load ceiling; the +5% cap is per-session only while hangboard recurs weekly | training | P3 | G3 | Open | [deep-audit §7](deep-audit.md) |
-| IB-030 | Deload cut and readiness-"Lighter" scaling stack multiplicatively on climbing volume with no combined floor (~×0.51) | eng | P3 | G1 | Open | [deep-audit §8](deep-audit.md) |
+| IB-030 | Deload cut and readiness-"Lighter" scaling stack multiplicatively on climbing volume with no combined floor (~×0.51) | eng | P3 | G1 | **Decided** ([ADR-0015 addendum](adr/0015-readiness-gating-climbing-sessions.md) / KG-B18, 2026-08-05) — cut volume **once**: readiness gate skips ×0.85 volume-scaling when a cut already stamped `originalTarget`, keeps RPE cap + swaps; note reworded intensity-only. No floor (rejected as cross-pass state), no schema/load-chain change. Ready for `/to-spec` | [deep-audit §8](deep-audit.md) |
 | IB-031 | RPE-drift monitoring signal and the `autoAdjust` thermostat react to the same input at cross purposes | eng | P3 | — | Open | [deep-audit §8](deep-audit.md) |
 | IB-034 | Coaching knowledge is hardcoded as branching JS in `program.js`, not editable structured data | eng | P3 | — | Open | [deep-audit §9](deep-audit.md) |
 | IB-035 | Test suite is browser-only with no CLI runner; sync, charts and service worker partially uncovered | eng | P3 | — | Open | [deep-audit §9](deep-audit.md) |
