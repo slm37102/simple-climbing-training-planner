@@ -105,3 +105,73 @@ test('Storage: optional.done boolean persists', () => {
   const back = Storage.getDay('2026-05-20');
   assertEq(back.exercises[0].actual.done, true);
 });
+
+// ─── Schema migration: legacy flat state → multi-plan shape (IB-061) ────────
+// The v3→v6 chain is the path a returning user who last opened the app before
+// the multi-plan rework hits on load. Only v5→v6 had a round-trip case
+// (15-monitoring.js); the earlier steps — especially the v3→v4 structural wrap
+// that reshapes {settings,benchmarks,days} into {plans,activePlanId,...} — had
+// none, so a regression that dropped a returning user's logged history would
+// pass silently. `importJson` can't reach it (it throws unless `plans` already
+// exists), so the migration runs only via the LocalStorage load path: seed the
+// key and call Storage.init(). Characterization test — pins current behaviour.
+test('[IB-061] v3→v6 load-path migration wraps a legacy flat state into a plan, preserving days/settings/benchmarks', () => {
+  resetStorage();
+  const legacy = {
+    version: 3,
+    settings: { cycleWeeks: 16, peakType: 'trip', startDate: '2026-01-05', units: 'lb' },
+    benchmarks: {
+      bodyweight: 68, maxHang20mm: 22, pullup1RM: 30, sportGrade: '7a', boulderGrade: 'V6',
+      history: [{ date: '2026-01-01', maxHang20mm: 22, pullup1RM: 30 }],
+    },
+    days: { '2026-01-06': { exercises: [{ id: 'e1', name: 'Max hangs', kind: 'hangboard', actual: { kg: 20, sets: 4, reps: 5, rpe: 8 } }] } },
+  };
+  localStorage.setItem('climb-planner:state', JSON.stringify(legacy));
+  Storage.init();
+
+  const raw = Storage.raw();
+  assertEq(raw.version, 6, 'the whole v3→v6 chain runs to the current version on load');
+  assert(raw.plans && typeof raw.plans === 'object' && !Array.isArray(raw.plans), 'v3→v4 wraps the flat state into a plans object');
+  assert(!('settings' in raw) && !('benchmarks' in raw) && !('days' in raw), 'the old flat top-level keys are removed by v3→v4');
+  const plan = raw.plans[raw.activePlanId];
+  assert(plan, 'activePlanId points at a real plan');
+
+  // The returning user's logged history must survive the wrap — the data-loss guard.
+  assertEq(Object.keys(plan.days), ['2026-01-06'], 'logged days are preserved into the plan');
+  assertEq(plan.days['2026-01-06'].exercises[0].actual.kg, 20, 'logged actuals survive the migration');
+
+  // User settings carried into the plan (not reset to defaults).
+  assertEq(plan.settings.cycleWeeks, 16, 'cycleWeeks carried into the plan');
+  assertEq(plan.settings.peakType, 'trip', 'peakType carried into the plan');
+  assertEq(plan.settings.units, 'lb', 'units carried into the plan');
+
+  // Benchmark scalars promoted to globalBenchmarks (v4→v5); per-plan history preserved.
+  assertEq(raw.globalBenchmarks.maxHang20mm, 22, 'benchmark scalars promoted to globalBenchmarks');
+  assertEq(raw.globalBenchmarks.sportGrade, '7a', 'grade strings promoted to globalBenchmarks');
+  assertEq(plan.benchmarks.history, [{ date: '2026-01-01', maxHang20mm: 22, pullup1RM: 30 }], 'legacy per-plan retest history preserved on the plan');
+  // v6 invariant: globalBenchmarks.history is always an array. (The legacy
+  // per-plan history is NOT promoted into it — it stays on the plan; whether
+  // that promotion is owed is a separate migrate-level question, trip-wire 4.)
+  assert(Array.isArray(raw.globalBenchmarks.history), 'globalBenchmarks.history is an array after v6');
+});
+
+test('[IB-061] load-path migration is idempotent — re-init on the migrated state does not corrupt it', () => {
+  resetStorage();
+  const legacy = {
+    version: 3,
+    settings: { cycleWeeks: 12, peakType: 'comp' },
+    benchmarks: { bodyweight: 70, maxHang20mm: 20, pullup1RM: 28 },
+    days: { '2026-02-02': { exercises: [{ name: 'Repeaters', kind: 'hangboard', actual: { kg: 15 } }] } },
+  };
+  localStorage.setItem('climb-planner:state', JSON.stringify(legacy));
+  Storage.init();
+  const firstPlanId = Storage.raw().activePlanId;
+
+  // A second load reads the just-saved v6 state and must migrate to a no-op.
+  Storage.init();
+  const raw = Storage.raw();
+  assertEq(raw.version, 6, 're-init keeps the state at v6');
+  assertEq(Object.keys(raw.plans).length, 1, 're-init does not duplicate the plan');
+  assertEq(raw.activePlanId, firstPlanId, 'the active plan id is stable across re-init');
+  assertEq(raw.plans[raw.activePlanId].days['2026-02-02'].exercises[0].actual.kg, 15, 'logged data survives a second load');
+});
