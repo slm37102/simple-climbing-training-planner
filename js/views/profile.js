@@ -4,7 +4,7 @@ import { Storage } from '../storage.js';
 import { Program } from '../program.js';
 import { Loads } from '../loads.js';
 import { Sync } from '../sync.js';
-import { flash, escHtml } from '../ui.js';
+import { flash, escHtml, safeColor } from '../ui.js';
 import { localIso as toLocalISO, addDays, daysBetween, mondayDow } from '../dates.js';
 import { openOnboarding } from './onboarding.js';
 import { limiterReadout } from '../limiter.js';
@@ -160,12 +160,12 @@ export function renderProfile(root) {
       return `<div class="plan-card ${isActive ? 'active-plan' : ''} ${plan.archived ? 'archived-plan' : ''}" data-plan-open="${plan.id}">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
           <div style="min-width:0">
-            <div class="pl-name"><span class="plan-dot" style="background:${plan.color}"></span> ${escHtml(plan.name)}</div>
+            <div class="pl-name"><span class="plan-dot" style="background:${safeColor(plan.color)}"></span> ${escHtml(plan.name)}</div>
             <div class="pl-sub">${planDateRange(plan)} · ${plan.focus} · ${daysLogged} day${daysLogged !== 1 ? 's' : ''} logged</div>
           </div>
           ${isActive ? '<span class="active-chip">Active</span>' : ''}
         </div>
-        <div class="pl-track"><div class="pl-bar" style="width:${pct}%;background:${plan.color}"></div></div>
+        <div class="pl-track"><div class="pl-bar" style="width:${pct}%;background:${safeColor(plan.color)}"></div></div>
         <div class="row" style="margin-top:10px;gap:6px">
           ${!isActive ? `<button class="mini-btn ghost-mini" data-action="set-active" data-pid="${plan.id}">Set active</button>` : ''}
           <button class="mini-btn ghost-mini" data-action="edit" data-pid="${plan.id}">Edit</button>

@@ -6,7 +6,7 @@ import { Storage } from '../storage.js';
 import { Program } from '../program.js';
 import { Monitoring } from '../monitoring.js';
 import { today } from '../dates.js';
-import { escHtml as esc } from '../ui.js';
+import { escHtml as esc, safeColor } from '../ui.js';
 
 export function renderLog(root) {
   let activeTab = 'feed';
@@ -486,7 +486,7 @@ export function renderLog(root) {
 
       return `<div class="card">
         <div class="row" style="margin-bottom:10px;gap:6px">
-          <span style="width:10px;height:10px;border-radius:50%;background:${plan.color || '#5FD4E8'};flex-shrink:0;display:inline-block"></span>
+          <span style="width:10px;height:10px;border-radius:50%;background:${safeColor(plan.color)};flex-shrink:0;display:inline-block"></span>
           <b>${esc(plan.name)}</b>
         </div>
         ${phaseRows}

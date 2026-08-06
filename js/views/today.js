@@ -8,7 +8,7 @@ import { Replan } from '../replan.js';
 import { Monitoring } from '../monitoring.js';
 import { today as todayIso, addDays as addDaysIso, daysBetween } from '../dates.js';
 import { inputVisibility, repsLabel, actualHasResult, howto, unitLabel } from '../exercise-inputs.js';
-import { escHtml as esc } from '../ui.js';
+import { escHtml as esc, safeColor } from '../ui.js';
 import { DRILL_CATEGORIES, WARMUP_DRILLS } from '../drills.js';
 
 const SELECTED_DATE_KEY = 'todaySelectedDate';
@@ -445,7 +445,7 @@ export function renderToday(root) {
   let planSwitcherHtml = '';
   if (allPlans.length >= 2) {
     const tabs = allPlans.map(p =>
-      `<button class="plan-tab ${p.id === activePlan.id ? 'active' : ''}" data-plan-id="${p.id}" style="--plan-color:${p.color}">
+      `<button class="plan-tab ${p.id === activePlan.id ? 'active' : ''}" data-plan-id="${p.id}" style="--plan-color:${safeColor(p.color)}">
         ${esc(p.name)}
       </button>`
     ).join('');
