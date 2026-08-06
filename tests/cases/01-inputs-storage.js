@@ -202,3 +202,30 @@ test('[IB-062] duplicatePlan makes a deep, independent copy: fresh id, default (
   assert(Storage.getPlan(srcId).days['2026-01-06'] != null, "the source's original logged day survives duplication");
   assertEq(Storage.getPlan(copyId).days['2026-02-02'].exercises[0].actual.kg, 99, 'the copy keeps its own logged day');
 });
+
+// ─── v2→v3 legacy `actual` string parse (IB-063) ────────────────────────────
+// IB-061 covered the v3→v6 chain but *explicitly* left the earlier v2→v3 step
+// uncovered. A pre-v3 state stored `exercise.actual` as a free string like
+// "5x2 @ 62kg RPE 9"; the migration must parse it into structured fields via
+// `parseLegacyActual`'s three regexes, or a returning user's historical logged
+// results silently blank on the one-time upgrade (data loss). Only reachable
+// via the LocalStorage load path (importJson throws without `plans`).
+test('[IB-063] v2→v3 migration parses a legacy string `actual` into structured {sets,reps,kg,rpe,raw}', () => {
+  resetStorage();
+  localStorage.setItem('climb-planner:state', JSON.stringify({
+    version: 2,
+    settings: {},
+    benchmarks: {},
+    days: { '2026-01-06': { exercises: [{ name: 'Max hangs', actual: '5x2 @ 62kg RPE 9' }] } },
+  }));
+  Storage.init();                                        // runs migrate() v2→v3→…→v6
+
+  const raw = Storage.raw();
+  assertEq(raw.version, 6, 'the whole chain runs from v2 to the current version on load');
+  const a = raw.plans[raw.activePlanId].days['2026-01-06'].exercises[0].actual;
+  assertEq(a.sets, 5, 'sets parsed from "5x2"');
+  assertEq(a.reps, 2, 'reps parsed from "5x2"');
+  assertEq(a.kg,   62, 'kg parsed from "@ 62kg"');
+  assertEq(a.rpe,  9,  'rpe parsed from "RPE 9"');
+  assertEq(a.raw, '5x2 @ 62kg RPE 9', 'the original string is preserved as raw');
+});
