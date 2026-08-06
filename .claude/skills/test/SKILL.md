@@ -1,13 +1,23 @@
 ---
 name: test
-description: Run or extend this repo's in-browser smoke test suite (tests/index.html) for the simple-climbing-training-planner PWA. There is no CLI test runner and no test framework — use this skill whenever the user asks to run tests, verify a bug fix, check a storage/schema change, or add a test case for this project, even if they just say "test this" or "make sure this didn't break anything."
+description: Run or extend this repo's in-browser smoke test suite (tests/index.html) for the simple-climbing-training-planner PWA. Run it headlessly with `node tools/run-tests.mjs`, or open the page. There is no test framework — use this skill whenever the user asks to run tests, verify a bug fix, check a storage/schema change, or add a test case for this project, even if they just say "test this" or "make sure this didn't break anything."
 ---
 
 # Running this project's test suite
 
-There is **no build, no lint, no CLI test runner** for this repo. Tests are an in-browser smoke suite: `tests/index.html` is the shell, `tests/harness.js` is the runner (`test`/`assert`/`assertEq`/`resetStorage`), and the cases live in **`tests/cases/*.js`** — one ES module per domain area, imported by the page in display order.
+There is **no build, no lint, and no test framework** for this repo. Tests are an in-browser smoke suite: `tests/index.html` is the shell, `tests/harness.js` is the runner (`test`/`assert`/`assertEq`/`resetStorage`), and the cases live in **`tests/cases/*.js`** — one ES module per domain area, imported by the page in display order.
 
 ## Running the suite
+
+**Headless (the fast path — CI, pre-push, "did I break anything"):**
+
+```
+node tools/run-tests.mjs
+```
+
+It serves the repo, loads `/tests/` in headless Chromium, waits for the harness to finish, prints the `N passed, M failed` summary with any failing case names, and exits **0 when green, 1 on any failure**. It only *drives* the existing suite — no test framework, `tests/` unchanged (IB-035). Needs **Playwright** (a dev/CI tool, not an app dependency): `npm i -g playwright && npx playwright install chromium`. If Playwright or a browser is missing the runner says exactly how to install it and exits non-zero.
+
+**In a browser (for stepping through / inspecting DOM):**
 
 1. Serve the repo root as static files (see the project's Commands): `npx http-server . -p 8765 -c-1` or `python -m http.server 8765`.
 2. Open `http://127.0.0.1:8765/tests/` — tests auto-run on load.
