@@ -5,7 +5,8 @@
 // file carries the same block so moving tests between files stays trivial.
 import { test, assert, assertEq, resetStorage, localIso, addIsoDays } from '../harness.js';
 import { Storage, newer } from '../../js/storage.js';
-import { Program, buildPhasePattern, hardPhasePos, DEFAULT_CYCLE_WEEKS, MIN_CYCLE_WEEKS, MAX_CYCLE_WEEKS } from '../../js/program.js';
+import { Program, buildPhasePattern, hardPhasePos, DEFAULT_CYCLE_WEEKS, MIN_CYCLE_WEEKS, MAX_CYCLE_WEEKS,
+         PHASE_PATTERN, clampCycleWeeks, cycleDays, weekFlavor } from '../../js/program.js';
 import { Loads } from '../../js/loads.js';
 import { Warmup } from '../../js/warmup.js';
 import { SKILL_DRILLS, DRILL_CATEGORIES, WARMUP_DRILLS } from '../../js/drills.js';
@@ -411,4 +412,53 @@ test('[ADR-0007] taper week gets a step volume cut with taperNote, intensity hel
   // the pre-fix double-cut result of 1.
   assertEq(pull.prescribedSets, 2, 'taper pull-up 4 (pre-cut) sets → cut to 2');
   assert(pull.pctRange[0] >= 0.75, 'intensity must be held through the taper cut');
+});
+
+// ─── IB-069: core program.js exports that had no direct coverage ──────────
+// Found by the pass-44 L6 sweep (exported symbols no test case referenced).
+// These are small, but each is stated as an invariant in the domain-invariants
+// skill, so an unpinned one is a claim no test would catch going stale.
+
+test('[IB-069] PHASE_PATTERN is the frozen 12-week COMP pattern, not "whatever the default is"', () => {
+  // Both the ADR-0002 addendum and the domain-invariants skill describe this
+  // export as buildPhasePattern(12) — a back-compat shape. It must therefore
+  // NOT track DEFAULT_CYCLE_WEEKS: re-tuning the default must not re-shape it.
+  assertEq(PHASE_PATTERN.length, 12);
+  const expected = buildPhasePattern(12, 'comp');
+  assertEq(JSON.stringify(PHASE_PATTERN), JSON.stringify(expected),
+    'PHASE_PATTERN must equal buildPhasePattern(12, "comp")');
+  // comp ⇒ a single taper week (trip/project would give 2) — the peakType half
+  // of the contract, which a bare buildPhasePattern(12) call would default into
+  // silently rather than state.
+  assertEq(PHASE_PATTERN.filter(w => w.phase === 'taper').length, 1,
+    'comp pattern has exactly one taper week');
+});
+
+test('[IB-069] clampCycleWeeks bounds, rounds, and falls back on garbage', () => {
+  assertEq(clampCycleWeeks(MIN_CYCLE_WEEKS - 5), MIN_CYCLE_WEEKS, 'clamps up to the floor');
+  assertEq(clampCycleWeeks(MAX_CYCLE_WEEKS + 5), MAX_CYCLE_WEEKS, 'clamps down to the ceiling');
+  assertEq(clampCycleWeeks(MIN_CYCLE_WEEKS), MIN_CYCLE_WEEKS, 'floor itself is allowed');
+  assertEq(clampCycleWeeks(MAX_CYCLE_WEEKS), MAX_CYCLE_WEEKS, 'ceiling itself is allowed');
+  assertEq(clampCycleWeeks(12.4), 12, 'rounds to nearest');
+  assertEq(clampCycleWeeks(12.6), 13, 'rounds to nearest');
+  assertEq(clampCycleWeeks('16'), 16, 'numeric strings coerce');
+  // Number(x) || DEFAULT means every falsy/NaN input lands on the default,
+  // including 0 — that is the intended behaviour, not an accident.
+  for (const junk of [null, undefined, 0, '', 'abc', NaN]) {
+    assertEq(clampCycleWeeks(junk), DEFAULT_CYCLE_WEEKS,
+      `garbage input ${JSON.stringify(junk)} should fall back to the default`);
+  }
+});
+
+test('[IB-069] cycleDays is clampCycleWeeks × 7, so it inherits the same guards', () => {
+  assertEq(cycleDays(12), 84);
+  assertEq(cycleDays(MAX_CYCLE_WEEKS + 100), MAX_CYCLE_WEEKS * 7, 'out-of-range weeks are clamped first');
+  assertEq(cycleDays('abc'), DEFAULT_CYCLE_WEEKS * 7, 'garbage falls back before multiplying');
+});
+
+test('[IB-069] weekFlavor alternates boulder (odd) / sport (even) from week 1', () => {
+  assertEq(weekFlavor(1), 'boulder');
+  assertEq(weekFlavor(2), 'sport');
+  assertEq(weekFlavor(11), 'boulder');
+  assertEq(weekFlavor(12), 'sport');
 });

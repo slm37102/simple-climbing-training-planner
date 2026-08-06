@@ -127,10 +127,17 @@ function _composeDouble({ base1, build1, base2, build2, peak, taper }) {
   return arr;
 }
 
-// Back-compat export: the 12-week default pattern as a static array.
+// Back-compat export: the 12-week COMP pattern as a static array.
 // Existing callers that read PHASE_PATTERN keep working; new code should call
-// Program.phasePattern(plan) or buildPhasePattern(weeks).
-export const PHASE_PATTERN = buildPhasePattern(DEFAULT_CYCLE_WEEKS);
+// Program.phasePattern(plan) or buildPhasePattern(weeks, peakType).
+//
+// IB-069 — pinned to a literal 12, not DEFAULT_CYCLE_WEEKS. Both the ADR-0002
+// addendum and the domain-invariants skill describe this as `buildPhasePattern(12)`,
+// i.e. a frozen back-compat shape; binding it to the default instead meant that
+// re-tuning DEFAULT_CYCLE_WEEKS would silently re-shape a "back-compat" export.
+// The two coincide today (DEFAULT_CYCLE_WEEKS === 12) — this pins the guarantee
+// the docs already claim, rather than leaving it a coincidence.
+export const PHASE_PATTERN = buildPhasePattern(12, 'comp');
 
 // Boulder-emphasis on odd weeks, sport-emphasis on even weeks (alternating).
 export function weekFlavor(weekIdx /* 1..N */) {
