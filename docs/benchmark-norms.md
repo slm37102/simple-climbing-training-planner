@@ -40,8 +40,23 @@ added kg  = bodyweight_kg × (ADDED %BW ÷ 100)
 
 ## Finger strength — two-arm, 20mm edge, 7-second hang, half-crimp or open (Lattice, 901 participants)
 
-This is the same measurement this app's `maxHang20mm` benchmark tracks (two-arm, added kg). Confidence:
-**medium** — the source dataset is large but proprietary/self-selected, and see the [important caveat](#the-uncomfortable-part-how-much-this-actually-predicts) on predictive power below.
+This is *nearly* — but **not exactly** — the measurement this app's `maxHang20mm` benchmark tracks. Both
+are two-arm added kg on a 20mm edge in half-crimp or open, but the **hang durations differ**: the Lattice
+table above is a **7-second** hang, while the app tests a **10-second** hold ("Max 10s hang on 20mm edge",
+`js/program.js:710`/`:724`; labelled "best 10s hang on 20mm" in Profile and onboarding). An earlier version
+of this line claimed the two were the same measurement; that was wrong, and `js/limiter.js` compares them
+directly with **no 7s↔10s conversion** (**IB-020**).
+
+**Direction and size of the error.** A maximal 10s hold is sustainable only at *lower* added load than a
+maximal 7s hold, so `maxHang20mm` reads systematically **low** against this table — biasing the limiter
+readout toward "below the norm band → fingers are a limiter." The bias is real but **bounded**: the
+readout's "meaningfully below" branch requires a full grade step (`GRADE_STEP_ADDED_PCT = 0.06`, i.e. 6pp
+of bodyweight), while the 7s→10s load delta is a few percent of bodyweight, so it can flip a borderline
+verdict but not a clear one. Which way to resolve it — retest at 7s, apply a documented conversion, or
+widen the threshold to absorb the difference — is an open training-content decision, not settled here.
+
+Confidence: **medium** — the source dataset is large but proprietary/self-selected, and see the
+[important caveat](#the-uncomfortable-part-how-much-this-actually-predicts) on predictive power below.
 
 | Grade | TOTAL %BW | ADDED %BW (app's unit) | Added kg @ 70kg bodyweight |
 |-------|-----------|--------------------------|----------------------------|
