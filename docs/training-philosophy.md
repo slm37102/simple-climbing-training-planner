@@ -44,9 +44,21 @@ Concretely, a Base week's three loaded sessions are one easy (Saturday) and two 
 
 For longer cycles the planner switches to a **double-block** structure above 20 weeks (ADR 0002). This mirrors Lattice's stated preference for repeating base→build mesocycles in annual plans over a single long base period.
 
-## Deload cadence (3:1 — every 4th week)
+## Deload cadence (3:1 — every 4th week, with a remainder into the Base retest)
 
 Three weeks hard, one week deload — across Base and Build. The last Base deload is also a **retest** (re-measure max hang, weighted pull-up 1RM, current best boulder grade). Updated benchmarks reset load prescriptions for the Build phase. This 3:1 cadence matches Lattice's published default and sits inside Hörst's "every 3–4 weeks of hard training" bound. Decided in [ADR-0004](adr/0004-deload-cadence-3-to-1.md) and implemented 2026-07-04 (`(i+1)%4` in `buildPhasePattern`) — the code previously deloaded every 3rd week, a 2:1 cadence mislabeled "3:1" (see [KG-B3](knowledge-gaps-archive.md#kg-b3--deload-cadence-code-is-21-doc-says-31-lattices-31-is-every-4th-week-p2-g1g3), Closed).
+
+**The cadence is not uniform at the end of Base** — worth knowing before reading a generated schedule. `buildPhasePattern` lays the `(i+1)%4` deloads down first, then **forces the last Base week to be the retest** (itself a deload), then suppresses a natural deload that would land immediately before it (`js/program.js:85–93`; constraint C2, pinned by `[ADR-0004][Phase2 C2]`). So the loading run *into* the retest is whatever the phase arithmetic leaves over — not always three weeks:
+
+| Cycle | Base weeks | Recovery weeks in Base | Hard run into the retest |
+|-------|-----------|------------------------|--------------------------|
+| 12-wk comp (default) | 6 | 4, 6 (retest) | **1** week |
+| 14-wk comp | 7 | 4, 7 (retest) | 2 weeks |
+| 16-wk comp | 9 | 4, 9 (retest) | **4** weeks |
+| 12-wk trip / project | 5 | 5 (retest) only — C2 suppresses the wk-4 deload | **4** weeks |
+| 20-wk comp | 11 | 4, 8, 11 (retest) | 2 weeks |
+
+Both directions of the deviation are consequences of that arithmetic rather than choices: the short run (12-wk comp) errs toward recovery, which is G3-consistent, while the 4-week runs sit at the outer edge of Hörst's "every 3–4 weeks" bound. Making the run uniformly three weeks would mean *relocating* the retest deload, not deleting a deload — removing the wk-4 one at 12-wk comp yields five consecutive hard weeks into the retest (`H H H H H R`), breaking the very bound the cadence exists to honour. So this is **documented rather than "fixed"**, per **IB-038** ([`deep-audit.md`](deep-audit.md) §10, which recommends exactly this wording change and rejects the schedule-changing alternative as self-defeating). The structural questions — whether that truncated final block is the right shape at all — stay open as **IB-005** and **IB-002**.
 
 ## Half-crimp dominance in Base
 
