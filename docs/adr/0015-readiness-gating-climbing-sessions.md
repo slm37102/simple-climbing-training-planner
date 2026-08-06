@@ -77,3 +77,43 @@ A **combined floor** (the audit's alternative — "never below ~0.5 of the autho
 - **No schema bump, no load-chain (`js/loads.js`) change** — this is a single prescription-pass edit.
 
 Considered-and-rejected, and the composition rule this narrows, are recorded here rather than reopening the body.
+
+---
+
+## Addendum (2026-08-06): a day with no readiness check-in is Normal, not Lighter
+
+Adjudicates **IB-058 / KG-B19** ([grill-queue #70](https://github.com/slm37102/simple-climbing-training-planner/issues/70)). Governs the *input* side of this ADR: what readiness value the readiness-gate pass runs on when the athlete hasn't checked in.
+
+### What was wrong
+
+`js/views/today.js` substituted a fabricated `{ sleep:3, soreness:3, fatigue:3 }` whenever a day carried no readiness check-in — in **two** places:
+
+1. **Render** (`today.js:494`) — `const readiness = dayLog.readiness || { sleep:3, soreness:3, fatigue:3 };`, then `Loads.computeReadinessMultiplier(readiness)`.
+2. **Persist** (`today.js:1078`) — `getOrInitDay()` wrote `readiness: cur.readiness || { sleep:3, soreness:3, fatigue:3 }`, so saving *anything* on a day (a set, a note, a session-feel tap) without touching the readiness pills **froze** `{3,3,3}` into the day record.
+
+`{3,3,3}` averages **3.0**, and `computeReadinessMultiplier` returns **Lighter (×0.85)** for `avg ≥ 2.5 && < 3.5` — Normal requires `≥ 3.5`. So merely *viewing or logging* a session without a check-in silently down-regulated **every** climbing session (target ×0.85 via the readiness-gate pass + the ≤8.5 RPE cap) and the hangboard/pull-up kg suggestion (×0.85).
+
+Three facts, all verified against current source, showed this was a defect and not a designed default:
+
+- **It defeats the function's own contract.** `computeReadinessMultiplier(null)` returns **Normal (×1.0)** — "no data → neutral." The view fabricated a value *specifically to avoid* passing the no-data case the function already handles, inverting its answer from Normal to Lighter.
+- **The neutral point of the 1–5 scale is 4, not 3.** The monitoring suite pegs `{4,4,4}` as its flat/normal baseline (`tests/cases/15-monitoring.js:36`) and explicitly asserts `computeReadinessMultiplier({4,4,4}).key === 'normal'` (`:258`). On this scale 4 = "fine," 3 = "mildly below par." Fabricating a **3** out of silence invents a mildly-sub-par report the athlete never made.
+- **The rest of the system already treats no-check-in as no-data.** `readinessScore` (`js/monitoring.js:20`) returns `null` for an absent readiness object *and* for one missing any of sleep/soreness/fatigue, so the `readinessTrend` signal (ADR-0014) already ignores un-filled days. `today.js` was the lone dissenter — and its persisted `{3,3,3}` actively **polluted** that baseline with a fabricated 3.0 the athlete never reported.
+
+**Impact:** systematic, silent **under-dosing** — an athlete who doesn't fill readiness before viewing/logging trains chronically light across a whole macrocycle. That is a **G1/G2** goal-attainment risk, not a G3 one. The s/s/f pills are a *subjective wellness* signal; the actual injury gates (the pain check-in → Silbernagel model, the ADR-0016 finger-density guard, ADR-0008 layoff decay) are **separate** and fire on their own regardless of this default, so defaulting wellness to Lighter bought no tissue protection — it only under-dosed the (far more common) days the athlete simply forgot. The audit rated it software-only, which is why it routed to a decision rather than a unilateral fix.
+
+### Decision
+
+**A day with no readiness check-in is treated as Normal (×1.0).**
+
+1. **Render:** when `dayLog.readiness` is absent, pass it straight through to `computeReadinessMultiplier` (which returns Normal via its own `if (!readiness)` guard) rather than fabricating `{3,3,3}`. The "no data → Normal" contract lives in **one** place — `js/loads.js` — and the view stops second-guessing it. As a free consequence, the s/s/f pills (`readiness[key] === v`) render **unfilled**, so "haven't checked in" is now visually distinct from "deliberately logged straight-3s" (which the old `{3,3,3}` default conflated). The summary line already guards `rdAvg` (`Avg — → Normal`), so it reads correctly with no data.
+2. **Persist:** stop fabricating readiness in `getOrInitDay()` — store a readiness object only when the athlete actually set at least one pill. This keeps the stored record honest and the `readinessTrend` baseline free of manufactured data points, resting on the fact that `readinessScore` already null-handles absent/partial readiness. The pain check-in path is unaffected — a pain-only day yields `{pain:{…}}` with no s/s/f, which `readinessScore` correctly scores as `null` while the Silbernagel gates still fire.
+
+### Left deliberately untouched: the 3 → Lighter threshold
+
+`computeReadinessMultiplier`'s thresholds are **not** changed. A **deliberately-logged** straight-3 continues to read Lighter, and that is correct: on a scale whose neutral point is 4 (per the tests above), tapping all 3s is a genuine "sleep meh, a bit sore, a bit tired" report — exactly the below-par-but-not-rest day the ×0.85 lever was built for. The IB-058 defect was never "3 reads Lighter"; it was "**silence** reads as 3." Realigning the thresholds would retroactively change the meaning of every already-logged 3 and touch validated load math (KG-C7) with no evidence demanding it — out of scope, and rejected as a fold-in. If a case ever arises that a deliberate 3.0 *should* read Normal, that is its own, larger decision and belongs in a fresh queue item.
+
+### Build scope (for the later `/to-spec` pass)
+
+- `js/views/today.js`: at ~L494, pass absent readiness through instead of defaulting to `{3,3,3}` (Normal comes from `computeReadinessMultiplier`'s guard); at ~L1078, drop the `{3,3,3}` fallback in `getOrInitDay()` so readiness persists only when set.
+- Add a test in the readiness/monitoring cases pinning the no-check-in behaviour: no `dayLog.readiness` → `Normal` prescription (no ×0.85, no ≤8.5 cap), pills unfilled, and no fabricated readiness written on a save that omits the pills (so `readinessTrend` ignores the day). No existing case asserts the old `{3,3,3}` behaviour, so nothing needs un-asserting.
+- **No schema bump, no load-chain (`js/loads.js`) change** — `computeReadinessMultiplier` is unchanged; this is a view-layer default fix (render + persist).
