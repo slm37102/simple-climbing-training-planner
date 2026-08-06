@@ -229,3 +229,23 @@ test('[IB-063] v2→v3 migration parses a legacy string `actual` into structured
   assertEq(a.rpe,  9,  'rpe parsed from "RPE 9"');
   assertEq(a.raw, '5x2 @ 62kg RPE 9', 'the original string is preserved as raw');
 });
+
+// ─── deletePlan: guard the last plan + reassign active on delete (IB-065) ────
+// deletePlan must (a) throw 'Cannot delete the only plan.' when one plan
+// remains — deleting the last one would leave a plan-less state that get()
+// later throws on — and (b) move activePlanId to a survivor when the plan being
+// deleted is the active one, or the app is left pointing at a dangling id.
+test('[IB-065] deletePlan reassigns activePlanId on active-plan delete and refuses the last plan', () => {
+  resetStorage();
+  const a = Storage.getActivePlan().id;        // reset leaves one (active) plan
+  const b = Storage.addPlan({ name: 'B' });    // active stays `a`
+  Storage.deletePlan(a);                        // delete the ACTIVE plan
+  assertEq(Storage.getPlan(a), null, 'the deleted plan is gone');
+  assertEq(Storage.raw().activePlanId, b, 'activePlanId moves to the surviving plan');
+
+  let threw = false;
+  try { Storage.deletePlan(b); }
+  catch (e) { threw = true; assertEq(e.message, 'Cannot delete the only plan.', 'guard message'); }
+  assert(threw, 'deleting the only remaining plan throws');
+  assert(Storage.getPlan(b) != null, 'the last plan is not deleted after the guard fires');
+});
