@@ -437,3 +437,74 @@ test('[ADR-0014] REGRESSION: signals panel renders on the Log tab and dismiss re
     assert(!document.getElementById('logSignalsPanel').querySelector('[data-log-signal="readinessTrend"]'), 'dismissed signal should disappear from the panel');
   } finally { root.remove(); }
 });
+
+// ─── IB-070: activeSignals — the dismissal filter itself ──────────────────
+// Found by the pass-45 L6 sweep: `activeSignals` had no direct test. The view
+// -level dismiss case above proves a click hides a banner; none of these three
+// properties was pinned, and each is a way a *safety* warning could vanish.
+
+const trendDays = (asOf) => {
+  const days = [];
+  for (let offset = 0; offset <= 27; offset++) {
+    const iso = addIsoDays(asOf, -offset);
+    const score = offset <= 6 ? 2 : 4;   // recent week low → readinessTrend fires
+    days.push([iso, { readiness: { sleep: score, soreness: score, fatigue: score } }]);
+  }
+  return days;
+};
+
+test('[IB-070] activeSignals dismissal is SELECTIVE — hiding one signal must not hide a co-firing one', () => {
+  const asOf = '2026-07-01';
+  const days = trendDays(asOf);
+  const dayLog = { readiness: { pain: { value: 7 } } };   // pain-red + readinessTrend both fire
+  const both = Monitoring.activeSignals({ days, benchmarkHistory: [], dayLog, asOfIso: asOf });
+  assert(both.readinessTrend && both.painCheckIn, 'fixture must fire both signals');
+
+  const dismissed = Monitoring.activeSignals({
+    days, benchmarkHistory: [], asOfIso: asOf,
+    dayLog: { ...dayLog, dismissedSignals: { readinessTrend: true } }
+  });
+  assertEq(dismissed.readinessTrend, null, 'the dismissed signal is suppressed');
+  assert(dismissed.painCheckIn, 'a co-firing pain-red signal must SURVIVE another signal\'s dismissal');
+});
+
+test('[IB-070] a dismissed signal is nulled, not deleted — the key stays so renderers can rely on the shape', () => {
+  const asOf = '2026-07-01';
+  const out = Monitoring.activeSignals({
+    days: trendDays(asOf), benchmarkHistory: [], asOfIso: asOf,
+    dayLog: { dismissedSignals: { readinessTrend: true } }
+  });
+  assert('readinessTrend' in out, 'key must remain present');
+  assertEq(out.readinessTrend, null);
+  // Every computeSignals key round-trips through the filter.
+  const raw = Monitoring.computeSignals({ days: trendDays(asOf), benchmarkHistory: [], todayPain: null, asOfIso: asOf });
+  assertEq(Object.keys(out).sort(), Object.keys(raw).sort(), 'activeSignals must not add or drop keys');
+});
+
+test('[IB-070] dismissal is scoped to the day it was made — tomorrow re-surfaces the warning', () => {
+  // dismissedSignals lives on the asOf day's log, so a dismissal must NOT be
+  // sticky across days. If this ever moves to plan settings, a dismissed
+  // pain-red would stay hidden forever — the failure this case exists to catch.
+  const asOf = '2026-07-01';
+  const days = trendDays(asOf);
+  const todayHidden = Monitoring.activeSignals({
+    days, benchmarkHistory: [], asOfIso: asOf,
+    dayLog: { dismissedSignals: { readinessTrend: true } }
+  });
+  assertEq(todayHidden.readinessTrend, null, 'dismissed on the day it was dismissed');
+
+  const tomorrow = Monitoring.activeSignals({
+    days, benchmarkHistory: [], asOfIso: asOf,
+    dayLog: {}                                  // the NEXT day's log carries no dismissals
+  });
+  assert(tomorrow.readinessTrend, 'a fresh day must re-surface the signal');
+});
+
+test('[IB-070] activeSignals tolerates a missing/!empty dayLog without throwing', () => {
+  const asOf = '2026-07-01';
+  for (const dayLog of [null, undefined, {}, { readiness: {} }, { dismissedSignals: {} }]) {
+    const out = Monitoring.activeSignals({ days: trendDays(asOf), benchmarkHistory: [], dayLog, asOfIso: asOf });
+    assert(out && typeof out === 'object', `dayLog ${JSON.stringify(dayLog)} should still yield a signal map`);
+    assert(out.readinessTrend, 'the trend signal still fires with no dismissals recorded');
+  }
+});
