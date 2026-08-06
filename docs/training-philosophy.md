@@ -68,7 +68,7 @@ Base-phase hangboard work emphasises half-crimp (or half-crimp + open-crimp mixe
 
 **Supported by controlled trials:**
 - Short-cycle (4–10 week) max-hang and repeater protocols produce measurable strength gains in trained climbers. López-Rivera & González-Badillo 2019 (PMID 30988852, n=26, 8 weeks) — significant max-hang and force gains under structured fingerboard protocols.
-- Strength-endurance specifically targeted in advanced climbers responds to short structured blocks. Mundry et al. 2021 (PMID 34188125, review).
+- Progressive **added-weight** hangboard training beats climbing alone for grip strength in advanced climbers; a decreasing-hang-time "endurance" protocol did not. Mundry et al. 2021 (PMID 34188125) — an 8-week RCT, n=30 UIAA VI–VIII, three arms (added-weight / endurance / normal climbing), seven grips; added-weight vs control p = 0.032, ES 0.36, endurance arm no different from control. This is the direct evidence for the app's *weighted, progressive* max-hang bias over timed-hang endurance work on the board. **Corrected 2026-08-06 (IB-040):** this bullet previously read "strength-endurance specifically targeted in advanced climbers responds to short structured blocks … (review)", which mislabelled an RCT as a review and **inverted the result** — the endurance arm is the one that failed to beat control.
 - Low-intensity finger loading builds finger strength comparably to maximal-load hangs, and combining the two is additive. Gilmore NK et al. 2024 (PMID 39560837, controlled study in healthy climbers).
 
 **Coaching-consensus but no controlled trial:**
@@ -86,7 +86,7 @@ Base-phase hangboard work emphasises half-crimp (or half-crimp + open-crimp mixe
 - Hörst E. *Training for Climbing*, 3rd ed. (2016).
 - Anderson M & M. *The Rock Climber's Training Manual* (2014).
 - López-Rivera E, González-Badillo JJ. *J Hum Kinet.* 2019;66:183–195. PMID 30988852.
-- Mundry S et al. *Front Sports Act Living.* 2021;3:651651. PMID 34188125.
+- Mundry S, Steinmetz G, Atkinson EJ, et al. *Sci Rep.* 2021;11:13530. PMID 34188125. (Hangboard training in advanced climbers: a randomized controlled trial.) — *Corrected 2026-08-06: previously listed as* Front Sports Act Living. *2021;3:651651, which was the wrong journal, volume and article number (IB-040).*
 - Gilmore NK et al. *Sports Medicine – Open.* 2024. PMID 39560837. (Loading programs & finger strength in climbers.)
 - Schweizer A. *J Biomech.* 2001;34(2):217–223. (A2 pulley loading in crimp grips.)
 - Vigouroux L et al. *J Biomech.* 2006;39(14):2583–2592. (Finger pulley forces under crimp.)

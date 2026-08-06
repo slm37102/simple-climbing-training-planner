@@ -30,4 +30,12 @@ Lattice Training documents this rule explicitly in their public coaching content
 - Lattice Training — *Training Series: Finger Strength* (Tom Randall): "On a deload, drop your volume by 40 to 60 percent and keep intensity at or near your normal working level."
 - Anderson M & M. *The Rock Climber's Training Manual* (2014) — Periodisation chapter; deload defined as reduced sets/reps at maintained loads.
 - Hörst E. *Training for Climbing* (3rd ed.) — Recovery week prescriptions: reduce volume, maintain finger-strength intensity.
-- Mundry S et al. *Front Sports Act Living.* 2021;3:651651. PMID 34188125. — General periodisation review; volume-deload as canonical recovery week pattern.
+- ~~Mundry S et al. *Front Sports Act Living.* 2021;3:651651. PMID 34188125. — General periodisation review; volume-deload as canonical recovery week pattern.~~ **Withdrawn 2026-08-06 — see the addendum below.**
+
+## Addendum (2026-08-06) — the Mundry citation is withdrawn; the Decision stands
+
+**The Decision above does not change** — deload remains a volume cut with intensity held. Only this ADR's source list changes, recorded here per ratchet 4 (**IB-040**).
+
+PMID 34188125 is **Mundry S, Steinmetz G, Atkinson EJ, et al. "Hangboard training in advanced climbers: A randomized controlled trial." *Sci Rep.* 2021;11:13530** — an 8-week hangboard RCT in 30 climbers measuring grip strength. It is **not** a "general periodisation review", and it says nothing about deloads or recovery-week patterns; it also carried the wrong journal, volume, and article number here (only the PMID was correct). See [ADR-0002's addendum](0002-configurable-cycle-length.md) for the full trace.
+
+This one is the least consequential of the ADRs that leaned on it: the volume-cut-with-intensity-held decision is independently supported by the three coaching sources still listed above (Lattice's explicit "drop volume 40–60%, keep intensity at or near normal working level", Anderson, and Hörst), all of which state the pattern directly. Removing Mundry costs this ADR no substantive support — it was decoration, and inaccurate decoration at that.
