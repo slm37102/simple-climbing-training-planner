@@ -337,6 +337,31 @@ test('[ADR-0006] Peak sport Thursday is 30/30 lactic with density-cut rest', () 
   assert(iv.prescribed.includes('3:50'), `wk10 rest should be density-cut to 3:50, got "${iv.prescribed}"`);
 });
 
+// IB-011: ADR-0006's 2026-08-06 addendum rests on the ramp being SMALL — 20s
+// total, floor never reached. Pin the whole sequence so the addendum can't
+// silently stop being true (and so nobody "fixes" the ramp by steepening it,
+// which would push the 30/30 glycolytic — the wrong direction under G3).
+test('[IB-011] the ADR-0006 density ramp totals 20s and never reaches the 2:30 floor', () => {
+  const start = '2026-05-04';                       // 12-wk comp cycle
+  const satsByWeeksLeft = { 3: '2026-07-04', 2: '2026-07-11' };
+  assert(Program.prescribeForContext(Program.resolveDate(satsByWeeksLeft[3], start, 12), 'sport')
+    .exercises[0].prescribed.includes('3:55'), 'weeksLeft 3 → 3:55');
+  // Peak Thursdays carry the ramp too (it is wired onto band 2, not only band 1)
+  const thu = wl => Program.prescribeForContext(Program.resolveDate(wl, start, 12), 'sport').exercises[0].prescribed;
+  assert(thu('2026-07-09').includes('3:50'), `weeksLeft 2 → 3:50, got "${thu('2026-07-09')}"`);
+  assert(thu('2026-07-16').includes('3:45'), `weeksLeft 1 → 3:45, got "${thu('2026-07-16')}"`);
+  // Nothing in the window ever drops to the 150s floor: the deepest cut is 3:40.
+  for (const iso of ['2026-07-04', '2026-07-09', '2026-07-11', '2026-07-16']) {
+    for (const flavor of ['sport', 'boulder']) {
+      const sess = Program.prescribeForContext(Program.resolveDate(iso, start, 12), flavor);
+      for (const ex of sess.exercises) {
+        assert(!/\b2:[0-5]\d\b/.test(ex.prescribed || ''),
+          `${iso}/${flavor}: rest fell into the 2:xx floor range — ramp steepened? got "${ex.prescribed}"`);
+      }
+    }
+  }
+});
+
 test('[ADR-0006] Sat 4×4 rest tightens only inside the final 4 weeks', () => {
   // wk9 Sat = 2026-07-04 (weeksLeft 3): 4:00 − 5s = 3:55
   const wk9 = Program.prescribeForContext(Program.resolveDate('2026-07-04', '2026-05-04', 12), 'sport');
