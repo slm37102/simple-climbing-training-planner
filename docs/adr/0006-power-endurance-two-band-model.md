@@ -12,7 +12,7 @@ Hörst and Lattice describe **two different energy-system bands**, and both fram
 
 - **Band 1 — aerobic-power / anaerobic-capacity ("the engine").** 60/60 intervals at RPE 7–8.5 at threshold [verified :423/:427]; 4×4-style capacity at RPE 8.5–9.5, 2–4 grades below max [verified :439/:487]. Trainable for ~6–8 weeks, then plateaus [verified :236]. This is Lattice's "8-week PE block", predominantly.
 - **Band 2 — anaerobic-lactic sharpening ("the peak").** 30/30 at RPE 9–10 [verified :451] and ≥1:10 work:rest bursts at RPE 9.5–10 [verified :479]. This is Hörst's last-2–4-week stimulus that overtrains if extended [verified :135/:542].
-- **Reconciliation:** Lattice's final-4-week "cut rest 5s/week" density progression [verified :459] is the mechanism that *shifts band 1 toward band 2* as the goal nears. Hörst's caution applies **only to band 2**. Both are consistent; the app's single blended prescription straddles the boundary.
+- **Reconciliation:** Lattice's final-4-week "cut rest 5s/week" density progression [verified :459] is the mechanism that *shifts band 1 toward band 2* as the goal nears. Hörst's caution applies **only to band 2**. Both are consistent; the app's single blended prescription straddles the boundary. — ⚠️ *This "shifts band 1 toward band 2" wording overstates the shipped ramp, which totals 20s (~8% off a 4:00 rest). See the [2026-08-06 addendum](#addendum-2026-08-06--the-density-progression-is-deliberately-mild-the-shifts-band-1-toward-band-2-framing-overstates-it) (IB-011); the band shift is carried by the phase structure and RPE targets, not by this cut.*
 
 ## Decision — app model (KG-A6): two-band model, phased
 
@@ -51,4 +51,25 @@ A climbing-kind prescription review ([wayfinder map #8](https://github.com/slm37
 
 **Clarification (the taxonomy was never self-contradictory):** "2–4 grades below max" is the *per-problem grade*; "near-failure" [verified 237] is the *cumulative effort* across all 16 climbs. A 4×4 works precisely because submaximal problems accumulate into near-failure — the two describe different axes, not a conflict. Running each problem at 1–2 below max instead makes the format overlap the athlete's dedicated Thursday limit bouldering (losing the distinct anaerobic-capacity/power-endurance adaptation) and adds injury exposure for no new stimulus.
 
-**Decision:** the boulder-triples 4×4 per-problem grade target is **2–3 grades below max** — a one-notch-harder narrowing of the published 2–4 band, biased for this intermediate athlete who already gets limit work elsewhere, but kept clearly submaximal so the "engine" stays distinct from the limit stimulus. RPE 8.5–9.5 and the 3–4-set / back-to-back structure are unchanged. Tracked as [KG-B7](../knowledge-gaps-archive.md#kg-b7--4×4-boulder-triples-grade-too-hard-p2-g1g3). **Implementation deferred** — this map produces the decision; the `js/program.js` edit is a separate hand-off.
+**Decision (2026-07-10):** the boulder-triples 4×4 per-problem grade target is **2–3 grades below max** — a one-notch-harder narrowing of the published 2–4 band, biased for this intermediate athlete who already gets limit work elsewhere, but kept clearly submaximal so the "engine" stays distinct from the limit stimulus. RPE 8.5–9.5 and the 3–4-set / back-to-back structure are unchanged. Tracked as [KG-B7](../knowledge-gaps-archive.md#kg-b7--4×4-boulder-triples-grade-too-hard-p2-g1g3). **Implementation deferred** — this map produces the decision; the `js/program.js` edit is a separate hand-off.
+
+## Addendum (2026-08-06) — the density progression is deliberately mild; the "shifts band 1 toward band 2" framing overstates it
+
+**No Decision changes** (ratchet 4): the two-band taxonomy, the phase mapping, and the 5s/week density cut all stand exactly as specified. What changes is this ADR's *claim about how much that cut accomplishes*. Closes **IB-011**.
+
+**What the mechanism actually does.** `densityRest(weeksLeft)` (`js/program.js`) runs only inside the final `DENSITY_WINDOW_WEEKS = 4`, subtracting `DENSITY_STEP_SEC = 5` per remaining week from `DENSITY_BASE_REST_SEC = 240`. Verified against the current code, the whole sequence is:
+
+| weeksLeft | 4+ | 3 | 2 | 1 | 0 |
+|-----------|----|----|----|----|----|
+| interval rest | *(no cut)* | 3:55 | 3:50 | 3:45 | 3:40 |
+
+That is a **20-second total reduction — about 8% off a 4-minute rest**. `DENSITY_FLOOR_SEC = 150` (2:30) never binds at the 240s base; it is a guard for a hypothetical shorter future base, not a target the ramp approaches.
+
+**Why the framing was too strong.** §Reconciliation above calls the 5s/week cut "the mechanism that *shifts band 1 toward band 2* as the goal nears." Shaving 8% off inter-interval rest is a **mild** manipulation — it nudges the stimulus, it does not transport a session across an energy-system band. The band shift is actually delivered by the **phase structure and the RPE targets** (Build 60/60 at RPE 7–8.5 and 4×4 at 8.5–9.5 → Peak 30/30 at RPE 9.5–10); the density ramp is a fine-grained top-up on that, faithful to the cited Lattice convention but not load-bearing on its own.
+
+**Two things this addendum explicitly does *not* concede**, because both were misreadings worth pinning:
+
+1. **The ramp is not mis-wired.** `densityRest` feeds the Peak 30/30 lactic session (`js/program.js:507`) as well as the two Build circuits (`:630`, `:661`) — so it *is* attached to the band-2 sharpening tool where this ADR intended, not only to the band-1 circuits.
+2. **The 60/60 block's exemption is intent, not omission.** §Decision–app-model item 1 prescribes "little density change" for the Build 60/60 band-1 block, and the code matches (`SIXTY_SIXTY_EXERCISE` is a fixed string, with the exclusion noted at its use site).
+
+**Do not "fix" this by steepening the ramp toward the 2:30 floor.** On the 30/30 that would be actively wrong: Hörst designed 30/30 to stay aerobic/low-lactate, and cutting its rest pushes it glycolytic — the wrong direction under G3, and a departure from the very Lattice convention (`5s/week`) the number is drawn from. The correct resolution is this documentation correction; the numbers stay.
