@@ -175,3 +175,30 @@ test('[IB-061] load-path migration is idempotent — re-init on the migrated sta
   assertEq(raw.activePlanId, firstPlanId, 'the active plan id is stable across re-init');
   assertEq(raw.plans[raw.activePlanId].days['2026-02-02'].exercises[0].actual.kg, 15, 'logged data survives a second load');
 });
+
+// ─── Plan duplication: deep, independent clone with empty days (IB-062) ──────
+// duplicatePlan backs a live Profile "Duplicate" button. The copy must be a
+// deep clone with a fresh id and — critically — EMPTY days: it reuses the
+// schedule/benchmarks but starts with no logged sessions. Dropping the
+// `clone.days = {}` line would silently inherit the source's entire training
+// log into the copy; a shallow clone would alias source state so logging into
+// one plan corrupts the other. Neither had any coverage.
+test('[IB-062] duplicatePlan makes a deep, independent copy: fresh id, default (copy) name, empty days', () => {
+  resetStorage();
+  const srcId = Storage.addPlan({ name: 'Base', focus: 'boulder' });
+  Storage.setDay(srcId, '2026-01-06', { exercises: [{ name: 'Max hangs', actual: { kg: 20 } }] });
+
+  const copyId = Storage.duplicatePlan(srcId);            // no name → default
+  assert(copyId !== srcId, 'the copy gets a fresh id');
+  const copy = Storage.getPlan(copyId);
+  assertEq(copy.name, 'Base (copy)', 'default name is "<source> (copy)"');
+  assertEq(copy.focus, 'boulder', 'schedule fields (focus) are carried over from the source');
+  assertEq(Object.keys(copy.days).length, 0, 'the copy starts with NO logged days — it reuses the plan, not the log');
+
+  // Deep independence: logging into the copy must not leak into the source, and
+  // the source's own logged day must stay intact.
+  Storage.setDay(copyId, '2026-02-02', { exercises: [{ name: 'Repeaters', actual: { kg: 99 } }] });
+  assertEq(Storage.getPlan(srcId).days['2026-02-02'], undefined, 'writing into the copy does not leak into the source');
+  assert(Storage.getPlan(srcId).days['2026-01-06'] != null, "the source's original logged day survives duplication");
+  assertEq(Storage.getPlan(copyId).days['2026-02-02'].exercises[0].actual.kg, 99, 'the copy keeps its own logged day');
+});
