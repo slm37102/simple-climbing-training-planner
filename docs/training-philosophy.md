@@ -29,9 +29,18 @@ The Base/Build hangboard protocols above are the decided **and implemented** des
 
 The Peak protocol was softened from the published Lattice/Anderson defaults for this athlete — see ADR 0001 (re-adjudicated against the verified research and implemented 2026-07-02; see the ADR's addendum).
 
-## Year-level shape (80/20)
+## Year-level shape and intensity distribution
 
-Even within a single macrocycle the planner reflects the **Lattice 80/20 rule**: across the year, roughly 80% of training time should be capacity / base / "easy mileage" work, 20% high-intensity. A 12-week cycle compresses this to ~50% Base, ~25% Build, ~17% Peak, ~8% Taper, but the same principle holds — most of the volume sits in Base, with Peak treated as a brief, intense expression of the work done earlier.
+**Phase duration** follows Lattice's block shape: the default 12-week cycle resolves to ~50% Base, ~25% Build, ~17% Peak, ~8% Taper (6/3/2/1 weeks at the 12-week comp shape — `buildPhasePattern`), so most of the *calendar* sits in Base, with Peak a brief, intense expression of the work done earlier. That much is accurate and implemented.
+
+**The plan is not 80/20 polarized in the intensity sense** — and this section used to claim it was. Lattice's 80/20 rule, and the Seiler-style polarized model behind it, describes an *intensity distribution* (~80% of training time genuinely easy, ~20% hard), not a phase-duration split. Mapping "half the calendar is Base" onto "80% of training is easy mileage" conflates the two. What the prescriptions actually deliver is a **concurrent / threshold-pyramidal** model:
+
+- **Genuinely easy rungs:** ARC (`sat-arc`, RPE 4–6), flash pyramid (RPE 6–7.5), and the optional easy open-climbing day (RPE 4–6). Base Saturdays alternate between the two easy rungs.
+- **Deliberately threshold-to-hard rungs, including inside Base:** Base intro max hangs (RPE 8–9, 80–85% total load), Base weighted pull-ups (RPE 7–8.5), Base Thursday projecting (RPE 7.5–9), and an explicit 60/60 threshold interval (`SIXTY_SIXTY_EXERCISE`, RPE 7–8.5) — a rung a genuinely polarized model specifically avoids.
+
+Concretely, a Base week's three loaded sessions are one easy (Saturday) and two that reach RPE 8–9 (Monday hangboard, Thursday projecting) — roughly half hard, not 80% easy.
+
+**This was corrected as a labelling fix, not a prescription change — deliberately.** The concurrent model is defensible, and arguably necessary, for an intermediate climbing 3× per week: few sessions force strength and energy systems to overlap within the week rather than separating into polarized blocks. The Base RPE 8–9 max-hang loading is also evidence-supported (~80–95% of maximal total load is consensus across Lattice and Eva López; López-Rivera & González-Badillo 2019, Medernach 2015) and is what drives the G1 progression goal. This repo's own research review is blunter still: polarized models are "emerging but lack climbing-specific research" ([`research/deep-research-report.md`](research/deep-research-report.md) — Open Questions), so 80/20 was never the better-evidenced choice here, only the better-known label. So **do not add hard work to "fill the 20%"**: reasoning from the old framing over-estimates how much easy mileage this plan contains and would push weekly high-intensity finger load above what a G3-durability-gated plan intends. Corrected per **IB-001** ([`deep-audit.md`](deep-audit.md) §1, adversarially verified); no ADR asserted the 80/20 framing and nothing in the code consumes the label. Should this athlete's frequency ever rise above 3×/week, whether to adopt a genuinely polarized distribution becomes a live training question again — it is not one today.
 
 For longer cycles the planner switches to a **double-block** structure above 20 weeks (ADR 0002). This mirrors Lattice's stated preference for repeating base→build mesocycles in annual plans over a single long base period.
 
