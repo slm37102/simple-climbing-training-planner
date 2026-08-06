@@ -48,6 +48,9 @@ The **Issue** column is the claim surface — an open issue with no active `🔒
 
 | ID | Decision to settle | P | Issue (claim here) | Status |
 |----|--------------------|---|--------------------|--------|
+| IB-064 | Should a hold week (deload/retest/taper/pain-amber) also clamp the readiness "Push" (×1.05 kg), not just the +2.5% targets-hit step? | P1 | [#76](https://github.com/slm37102/simple-climbing-training-planner/issues/76) | **Grilling** |
+| IB-029 | Should the autoregulation magnitudes self-tune from the athlete's logs, or stay honest-labeled invented defaults? | P2 | [#75](https://github.com/slm37102/simple-climbing-training-planner/issues/75) | Queued |
+| IB-020 | Finger norm table is a 7s hang but `maxHang20mm` is a 10s hold — retest at 7s, convert, or widen the threshold? | P2 | [#77](https://github.com/slm37102/simple-climbing-training-planner/issues/77) | Queued |
 | IB-014 | What injury-history intake should exist, and how should it pre-soften finger load (vs. today's purely reactive moderation)? | P1 | [#60](https://github.com/slm37102/simple-climbing-training-planner/issues/60) | **Decided** → [ADR-0017](adr/0017-finger-tweak-return-state.md) |
 | IB-024 | Should the antagonist block gain a vertical/scapular press, and what/where? | P1 | [#61](https://github.com/slm37102/simple-climbing-training-planner/issues/61) | **Decided** → [ADR-0018](adr/0018-vertical-press-in-antagonist-block.md) |
 | IB-056 | Should taper weeks hold the +2.5% targets-hit progression? | P2 | [#68](https://github.com/slm37102/simple-climbing-training-planner/issues/68) | **Decided** → [ADR-0007 addendum](adr/0007-taper-hold-intensity-peaktype.md) |
