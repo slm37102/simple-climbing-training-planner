@@ -9,7 +9,7 @@ argument-hint: "[--full to force the deep lens fan-out | IB-### to work one item
 
 An **on-ramp** in the `/ask-matt` sense: it generates work, files it, and merges onto the main flow. It owns the survey and the ledger. The main flow owns the build — this skill never restates `/implement`, `/tdd` or `/code-review`, it defers to them.
 
-**Two of those skills answer to the keyboard, not to an agent.** `/implement`, `/grill-with-docs`, `/to-spec`, `/to-tickets` and `/improve-codebase-architecture` are all `disable-model-invocation: true`, so a running agent cannot call them — only the reachable four (`/tdd`, `/code-review`, `/test`, `/diagnosing-bugs`) can be invoked mid-pass. Where a stage below names an un-invokable skill, an agent does one of two things: **does the work that skill describes, inline, following its discipline**, or, when the pass is interactive and the user would rather drive, **hands back and names the slash command for them to type**. It never pretends to have invoked one. (This constraint is itself IB-051.)
+**Several of the skills this flow leans on answer to the keyboard, not to an agent.** `/implement`, `/grill-with-docs`, `/to-spec`, `/to-tickets` and `/improve-codebase-architecture` are all `disable-model-invocation: true`, so a running agent cannot call them — only the reachable ones (`/tdd`, `/code-review`, `/test`, `/diagnosing-bugs`, and `/resolving-merge-conflicts`) can be invoked mid-pass. Where a stage below names an un-invokable skill, an agent does one of two things: **does the work that skill describes, inline, following its discipline**, or, when the pass is interactive and the user would rather drive, **hands back and names the slash command for them to type**. It never pretends to have invoked one. (This constraint is itself IB-051.)
 
 The ledger is `docs/improvement-backlog.md`. It is what makes the survey **cumulative**: `/improve-codebase-architecture` writes its report to a temp dir by design, so without a durable ledger nothing accrues between passes and nothing gets drained.
 
@@ -129,6 +129,8 @@ git -C "$WT" push -u origin claude/ib-0NN-<slug>
 # opens a PR for whatever branch the primary checkout happens to be on:
 gh pr create --head claude/ib-0NN-<slug> --title "IB-0NN: <what changed>" --label ready-for-human
 ```
+
+**If the merge conflicts** — a parallel pass reached `main` first and touched the same ledger rows, or both sides bumped `sw.js` — don't `git merge --abort` and start over. Invoke **`/resolving-merge-conflicts`** (it's model-invocable, unlike most of the main flow): it works the conflict hunk by hunk, resolving by **intent** traced to each side's primary source rather than by picking lines — a `Closed`/`Decided` row wins over the same row left `Open`, and both sides' *new* rows are kept — then finishes the operation. Re-run the suite (ratchet 1) before the push. This is the sanctioned path for the same-item / same-ledger collision the parallel-session note above predicts.
 
 Then hand the tree back (ratchet 5), once the merge or push has actually landed:
 
