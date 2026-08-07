@@ -4,12 +4,23 @@ import { Storage } from '../storage.js';
 import { Program } from '../program.js';
 import { Loads } from '../loads.js';
 import { Sync } from '../sync.js';
-import { flash, escHtml } from '../ui.js';
+import { flash, escHtml, safeColor } from '../ui.js';
 import { localIso as toLocalISO, addDays, daysBetween, mondayDow } from '../dates.js';
 import { openOnboarding } from './onboarding.js';
 import { limiterReadout } from '../limiter.js';
 
 const COLORS = ['#5FD4E8', '#F0607A', '#3FB6A8', '#E0A53C', '#6E8BF0', '#F07850'];
+
+// Climbing-style personalization (IB-015). The prescription reads
+// benchmarks.dominantStyle / dominantAngle to bias 2 anti-style boulders into
+// Base/Build bouldering sessions (KG-A10, buildAntiStyleCue in program.js); the
+// values were collected in the schema (defaults crimp/slight-overhang) but had
+// no editor, so they were stuck. These label maps are presentation only — the
+// canonical vocabulary lives with STYLE_OPPOSITES/ANGLE_OPPOSITES in program.js.
+const STYLE_CHOICES = [['crimp', 'Crimp'], ['pocket', 'Pocket'], ['sloper', 'Sloper'], ['pinch', 'Pinch']];
+const ANGLE_CHOICES = [['slab', 'Slab'], ['vert', 'Vertical'], ['slight-overhang', 'Slight OH'], ['steep', 'Steep'], ['roof', 'Roof']];
+const STYLE_READ = { crimp: 'crimps', pocket: 'pockets', sloper: 'slopers', pinch: 'pinches' };
+const ANGLE_READ = { slab: 'slab', vert: 'vertical', 'slight-overhang': 'slight overhang', steep: 'steep overhang', roof: 'roof' };
 
 function planDateRange(plan) {
   const start = Program.effectiveStart(plan.settings);
@@ -74,6 +85,34 @@ export function renderProfile(root) {
     </div>`;
   }
 
+  // Anti-style personalization block (IB-015). Read-only shows the current
+  // grip+angle; editing shows pill selectors that write benchDraft.
+  function stylePillGroup(kind, choices, current) {
+    const pills = choices.map(([val, label]) =>
+      `<div class="pill ${current === val ? 'active' : ''}" data-${kind}-pill="${val}" role="button" tabindex="0">${label}</div>`
+    ).join('');
+    return `<div class="pill-group" data-${kind}-group>${pills}</div>`;
+  }
+  function styleBlockHtml() {
+    const s = benchDraft.dominantStyle, a = benchDraft.dominantAngle;
+    const readable = (STYLE_READ[s] && ANGLE_READ[a])
+      ? `${STYLE_READ[s]} · ${ANGLE_READ[a]}`
+      : 'not set';
+    if (!benchEditing) {
+      return `<div class="bench-row" data-style-summary>
+        <div><div class="b-name">Strongest style</div><div class="b-unit">biases anti-style boulders</div></div>
+        <div class="b-val" style="font-size:.85rem;text-transform:capitalize">${readable}</div>
+      </div>`;
+    }
+    return `<div data-style-edit style="margin-top:10px">
+      <div class="b-name" style="margin-bottom:6px">Strongest grip</div>
+      ${stylePillGroup('style', STYLE_CHOICES, s)}
+      <div class="b-name" style="margin:12px 0 6px">Strongest angle</div>
+      ${stylePillGroup('angle', ANGLE_CHOICES, a)}
+      <p class="muted" style="margin:10px 0 0;font-size:.72rem">Base/Build bouldering sessions cue 2 problems in the opposite style, to train your weaknesses.</p>
+    </div>`;
+  }
+
   function benchmarksCardHtml() {
     const sugg = suggestedPullupKg();
     return `<div class="card">
@@ -86,6 +125,7 @@ export function renderProfile(root) {
         ${benchRow('maxHang20mm', 'Max-hang added load', 'kg · best 10s hang on 20mm', 1, -30)}
         ${benchRow('pullup1RM', '1RM weighted pull-up', 'kg · added weight', 1, -30)}
         ${benchRow('bodyweight', 'Bodyweight', 'kg', 0.5, 30)}
+        ${styleBlockHtml()}
       </div>
       ${sugg != null ? `<div class="callout"><span class="k">→ Suggested pull-up work load</span><span class="v">+${sugg} kg</span></div>` : ''}
     </div>`;
@@ -120,12 +160,12 @@ export function renderProfile(root) {
       return `<div class="plan-card ${isActive ? 'active-plan' : ''} ${plan.archived ? 'archived-plan' : ''}" data-plan-open="${plan.id}">
         <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
           <div style="min-width:0">
-            <div class="pl-name"><span class="plan-dot" style="background:${plan.color}"></span> ${escHtml(plan.name)}</div>
+            <div class="pl-name"><span class="plan-dot" style="background:${safeColor(plan.color)}"></span> ${escHtml(plan.name)}</div>
             <div class="pl-sub">${planDateRange(plan)} · ${plan.focus} · ${daysLogged} day${daysLogged !== 1 ? 's' : ''} logged</div>
           </div>
           ${isActive ? '<span class="active-chip">Active</span>' : ''}
         </div>
-        <div class="pl-track"><div class="pl-bar" style="width:${pct}%;background:${plan.color}"></div></div>
+        <div class="pl-track"><div class="pl-bar" style="width:${pct}%;background:${safeColor(plan.color)}"></div></div>
         <div class="row" style="margin-top:10px;gap:6px">
           ${!isActive ? `<button class="mini-btn ghost-mini" data-action="set-active" data-pid="${plan.id}">Set active</button>` : ''}
           <button class="mini-btn ghost-mini" data-action="edit" data-pid="${plan.id}">Edit</button>
@@ -487,9 +527,11 @@ export function renderProfile(root) {
       if (benchEditing) {
         // Commit
         Storage.setGlobalBenchmarks({
-          bodyweight:  benchDraft.bodyweight ?? null,
-          maxHang20mm: benchDraft.maxHang20mm ?? null,
-          pullup1RM:   benchDraft.pullup1RM ?? null,
+          bodyweight:   benchDraft.bodyweight ?? null,
+          maxHang20mm:  benchDraft.maxHang20mm ?? null,
+          pullup1RM:    benchDraft.pullup1RM ?? null,
+          dominantStyle: benchDraft.dominantStyle,
+          dominantAngle: benchDraft.dominantAngle,
         });
         flash('Benchmarks saved');
         benchEditing = false;
@@ -516,6 +558,18 @@ export function renderProfile(root) {
         benchDraft[inp.dataset.benchInput] = Number.isFinite(v) ? v : null;
       });
     });
+    // Anti-style pills (IB-015): single-select within each group, no re-render.
+    const wireStylePills = (kind, field) => {
+      root.querySelectorAll(`[data-${kind}-pill]`).forEach(pill => {
+        pill.addEventListener('click', () => {
+          benchDraft[field] = pill.dataset[`${kind}Pill`];
+          root.querySelectorAll(`[data-${kind}-pill]`).forEach(p => p.classList.remove('active'));
+          pill.classList.add('active');
+        });
+      });
+    };
+    wireStylePills('style', 'dominantStyle');
+    wireStylePills('angle', 'dominantAngle');
 
     // Plans
     document.getElementById('new-plan-btn')?.addEventListener('click', () => {
@@ -617,7 +671,7 @@ export function renderProfile(root) {
   function render() {
     if (!benchEditing || !benchDraft) {
       const bm = Storage.get().benchmarks;
-      benchDraft = { bodyweight: bm.bodyweight, maxHang20mm: bm.maxHang20mm, pullup1RM: bm.pullup1RM };
+      benchDraft = { bodyweight: bm.bodyweight, maxHang20mm: bm.maxHang20mm, pullup1RM: bm.pullup1RM, dominantStyle: bm.dominantStyle, dominantAngle: bm.dominantAngle };
     }
     let html = headHtml() + benchmarksCardHtml() + limiterCardHtml() + plansCardHtml() + settingsCardHtml();
     root.innerHTML = html;

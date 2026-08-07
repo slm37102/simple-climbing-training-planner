@@ -231,3 +231,51 @@ test('[KG-A10] threads end-to-end through Program.build(plan, dateISO, benchmark
   const noBenchmarks = Program.build(plan, '2026-05-21');
   assert(!noBenchmarks.styleNote, 'Program.build without a benchmarks arg must not add a styleNote');
 });
+
+// ─── IB-015: the Profile Benchmarks card now edits dominantStyle/dominantAngle ──
+// The anti-style fields above were schema-collected (defaults crimp/slight-
+// overhang) but had NO editor, so KG-A10 was closed-but-unusable — the cue was
+// permanently stuck at the seeded profile. The Benchmarks card now exposes pill
+// selectors; this pins the edit → save → prescription path end-to-end.
+test('[IB-015] Profile style pills persist dominantStyle/dominantAngle and change the anti-style cue', () => {
+  resetStorage();
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderProfile(root);
+    // Read-only default summary shows the seeded crimp/slight-overhang; no pills.
+    const summary = root.querySelector('[data-style-summary]');
+    assert(summary, 'style summary row should render on the Benchmarks card');
+    assert(/crimps/.test(summary.textContent) && /slight overhang/.test(summary.textContent),
+      `expected the default style summary, got "${summary.textContent}"`);
+    assert(!root.querySelector('[data-style-pill]'), 'pills must not show outside edit mode');
+
+    // Enter edit mode → pills appear with the seeded values pre-selected.
+    root.querySelector('[data-bench-toggle]').click();
+    assert(root.querySelector('[data-style-pill="crimp"]').classList.contains('active'), 'seeded grip pill must be active');
+    assert(root.querySelector('[data-angle-pill="slight-overhang"]').classList.contains('active'), 'seeded angle pill must be active');
+
+    // Pick a new profile: sloper / roof.
+    root.querySelector('[data-style-pill="sloper"]').click();
+    root.querySelector('[data-angle-pill="roof"]').click();
+    assert(root.querySelector('[data-style-pill="sloper"]').classList.contains('active'), 'clicked grip pill becomes active');
+    assert(!root.querySelector('[data-style-pill="crimp"]').classList.contains('active'), 'the previous grip pill clears (single-select)');
+
+    // Save (Done) → persists to global benchmarks.
+    root.querySelector('[data-bench-toggle]').click();
+    const bm = Storage.get().benchmarks;
+    assertEq(bm.dominantStyle, 'sloper');
+    assertEq(bm.dominantAngle, 'roof');
+
+    // The prescription cue now reflects the SAVED profile, not the old default
+    // (sloper → crimps/pockets, roof → slab/vert) — proving the editor reaches
+    // the prescription that was previously unreachable.
+    const thu = Program.prescribeForContext(Program.resolveDate('2026-05-21', '2026-05-04', 12), 'boulder', Storage.get().benchmarks);
+    assertEq(thu.styleNote, 'include 2 anti-style problems — crimps/pockets, slab or vertical');
+
+    // A fresh read-only render shows the new summary.
+    renderProfile(root);
+    const after = root.querySelector('[data-style-summary]').textContent;
+    assert(/slopers/.test(after) && /roof/.test(after), `summary should reflect the saved profile, got "${after}"`);
+  } finally { root.remove(); }
+});

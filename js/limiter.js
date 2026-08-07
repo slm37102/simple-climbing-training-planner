@@ -10,6 +10,17 @@
 // Added-%BW finger-strength norm table (Lattice, 901 participants;
 // confidence: medium — see benchmark-norms.md's caveats). Keyed by boulder
 // grade, anchored on the athlete's TARGET grade, not their current one.
+//
+// IB-020 — DURATION MISMATCH, deliberately un-corrected here: this table is a
+// 7-second hang, but `maxHang20mm` stores a 10-second hold (program.js:710).
+// A max 10s hold sits at lower added load than a max 7s one, so the stored
+// number reads low against this table and the verdict is biased toward
+// "below → fingers are a limiter". Bounded: "meaningfully below" needs a full
+// GRADE_STEP_ADDED_PCT (6pp of BW) while the 7s→10s delta is a few pp. No
+// conversion is applied because picking one (retest at 7s / convert / widen
+// the threshold) is an open training-content decision — so the readout
+// DISCLOSES the mismatch in its caveat instead of silently fudging it, the
+// same honest-labeling posture as KG-C7.
 const FINGER_NORM_ADDED_PCT = {
   V4: 0.28, V5: 0.34, V6: 0.40, V7: 0.46, V8: 0.52, V9: 0.58, V10: 0.64, V11: 0.70
 };
@@ -86,10 +97,14 @@ export function limiterReadout(benchmarks) {
   }
 
   if (!lines.length) return null;
-  return {
-    lines,
-    caveat: 'Strength explains only ~17% of grade variance at this ability tier (finger) and ~8–12% (pulling) — treat this as a sanity check, not a diagnosis.'
-  };
+  // The duration disclosure (IB-020) is only relevant when a fingers line
+  // actually rendered — it says nothing about the pulling comparison.
+  const showsFingers = lines.some(l => l.key === 'fingers');
+  const caveat = 'Strength explains only ~17% of grade variance at this ability tier (finger) and ~8–12% (pulling) — treat this as a sanity check, not a diagnosis.'
+    + (showsFingers
+      ? ' The finger norm band is measured on a 7s hang, but your benchmark is a 10s hang — a 10s hold needs less added weight, so this reads your fingers slightly low.'
+      : '');
+  return { lines, caveat };
 }
 
 export const Limiter = { limiterReadout, FINGER_NORM_ADDED_PCT, PULLUP_CEILING_ADDED_PCT };

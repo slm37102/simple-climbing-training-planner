@@ -105,3 +105,147 @@ test('Storage: optional.done boolean persists', () => {
   const back = Storage.getDay('2026-05-20');
   assertEq(back.exercises[0].actual.done, true);
 });
+
+// ─── Schema migration: legacy flat state → multi-plan shape (IB-061) ────────
+// The v3→v6 chain is the path a returning user who last opened the app before
+// the multi-plan rework hits on load. Only v5→v6 had a round-trip case
+// (15-monitoring.js); the earlier steps — especially the v3→v4 structural wrap
+// that reshapes {settings,benchmarks,days} into {plans,activePlanId,...} — had
+// none, so a regression that dropped a returning user's logged history would
+// pass silently. `importJson` can't reach it (it throws unless `plans` already
+// exists), so the migration runs only via the LocalStorage load path: seed the
+// key and call Storage.init(). Characterization test — pins current behaviour.
+test('[IB-061] v3→v6 load-path migration wraps a legacy flat state into a plan, preserving days/settings/benchmarks', () => {
+  resetStorage();
+  const legacy = {
+    version: 3,
+    settings: { cycleWeeks: 16, peakType: 'trip', startDate: '2026-01-05', units: 'lb' },
+    benchmarks: {
+      bodyweight: 68, maxHang20mm: 22, pullup1RM: 30, sportGrade: '7a', boulderGrade: 'V6',
+      history: [{ date: '2026-01-01', maxHang20mm: 22, pullup1RM: 30 }],
+    },
+    days: { '2026-01-06': { exercises: [{ id: 'e1', name: 'Max hangs', kind: 'hangboard', actual: { kg: 20, sets: 4, reps: 5, rpe: 8 } }] } },
+  };
+  localStorage.setItem('climb-planner:state', JSON.stringify(legacy));
+  Storage.init();
+
+  const raw = Storage.raw();
+  assertEq(raw.version, 6, 'the whole v3→v6 chain runs to the current version on load');
+  assert(raw.plans && typeof raw.plans === 'object' && !Array.isArray(raw.plans), 'v3→v4 wraps the flat state into a plans object');
+  assert(!('settings' in raw) && !('benchmarks' in raw) && !('days' in raw), 'the old flat top-level keys are removed by v3→v4');
+  const plan = raw.plans[raw.activePlanId];
+  assert(plan, 'activePlanId points at a real plan');
+
+  // The returning user's logged history must survive the wrap — the data-loss guard.
+  assertEq(Object.keys(plan.days), ['2026-01-06'], 'logged days are preserved into the plan');
+  assertEq(plan.days['2026-01-06'].exercises[0].actual.kg, 20, 'logged actuals survive the migration');
+
+  // User settings carried into the plan (not reset to defaults).
+  assertEq(plan.settings.cycleWeeks, 16, 'cycleWeeks carried into the plan');
+  assertEq(plan.settings.peakType, 'trip', 'peakType carried into the plan');
+  assertEq(plan.settings.units, 'lb', 'units carried into the plan');
+
+  // Benchmark scalars promoted to globalBenchmarks (v4→v5); per-plan history preserved.
+  assertEq(raw.globalBenchmarks.maxHang20mm, 22, 'benchmark scalars promoted to globalBenchmarks');
+  assertEq(raw.globalBenchmarks.sportGrade, '7a', 'grade strings promoted to globalBenchmarks');
+  assertEq(plan.benchmarks.history, [{ date: '2026-01-01', maxHang20mm: 22, pullup1RM: 30 }], 'legacy per-plan retest history preserved on the plan');
+  // v6 invariant: globalBenchmarks.history is always an array. (The legacy
+  // per-plan history is NOT promoted into it — it stays on the plan; whether
+  // that promotion is owed is a separate migrate-level question, trip-wire 4.)
+  assert(Array.isArray(raw.globalBenchmarks.history), 'globalBenchmarks.history is an array after v6');
+});
+
+test('[IB-061] load-path migration is idempotent — re-init on the migrated state does not corrupt it', () => {
+  resetStorage();
+  const legacy = {
+    version: 3,
+    settings: { cycleWeeks: 12, peakType: 'comp' },
+    benchmarks: { bodyweight: 70, maxHang20mm: 20, pullup1RM: 28 },
+    days: { '2026-02-02': { exercises: [{ name: 'Repeaters', kind: 'hangboard', actual: { kg: 15 } }] } },
+  };
+  localStorage.setItem('climb-planner:state', JSON.stringify(legacy));
+  Storage.init();
+  const firstPlanId = Storage.raw().activePlanId;
+
+  // A second load reads the just-saved v6 state and must migrate to a no-op.
+  Storage.init();
+  const raw = Storage.raw();
+  assertEq(raw.version, 6, 're-init keeps the state at v6');
+  assertEq(Object.keys(raw.plans).length, 1, 're-init does not duplicate the plan');
+  assertEq(raw.activePlanId, firstPlanId, 'the active plan id is stable across re-init');
+  assertEq(raw.plans[raw.activePlanId].days['2026-02-02'].exercises[0].actual.kg, 15, 'logged data survives a second load');
+});
+
+// ─── Plan duplication: deep, independent clone with empty days (IB-062) ──────
+// duplicatePlan backs a live Profile "Duplicate" button. The copy must be a
+// deep clone with a fresh id and — critically — EMPTY days: it reuses the
+// schedule/benchmarks but starts with no logged sessions. Dropping the
+// `clone.days = {}` line would silently inherit the source's entire training
+// log into the copy; a shallow clone would alias source state so logging into
+// one plan corrupts the other. Neither had any coverage.
+test('[IB-062] duplicatePlan makes a deep, independent copy: fresh id, default (copy) name, empty days', () => {
+  resetStorage();
+  const srcId = Storage.addPlan({ name: 'Base', focus: 'boulder' });
+  Storage.setDay(srcId, '2026-01-06', { exercises: [{ name: 'Max hangs', actual: { kg: 20 } }] });
+
+  const copyId = Storage.duplicatePlan(srcId);            // no name → default
+  assert(copyId !== srcId, 'the copy gets a fresh id');
+  const copy = Storage.getPlan(copyId);
+  assertEq(copy.name, 'Base (copy)', 'default name is "<source> (copy)"');
+  assertEq(copy.focus, 'boulder', 'schedule fields (focus) are carried over from the source');
+  assertEq(Object.keys(copy.days).length, 0, 'the copy starts with NO logged days — it reuses the plan, not the log');
+
+  // Deep independence: logging into the copy must not leak into the source, and
+  // the source's own logged day must stay intact.
+  Storage.setDay(copyId, '2026-02-02', { exercises: [{ name: 'Repeaters', actual: { kg: 99 } }] });
+  assertEq(Storage.getPlan(srcId).days['2026-02-02'], undefined, 'writing into the copy does not leak into the source');
+  assert(Storage.getPlan(srcId).days['2026-01-06'] != null, "the source's original logged day survives duplication");
+  assertEq(Storage.getPlan(copyId).days['2026-02-02'].exercises[0].actual.kg, 99, 'the copy keeps its own logged day');
+});
+
+// ─── v2→v3 legacy `actual` string parse (IB-063) ────────────────────────────
+// IB-061 covered the v3→v6 chain but *explicitly* left the earlier v2→v3 step
+// uncovered. A pre-v3 state stored `exercise.actual` as a free string like
+// "5x2 @ 62kg RPE 9"; the migration must parse it into structured fields via
+// `parseLegacyActual`'s three regexes, or a returning user's historical logged
+// results silently blank on the one-time upgrade (data loss). Only reachable
+// via the LocalStorage load path (importJson throws without `plans`).
+test('[IB-063] v2→v3 migration parses a legacy string `actual` into structured {sets,reps,kg,rpe,raw}', () => {
+  resetStorage();
+  localStorage.setItem('climb-planner:state', JSON.stringify({
+    version: 2,
+    settings: {},
+    benchmarks: {},
+    days: { '2026-01-06': { exercises: [{ name: 'Max hangs', actual: '5x2 @ 62kg RPE 9' }] } },
+  }));
+  Storage.init();                                        // runs migrate() v2→v3→…→v6
+
+  const raw = Storage.raw();
+  assertEq(raw.version, 6, 'the whole chain runs from v2 to the current version on load');
+  const a = raw.plans[raw.activePlanId].days['2026-01-06'].exercises[0].actual;
+  assertEq(a.sets, 5, 'sets parsed from "5x2"');
+  assertEq(a.reps, 2, 'reps parsed from "5x2"');
+  assertEq(a.kg,   62, 'kg parsed from "@ 62kg"');
+  assertEq(a.rpe,  9,  'rpe parsed from "RPE 9"');
+  assertEq(a.raw, '5x2 @ 62kg RPE 9', 'the original string is preserved as raw');
+});
+
+// ─── deletePlan: guard the last plan + reassign active on delete (IB-065) ────
+// deletePlan must (a) throw 'Cannot delete the only plan.' when one plan
+// remains — deleting the last one would leave a plan-less state that get()
+// later throws on — and (b) move activePlanId to a survivor when the plan being
+// deleted is the active one, or the app is left pointing at a dangling id.
+test('[IB-065] deletePlan reassigns activePlanId on active-plan delete and refuses the last plan', () => {
+  resetStorage();
+  const a = Storage.getActivePlan().id;        // reset leaves one (active) plan
+  const b = Storage.addPlan({ name: 'B' });    // active stays `a`
+  Storage.deletePlan(a);                        // delete the ACTIVE plan
+  assertEq(Storage.getPlan(a), null, 'the deleted plan is gone');
+  assertEq(Storage.raw().activePlanId, b, 'activePlanId moves to the surviving plan');
+
+  let threw = false;
+  try { Storage.deletePlan(b); }
+  catch (e) { threw = true; assertEq(e.message, 'Cannot delete the only plan.', 'guard message'); }
+  assert(threw, 'deleting the only remaining plan throws');
+  assert(Storage.getPlan(b) != null, 'the last plan is not deleted after the guard fires');
+});

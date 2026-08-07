@@ -31,6 +31,26 @@ test('Today: renders without throwing for a valid plan', () => {
   assert(root.innerHTML.length > 0, 'empty render');
 });
 
+// First-run empty states (IB-067): today.js and calendar.js short-circuit to a
+// "configure your plan" card when Program.effectiveStart is null (a fresh plan
+// with no start/comp date). Every other today/calendar case sets a startDate
+// first, so these first-run branches — the very first screen a new athlete sees
+// — were never mounted; a refactor moving grid-building above the null guard
+// would crash onboarding with no failing test.
+test('[IB-067] Today and Calendar render their first-run empty state on a fresh plan (no start/comp date)', () => {
+  resetStorage();                    // fresh default plan: startDate/compDate null → effectiveStart null
+  const t = document.createElement('div'); document.body.appendChild(t);
+  const c = document.createElement('div'); document.body.appendChild(c);
+  try {
+    renderToday(t);
+    assert(/set up your cycle/i.test(t.innerHTML), 'Today shows the "Set up your cycle" first-run card');
+    assert(/#profile/i.test(t.innerHTML), 'the first-run card links the athlete to Profile');
+
+    renderCalendar(c);
+    assert(/no cycle configured/i.test(c.innerHTML), 'Calendar shows the "No cycle configured" first-run card');
+  } finally { t.remove(); c.remove(); }
+});
+
 test('Today: change events on stepper inputs persist actual', () => {
   resetStorage();
   const plan = Storage.getActivePlan();

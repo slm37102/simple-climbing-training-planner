@@ -12,7 +12,7 @@ The original implementation hard-coded a 12-week (84-day) macrocycle in `js/prog
 
 ## Why not always single-block, or always double-block?
 
-- **Always single-block** for longer cycles risks Base-phase staleness. Mundry et al. 2021 (PMID 34188125) and Lattice's coaching content both report that block-periodised models with multiple base→build cycles outperform unbroken linear progression once the cycle exceeds roughly 16–20 weeks of in-phase training.
+- **Always single-block** for longer cycles risks Base-phase staleness. Lattice's coaching content recommends block-periodised models with multiple base→build cycles over unbroken linear progression once a cycle runs long. (This bullet previously also cited Mundry et al. 2021 for that claim; it does not support it — see the addendum below.)
 - **Always double-block** for short cycles wastes the limited stimulus on transition weeks. At ≤16 weeks a single block has enough runway for one strong taper into peak performance.
 - The 20-week threshold is a heuristic — peer-reviewed evidence for the exact cutoff is thin (there is **no controlled trial of macrocycle length in climbers**). It matches Lattice's qualitative recommendation and is easy to reason about. Future work could expose the threshold as a setting if the athlete wants to experiment.
 
@@ -30,7 +30,7 @@ The original implementation hard-coded a 12-week (84-day) macrocycle in `js/prog
 
 ## Sources
 
-- Mundry S et al. *Front Sports Act Living.* 2021;3:651651. PMID 34188125. — Block periodisation review in strength sports; multi-block models for cycles > ~16 weeks.
+- ~~Mundry S et al. *Front Sports Act Living.* 2021;3:651651. PMID 34188125. — Block periodisation review in strength sports; multi-block models for cycles > ~16 weeks.~~ **Withdrawn 2026-08-06 — this reference was wrong in every part except the PMID; see the addendum below.**
 - López-Rivera E, González-Badillo JJ. *J Hum Kinet.* 2019;66:183–195. PMID 30988852. — 8-week fingerboard intervention; supports short cycle viability.
 - Lattice Training — "How long should a training cycle be?" coaching content; 12–24 week guidance with double-block recommendation for longer windows.
 - Hörst E. *Training for Climbing* (3rd ed.) — 12 to 16 week peaking cycles for sport climbers; longer base periods for capacity development.
@@ -42,3 +42,19 @@ Two later ADRs superseded parts of the "What we picked" formula above. The **cyc
 - **Taper length is no longer `2 if weeks ≥ 14 else 1`.** ADR-0007 made taper length a function of `settings.peakType`, not cycle length: `taperWeeksFor(peakType)` returns 1 for `'comp'` and 2 for `'trip'`/`'project'` (`js/program.js`). A comp peaks on a single day (short 1-wk step-taper plus the mandatory `rest-pre-goal` day); a trip or open project rides the ~1-month peak window, so 2 wk.
 - **`buildPhasePattern` now takes `peakType`.** The signature is `buildPhasePattern(weeks, peakType = 'comp')`, because the taper clause above needs it. The back-compat `PHASE_PATTERN` export is `buildPhasePattern(12)` — i.e. the 12-week **comp** pattern — not `buildPhasePattern(DEFAULT_CYCLE_WEEKS)` as the Migration section says.
 - **Deload cadence is every 4th week, not every 3rd.** ADR-0004 changed the "Deload cadence" line from `weekIdx % 3 === 0` to a 3:1 loading pattern: `((i + 1) % 4 === 0)` within each Base/Build block (`js/program.js`). The end-of-Base-block retest replacing the old wk-3 retest is unchanged.
+
+## Addendum (2026-08-06) — the Mundry citation is withdrawn; the Decision stands
+
+**The Decision above does not change.** What changes is its evidentiary support: the one peer-reviewed reference this ADR offered for the double-block rationale does not say what the ADR claimed. Recorded here per ratchet 4 rather than quietly edited, and it closes **IB-040**.
+
+**What the reference actually is.** PMID 34188125 is **Mundry S, Steinmetz G, Atkinson EJ, et al. "Hangboard training in advanced climbers: A randomized controlled trial." *Sci Rep.* 2021;11:13530** — an 8-week RCT in 30 UIAA VI–VIII climbers comparing two hangboard protocols (added weight vs. decreasing hang time) against normal climbing, measuring grip strength across seven grips. The added-weight arm beat control (p = 0.032, ES 0.36); the endurance arm did not differ from control.
+
+**How this ADR mis-cited it — three separate errors:**
+
+1. **Wrong publication.** It was listed as *Front Sports Act Living.* 2021;3:651651. That is a different journal, volume, and article number; only the PMID was right. (`ADR-0001` cites the same PMID correctly as *Sci Rep.* 2021;11:13530.)
+2. **Wrong study type.** Described as a "block periodisation review in strength sports." It is neither a review nor about strength sports — it is a climbing RCT.
+3. **Wrong claim.** Cited for "multi-block models for cycles > ~16 weeks" and for block-periodised models outperforming linear progression. The paper studies **hangboard protocols over a single 8-week block**; it contains no comparison of block vs. linear periodisation and no finding about macrocycle length at all.
+
+**Why it went unnoticed, and what already guarded against it.** The repo's own research corpus had this right the whole time: `docs/research/climbing-kind-exercise-prescriptions.md` files Mundry 2021 under hangboard/finger-strength trials and warns explicitly that those trials "must **not** be cited to prop up" other exercise classes. The ADR predates that file's discipline.
+
+**Net effect on the Decision.** The 20-week threshold and the double-block switch now rest on what they always actually rested on — Lattice's qualitative coaching guidance plus this app's own judgement — with **no peer-reviewed backing**, consistent with KG-C2 (no controlled trial of macrocycle length in climbers, Won't-fix) and with the "The 20-week threshold is a heuristic" caveat this ADR already carried. `js/program.js`'s `DOUBLE_BLOCK_THRESHOLD` comment is relabelled to match.

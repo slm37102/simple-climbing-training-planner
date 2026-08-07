@@ -24,7 +24,7 @@ Load targets are calculated automatically from your benchmarks (max 20mm hang, 1
 
 ## Phase Overview (12 Weeks)
 
-Deloads land every **4th** week (3 hard : 1 deload — `adr/0004-deload-cadence-3-to-1.md`), plus the forced retest-deload that ends each Base block. Taper length follows the plan's **peak type** (comp 1 wk · trip/project 2 wk — `adr/0007-taper-hold-intensity-peaktype.md`); the day before the goal is always a full rest day.
+Deloads land every **4th** week (3 hard : 1 deload — `adr/0004-deload-cadence-3-to-1.md`), plus the forced retest-deload that ends each Base block — so the hard run into a retest is the phase-arithmetic remainder (1–4 weeks), not always three; see the deload-cadence table in `training-philosophy.md`. Taper length follows the plan's **peak type** (comp 1 wk · trip/project 2 wk — `adr/0007-taper-hold-intensity-peaktype.md`); the day before the goal is always a full rest day.
 
 | Wk | Phase | Deload | Notes |
 |----|-------|--------|-------|
@@ -151,7 +151,7 @@ Replaces the normal Mon hangboard session. Record results → tap **"Save as Ben
 
 ## Deload Rules
 
-- Cadence: every 4th week within Base and Build — 3 hard : 1 deload (see `adr/0004-deload-cadence-3-to-1.md`)
+- Cadence: every 4th week within Base and Build — 3 hard : 1 deload (see `adr/0004-deload-cadence-3-to-1.md`); uniform only up to the Base retest seam, where the run is the remainder (1–4 weeks)
 - Volume cut ~40% (numeric sets ×0.6, min 1) with **intensity held** — kg stays at working level (see `adr/0003-deload-as-volume-cut.md`)
 - Taper weeks apply the same volume cut with intensity held (see `adr/0007-taper-hold-intensity-peaktype.md`)
 - Hangboard days: no S&C antagonist block
