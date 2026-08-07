@@ -54,8 +54,8 @@ The **Issue** column is the claim surface — an open issue with no active `🔒
 | IB-014 | What injury-history intake should exist, and how should it pre-soften finger load (vs. today's purely reactive moderation)? | P1 | [#60](https://github.com/slm37102/simple-climbing-training-planner/issues/60) | **Decided** → [ADR-0017](adr/0017-finger-tweak-return-state.md) |
 | IB-024 | Should the antagonist block gain a vertical/scapular press, and what/where? | P1 | [#61](https://github.com/slm37102/simple-climbing-training-planner/issues/61) | **Decided** → [ADR-0018](adr/0018-vertical-press-in-antagonist-block.md) |
 | IB-056 | Should taper weeks hold the +2.5% targets-hit progression? | P2 | [#68](https://github.com/slm37102/simple-climbing-training-planner/issues/68) | **Decided** → [ADR-0007 addendum](adr/0007-taper-hold-intensity-peaktype.md) |
-| IB-030 | Should the deload × readiness-Lighter volume stack have a combined floor? | P3 | [#69](https://github.com/slm37102/simple-climbing-training-planner/issues/69) | **Decided** → [ADR-0015 addendum](adr/0015-readiness-gating-climbing-sessions.md) |
 | IB-058 | Should a day with no readiness check-in default to Normal or Lighter? | P2 | [#70](https://github.com/slm37102/simple-climbing-training-planner/issues/70) | **Decided** → [ADR-0015 addendum](adr/0015-readiness-gating-climbing-sessions.md) |
+| IB-030 | Should the deload × readiness-Lighter volume stack have a combined floor? | P3 | [#69](https://github.com/slm37102/simple-climbing-training-planner/issues/69) | **Decided** → [ADR-0015 addendum](adr/0015-readiness-gating-climbing-sessions.md) |
 
 ## Decided
 

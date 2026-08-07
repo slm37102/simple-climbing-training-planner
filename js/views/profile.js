@@ -199,7 +199,7 @@ export function renderProfile(root) {
         <select id="pf-peakType">
           <option value="comp" ${(settings.peakType || 'comp') === 'comp' ? 'selected' : ''}>Comp — 1-wk taper + rest day before</option>
           <option value="trip" ${settings.peakType === 'trip' ? 'selected' : ''}>Trip — 2-wk taper</option>
-          <option value="project" ${settings.peakType === 'project' ? 'selected' : ''}>Project — 2-wk rolling taper</option>
+          <option value="project" ${settings.peakType === 'project' ? 'selected' : ''}>Project — 2-wk taper (open window)</option>
         </select>
       </div>
       <div class="field">
@@ -391,8 +391,7 @@ export function renderProfile(root) {
       const v = pickerState.compDate;
       if (v) {
         const start = Program.computeStartFromComp(v, weeks);
-        const today = new Date(); today.setHours(0, 0, 0, 0);
-        const diff  = Math.round((new Date(start + 'T00:00:00') - today) / 86400000);
+        const diff  = daysBetween(toLocalISO(new Date()), start);
         const warn  = diff < 0
           ? ` ⚠ cycle started ${-diff} day${diff === -1 ? '' : 's'} ago — early weeks already passed.` : '';
         compHint.textContent = `Cycle: ${start} → ${v} (${weeks} wk).${warn}`;

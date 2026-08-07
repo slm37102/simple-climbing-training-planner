@@ -298,7 +298,7 @@ test('[ADR-0014] Storage.saveRetestBenchmarks appends to history instead of over
   assertEq(benchmarks.history[1], { date: '2026-06-08', maxHang20mm: 20, pullup1RM: 30 });
 });
 
-test('[ADR-0014] mergeRemote round-trips globalBenchmarks.history (LWW on the whole object)', () => {
+test('[ADR-0014] mergeRemote round-trips globalBenchmarks.history (scalars LWW, history unioned)', () => {
   resetStorage();
   Storage.saveRetestBenchmarks({ bodyweight: 70, maxHang20mm: 18, pullup1RM: 28 }, '2026-05-01');
   const remoteTs = new Date(Date.now() + 60000).toISOString();
@@ -314,8 +314,39 @@ test('[ADR-0014] mergeRemote round-trips globalBenchmarks.history (LWW on the wh
   };
   Storage.mergeRemote(remote);
   const { benchmarks } = Storage.get();
-  assertEq(benchmarks.history.length, 2, 'remote history (newer) should win and round-trip intact');
+  assertEq(benchmarks.history.length, 2, 'remote history (superset here) round-trips intact');
   assertEq(benchmarks.history[1], { date: '2026-06-15', maxHang20mm: 22, pullup1RM: 32 });
+});
+
+test('[IB-059] mergeRemote unions retest history by date — a local snapshot the newer remote lacks survives', () => {
+  resetStorage();
+  // Two retests logged locally.
+  Storage.saveRetestBenchmarks({ bodyweight: 70, maxHang20mm: 18, pullup1RM: 28 }, '2026-05-01');
+  Storage.saveRetestBenchmarks({ bodyweight: 70, maxHang20mm: 19, pullup1RM: 29 }, '2026-06-08');
+  // Remote is NEWER (wins scalar LWW) but is MISSING the local 06-08 snapshot and adds 06-15.
+  // Old wholesale-replace behaviour would drop 06-08 here.
+  const remoteTs = new Date(Date.now() + 60000).toISOString();
+  const remote = {
+    version: 6, activePlanId: Storage.activeId(),
+    plans: {}, globalSettings: {},
+    globalBenchmarks: {
+      bodyweight: 70, maxHang20mm: 22, pullup1RM: 32,
+      history: [
+        { date: '2026-05-01', maxHang20mm: 18, pullup1RM: 28 },
+        { date: '2026-06-15', maxHang20mm: 22, pullup1RM: 32 }
+      ],
+      updatedAt: remoteTs
+    }
+  };
+  Storage.mergeRemote(remote);
+  let { benchmarks } = Storage.get();
+  assertEq(benchmarks.maxHang20mm, 22, 'scalar benchmark still LWW to the newer remote');
+  assertEq(benchmarks.history.map(h => h.date), ['2026-05-01', '2026-06-08', '2026-06-15'],
+    'union preserves the local-only 2026-06-08 snapshot the newer remote lacked, sorted by date');
+  // Idempotent: re-merging the same remote changes nothing.
+  const before = JSON.stringify(Storage.get().benchmarks.history);
+  Storage.mergeRemote(remote);
+  assertEq(JSON.stringify(Storage.get().benchmarks.history), before, 'second identical merge is a no-op');
 });
 
 test('[ADR-0014] REGRESSION: pain check-in persists value + worse-this-morning flag on the Today tab', () => {

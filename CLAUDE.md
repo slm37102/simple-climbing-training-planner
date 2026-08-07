@@ -58,7 +58,7 @@ The training logic lives in **`js/program.js`** (the macrocycle — `Program.bui
 - **View pattern:** replace `root.innerHTML`, then call a `wire(...)` function that attaches listeners by `data-*` attribute. No virtual DOM, no templating library.
 - **Tap-friendly inputs:** pill selectors and steppers (in `today.js`, styled in `css/styles.css`) are the standard idiom for numeric input — use them over bare `<input type="number">`. Suggested loads are tap-to-prefill buttons (`data-suggest-btn` / `data-suggest-kg`).
 - **`firebase-config.js` is intentionally public.** The `apiKey` is a project identifier, not a secret; security is enforced by `firestore.rules` (`request.auth.uid == uid`). Don't move it to env vars or try to hide it. Set `SYNC_ENABLED = false` there for a local-only build.
-- **`sw.js` bypasses Firestore / Auth / gstatic URLs explicitly** (see the regex) — the Firebase SDK handles its own offline persistence; don't cache those. `sw.js` is also **derived, not hand-maintained**: run `node tools/generate-sw.mjs --bump` after changing anything under `js/` (see the `domain-invariants` skill).
+- **`sw.js` bypasses Firestore / Auth / gstatic URLs explicitly** (see the regex) — the Firebase SDK handles its own offline persistence; don't cache those. `sw.js` is also **derived, not hand-maintained**: run `node tools/generate-sw.mjs` after changing anything under `js/` (see the `domain-invariants` skill).
 
 ## Disclaimer
 

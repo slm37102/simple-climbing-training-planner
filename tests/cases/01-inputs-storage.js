@@ -58,6 +58,22 @@ test('inputVisibility optional flag overrides → checkbox only', () => {
 
 // ─── Storage ──────────────────────────────────────────────────────────────
 
+// IB-037: grade benchmark fields default to a consistent empty type across
+// code paths. Grades are strings → '' (not null); numeric benchmarks stay null.
+// Previously defaultBenchmarks() used null while globalBenchmarks used '',
+// which meant a per-plan grade could interpolate as the literal "null".
+test('[IB-037] fresh benchmark grade fields use "" empty in both global and per-plan shapes', () => {
+  resetStorage();
+  const g = Storage.get().benchmarks;            // globalBenchmarks (live path)
+  const p = Storage.getActivePlan().benchmarks;  // per-plan (defaultBenchmarks)
+  assertEq(g.sportGrade,   '', 'global sportGrade empty is ""');
+  assertEq(g.boulderGrade, '', 'global boulderGrade empty is ""');
+  assertEq(p.sportGrade,   '', 'per-plan sportGrade empty is "" (was null)');
+  assertEq(p.boulderGrade, '', 'per-plan boulderGrade empty is ""');
+  // numeric benchmarks are consistently null (empty number), not ''
+  assertEq(p.maxHang20mm, null, 'numeric benchmark empty stays null');
+});
+
 test('Storage.setDay → getDay round-trip preserves actual fields', () => {
   resetStorage();
   Storage.setDay('2026-05-20', {

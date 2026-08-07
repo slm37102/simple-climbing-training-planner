@@ -116,10 +116,12 @@ test('[IB-042] Today: flavor badge carries an explanatory title (not bare jargon
     const badge = root.querySelector('.badge[class*="focus-"]');
     assert(badge, 'expected a flavor focus badge in the header');
     const title = badge.getAttribute('title') || '';
-    assert(/Session focus this week:/.test(title),
+    // IB-052 reworded the tooltip: the badge now names THIS session's focus
+    // (day-level styleFlavor), so it describes the session rather than the week.
+    assert(/This session's focus:/.test(title),
       'flavor badge must explain itself via a title, like the energy badge does');
-    // The caveat that defuses the hybrid alternation confusion must be present.
-    assert(/alternates automatically/.test(title), 'title should note hybrid week-to-week alternation');
+    // It still notes hybrid week-to-week alternation so the label is not read as fixed.
+    assert(/alternates week to week/.test(title), 'title should note hybrid week-to-week alternation');
   } finally { root.remove(); }
 });
 

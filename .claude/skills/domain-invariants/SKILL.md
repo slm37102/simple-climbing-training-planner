@@ -45,7 +45,7 @@ The load-bearing rules of this repo's training logic, storage layer, and change-
 ### When you add a field or file
 
 - New `settings` field → add to `defaultSettings()` AND rely on `migrate()`'s shallow-merge to backfill loaded state (keep the existing pattern — `peakType` shipped this way with no schema bump).
-- **`sw.js` is derived, not hand-maintained: run `node tools/generate-sw.mjs --bump` after changing anything under `js/`** (and after a `SCHEMA_VERSION` bump in `js/storage.js`). It regenerates the `SHELL` array from the files on disk — a new/renamed `js/` file is picked up automatically — and increments the `CACHE` version so PWA clients fetch the new JS. Run without `--bump` to sync `SHELL` only.
+- **`sw.js` is derived, not hand-maintained: run `node tools/generate-sw.mjs` after changing anything under `js/`** (and after a `SCHEMA_VERSION` bump in `js/storage.js`). It regenerates the `SHELL` array from the files on disk — a new/renamed `js/` file is picked up automatically — and sets the `CACHE` key to a content hash of the shell assets, so PWA clients fetch the new payload whenever it changes. There is no `--bump`: the key is derived, not counted (IB-055), which makes regeneration idempotent (re-running with no source change is a no-op) and collision-free (two branches editing different files get different keys, never a silently-colliding version).
 
 ## Common entry points for changes
 
@@ -54,6 +54,6 @@ The load-bearing rules of this repo's training logic, storage layer, and change-
 - Change load calculation → `js/loads.js`.
 - New input UI → renderer in `js/views/today.js` (`renderExercise`) + CSS. (Log is read-only — there is no edit form to mirror.)
 - New post-build session mutation (a deload-like cut, a note, a swap) → register a pass in `PRESCRIPTION_PASSES` in `js/program.js`, not an if-block in `prescribeForContext`.
-- New top-level tab → register in the `views` map in `js/app.js`, add a `<button data-view="X">` in `index.html`, create `js/views/X.js`, then `node tools/generate-sw.mjs --bump`.
+- New top-level tab → register in the `views` map in `js/app.js`, add a `<button data-view="X">` in `index.html`, create `js/views/X.js`, then `node tools/generate-sw.mjs`.
 - New monitoring signal (ADR-0014) → the signal function in `js/monitoring.js` plus, if its response mutates the plan, an `actionKey` case in `acceptSettingsPatch` — both the Today banner and the Log panel consume signals through `Monitoring.activeSignals`/`dismissPatch`/`acceptSettingsPatch`, so no view code is needed for a new advisory signal.
 - New limiter/norm comparison (ADR-0011) → `js/limiter.js`'s `limiterReadout(benchmarks)` — a pure function returning `{lines, caveat}` or `null`; consumed by the Profile-tab card, which recomputes on any benchmark change. Informational only — never wire a limiter verdict into a prescription path.

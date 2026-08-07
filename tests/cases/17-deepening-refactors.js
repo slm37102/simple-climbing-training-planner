@@ -139,6 +139,34 @@ test('[pipeline] REGRESSION: ramp + Lighter callout shows "Readiness target ↓ 
   } finally { root.remove(); }
 });
 
+test('[IB-043] deload callout leads with the cut value, original demoted to dimmed strikethrough', () => {
+  // A natural deload day (wk4 Sat, boulder) with a NORMAL readiness check-in, so
+  // the readiness pass is a no-op and the deload branch owns the callout. Before
+  // IB-043 that branch rendered "<s>original</s>value" — original first, full
+  // opacity — inline; against the crisp-headline-target intent on exactly the
+  // stacked-pass days clarity matters most. Now the cut value is the headline and
+  // the original is demoted to a dimmed <s>, matching the readiness/ramp branches.
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.updatePlan(plan.id, { focus: 'boulder' });
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-30'); // wk4 Sat — natural deload
+  Storage.setDay('2026-05-30', { readiness: { sleep: 4, soreness: 4, fatigue: 4 } }); // avg 4.0 → Normal, no scaling
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const html = root.innerHTML;
+    assert(/deload-target/.test(html), 'a deload-target callout should render on this day');
+    // headline cut value renders BEFORE the dimmed strikethrough (value-first)
+    assert(/<span class="v">[^<]+<span style="opacity:\.6"><s>/.test(html),
+      'deload callout must lead with the cut value, then a dimmed <s> of the original');
+    // the pre-IB-043 order (strikethrough immediately after .v, full opacity) is gone
+    assert(!/<span class="v"><s>/.test(html),
+      'the struck-through original must no longer render first at full opacity');
+  } finally { root.remove(); }
+});
+
 test('Today: Missed status persists from the Today tab (Log is a read-only feed now)', () => {
   resetStorage();
   const plan = Storage.getActivePlan();

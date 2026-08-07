@@ -6,7 +6,7 @@ import { Loads } from '../loads.js';
 import { Warmup } from '../warmup.js';
 import { Replan } from '../replan.js';
 import { Monitoring } from '../monitoring.js';
-import { today as todayIso, addDays as addDaysIso } from '../dates.js';
+import { today as todayIso, addDays as addDaysIso, daysBetween } from '../dates.js';
 import { inputVisibility, repsLabel, actualHasResult, howto, unitLabel } from '../exercise-inputs.js';
 import { escHtml as esc } from '../ui.js';
 import { DRILL_CATEGORIES, WARMUP_DRILLS } from '../drills.js';
@@ -126,8 +126,7 @@ function cycleStats(plan) {
   let totalSessions = 0;
 
   for (const [iso, entry] of Object.entries(plan.days || {})) {
-    const d = new Date(iso + 'T00:00:00');
-    const dayIdx = Math.floor((d - new Date(start + 'T00:00:00')) / 86400000);
+    const dayIdx = daysBetween(start, iso);
     if (dayIdx < 0 || dayIdx >= totalDays) continue;
 
     const exList = entry?.exercises || [];
@@ -203,12 +202,14 @@ function displayTitle(session) {
 
 // IB-042: the flavor badge showed a bare "boulder"/"sport"/"hybrid" with no
 // explanation — the adjacent energy-system badge carries a title, this one
-// didn't. Name what the week-emphasis means, and note that on a hybrid plan the
-// label alternates automatically (so a given session may not match it — that's
-// the source of the "why does it say sport today?" confusion).
+// didn't. Name what the emphasis means.
+// IB-052: the badge now reflects THIS session's content-flavor (session.styleFlavor),
+// not the raw week-alternation — so on a hybrid Build sport-parity Thursday it reads
+// "boulder" to match the limit-bouldering session, instead of contradicting it. The
+// old "may not match the label" caveat is retired because it now does match.
 function flavorLabel(flavor) {
   const name = { boulder: 'bouldering', sport: 'sport / route climbing', hybrid: 'hybrid — both disciplines' }[flavor] || flavor;
-  return `Session focus this week: ${name}. On a hybrid plan this alternates automatically week to week, so a given session may not match the label.`;
+  return `This session's focus: ${name}. On a hybrid plan the emphasis alternates week to week and each session is labelled by what it actually trains.`;
 }
 
 function headerHtml(date, ctx, session) {
@@ -216,7 +217,11 @@ function headerHtml(date, ctx, session) {
   const deloadBadge = ctx.deload ? `<span class="badge deload">Deload</span>` : '';
   const retestBadge = session?.isRetest ? `<span class="badge taper">Retest</span>` : '';
   const energyTip = session?.energySystem ? infoBadge('Energy system: ' + session.energySystem) : '';
-  const flavor = ctx.flavor ? `<span class="badge focus-${ctx.flavor === 'boulder' ? 'boulder' : ctx.flavor === 'sport' ? 'sport' : 'hybrid'}" title="${esc(flavorLabel(ctx.flavor))}">${ctx.flavor}</span>` : '';
+  // IB-052: prefer the session's day-level content-flavor over the week-level
+  // ctx.flavor, so the badge names the session actually prescribed. Falls back to
+  // ctx.flavor (e.g. the post-goal retest card, which carries no session flavor).
+  const dayFlavor = session?.styleFlavor ?? ctx.flavor;
+  const flavor = dayFlavor ? `<span class="badge focus-${dayFlavor === 'boulder' ? 'boulder' : dayFlavor === 'sport' ? 'sport' : 'hybrid'}" title="${esc(flavorLabel(dayFlavor))}">${dayFlavor}</span>` : '';
   return `<div>
     <div class="eyebrow">
       <span>${prettyDate(date)}</span>
@@ -877,8 +882,9 @@ function accSub(ex, actual, suggestion) {
 }
 
 // Crisp headline target for climbing-kind exercises (gym-ready spec §2):
-// "Today's target → 4 problems", or on a deload/taper week with the original
-// struck through: "Deload target → 4 sets 2 sets".
+// "Today's target → 4 problems", or on a deload/taper week the cut value leads
+// and the original is demoted to dimmed strikethrough: "Deload target → 2 sets 4 sets"
+// (IB-043 — final number first, provenance dimmed, matching the readiness/ramp branches).
 function targetCalloutHtml(ex) {
   if (!ex.prescribedTarget) return '';
   const { value, unit } = ex.prescribedTarget;
@@ -897,8 +903,11 @@ function targetCalloutHtml(ex) {
     }
   }
   if (ex.originalTarget) {
+    // IB-043: lead with the cut value and demote the struck-through original to
+    // dimmed provenance, mirroring the readiness/ramp branches — on a deload day
+    // the number the athlete acts on should be the headline, not the old template.
     const { value: ov, unit: ou } = ex.originalTarget;
-    return `<div class="callout deload-target"><span class="k">Deload target</span><span class="v"><s>${ov} ${unitLabel(ov, ou)}</s>${value} ${label}</span></div>`;
+    return `<div class="callout deload-target"><span class="k">Deload target</span><span class="v">${value} ${label} <span style="opacity:.6"><s>${ov} ${unitLabel(ov, ou)}</s></span></span></div>`;
   }
   // ADR-0009 Base aerobic ramp — volume stepped up from the phase template.
   if (ex.rampedFrom) {
