@@ -27,6 +27,7 @@ Grilling settles the **decision**; it does not ship code. Once decided, the buil
    - One question at a time, each with your recommended answer, waiting for the user's answer before the next.
    - Facts you can find in the code or docs, you **look up** — never ask what you can check. Decisions are the user's; put each one to them and wait.
    - **HITL — never answer your own questions.** A grill where the agent supplies the human's side is broken. This is the whole reason the item is here and not built inline.
+   - **`/wait-what` means the round didn't land — re-pitch, then *stay* re-pitched.** It is `disable-model-invocation: true`, so it only ever arrives from the keyboard: the user telling you a round was too dense to answer, not asking for more detail. Re-pitch with a little context, in ASD-STE100 Simplified Technical English, using the `CONTEXT.md` ubiquitous language — then hold that register for the rest of the grill. Drifting back to the dense one is what earns the second `/wait-what`. A round the human can't answer is a wasted round, and the answers are the only thing this skill is here to collect.
    - Ground each branch in real evidence, the way `docs/adr/` already does — this is a G3-sensitive athlete, so "uncited convention dressed as behaviour" is not enough.
    - Do not enact anything until the user confirms shared understanding.
 
