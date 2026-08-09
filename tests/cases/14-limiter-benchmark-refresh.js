@@ -77,6 +77,25 @@ test('[ADR-0011] caveat states the R² honesty requirement', () => {
   assert(/17%/.test(readout.caveat) && /8.{1,2}12%/.test(readout.caveat), `caveat missing R² figures, got "${readout.caveat}"`);
 });
 
+// IB-020: the norm table is a 7s hang, maxHang20mm is a 10s hold, and no
+// conversion is applied. Which way to resolve that is an open training call,
+// so the readout must at least DISCLOSE it — and only where it's relevant.
+test('[IB-020] caveat discloses the 7s-norm / 10s-benchmark duration mismatch when a fingers line shows', () => {
+  const readout = limiterReadout({ bodyweight: 70, maxHang20mm: 23.8, boulderGrade: 'V5' });
+  assert(readout.lines.some(l => l.key === 'fingers'), 'expected a fingers line');
+  assert(/7s hang/.test(readout.caveat) && /10s hang/.test(readout.caveat),
+    `caveat must name both hang durations, got "${readout.caveat}"`);
+  assert(/reads your fingers slightly low/i.test(readout.caveat),
+    `caveat must state the direction of the bias, got "${readout.caveat}"`);
+});
+
+test('[IB-020] duration disclosure is omitted when no fingers line rendered (pull-ups only)', () => {
+  const readout = limiterReadout({ bodyweight: 70, pullup1RM: 46 });
+  assert(!readout.lines.some(l => l.key === 'fingers'), 'expected no fingers line');
+  assert(!/7s hang/.test(readout.caveat),
+    `pull-up-only readout must not carry the finger-duration caveat, got "${readout.caveat}"`);
+});
+
 test('[ADR-0011] REGRESSION: card renders on the Profile tab and recomputes on a benchmark change', () => {
   resetStorage();
   Storage.setGlobalBenchmarks({ bodyweight: 70, maxHang20mm: 10, boulderGrade: 'V7' });

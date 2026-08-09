@@ -23,7 +23,7 @@ python -m http.server 8765
 
 Then open `http://127.0.0.1:8765/` and click **"Use locally only"** on the auth gate. The service worker only activates over `https://` or `localhost`.
 
-**Tests** are an in-browser smoke suite at `tests/index.html`, no CLI runner. See the `test` skill for how to run it, what it covers, Playwright MCP notes, and this dev machine's environment quirks (stale `node`/`npx`/`python` PATH, Playwright MCP connection order).
+**Tests** are an in-browser smoke suite at `tests/index.html`. Run them headlessly from a terminal with **`node tools/run-tests.mjs`** (exit 0 = all green, 1 = any failure; needs Playwright — a dev/CI tool, not an app dep), or open the page by hand. It drives the existing harness; it is **not** a test framework — `tests/` is unchanged. See the `test` skill for what it covers, the Playwright-MCP path for interactive/e2e work, and this dev machine's environment quirks.
 
 ## Deploy
 

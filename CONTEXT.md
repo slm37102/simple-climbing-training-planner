@@ -25,7 +25,7 @@ The macrocycle is anchored either by a chosen **start date** or by a **competiti
 
 ## Deload week
 
-A scheduled recovery week interleaved every fourth week (3 hard : 1 deload — see `docs/adr/0004-deload-cadence-3-to-1.md`) inside Base and Build. A deload **drops prescribed volume ~40% while holding intensity** (load kg unchanged) — this preserves the neuromuscular stimulus while letting connective tissue recover. See `docs/adr/0003-deload-as-volume-cut.md`. The last Base deload is also a **retest** week.
+A scheduled recovery week interleaved every fourth week (3 hard : 1 deload — see `docs/adr/0004-deload-cadence-3-to-1.md`) inside Base and Build. A deload **drops prescribed volume ~40% while holding intensity** (load kg unchanged) — this preserves the neuromuscular stimulus while letting connective tissue recover. See `docs/adr/0003-deload-as-volume-cut.md`. The last Base deload is also a **retest** week — and because that retest is *forced* onto the final Base week, the loading run into it is the remainder of the phase arithmetic (1–4 hard weeks depending on cycle length), not always three; the "every fourth week" cadence is uniform only up to that seam. See the deload-cadence section of `docs/training-philosophy.md` for the per-cycle table.
 
 ## Retest
 

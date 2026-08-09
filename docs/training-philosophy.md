@@ -29,15 +29,36 @@ The Base/Build hangboard protocols above are the decided **and implemented** des
 
 The Peak protocol was softened from the published Lattice/Anderson defaults for this athlete — see ADR 0001 (re-adjudicated against the verified research and implemented 2026-07-02; see the ADR's addendum).
 
-## Year-level shape (80/20)
+## Year-level shape and intensity distribution
 
-Even within a single macrocycle the planner reflects the **Lattice 80/20 rule**: across the year, roughly 80% of training time should be capacity / base / "easy mileage" work, 20% high-intensity. A 12-week cycle compresses this to ~50% Base, ~25% Build, ~17% Peak, ~8% Taper, but the same principle holds — most of the volume sits in Base, with Peak treated as a brief, intense expression of the work done earlier.
+**Phase duration** follows Lattice's block shape: the default 12-week cycle resolves to ~50% Base, ~25% Build, ~17% Peak, ~8% Taper (6/3/2/1 weeks at the 12-week comp shape — `buildPhasePattern`), so most of the *calendar* sits in Base, with Peak a brief, intense expression of the work done earlier. That much is accurate and implemented.
+
+**The plan is not 80/20 polarized in the intensity sense** — and this section used to claim it was. Lattice's 80/20 rule, and the Seiler-style polarized model behind it, describes an *intensity distribution* (~80% of training time genuinely easy, ~20% hard), not a phase-duration split. Mapping "half the calendar is Base" onto "80% of training is easy mileage" conflates the two. What the prescriptions actually deliver is a **concurrent / threshold-pyramidal** model:
+
+- **Genuinely easy rungs:** ARC (`sat-arc`, RPE 4–6), flash pyramid (RPE 6–7.5), and the optional easy open-climbing day (RPE 4–6). Base Saturdays alternate between the two easy rungs.
+- **Deliberately threshold-to-hard rungs, including inside Base:** Base intro max hangs (RPE 8–9, 80–85% total load), Base weighted pull-ups (RPE 7–8.5), Base Thursday projecting (RPE 7.5–9), and an explicit 60/60 threshold interval (`SIXTY_SIXTY_EXERCISE`, RPE 7–8.5) — a rung a genuinely polarized model specifically avoids.
+
+Concretely, a Base week's three loaded sessions are one easy (Saturday) and two that reach RPE 8–9 (Monday hangboard, Thursday projecting) — roughly half hard, not 80% easy.
+
+**This was corrected as a labelling fix, not a prescription change — deliberately.** The concurrent model is defensible, and arguably necessary, for an intermediate climbing 3× per week: few sessions force strength and energy systems to overlap within the week rather than separating into polarized blocks. The Base RPE 8–9 max-hang loading is also evidence-supported (~80–95% of maximal total load is consensus across Lattice and Eva López; López-Rivera & González-Badillo 2019, Medernach 2015) and is what drives the G1 progression goal. This repo's own research review is blunter still: polarized models are "emerging but lack climbing-specific research" ([`research/deep-research-report.md`](research/deep-research-report.md) — Open Questions), so 80/20 was never the better-evidenced choice here, only the better-known label. So **do not add hard work to "fill the 20%"**: reasoning from the old framing over-estimates how much easy mileage this plan contains and would push weekly high-intensity finger load above what a G3-durability-gated plan intends. Corrected per **IB-001** ([`deep-audit.md`](deep-audit.md) §1, adversarially verified); no ADR asserted the 80/20 framing and nothing in the code consumes the label. Should this athlete's frequency ever rise above 3×/week, whether to adopt a genuinely polarized distribution becomes a live training question again — it is not one today.
 
 For longer cycles the planner switches to a **double-block** structure above 20 weeks (ADR 0002). This mirrors Lattice's stated preference for repeating base→build mesocycles in annual plans over a single long base period.
 
-## Deload cadence (3:1 — every 4th week)
+## Deload cadence (3:1 — every 4th week, with a remainder into the Base retest)
 
 Three weeks hard, one week deload — across Base and Build. The last Base deload is also a **retest** (re-measure max hang, weighted pull-up 1RM, current best boulder grade). Updated benchmarks reset load prescriptions for the Build phase. This 3:1 cadence matches Lattice's published default and sits inside Hörst's "every 3–4 weeks of hard training" bound. Decided in [ADR-0004](adr/0004-deload-cadence-3-to-1.md) and implemented 2026-07-04 (`(i+1)%4` in `buildPhasePattern`) — the code previously deloaded every 3rd week, a 2:1 cadence mislabeled "3:1" (see [KG-B3](knowledge-gaps-archive.md#kg-b3--deload-cadence-code-is-21-doc-says-31-lattices-31-is-every-4th-week-p2-g1g3), Closed).
+
+**The cadence is not uniform at the end of Base** — worth knowing before reading a generated schedule. `buildPhasePattern` lays the `(i+1)%4` deloads down first, then **forces the last Base week to be the retest** (itself a deload), then suppresses a natural deload that would land immediately before it (`js/program.js:85–93`; constraint C2, pinned by `[ADR-0004][Phase2 C2]`). So the loading run *into* the retest is whatever the phase arithmetic leaves over — not always three weeks:
+
+| Cycle | Base weeks | Recovery weeks in Base | Hard run into the retest |
+|-------|-----------|------------------------|--------------------------|
+| 12-wk comp (default) | 6 | 4, 6 (retest) | **1** week |
+| 14-wk comp | 7 | 4, 7 (retest) | 2 weeks |
+| 16-wk comp | 9 | 4, 9 (retest) | **4** weeks |
+| 12-wk trip / project | 5 | 5 (retest) only — C2 suppresses the wk-4 deload | **4** weeks |
+| 20-wk comp | 11 | 4, 8, 11 (retest) | 2 weeks |
+
+Both directions of the deviation are consequences of that arithmetic rather than choices: the short run (12-wk comp) errs toward recovery, which is G3-consistent, while the 4-week runs sit at the outer edge of Hörst's "every 3–4 weeks" bound. Making the run uniformly three weeks would mean *relocating* the retest deload, not deleting a deload — removing the wk-4 one at 12-wk comp yields five consecutive hard weeks into the retest (`H H H H H R`), breaking the very bound the cadence exists to honour. So this is **documented rather than "fixed"**, per **IB-038** ([`deep-audit.md`](deep-audit.md) §10, which recommends exactly this wording change and rejects the schedule-changing alternative as self-defeating). The structural questions — whether that truncated final block is the right shape at all — stay open as **IB-005** and **IB-002**.
 
 ## Half-crimp dominance in Base
 
@@ -47,7 +68,7 @@ Base-phase hangboard work emphasises half-crimp (or half-crimp + open-crimp mixe
 
 **Supported by controlled trials:**
 - Short-cycle (4–10 week) max-hang and repeater protocols produce measurable strength gains in trained climbers. López-Rivera & González-Badillo 2019 (PMID 30988852, n=26, 8 weeks) — significant max-hang and force gains under structured fingerboard protocols.
-- Strength-endurance specifically targeted in advanced climbers responds to short structured blocks. Mundry et al. 2021 (PMID 34188125, review).
+- Progressive **added-weight** hangboard training beats climbing alone for grip strength in advanced climbers; a decreasing-hang-time "endurance" protocol did not. Mundry et al. 2021 (PMID 34188125) — an 8-week RCT, n=30 UIAA VI–VIII, three arms (added-weight / endurance / normal climbing), seven grips; added-weight vs control p = 0.032, ES 0.36, endurance arm no different from control. This is the direct evidence for the app's *weighted, progressive* max-hang bias over timed-hang endurance work on the board. **Corrected 2026-08-06 (IB-040):** this bullet previously read "strength-endurance specifically targeted in advanced climbers responds to short structured blocks … (review)", which mislabelled an RCT as a review and **inverted the result** — the endurance arm is the one that failed to beat control.
 - Low-intensity finger loading builds finger strength comparably to maximal-load hangs, and combining the two is additive. Gilmore NK et al. 2024 (PMID 39560837, controlled study in healthy climbers).
 
 **Coaching-consensus but no controlled trial:**
@@ -65,7 +86,7 @@ Base-phase hangboard work emphasises half-crimp (or half-crimp + open-crimp mixe
 - Hörst E. *Training for Climbing*, 3rd ed. (2016).
 - Anderson M & M. *The Rock Climber's Training Manual* (2014).
 - López-Rivera E, González-Badillo JJ. *J Hum Kinet.* 2019;66:183–195. PMID 30988852.
-- Mundry S et al. *Front Sports Act Living.* 2021;3:651651. PMID 34188125.
+- Mundry S, Steinmetz G, Atkinson EJ, et al. *Sci Rep.* 2021;11:13530. PMID 34188125. (Hangboard training in advanced climbers: a randomized controlled trial.) — *Corrected 2026-08-06: previously listed as* Front Sports Act Living. *2021;3:651651, which was the wrong journal, volume and article number (IB-040).*
 - Gilmore NK et al. *Sports Medicine – Open.* 2024. PMID 39560837. (Loading programs & finger strength in climbers.)
 - Schweizer A. *J Biomech.* 2001;34(2):217–223. (A2 pulley loading in crimp grips.)
 - Vigouroux L et al. *J Biomech.* 2006;39(14):2583–2592. (Finger pulley forces under crimp.)

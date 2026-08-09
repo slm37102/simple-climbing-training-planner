@@ -12,15 +12,27 @@ export const MIN_CYCLE_WEEKS = 8;
 export const MAX_CYCLE_WEEKS = 40;
 export const DEFAULT_CYCLE_WEEKS = 12;
 // Above this threshold we switch to a double-block (Base→Build → Base→Build → Peak→Taper)
-// instead of stretching a single Base further. Coach consensus (Lattice, Hörst, Anderson)
-// says single-block adaptations plateau beyond ~20 wk without phase transitions.
+// instead of stretching a single Base further.
+//
+// APP DEFAULT, UNVALIDATED (IB-040) — the previous comment here claimed "coach
+// consensus (Lattice, Hörst, Anderson) says single-block adaptations plateau
+// beyond ~20 wk", which over-stated it three ways: no source gives this 20-week
+// cutoff, there is no controlled trial of macrocycle length in climbers (KG-C2,
+// Won't-fix), and block-beats-linear is itself only weakly/mixed supported —
+// head-to-head meta-analyses find no meaningful difference, so "beats linear
+// beyond 16–20 wk" is an extrapolation, not a finding. Lattice's qualitative
+// "double-block for longer windows" guidance is real and is what this tracks;
+// the number is ours. Same honest-labeling posture as loads.js's KG-C7 block.
 const DOUBLE_BLOCK_THRESHOLD = 20;
 // Share of the non-Peak/non-Taper weeks that goes to Build; Base takes the rest
 // (ADR-0002's phase-split formula — a ~2:1 Base:Build ratio). Applied at three
 // derivation sites (single block, plus each double-block sub-block), so it lives
 // here rather than inline: the three must never drift apart. 0.33 is ADR-0002's
 // own wording and is indistinguishable from 1/3 in effect — the two agree for
-// every reachable `remaining` (5–37 wk). The *value* is app-invented (IB-040).
+// every reachable `remaining` (5–37 wk). The *value* is app-invented (IB-040):
+// uncited, no climber RCT behind it, and it governs how much of every cycle is
+// the goal-critical Build phase — so treat it as a tunable default, not a
+// validated constant, if you ever revisit the phase split.
 const BUILD_FRACTION_OF_REMAINING = 0.33;
 
 export function clampCycleWeeks(weeks) {
@@ -115,10 +127,17 @@ function _composeDouble({ base1, build1, base2, build2, peak, taper }) {
   return arr;
 }
 
-// Back-compat export: the 12-week default pattern as a static array.
+// Back-compat export: the 12-week COMP pattern as a static array.
 // Existing callers that read PHASE_PATTERN keep working; new code should call
-// Program.phasePattern(plan) or buildPhasePattern(weeks).
-export const PHASE_PATTERN = buildPhasePattern(DEFAULT_CYCLE_WEEKS);
+// Program.phasePattern(plan) or buildPhasePattern(weeks, peakType).
+//
+// IB-069 — pinned to a literal 12, not DEFAULT_CYCLE_WEEKS. Both the ADR-0002
+// addendum and the domain-invariants skill describe this as `buildPhasePattern(12)`,
+// i.e. a frozen back-compat shape; binding it to the default instead meant that
+// re-tuning DEFAULT_CYCLE_WEEKS would silently re-shape a "back-compat" export.
+// The two coincide today (DEFAULT_CYCLE_WEEKS === 12) — this pins the guarantee
+// the docs already claim, rather than leaving it a coincidence.
+export const PHASE_PATTERN = buildPhasePattern(12, 'comp');
 
 // Boulder-emphasis on odd weeks, sport-emphasis on even weeks (alternating).
 export function weekFlavor(weekIdx /* 1..N */) {

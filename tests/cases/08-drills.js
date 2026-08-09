@@ -59,6 +59,38 @@ test('[KG-A9 addendum] Warmup.forSession: skillDrills is the WARMUP_DRILLS subse
   assertEq(Warmup.forSession(tueSess).skillDrills, null, 'Tue light day has its own dedicated picker, not this one');
 });
 
+// ─── Warm-up CONTENT routing by real session type (IB-066) ──────────────────
+// The skillDrills test above pins the Thu/Sat drill *picker*, but nothing pins
+// the WARM-UP content: forSession appends HANGBOARD_PROGRESSION (the
+// progressive-load finger warm-up before max hangs) on mon-hangboard*/mon-retest
+// and CLIMBING_PROGRESSION on thu-/sat-, keyed on program.js session-id prefixes.
+// The hangboard branch is the app's key pulley/tendon injury guard and had no
+// coverage — a program.js sessionId rename would silently drop it. Derive the
+// sessions from Program (not a stub) so this pins that cross-module coupling.
+test('[IB-066] Warmup.forSession routes the progressive finger warm-up to real hangboard sessions and the climbing warm-up to Thu/Sat', () => {
+  const mon = Program.resolveDate('2026-05-04', '2026-05-04', 12); // Mon wk1
+  const thu = Program.resolveDate('2026-05-07', '2026-05-04', 12); // Thu wk1
+  const monSess = Program.prescribeForContext(mon, 'hybrid');
+  const thuSess = Program.prescribeForContext(thu, 'hybrid');
+  assert(monSess.sessionId.startsWith('mon-hangboard'), `guard: Mon wk1 must be a hangboard session (got ${monSess.sessionId})`);
+  assert(thuSess.sessionId.startsWith('thu-'), `guard: Thu wk1 must be a thu- session (got ${thuSess.sessionId})`);
+
+  const monWarm = Warmup.forSession(monSess).warmup;
+  assert(monWarm.some(w => /progressive hangs/i.test(w)),
+    'a real Monday hangboard session must carry the progressive finger warm-up before max hangs');
+  assert(!monWarm.some(w => /easy boulders/i.test(w)),
+    'the hangboard warm-up must not be the climbing progression');
+
+  const thuWarm = Warmup.forSession(thuSess).warmup;
+  assert(thuWarm.some(w => /easy boulders|footwork/i.test(w)),
+    'a real Thu climbing session must carry the climbing warm-up progression');
+  assert(!thuWarm.some(w => /progressive hangs/i.test(w)),
+    'the climbing warm-up must not be the hangboard progression');
+
+  // rest day → no warm-up at all (the isRest short-circuit)
+  assertEq(Warmup.forSession({ isRest: true }).warmup.length, 0, 'a rest session carries no warm-up');
+});
+
 test('[KG-A9 addendum] REGRESSION: picking a warm-up drill on the Today tab persists dayLog.warmupDrill without touching exercises', () => {
   resetStorage();
   const plan = Storage.getActivePlan();
