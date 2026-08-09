@@ -23,11 +23,14 @@ Grilling settles the **decision**; it does not ship code. Once decided, the buil
 
    Then mark the row `Grilling` in `docs/grill-queue.md` and read the item's full detail: its `IB-*` row in `docs/improvement-backlog.md`, the audit section it points to, and the training docs that bear on it (`docs/training-philosophy.md`, the relevant `docs/adr/`, `docs/knowledge-gaps.md`).
 
-3. **Grill — `/grilling` using `/domain-modeling`.** Invoke `/grilling` (it is model-invocable). Its discipline governs:
-   - One question at a time, each with your recommended answer, waiting for the user's answer before the next.
-   - Facts you can find in the code or docs, you **look up** — never ask what you can check. Decisions are the user's; put each one to them and wait.
-   - **HITL — never answer your own questions.** A grill where the agent supplies the human's side is broken. This is the whole reason the item is here and not built inline.
-   - **`/wait-what` means the round didn't land — re-pitch, then *stay* re-pitched.** It is `disable-model-invocation: true`, so it only ever arrives from the keyboard: the user telling you a round was too dense to answer, not asking for more detail. Re-pitch with a little context, in ASD-STE100 Simplified Technical English, using the `CONTEXT.md` ubiquitous language — then hold that register for the rest of the grill. Drifting back to the dense one is what earns the second `/wait-what`. A round the human can't answer is a wasted round, and the answers are the only thing this skill is here to collect.
+3. **Grill — `/grilling` using `/domain-modeling`.** Invoke `/grilling` (it is model-invocable). Its discipline governs, sharpened three ways:
+
+   - **Sort every open point into `fact`, `mechanism` or `judgement`. Only `judgement` reaches the user.**
+     - **`fact`** — anything the code, the tests or `docs/` can settle. Look it up and report what you found. Facts are your job, in every round.
+     - **`mechanism`** — the technical call that follows *once* the judgement is made: which module holds the change, a flag or a clamp, what the regression pins, whether the schema moves. **Decide it yourself.** State the call in one line with its reason and move on; the user overturns it if they disagree. A round that asks permission for an obvious mechanism spends the user's attention on the half you are better placed to answer.
+     - **`judgement`** — the training-content trade-off, the risk appetite, the scope. **Ask, then wait.** This is the whole reason the item is here and not built inline, so **never answer your own `judgement` question.** A grill where the agent supplies the human's side is broken.
+   - **Write every round in the plain register, from the first round.** ASD-STE100 Simplified Technical English, the `CONTEXT.md` ubiquitous language, one idea per sentence. Give each question its evidence and its options in the question itself, so it can be answered without re-reading an earlier round. The plain register is the default here, not a recovery mode.
+   - **`/wait-what` means a round missed that register.** It is `disable-model-invocation: true`, so it only ever arrives from the keyboard: the user telling you a round was too dense to answer, not asking for more detail. Re-pitch with a little context — then *hold* the plain register for the rest of the grill; drifting back is what earns the second `/wait-what`. A round the human can't answer is a wasted round, and the answers are the only thing this skill is here to collect.
    - Ground each branch in real evidence, the way `docs/adr/` already does — this is a G3-sensitive athlete, so "uncited convention dressed as behaviour" is not enough.
    - Do not enact anything until the user confirms shared understanding.
 
