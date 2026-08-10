@@ -14,13 +14,29 @@
 // IB-020 — DURATION MISMATCH, deliberately un-corrected here: this table is a
 // 7-second hang, but `maxHang20mm` stores a 10-second hold (program.js:710).
 // A max 10s hold sits at lower added load than a max 7s one, so the stored
-// number reads low against this table and the verdict is biased toward
-// "below → fingers are a limiter". Bounded: "meaningfully below" needs a full
-// GRADE_STEP_ADDED_PCT (6pp of BW) while the 7s→10s delta is a few pp. No
-// conversion is applied because picking one (retest at 7s / convert / widen
-// the threshold) is an open training-content decision — so the readout
-// DISCLOSES the mismatch in its caveat instead of silently fudging it, the
-// same honest-labeling posture as KG-C7.
+// number reads low against this table, biasing the fingers line toward
+// "below → fingers are a limiter".
+//
+// The ADR-0011 addendum (2026-08-09, KG-B22) settled how to live with that —
+// read it for the argument; the load-bearing facts here are:
+//   · Direction known, MAGNITUDE UNQUANTIFIED. An earlier version of this
+//     comment called the error "bounded — a few pp"; a /research pass found
+//     that bound unsourced. Nothing quantifies the 7s→10s delta, and the only
+//     circulating figures span ≈1–7 pp against a 6 pp GRADE_STEP_ADDED_PCT —
+//     so the bias can manufacture a *clear* below-band reading. Don't let the
+//     "bounded" reassurance back in.
+//   · So the below-band branch states the comparison and WITHHOLDS THE VERDICT
+//     (`verdict: 'below-unresolved'`). at-or-above and `elsewhere` stay: the
+//     same error biases them *against* themselves, so it can't produce them
+//     spuriously.
+//   · No conversion factor, and the threshold is NOT widened — both would be
+//     fresh invented constants papering over an unquantified one (the posture
+//     ADR-0020 refused). Nor does the benchmark move: `maxHang20mm` is also
+//     `prescribeLoadKg`'s `baseMax`, and ADR-0013 builds every hangboard band
+//     on it, so retesting at 7s would raise every prescription to fix a
+//     readout. Honest labeling instead — the KG-C7 posture.
+// IB-073 tracks the clean exit: a duration-matched 10s/20mm table (Power
+// Company) would replace this one and reverse the suppression.
 const FINGER_NORM_ADDED_PCT = {
   V4: 0.28, V5: 0.34, V6: 0.40, V7: 0.46, V8: 0.52, V9: 0.58, V10: 0.64, V11: 0.70
 };
@@ -30,10 +46,12 @@ const FINGER_NORM_ADDED_PCT = {
 // Confidence: low-medium (no grade table exists for pulling strength at all).
 const PULLUP_CEILING_ADDED_PCT = 0.65;
 
-// "Meaningfully below" the finger norm band, per the ADR-0011 verdict — an
-// app convention (unvalidated, KG-C7 posture), not a Lattice-published
-// threshold: one full grade-step under the target's norm band (the table
-// above steps roughly +6pp added per grade).
+// "Meaningfully below" the finger norm band — an app convention (unvalidated,
+// KG-C7 posture), not a Lattice-published threshold: one full grade-step under
+// the target's norm band (the table above steps roughly +6pp added per grade).
+// Since the ADR-0011 addendum this selects *which withheld-conclusion wording*
+// renders, not whether a verdict is issued — deliberately NOT widened to
+// absorb the duration mismatch (see the IB-020 note above).
 const GRADE_STEP_ADDED_PCT = 0.06;
 
 function normalizeGrade(g) {
@@ -64,12 +82,15 @@ export function limiterReadout(benchmarks) {
     const meaningfullyBelow = athletePct <= normPct - GRADE_STEP_ADDED_PCT;
     lines.push({
       key: 'fingers',
-      verdict: fingersAtOrAbove ? 'at-or-above' : (meaningfullyBelow ? 'below' : 'near'),
+      // 'below-unresolved', not 'below': the comparison resolved, the verdict
+      // did not (ADR-0011 addendum §1). IB-073 flips this back to a real
+      // verdict if a duration-matched norm table ever lands.
+      verdict: fingersAtOrAbove ? 'at-or-above' : (meaningfullyBelow ? 'below-unresolved' : 'near'),
       text: fingersAtOrAbove
         ? `Fingers: at or above the ${grade} norm band — fingers likely aren't your main limiter.`
         : meaningfullyBelow
-          ? `Fingers: meaningfully below the ${grade} norm band — a limiter candidate.`
-          : `Fingers: a little below the ${grade} norm band — not yet a clear limiter candidate.`
+          ? `Fingers: more than a grade step below the ${grade} norm band — but this is not a verdict: the band is a 7s hang, your benchmark a 10s hold, and that difference is not quantified.`
+          : `Fingers: a little below the ${grade} norm band — under one grade step, so no conclusion either way.`
     });
   }
 
@@ -102,7 +123,12 @@ export function limiterReadout(benchmarks) {
   const showsFingers = lines.some(l => l.key === 'fingers');
   const caveat = 'Strength explains only ~17% of grade variance at this ability tier (finger) and ~8–12% (pulling) — treat this as a sanity check, not a diagnosis.'
     + (showsFingers
-      ? ' The finger norm band is measured on a 7s hang, but your benchmark is a 10s hang — a 10s hold needs less added weight, so this reads your fingers slightly low.'
+      // Direction known, magnitude unquantified — and the magnitude stays OFF
+      // the card on purpose. The circulating ≈1–7 pp figures are two
+      // inconsistent numbers from one secondary site; printing them would hand
+      // the athlete a bound, which is exactly the "bounded" framing the
+      // ADR-0011 addendum retracted. They live in docs/benchmark-norms.md.
+      ? ' The finger norm band is measured on a 7s hang, but your benchmark is a 10s hang — a 10s hold needs less added weight, so this reads your fingers low. How much lower is not quantified: nothing reliably measures the difference between the two hang durations.'
       : '');
   return { lines, caveat };
 }
