@@ -25,7 +25,9 @@ git -C "$WT" checkout -- sw.js docs/training-plan.md       # ratchet 5, always
 
 The `domain-invariants` skill (`.claude/skills/domain-invariants/SKILL.md`, "Key invariants" section) and `.github/copilot-instructions.md` both make specific, checkable claims about the code. Either can go stale, and a stale invariant misleads every future agent that reads it.
 
-Walk each claim and grep it against the code. The two files also disagree with each other, which is itself a finding — `copilot-instructions.md` is the one that has drifted (that is IB-048).
+Walk each claim and grep it against the code. The two files also disagree with each other, which is itself a finding — `copilot-instructions.md` is reliably the one that has drifted (IB-048, then again as IB-072).
+
+**Re-walk `copilot-instructions.md` whenever a pass edits `js/program.js`, `js/views/log.js`, `js/app.js`, or the test layout.** It is the only invariant surface with neither a test nor a generator behind it, so it drifts silently and has now done so twice — IB-072 found seven false claims, two of which actively instructed the reader to undo a deliberate decision (reintroduce the removed Log edit form; hand-edit `SHELL` in the generated `sw.js`). A claim that tells a reader to *do* something is worth more scrutiny than one that merely describes.
 
 **A finding looks like:** a named function whose signature no longer matches, a threshold quoted at the wrong value, a rule stated without its governing ADR's later correction, or a test cited that no longer exists.
 
