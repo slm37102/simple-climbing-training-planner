@@ -10,7 +10,7 @@ import { Loads } from '../../js/loads.js';
 import { Warmup } from '../../js/warmup.js';
 import { SKILL_DRILLS, DRILL_CATEGORIES, WARMUP_DRILLS } from '../../js/drills.js';
 import { Replan, MAJOR_GAP_DAYS } from '../../js/replan.js';
-import { limiterReadout } from '../../js/limiter.js';
+import { limiterReadout, Limiter } from '../../js/limiter.js';
 import { Monitoring } from '../../js/monitoring.js';
 import { inputVisibility, repsLabel, actualHasResult, howto, unitLabel } from '../../js/exercise-inputs.js';
 import { today as datesToday, addDays as datesAddDays, daysBetween, snapToMonday as datesSnapToMonday } from '../../js/dates.js';
@@ -34,8 +34,8 @@ test('[ADR-0011] fingers at-or-above the target-grade norm band', () => {
 test('[ADR-0011] fingers meaningfully (≥1 grade-step) below the target-grade norm band', () => {
   const readout = limiterReadout({ bodyweight: 70, maxHang20mm: 10, boulderGrade: 'V7' }); // 10/70=0.143, V7 norm 0.46, step 0.06 → 0.143 <= 0.40
   const fingers = readout.lines.find(l => l.key === 'fingers');
-  assertEq(fingers.verdict, 'below');
-  assert(/limiter candidate/i.test(fingers.text));
+  assertEq(fingers.verdict, 'below-unresolved');
+  assert(/below the V7 norm band/i.test(fingers.text));
 });
 
 test('[ADR-0011] fingers a little below but not a full grade-step — the ambiguous middle band', () => {
@@ -78,14 +78,16 @@ test('[ADR-0011] caveat states the R² honesty requirement', () => {
 });
 
 // IB-020: the norm table is a 7s hang, maxHang20mm is a 10s hold, and no
-// conversion is applied. Which way to resolve that is an open training call,
-// so the readout must at least DISCLOSE it — and only where it's relevant.
+// conversion is applied. The ADR-0011 addendum (2026-08-09, KG-B22) settled
+// how to live with that: direction known, magnitude UNQUANTIFIED — so the
+// readout discloses it (and only where relevant) and withholds the below-band
+// verdict rather than concluding "a limiter candidate" off a biased reading.
 test('[IB-020] caveat discloses the 7s-norm / 10s-benchmark duration mismatch when a fingers line shows', () => {
   const readout = limiterReadout({ bodyweight: 70, maxHang20mm: 23.8, boulderGrade: 'V5' });
   assert(readout.lines.some(l => l.key === 'fingers'), 'expected a fingers line');
   assert(/7s hang/.test(readout.caveat) && /10s hang/.test(readout.caveat),
     `caveat must name both hang durations, got "${readout.caveat}"`);
-  assert(/reads your fingers slightly low/i.test(readout.caveat),
+  assert(/reads your fingers low/i.test(readout.caveat),
     `caveat must state the direction of the bias, got "${readout.caveat}"`);
 });
 
@@ -96,6 +98,48 @@ test('[IB-020] duration disclosure is omitted when no fingers line rendered (pul
     `pull-up-only readout must not carry the finger-duration caveat, got "${readout.caveat}"`);
 });
 
+test('[IB-020] REGRESSION: the caveat states the magnitude is UNQUANTIFIED, never "bounded" or "slightly"', () => {
+  const readout = limiterReadout({ bodyweight: 70, maxHang20mm: 23.8, boulderGrade: 'V5' });
+  assert(/not quantified|unquantified/i.test(readout.caveat),
+    `caveat must say the size of the bias is unquantified, got "${readout.caveat}"`);
+  // The /research pass found the "a few percent / bounded / slightly low"
+  // reassurance unsourced — the circulating estimates reach a full grade step.
+  assert(!/slightly|bounded|a few percent/i.test(readout.caveat),
+    `caveat must not re-assert the retracted bounded claim, got "${readout.caveat}"`);
+});
+
+test('[IB-020] REGRESSION: below-band fingers state the comparison but withhold the verdict', () => {
+  const readout = limiterReadout({ bodyweight: 70, maxHang20mm: 10, boulderGrade: 'V7' }); // 0.143 vs V7 norm 0.46 — a clear below-band reading
+  const fingers = readout.lines.find(l => l.key === 'fingers');
+  assertEq(fingers.verdict, 'below-unresolved', 'below-band must not resolve to a verdict');
+  assert(!/limiter candidate/i.test(fingers.text),
+    `below-band line must not conclude "a limiter candidate", got "${fingers.text}"`);
+  assert(/not a verdict|no conclusion/i.test(fingers.text),
+    `below-band line must say it is withholding a conclusion, got "${fingers.text}"`);
+  assert(/7s/.test(fingers.text) && /10s/.test(fingers.text) && /not quantified/i.test(fingers.text),
+    `below-band line must name the unquantified duration mismatch as the reason, got "${fingers.text}"`);
+});
+
+test('[IB-020] REGRESSION: at-or-above and elsewhere are NOT suppressed — the same bias runs against them', () => {
+  const readout = limiterReadout({ bodyweight: 70, maxHang20mm: 23.8, boulderGrade: 'V5', pullup1RM: 46 });
+  const fingers = readout.lines.find(l => l.key === 'fingers');
+  assertEq(fingers.verdict, 'at-or-above', 'a 10s hold reading at/above a 7s band is if anything understated');
+  assert(/aren't your main limiter/i.test(fingers.text), 'the at-or-above conclusion still stands');
+  assert(readout.lines.some(l => l.key === 'elsewhere'), 'the elsewhere-inference line still stands');
+});
+
+test('[IB-020] REGRESSION: the grade-step threshold is NOT widened to absorb the mismatch', () => {
+  // ADR-0011 addendum §3: no conversion factor, threshold unchanged at 6pp.
+  assertEq(Limiter.FINGER_NORM_ADDED_PCT.V6, 0.40, 'the Lattice table itself is unchanged');
+  // V6 norm 0.40, step 0.06 → the boundary sits at 0.34, i.e. 23.8kg @ 70kg BW.
+  const atBoundary = limiterReadout({ bodyweight: 70, maxHang20mm: 23.8, boulderGrade: 'V6' });
+  assertEq(atBoundary.lines.find(l => l.key === 'fingers').verdict, 'below-unresolved',
+    'exactly one grade step below must still cross into the below-band branch');
+  const justInside = limiterReadout({ bodyweight: 70, maxHang20mm: 24.5, boulderGrade: 'V6' }); // 0.35 > 0.34
+  assertEq(justInside.lines.find(l => l.key === 'fingers').verdict, 'near',
+    'just inside one grade step must still read "near"');
+});
+
 test('[ADR-0011] REGRESSION: card renders on the Profile tab and recomputes on a benchmark change', () => {
   resetStorage();
   Storage.setGlobalBenchmarks({ bodyweight: 70, maxHang20mm: 10, boulderGrade: 'V7' });
@@ -104,8 +148,11 @@ test('[ADR-0011] REGRESSION: card renders on the Profile tab and recomputes on a
   try {
     renderProfile(root);
     let card = root.querySelector('[data-limiter-card]');
-    assert(card, 'limiter card should render when benchmarks resolve a verdict');
-    assert(/limiter candidate/i.test(card.textContent), 'expected the below-norm fingers verdict text');
+    assert(card, 'limiter card should render when benchmarks resolve a readout');
+    assert(/more than a grade step below the V7 norm band/i.test(card.textContent),
+      'expected the below-norm fingers comparison text');
+    assert(!/limiter candidate/i.test(card.textContent),
+      'the suppressed verdict (IB-020) must not reach the rendered card');
 
     Storage.setGlobalBenchmarks({ maxHang20mm: 40 }); // now well above the V7 norm
     renderProfile(root);
