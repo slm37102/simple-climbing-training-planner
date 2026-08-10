@@ -58,7 +58,7 @@ That invalidates the reassurance our own shipped text was giving. Both `docs/ben
 
 ### Decision
 
-**Settle now rather than park.** The correction does not depend on the table: the "bounded" claim is unsupported whichever values PCC turns out to hold, and parking would leave it in shipped text for an unbounded wait. Fetching the table becomes its own queued item (**IB-072**) for a session with network access.
+**Settle now rather than park.** The correction does not depend on the table: the "bounded" claim is unsupported whichever values PCC turns out to hold, and parking would leave it in shipped text for an unbounded wait. Fetching the table becomes its own queued item (**IB-073**) for a session with network access.
 
 1. **Suppress the "limiter candidate" verdict.** When `athletePct <= normPct - GRADE_STEP_ADDED_PCT`, the readout no longer concludes "a limiter candidate." It states the comparison and **withholds the verdict**, naming the reason: the band is a 7s hang, the benchmark a 10s hold, and the gap between them is unquantified — so a below-band reading cannot be distinguished from the measurement artefact.
 2. **Correct the disclosure** in both places from "bounded / a few percent" to **"direction known, magnitude unquantified."**
@@ -76,7 +76,7 @@ That invalidates the reassurance our own shipped text was giving. Both `docs/ben
 ### Consequences
 
 - The readout gets *quieter*, not wronger: it still shows where the athlete sits against the band, and still says when fingers look adequate. It stops asserting the one conclusion the measurement cannot support.
-- **IB-072** (fetch the PCC 10s/20mm table) is queued. If it lands, it **replaces** `FINGER_NORM_ADDED_PCT` with a duration-matched table and this addendum's suppression is **reversed** — the mismatch will no longer exist. That is the clean exit, and it is why no conversion constant is introduced in the meantime.
+- **IB-073** (fetch the PCC 10s/20mm table) is queued. If it lands, it **replaces** `FINGER_NORM_ADDED_PCT` with a duration-matched table and this addendum's suppression is **reversed** — the mismatch will no longer exist. That is the clean exit, and it is why no conversion constant is introduced in the meantime.
 - Informational-only still holds: no prescription changes (§3), so this touches no load chain and no schema.
 
 ### Build scope (for the later `/to-spec` pass)
