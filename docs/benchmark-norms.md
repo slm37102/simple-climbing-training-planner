@@ -47,13 +47,28 @@ table above is a **7-second** hang, while the app tests a **10-second** hold ("M
 of this line claimed the two were the same measurement; that was wrong, and `js/limiter.js` compares them
 directly with **no 7s↔10s conversion** (**IB-020**).
 
-**Direction and size of the error.** A maximal 10s hold is sustainable only at *lower* added load than a
-maximal 7s hold, so `maxHang20mm` reads systematically **low** against this table — biasing the limiter
-readout toward "below the norm band → fingers are a limiter." The bias is real but **bounded**: the
-readout's "meaningfully below" branch requires a full grade step (`GRADE_STEP_ADDED_PCT = 0.06`, i.e. 6pp
-of bodyweight), while the 7s→10s load delta is a few percent of bodyweight, so it can flip a borderline
-verdict but not a clear one. Which way to resolve it — retest at 7s, apply a documented conversion, or
-widen the threshold to absorb the difference — is an open training-content decision, not settled here.
+**Direction known, magnitude unquantified.** A maximal 10s hold is sustainable only at *lower* added load
+than a maximal 7s hold, so `maxHang20mm` reads systematically **low** against this table — biasing the
+limiter readout toward "below the norm band → fingers are a limiter." *How far* low is not known. An
+earlier version of this section called the bias **bounded** ("a few percent of bodyweight" against the
+6pp `GRADE_STEP_ADDED_PCT`, so it "can flip a borderline verdict but not a clear one"); a
+[`/research` pass](research/max-hang-duration-norms.md) found that bound **unsourced**. There is no
+peer-reviewed quantification of the 7s→10s delta at all, and the only figures in circulation are two
+mutually inconsistent, unit-ambiguous numbers from a single secondary site — under their plausible
+readings the delta spans **≈1 pp to ≈7 pp of bodyweight**, i.e. up to a full grade step. So the bias can
+*manufacture* a clear below-band reading, not merely tip a borderline one.
+
+**How it is resolved ([ADR-0011 addendum](adr/0011-limiter-readout.md), 2026-08-09 · KG-B22).** The
+below-band branch of `js/limiter.js` now **states the comparison and withholds the verdict** — it no
+longer concludes "a limiter candidate", and names the unquantified mismatch as the reason. The 10s
+benchmark and this Lattice table both stay: retesting at 7s is impossible without moving every
+prescription (`maxHang20mm` is `prescribeLoadKg`'s `baseMax`, and ADR-0013 builds every hangboard band on
+it), and neither a conversion factor nor a widened threshold is invented — both would paper over an
+unquantified constant with a fresh invented one. The at-or-above and "elsewhere" lines are untouched: the
+same error biases them *against* themselves, so they are never spuriously produced. **IB-073** tracks the
+clean exit — a duration-matched 10s/20mm table (Power Company Climbing, confirmed 10s/20mm and its unit
+convention pinned) would replace this table and reverse the suppression, but its cell values are
+currently unreachable behind this environment's egress policy.
 
 Confidence: **medium** — the source dataset is large but proprietary/self-selected, and see the
 [important caveat](#the-uncomfortable-part-how-much-this-actually-predicts) on predictive power below.
