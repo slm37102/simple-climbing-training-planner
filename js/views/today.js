@@ -421,6 +421,32 @@ function wireTopBanners(root, env) {
   }
 }
 
+// ADR-0015 addendum (2026-08-06) / IB-058: a day with **no readiness check-in**
+// reads Normal, not Lighter. This view used to fabricate `{sleep:3,soreness:3,
+// fatigue:3}` from silence, which averages 3.0 → Lighter (×0.85) and silently
+// down-regulated every un-checked-in session — defeating
+// `Loads.computeReadinessMultiplier`'s own "no readiness → Normal" guard.
+// "No check-in" means **none** of sleep/soreness/fatigue is present. That is
+// deliberately *looser* than `js/monitoring.js`'s `readinessScore`, which nulls
+// out when **any** of the three is missing — do not "align" the two. The strict
+// rule is right for a longitudinal baseline (a partial score biases a 28-day
+// average) and wrong for same-day gating: under it, an athlete who taps
+// sleep 1 and soreness 1 but forgets fatigue would read Normal, discarding a
+// genuine bad report — the mirror image of the IB-058 defect.
+// This deliberately also covers a **pain-only** day: the pain check-in persists
+// `readiness` without s/s/f, and `computeReadinessMultiplier` defaults each
+// missing field to 3 — so without this guard a logged pain value would re-enter
+// through the back door as a fabricated straight-3 wellness report. Pain has its
+// own gates (the Silbernagel model via `Loads.holdProgressionFor` / ADR-0014) and
+// must not masquerade as one. A *partially* tapped check-in (at least one pill
+// set) is left exactly as before — the athlete is mid-report, not silent.
+function readinessForMultiplier(readiness) {
+  if (!readiness) return null;
+  const { sleep, soreness, fatigue } = readiness;
+  if (sleep == null && soreness == null && fatigue == null) return null;
+  return readiness;
+}
+
 export function renderToday(root) {
   const activePlan = Storage.getActivePlan();
   const date = getSelectedDate();
@@ -496,8 +522,9 @@ export function renderToday(root) {
   }
 
   const dayLog = Storage.getDay(date) || {};
-  const readiness = dayLog.readiness || { sleep:3, soreness:3, fatigue:3 };
-  const { multiplier, label: rdLabel, key: rdKey, avg: rdAvg } = Loads.computeReadinessMultiplier(readiness);
+  const readiness = dayLog.readiness || null;
+  const { multiplier, label: rdLabel, key: rdKey, avg: rdAvg } =
+    Loads.computeReadinessMultiplier(readinessForMultiplier(readiness));
   // ADR-0015: readiness gating for climbing (non-kg) sessions. The key→label
   // adapter is Program's (IB-032) — it owns the label vocabulary its
   // readiness-gate pass matches on.
@@ -555,14 +582,14 @@ export function renderToday(root) {
       <label id="pill-lbl-${key}">${key.charAt(0).toUpperCase() + key.slice(1)}</label>
       <div class="pill-group" role="group" aria-labelledby="pill-lbl-${key}" data-pill-group="${key}">
         ${[1,2,3,4,5].map(v =>
-          `<button type="button" class="pill ${readiness[key]===v?'active':''}" data-pill="${key}" data-val="${v}" aria-pressed="${readiness[key]===v}">${v}</button>`
+          `<button type="button" class="pill ${readiness?.[key]===v?'active':''}" data-pill="${key}" data-val="${v}" aria-pressed="${readiness?.[key]===v}">${v}</button>`
         ).join('')}
       </div>
     </div>`;
 
   // ADR-0014: pain check-in — distinct from generic soreness (0-10 finger/
   // elbow pain + a "worse this morning?" flag), the Silbernagel-model input.
-  const pain = readiness.pain || null;
+  const pain = readiness?.pain || null;
   // Zone coloring mirrors the Silbernagel gate this input feeds (monitoring.js):
   // 0–2 fine, 3–5 hold progression, 6–10 skip finger loading. The colored track
   // + end anchors say which way the scale runs without a separate legend.
@@ -1084,7 +1111,12 @@ function wire(root, date, session, ctx, readinessMult) {
       week: ctx.weekIdx, phase: ctx.phase, weekFlavor: ctx.flavor, isDeload: ctx.deload,
       sessionId: session.sessionId,
       status: cur.status || 'partial',
-      readiness: cur.readiness || { sleep:3, soreness:3, fatigue:3 },
+      // IB-058 / ADR-0015 addendum: do NOT fabricate readiness. Saving anything
+      // on a day (a set, a note, a session-feel tap) used to freeze a
+      // `{3,3,3}` the athlete never reported into the day record — which then
+      // fed the ADR-0014 `readinessTrend` baseline as a real 3.0 data point.
+      // Readiness is stored only once the athlete actually sets something.
+      ...(cur.readiness ? { readiness: cur.readiness } : {}),
       sessionFeel: cur.sessionFeel ?? 3,
       // Carry kind/optional/prescribedTarget onto the persisted exercise so
       // js/views/log.js's edit form (which reads only the stored day, never the

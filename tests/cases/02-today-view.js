@@ -110,6 +110,12 @@ test('[IB-041] Today: suggested-load reason[] renders as an info-badge tooltip',
   // kg suggestion, so Loads.resolveForDay populates reason[] (range → … →
   // readiness). Before IB-041 that array was computed and thrown away.
   sessionStorage.setItem('todaySelectedDate', '2026-06-15');
+  // IB-058: the readiness step is appended only when the multiplier is not 1.0
+  // (`js/loads.js` — "readiness ×…"). This case used to get that step for free
+  // from the fabricated `{3,3,3}` the view injected for un-checked-in days,
+  // i.e. its coverage rested on the defect IB-058 removed. The check-in is now
+  // explicit, so the assertion below tests the chain rather than an artefact.
+  Storage.setDay('2026-06-15', { readiness: { sleep: 3, soreness: 3, fatigue: 3 } }); // avg 3.0 → Lighter ×0.85
   const root = document.createElement('div');
   document.body.appendChild(root);
   try {
@@ -118,7 +124,8 @@ test('[IB-041] Today: suggested-load reason[] renders as an info-badge tooltip',
       'expected a "Why this load" info-badge tooltip on the suggested load');
     assert(/class="info-badge"/.test(root.innerHTML), 'expected the info-badge element');
     // The tooltip must carry chain provenance, not just a label — the readiness
-    // step is always appended when a kg suggestion is computed.
+    // step is appended when the multiplier is not 1.0, hence the explicit
+    // check-in in the fixture above.
     const tip = root.innerHTML.match(/title="Why this load:[^"]*/)[0];
     assert(/readiness ×/.test(tip), 'reason tooltip should include the readiness multiplier step');
   } finally { root.remove(); }

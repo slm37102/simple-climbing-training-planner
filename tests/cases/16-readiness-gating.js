@@ -195,3 +195,172 @@ test('[ADR-0015] REGRESSION: RPE-cap note renders on the Today tab for a capped 
     assert(/stay ≤8\.5/i.test(root.textContent), 'expected the RPE-cap note text in the rendered session');
   } finally { root.remove(); }
 });
+
+// ─── IB-058 / ADR-0015 addendum (2026-08-06): silence reads Normal, not Lighter ──
+// The Today view used to fabricate `{sleep:3,soreness:3,fatigue:3}` whenever a
+// day carried no readiness check-in. That averages 3.0, and
+// `computeReadinessMultiplier` scores `avg >= 2.5 && < 3.5` as **Lighter
+// (×0.85)** — so merely viewing or logging a session without checking in
+// down-regulated every climbing target (+ the ≤8.5 RPE cap, + the kg
+// suggestion), and `getOrInitDay` froze a 3.0 the athlete never reported into
+// the day record, polluting the ADR-0014 `readinessTrend` baseline.
+// `computeReadinessMultiplier(null)` already returned Normal — the view
+// fabricated a value specifically to defeat its own function's contract.
+
+test('[IB-058] REGRESSION: a day with no readiness check-in prescribes Normal, not Lighter', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.updatePlan(plan.id, { focus: 'boulder' });
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-09'); // wk1 Sat, sat-flash-pyramid = 18 problems
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    assert(!Storage.getDay('2026-05-09'), 'fixture: the day must start with no log at all');
+    renderToday(root);
+    const summary = root.querySelector('[data-readiness-summary]');
+    assert(summary, 'expected the readiness summary line');
+    assert(/Normal/.test(summary.textContent), `expected Normal with no check-in, got "${summary.textContent}"`);
+    assert(/Avg\s*—/.test(summary.textContent), 'expected "Avg —" (no data), not a fabricated average');
+    assert(!/Readiness: lighter/i.test(root.textContent), 'the ×0.85 readiness note must not fire without a check-in');
+    assert(!/stay ≤8\.5/i.test(root.textContent), 'the ≤8.5 RPE cap must not fire without a check-in');
+    assert(/18 problems/.test(root.textContent), 'expected the un-scaled 18-problem target');
+    assert(!/15 problems/.test(root.textContent), 'target must not be scaled ×0.85 without a check-in');
+    // The kg side of the defect: `js/loads.js` appends a "readiness ×…" step to
+    // the load trail only when the multiplier is not 1.0, so its absence is the
+    // observable proof that the kg suggestion is un-scaled too.
+    assert(!/readiness ×/.test(root.innerHTML), 'the kg chain must not apply a readiness multiplier without a check-in');
+  } finally { root.remove(); }
+});
+
+test('[IB-058] REGRESSION: with no check-in the sleep/soreness/fatigue pills render unfilled', () => {
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-09');
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    for (const key of ['sleep', 'soreness', 'fatigue']) {
+      const group = root.querySelector(`[data-pill-group="${key}"]`);
+      assert(group, `expected a ${key} pill group`);
+      assertEq(group.querySelectorAll('.pill.active').length, 0,
+        `${key} must render unfilled so "not checked in" is distinct from "logged straight-3s"`);
+    }
+  } finally { root.remove(); }
+});
+
+test('[IB-058] a DELIBERATELY-logged straight-3 still reads Lighter (thresholds untouched)', () => {
+  // The addendum changes what *silence* means, not what a logged 3 means — and
+  // this is what makes the two cases above non-vacuous: same date, same view,
+  // Lighter appears the moment the athlete actually reports {3,3,3}.
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.updatePlan(plan.id, { focus: 'boulder' });
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-09');
+  Storage.setDay('2026-05-09', { readiness: { sleep: 3, soreness: 3, fatigue: 3 } });
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const summary = root.querySelector('[data-readiness-summary]');
+    assert(/Lighter/.test(summary.textContent), `expected Lighter for a logged {3,3,3}, got "${summary.textContent}"`);
+    assert(/Readiness: lighter/i.test(root.textContent), 'expected the ×0.85 readiness note');
+    assert(/15 problems/.test(root.textContent), 'expected floor(18 × 0.85) = 15');
+  } finally { root.remove(); }
+});
+
+test('[IB-058] a pain-only day reads Normal — a pain value must not re-enter as a fabricated straight-3', () => {
+  // Found while building IB-058, and not anticipated by the addendum (which
+  // reasoned only about monitoring's `readinessScore`): the pain check-in
+  // persists `readiness` WITHOUT sleep/soreness/fatigue, and
+  // `computeReadinessMultiplier` defaults each missing field to 3 — so a
+  // truthy pain-only object would average 3.0 → Lighter, restoring the exact
+  // defect through a different door. Pain has its own gates (ADR-0014's
+  // Silbernagel model via `Loads.holdProgressionFor`), which still fire.
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.updatePlan(plan.id, { focus: 'boulder' });
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-09');
+  Storage.setDay('2026-05-09', { readiness: { pain: { value: 4, settledByMorning: true } } });
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const summary = root.querySelector('[data-readiness-summary]');
+    assert(/Normal/.test(summary.textContent), `pain-only must read Normal, got "${summary.textContent}"`);
+    assert(!/Readiness: lighter/i.test(root.textContent), 'a pain value alone must not trigger the wellness ×0.85 lever');
+    assert(/18 problems/.test(root.textContent), 'expected the un-scaled target on a pain-only day');
+    // The pain input itself is still rendered and still selected.
+    assertEq(root.querySelectorAll('[data-pain-pill].active').length, 1, 'the logged pain value must still render');
+  } finally { root.remove(); }
+});
+
+test('[IB-058] REGRESSION: saving a day without touching the pills persists NO readiness', () => {
+  // getOrInitDay used to write `{3,3,3}` on every save, so a session-feel tap
+  // (or any logged set) manufactured a 3.0 data point for the ADR-0014
+  // readinessTrend baseline. `Monitoring.readinessScore` treats absent
+  // readiness as null, so an un-persisted day is correctly ignored.
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' });
+  sessionStorage.setItem('todaySelectedDate', '2026-05-09');
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderToday(root);
+    const feel = root.querySelector('[data-pill="sessionFeel"][data-val="4"]');
+    assert(feel, 'expected the session-feel pills');
+    feel.click();
+    const day = Storage.getDay('2026-05-09');
+    assertEq(day.sessionFeel, 4, 'fixture: the save must actually have happened');
+    assert(!day.readiness, `no readiness may be fabricated on save, got ${JSON.stringify(day.readiness)}`);
+    // The point of not fabricating: the ADR-0014 readinessTrend baseline must
+    // not gain a data point the athlete never reported. Assert it rather than
+    // asserting only the storage shape.
+    assertEq(Monitoring.readinessTrendSignal(Storage.listDays(plan.id), '2026-05-09'), null,
+      'a saved-but-un-checked-in day must contribute nothing to the readiness trend');
+    // …and a real check-in afterwards still persists normally.
+    root.querySelector('[data-pill="sleep"][data-val="5"]').click();
+    assertEq(Storage.getDay('2026-05-09').readiness.sleep, 5);
+  } finally { root.remove(); }
+});
+
+test('[IB-058] Log feed averages the three wellness pills by name, not every numeric key', () => {
+  // `fmtReadiness` used to average `Object.values(r)`, which folded in the
+  // `multiplier` today.js stores alongside the pills. That was bounded while
+  // the view fabricated all three pills; once IB-058 stopped fabricating them a
+  // partial/pain-only day could render a score the athlete never reported.
+  resetStorage();
+  const plan = Storage.getActivePlan();
+  Storage.setPlanSettings(plan.id, { anchorMode: 'startDate', startDate: '2026-05-04', cycleWeeks: 12, peakType: 'comp' });
+  // A full check-in: the multiplier stored beside the pills must not skew it.
+  Storage.setDay('2026-05-09', {
+    sessionId: 'sat-flash-pyramid', phase: 'base', week: 1,
+    readiness: { sleep: 3, soreness: 3, fatigue: 3, multiplier: 0.85 },
+    exercises: [{ name: 'Flash pyramid', kind: 'boulder', actual: { reps: 18, rpe: 7 } }]
+  });
+  // A pain-only day: no s/s/f at all → no readiness readout, not a fake one.
+  Storage.setDay('2026-05-10', {
+    sessionId: 'sun-optional', phase: 'base', week: 1,
+    readiness: { pain: { value: 4, settledByMorning: true } },
+    exercises: [{ name: 'Easy open climbing (optional)', kind: 'open-climb', actual: { done: true } }]
+  });
+  const root = document.createElement('div');
+  document.body.appendChild(root);
+  try {
+    renderLog(root);
+    // Feed cards are collapsed by default; readiness lives in the detail body.
+    const toggles = root.querySelectorAll('[data-log-toggle]');
+    assertEq(toggles.length, 2, 'fixture: expected both logged days in the feed');
+    toggles.forEach(t => t.click());
+    assert(/Readiness 3\.0/.test(root.textContent),
+      `expected the pills-only average 3.0, got: ${(root.textContent.match(/Readiness [\d.]+/g) || []).join(', ') || 'none'}`);
+    assert(!/Readiness 2\.5/.test(root.textContent), 'the stored multiplier must not be averaged into the score');
+    assertEq((root.textContent.match(/Readiness [\d.]+/g) || []).length, 1,
+      'a pain-only day carries no wellness score, so it must render no Readiness readout');
+  } finally { root.remove(); }
+});

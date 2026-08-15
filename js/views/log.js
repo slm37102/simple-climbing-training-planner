@@ -35,11 +35,21 @@ export function renderLog(root) {
     return parts.join(' ') || (a.raw || '');
   }
 
+  // IB-058: average the three wellness pills BY NAME, never `Object.values(r)`.
+  // The stored readiness object also carries a `multiplier` (today.js writes it
+  // alongside the pills) and a `pain` sub-object, so averaging every numeric
+  // value folded the multiplier into the score — `{3,3,3,multiplier:0.85}`
+  // displayed "Readiness 2.5". That was bounded while the view fabricated all
+  // three pills; once IB-058 stopped fabricating them, a partial or pain-only
+  // day could hold a single pill and render a number the athlete never
+  // reported. Same "all three or nothing" contract as `readinessScore`
+  // (js/monitoring.js) — correct HERE because this is a historical readout,
+  // not same-day gating (see the note on today.js's readinessForMultiplier).
   function fmtReadiness(r) {
     if (!r || typeof r !== 'object') return '';
-    const vals = Object.values(r).filter(v => typeof v === 'number');
-    if (!vals.length) return '';
-    const avg = vals.reduce((s, v) => s + v, 0) / vals.length;
+    const { sleep, soreness, fatigue } = r;
+    if (sleep == null || soreness == null || fatigue == null) return '';
+    const avg = (sleep + soreness + fatigue) / 3;
     return ` · Readiness ${avg.toFixed(1)}`;
   }
 

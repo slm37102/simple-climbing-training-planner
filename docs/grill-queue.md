@@ -48,6 +48,8 @@ The **Issue** column is the claim surface — an open issue with no active `🔒
 
 | ID | Decision to settle | P | Issue (claim here) | Status |
 |----|--------------------|---|--------------------|--------|
+| IB-084 | On a **negative (assisted) benchmark**, what should "progression" and "layoff decay" mean? Today the +5% cap pins every kg suggestion to one constant (RPE, readiness and targets-hit are all inert) and `layoffDecay` resumes the athlete **harder** after time off | P1 | [#83](https://github.com/slm37102/simple-climbing-training-planner/issues/83) | Queued |
+| IB-085 | Should the ADR-0014 forced volume cut scale the **ramped** target or the **authored template**? Accepting the readiness-trend cut on a ramped Base week yields 13 problems where a real deload gives 10 — a 28% cut, not the promised ~40% | P2 | [#84](https://github.com/slm37102/simple-climbing-training-planner/issues/84) | Queued |
 | IB-064 | Should a hold week (deload/retest/taper/pain-amber) also clamp the readiness "Push" (×1.05 kg), not just the +2.5% targets-hit step? | P1 | [#76](https://github.com/slm37102/simple-climbing-training-planner/issues/76) | **Decided** → [ADR-0019](adr/0019-hold-weeks-clamp-readiness-push.md) |
 | IB-029 | Should the autoregulation magnitudes self-tune from the athlete's logs, or stay honest-labeled invented defaults? | P2 | [#75](https://github.com/slm37102/simple-climbing-training-planner/issues/75) | **Decided** → [ADR-0020](adr/0020-autoregulation-magnitudes-are-permanent-conventions.md) |
 | IB-073 | Fetch the Power Company 10s/20mm norm table and replace the duration-mismatched Lattice one (needs network access — currently 403-blocked) | P2 | [#81](https://github.com/slm37102/simple-climbing-training-planner/issues/81) | Queued |
